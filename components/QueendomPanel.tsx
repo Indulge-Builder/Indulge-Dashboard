@@ -2,13 +2,14 @@
 
 import { motion } from "framer-motion";
 import {
-  Users,
   CheckCircle,
   Activity,
   Ticket,
   CalendarDays,
 } from "lucide-react";
 import AnimatedCounter from "./AnimatedCounter";
+import GoldPill from "./GoldPill";
+import AgentLeaderboard from "./AgentLeaderboard";
 import type { QueenStats } from "@/lib/types";
 
 interface QueendomPanelProps {
@@ -18,19 +19,19 @@ interface QueendomPanelProps {
   delay?: number;
 }
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.16, delayChildren: 0.25 },
-  },
-};
-
 const itemVariants = {
-  hidden: { opacity: 0, y: 36 },
+  hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.14, delayChildren: 0.2 },
   },
 };
 
@@ -44,13 +45,13 @@ export default function QueendomPanel({
 
   return (
     <motion.section
-      className="relative flex-1 flex flex-col items-center justify-center overflow-hidden"
-      style={{ padding: "2.5vh 5vw" }}
+      className="relative flex-1 flex flex-col min-h-0 overflow-hidden"
+      style={{ padding: "2vh 3vw" }}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Ambient radial glow specific to each side */}
+      {/* Ambient radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -58,190 +59,140 @@ export default function QueendomPanel({
         }}
       />
 
-      {/* ── Queen Header ── */}
+      {/* ── Header: centered title + Gold Pill below ── */}
       <motion.div
-        className="w-full max-w-[620px] text-center mb-[2.8vh]"
+        className="relative flex flex-col items-center text-center mb-[1.8vh] flex-shrink-0"
         variants={itemVariants}
       >
-        <div className="flex items-center gap-4 mb-[1vh]">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/45" />
-          <span className="text-gold-500/40 text-[10px]">✦</span>
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/45" />
+        {/* Ornamental rule */}
+        <div className="flex items-center gap-4 w-full mb-[0.8vh]">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/40" />
+          <span className="text-gold-500/35 text-[9px]">✦</span>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/40" />
         </div>
 
         <h2 className="font-playfair text-[2.6rem] tracking-[0.25em] text-champagne uppercase leading-none">
           {name}
         </h2>
-        <p className="font-inter text-[9px] tracking-[0.7em] uppercase text-gold-500/45 mt-[5px]">
+        <p className="font-inter text-[8px] tracking-[0.7em] uppercase text-gold-500/40 mt-[3px] mb-[1vh]">
           Queendom
         </p>
 
-        <div className="flex items-center gap-4 mt-[1vh]">
+        <GoldPill count={stats.members.total} delay={delay / 1000 + 0.5} />
+
+        {/* Ornamental rule */}
+        <div className="flex items-center gap-4 w-full mt-[1vh]">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/20" />
-          <span className="font-inter text-[7px] tracking-[0.6em] uppercase text-gold-500/25">
-            ✦ &nbsp; ✦ &nbsp; ✦
-          </span>
+          <span className="font-inter text-[7px] tracking-[0.5em] text-gold-500/20">✦ &nbsp; ✦</span>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/20" />
         </div>
       </motion.div>
 
-      {/* ── Section 1: Ticket Performance (Top) ── */}
+      {/* ── Ticket Performance (compact) ── */}
       <motion.div
-        className="w-full max-w-[620px] mb-[2vh]"
+        className="flex-shrink-0 mb-[1.6vh]"
         variants={itemVariants}
       >
         <div
           className="glass gold-border-glow rounded-2xl relative overflow-hidden"
-          style={{ padding: "2.4vh 2.6vw" }}
+          style={{ padding: "1.6vh 2vw" }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] to-transparent pointer-events-none rounded-2xl" />
 
-          {/* Section label */}
-          <div className="flex items-center gap-2 mb-[2vh]">
-            <Ticket size={12} className="text-gold-500/50" />
-            <span className="font-inter text-[14px] tracking-[0.45em] uppercase text-gold-500/50">
+          {/* Label */}
+          <div className="flex items-center gap-2 mb-[1.2vh]">
+            <Ticket size={11} className="text-gold-500/50" />
+            <span className="font-inter text-[12px] tracking-[0.45em] uppercase text-gold-500/50">
               Ticket Performance
             </span>
           </div>
 
-          {/* ── Hero: Solved Today ── */}
-          <div className="flex flex-col items-center justify-center text-center mb-[2vh]">
-            <div className="flex items-center gap-2 mb-[1vh]">
-              <CheckCircle size={11} className="text-emerald-400/70" />
-              <p className="font-inter text-[12px] tracking-[0.45em] uppercase text-emerald-400/70">
-                Solved Today
-              </p>
-            </div>
-            <AnimatedCounter
-              value={stats.tickets.solvedToday}
-              className="font-edu text-[7.5rem] leading-none text-emerald-400 emerald-glow-hero tabular-nums"
-              delay={delay + 1000}
-            />
-          </div>
-
-          {/* Ornamental divider */}
-          <div className="flex items-center gap-3 mb-[2vh]">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/20" />
-            <span className="text-gold-500/25 text-[7px]">✦</span>
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/20" />
-          </div>
-
-          {/* ── Secondary Row: Total Received This Month + Total Pending ── */}
-          <div className="grid grid-cols-2 gap-[10px]">
-            {/* Total Received This Month */}
-            <div
-              className="bg-black/40 rounded-xl border border-gold-500/[0.11] flex flex-col items-center justify-center text-center"
-              style={{ padding: "1.8vh 1vw" }}
-            >
-              <div className="flex items-center gap-1.5 mb-[0.8vh]">
-                <CalendarDays size={10} className="text-gold-500/50" />
-                <p className="font-inter text-[10px] tracking-[0.3em] uppercase text-amber-400/65">
-                  Total Received
+          <div className="flex items-center gap-[2vw]">
+            {/* Hero: Solved Today */}
+            <div className="flex flex-col items-center justify-center text-center flex-shrink-0">
+              <div className="flex items-center gap-1.5 mb-[0.4vh]">
+                <CheckCircle size={10} className="text-emerald-400/70" />
+                <p className="font-inter text-[10px] tracking-[0.4em] uppercase text-emerald-400/70">
+                  Solved Today
                 </p>
               </div>
               <AnimatedCounter
-                value={stats.tickets.totalThisMonth}
-                className="font-edu text-[3.2rem] leading-none text-champagne tabular-nums"
-                delay={delay + 1200}
+                value={stats.tickets.solvedToday}
+                className="font-edu text-[4.5rem] leading-none text-emerald-400 emerald-glow-hero tabular-nums"
+                delay={delay + 1000}
               />
-              <p className="font-inter text-[10px] tracking-[0.3em] uppercase text-gold-500/70 mt-[0.5vh]">
-                This Month
-              </p>
             </div>
 
-            {/* Total Pending – live pulse */}
-            <div
-              className="bg-black/50 rounded-xl border border-amber-500/[0.18] flex flex-col items-center justify-center text-center"
-              style={{ padding: "1.8vh 1vw" }}
-            >
-              <div className="flex items-center gap-2 mb-[0.8vh]">
-                {/* Live pulse dot */}
-                <span className="relative flex h-[8px] w-[8px] flex-shrink-0">
-                  <motion.span
-                    className="absolute inline-flex h-full w-full rounded-full bg-amber-400/45"
-                    animate={{ scale: [1, 2.8, 1], opacity: [0.65, 0, 0.65] }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                  <span className="relative inline-flex rounded-full h-[8px] w-[8px] bg-amber-400" />
-                </span>
-                <Activity size={10} className="text-amber-400/65" />
-                <p className="font-inter text-[10px] tracking-[0.3em] uppercase text-amber-400/65">
-                  Pending
+            {/* Divider */}
+            <div className="h-16 w-px bg-gradient-to-b from-transparent via-gold-500/20 to-transparent flex-shrink-0" />
+
+            {/* Secondary stats */}
+            <div className="flex gap-[1.2vw] flex-1">
+              {/* Total Received */}
+              <div
+                className="flex-1 bg-black/40 rounded-xl border border-gold-500/[0.11] flex flex-col items-center justify-center text-center"
+                style={{ padding: "1.2vh 0.8vw" }}
+              >
+                <div className="flex items-center gap-1 mb-[0.3vh]">
+                  <CalendarDays size={9} className="text-gold-500/50" />
+                  <p className="font-inter text-[9px] tracking-[0.3em] uppercase text-amber-400/65">
+                    Received
+                  </p>
+                </div>
+                <AnimatedCounter
+                  value={stats.tickets.totalThisMonth}
+                  className="font-edu text-[2.4rem] leading-none text-champagne tabular-nums"
+                  delay={delay + 1200}
+                />
+                <p className="font-inter text-[8px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
+                  This Month
                 </p>
               </div>
-              <AnimatedCounter
-                value={stats.tickets.pendingToResolve}
-                className="font-edu text-[3.2rem] leading-none text-rosegold tabular-nums"
-                delay={delay + 1350}
-              />
-              <p className="font-inter text-[10px] tracking-[0.3em] uppercase text-gold-500/70 mt-[0.5vh]">
-                To Resolve
-              </p>
+
+              {/* Pending */}
+              <div
+                className="flex-1 bg-black/50 rounded-xl border border-amber-500/[0.18] flex flex-col items-center justify-center text-center"
+                style={{ padding: "1.2vh 0.8vw" }}
+              >
+                <div className="flex items-center gap-1.5 mb-[0.3vh]">
+                  <span className="relative flex h-[6px] w-[6px] flex-shrink-0">
+                    <motion.span
+                      className="absolute inline-flex h-full w-full rounded-full bg-amber-400/45"
+                      animate={{ scale: [1, 2.8, 1], opacity: [0.65, 0, 0.65] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-amber-400" />
+                  </span>
+                  <Activity size={9} className="text-amber-400/65" />
+                  <p className="font-inter text-[9px] tracking-[0.3em] uppercase text-amber-400/65">
+                    Pending
+                  </p>
+                </div>
+                <AnimatedCounter
+                  value={stats.tickets.pendingToResolve}
+                  className="font-edu text-[2.4rem] leading-none text-rosegold tabular-nums"
+                  delay={delay + 1350}
+                />
+                <p className="font-inter text-[8px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
+                  To Resolve
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* ── Section 2: Members (Bottom) ── */}
-      <motion.div className="w-full max-w-[620px]" variants={itemVariants}>
-        <div
-          className="glass gold-border-glow rounded-2xl relative overflow-hidden"
-          style={{ padding: "2.4vh 2.6vw" }}
-        >
-          {/* Subtle inner gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.06] to-transparent pointer-events-none rounded-2xl" />
-
-          {/* Section label */}
-          <div className="flex items-center gap-2 mb-[1.5vh]">
-            <Users size={12} className="text-gold-500" />
-            <span className="font-inter text-[14px] tracking-[0.45em] uppercase text-gold-500/50">
-              Our Members
-            </span>
-          </div>
-
-          {/* Big total number */}
-          <div className="text-center mb-[2vh]">
-            <AnimatedCounter
-              value={stats.members.total}
-              className="font-edu text-[5.5rem] leading-none text-gold-400 gold-glow tabular-nums"
-              delay={delay + 700}
-            />
-          </div>
-
-          {/* Yearly / Monthly split */}
-          <div className="grid grid-cols-2 gap-3">
-            <div
-              className="bg-black/35 rounded-xl border border-gold-500/[0.09] text-center"
-              style={{ padding: "1.6vh 1vw" }}
-            >
-              <p className="font-inter text-[10px] tracking-[0.5em] uppercase text-amber-400/65 mb-[0.8vh]">
-                Yearly
-              </p>
-              <AnimatedCounter
-                value={stats.members.yearly}
-                className="font-edu text-[2.6rem] leading-none text-gold-400 gold-glow tabular-nums"
-                delay={delay + 900}
-              />
-            </div>
-            <div
-              className="bg-black/35 rounded-xl border border-gold-500/[0.09] text-center"
-              style={{ padding: "1.6vh 1vw" }}
-            >
-              <p className="font-inter text-[10px] tracking-[0.5em] uppercase text-amber-400/65 mb-[0.8vh]">
-                Monthly
-              </p>
-              <AnimatedCounter
-                value={stats.members.monthly}
-                className="font-edu text-[2.6rem] leading-none text-slate-300 tabular-nums"
-                delay={delay + 1000}
-              />
-            </div>
-          </div>
-        </div>
+      {/* ── Agent Leaderboard (fills remaining height) ── */}
+      <motion.div
+        className="flex-1 min-h-0 flex flex-col glass gold-border-glow rounded-2xl relative overflow-hidden"
+        style={{ padding: "1.6vh 2vw" }}
+        variants={itemVariants}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
+        <AgentLeaderboard
+          agents={stats.agents}
+          queendomDelay={delay / 1000 + 0.3}
+        />
       </motion.div>
     </motion.section>
   );

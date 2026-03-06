@@ -1,7 +1,5 @@
 export interface MemberStats {
   total: number;
-  yearly: number;
-  monthly: number;
 }
 
 export interface TicketStats {
@@ -11,18 +9,26 @@ export interface TicketStats {
   pendingToResolve: number; // any active / open status — no date gate
 }
 
+export interface AgentStats {
+  id: string;
+  name: string;
+  queendom: "ananyshree" | "anishqa";
+  tasksAssignedToday: number;
+  tasksCompletedToday: number;
+  tasksCompletedThisMonth: number;
+}
+
 export interface QueenStats {
   members: MemberStats;
   tickets: TicketStats;
+  agents: AgentStats[];
 }
-
-export type PlanTier = "diamond" | "platinum" | "gold" | "silver";
 
 export interface Onboarding {
   id: string;
   clientName: string;
   plan: string;
-  planTier: PlanTier;
+
   salesperson: string;
   createdAt: string;
 }

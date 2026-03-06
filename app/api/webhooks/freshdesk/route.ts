@@ -9,6 +9,7 @@
  *     "ticket_id":     "{{ticket.id}}",
  *     "status":        "{{ticket.status}}",
  *     "queendom_name": "{{ticket.group.name}}",
+ *     "agent_name":    "{{ticket.agent.name}}",
  *     "created_at":    "{{ticket.created_at}}",
  *     "resolved_at":   "{{ticket.resolved_at}}"
  *   }
@@ -19,6 +20,7 @@
  *     ticket_id     TEXT        PRIMARY KEY,
  *     status        TEXT        NOT NULL,
  *     queendom_name TEXT        NOT NULL,
+ *     agent_name    TEXT,
  *     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  *     resolved_at   TIMESTAMPTZ
  *   );
@@ -33,6 +35,7 @@ interface FreshdeskPayload {
   ticket_id:     string | number;
   status:        string;
   queendom_name: string;
+  agent_name?:   string; // {{ticket.agent.name}}
   created_at?:   string; // {{ticket.created_at}}
   resolved_at?:  string; // {{ticket.resolved_at}} — empty string when not yet resolved
 }
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { ticket_id, status, queendom_name, created_at, resolved_at } = payload;
+  const { ticket_id, status, queendom_name, agent_name, created_at, resolved_at } = payload;
 
   if (!ticket_id || !status || !queendom_name) {
     console.error("[freshdesk webhook] missing required fields →", {
@@ -105,6 +108,7 @@ export async function POST(req: NextRequest) {
     ticket_id:     String(ticket_id),
     status,
     queendom_name,
+    agent_name:    agent_name?.trim() || null,
     // Use Freshdesk's creation timestamp when valid; fall back to now()
     // only for genuinely new tickets where Freshdesk omits the field.
     created_at: isValidDate(created_at) ? created_at : now,
@@ -137,7 +141,11 @@ export async function POST(req: NextRequest) {
   // Only touch the columns that legitimately change on a status update.
   // created_at is intentionally excluded — we never overwrite the original
   // ticket creation time when processing a status-change event.
-  const updateCols: Record<string, unknown> = { status, queendom_name };
+  const updateCols: Record<string, unknown> = {
+    status,
+    queendom_name,
+    agent_name: agent_name?.trim() || null,
+  };
   if ("resolved_at" in row) updateCols.resolved_at = row.resolved_at;
 
   const { data: updated, error: updateError } = await db

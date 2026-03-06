@@ -3,14 +3,30 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import type { QueenStats, MemberStats, TicketStats } from "@/lib/types";
+import {
+  buildRoster,
+  ROSTER_ANANYSHREE,
+  ROSTER_ANISHQA,
+} from "@/lib/agentRoster";
+import type {
+  QueenStats,
+  MemberStats,
+  TicketStats,
+  AgentStats,
+} from "@/lib/types";
 import TopBar from "./TopBar";
 import QueendomPanel from "./QueendomPanel";
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Fixed rosters — all stats start at 0 and are filled in by /api/agents
+// ─────────────────────────────────────────────────────────────────────────────
+const AGENTS_ANANYSHREE = buildRoster(ROSTER_ANANYSHREE, "ananyshree");
+const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Zero initial state — every counter animates up from 0 on first load
 // ─────────────────────────────────────────────────────────────────────────────
-const ZERO_MEMBERS: MemberStats = { total: 0, yearly: 0, monthly: 0 };
+const ZERO_MEMBERS: MemberStats = { total: 0 };
 const ZERO_TICKETS: TicketStats = {
   totalThisMonth: 0,
   solvedThisMonth: 0,
@@ -18,10 +34,19 @@ const ZERO_TICKETS: TicketStats = {
   pendingToResolve: 0,
 };
 
-const INIT: QueenStats = { members: ZERO_MEMBERS, tickets: ZERO_TICKETS };
+const INIT_ANANYSHREE: QueenStats = {
+  members: ZERO_MEMBERS,
+  tickets: ZERO_TICKETS,
+  agents: AGENTS_ANANYSHREE,
+};
+const INIT_ANISHQA: QueenStats = {
+  members: ZERO_MEMBERS,
+  tickets: ZERO_TICKETS,
+  agents: AGENTS_ANISHQA,
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Response shapes returned by our two API routes
+// API response shapes
 // ─────────────────────────────────────────────────────────────────────────────
 interface MemberApiResponse {
   ananyshree: MemberStats;
@@ -33,14 +58,50 @@ interface TicketApiResponse {
   anishqa: TicketStats;
 }
 
+// Per-agent live stats keyed by agent name
+interface AgentLiveStats {
+  tasksAssignedToday: number;
+  tasksCompletedToday: number;
+  tasksCompletedThisMonth: number;
+}
+
+interface AgentApiResponse {
+  ananyshree: Record<string, AgentLiveStats>;
+  anishqa: Record<string, AgentLiveStats>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Merges live stats into a roster, preserving order.
+// Agents not present in the API response keep their current values (stay at 0
+// on first render, then hold last-known values on partial updates).
+// After merging, sort descending by completedToday → thisMonth so the
+// best performer always floats to the top of the leaderboard.
+// ─────────────────────────────────────────────────────────────────────────────
+function mergeAndRank(
+  roster: AgentStats[],
+  live: Record<string, AgentLiveStats>,
+): AgentStats[] {
+  const merged = roster.map((agent) => {
+    const stats = live[agent.name];
+    return stats ? { ...agent, ...stats } : agent;
+  });
+
+  return merged.sort(
+    (a, b) =>
+      b.tasksCompletedToday - a.tasksCompletedToday ||
+      b.tasksCompletedThisMonth - a.tasksCompletedThisMonth,
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Dashboard
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const [ananyshreeStats, setAnanyshreeStats] = useState<QueenStats>(INIT);
-  const [anishqaStats, setAnishqaStats] = useState<QueenStats>(INIT);
+  const [ananyshreeStats, setAnanyshreeStats] =
+    useState<QueenStats>(INIT_ANANYSHREE);
+  const [anishqaStats, setAnishqaStats] = useState<QueenStats>(INIT_ANISHQA);
 
-  // ── Member fetch (calls /api/clients, service-role key, bypasses RLS) ───────
+  // ── /api/clients — active member counts ─────────────────────────────────────
   const fetchMembers = useCallback(async () => {
     try {
       const res = await fetch("/api/clients", { cache: "no-store" });
@@ -56,7 +117,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  // ── Ticket fetch (calls /api/tickets, aggregates active/solved metrics) ──────
+  // ── /api/tickets — queendom-level ticket metrics ─────────────────────────────
   const fetchTickets = useCallback(async () => {
     try {
       const res = await fetch("/api/tickets", { cache: "no-store" });
@@ -72,28 +133,49 @@ export default function Dashboard() {
     }
   }, []);
 
-  // ── Fetch both in parallel ───────────────────────────────────────────────────
+  // ── /api/agents — per-agent stats; merges into roster & re-ranks ────────────
+  const fetchAgents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/agents", { cache: "no-store" });
+      if (!res.ok) {
+        console.error("[Dashboard] /api/agents →", res.status, res.statusText);
+        return;
+      }
+      const data: AgentApiResponse = await res.json();
+
+      setAnanyshreeStats((prev) => ({
+        ...prev,
+        agents: mergeAndRank(prev.agents, data.ananyshree),
+      }));
+      setAnishqaStats((prev) => ({
+        ...prev,
+        agents: mergeAndRank(prev.agents, data.anishqa),
+      }));
+    } catch (err) {
+      console.error("[Dashboard] fetchAgents failed:", err);
+    }
+  }, []);
+
+  // ── Fetch everything in parallel ─────────────────────────────────────────────
   const fetchAll = useCallback(
-    () => Promise.all([fetchMembers(), fetchTickets()]),
-    [fetchMembers, fetchTickets],
+    () => Promise.all([fetchMembers(), fetchTickets(), fetchAgents()]),
+    [fetchMembers, fetchTickets, fetchAgents],
   );
 
-  // ── Initial load ────────────────────────────────────────────────────────────
+  // ── Initial load ─────────────────────────────────────────────────────────────
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  // ── 20-second polling (guaranteed refresh regardless of realtime status) ────
+  // ── 20-second polling fallback ───────────────────────────────────────────────
   useEffect(() => {
     const id = setInterval(fetchAll, 20_000);
     return () => clearInterval(id);
   }, [fetchAll]);
 
   // ── Supabase Realtime subscriptions ─────────────────────────────────────────
-  // Two separate channels so each table change triggers only the relevant fetch.
-  // These fire instantly when a row changes — no waiting for the 20-s poll.
-  // (If the anon key lacks a SELECT policy on a table, the subscription silently
-  //  does nothing and the 20-s poll acts as the fallback.)
+  // clients table  → refresh member counts
+  // tickets table  → refresh both queendom-level stats AND per-agent stats
   useEffect(() => {
     if (!supabase) return;
 
@@ -114,7 +196,11 @@ export default function Dashboard() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "tickets" },
-        () => fetchTickets(),
+        // Single ticket change → refresh both queendom totals and per-agent rings
+        () => {
+          fetchTickets();
+          fetchAgents();
+        },
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED")
@@ -125,7 +211,7 @@ export default function Dashboard() {
       supabase?.removeChannel(clientsChannel);
       supabase?.removeChannel(ticketsChannel);
     };
-  }, [fetchMembers, fetchTickets]);
+  }, [fetchMembers, fetchTickets, fetchAgents]);
 
   // ───────────────────────────────────────────────────────────────────────────
   return (
