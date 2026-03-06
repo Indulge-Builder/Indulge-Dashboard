@@ -24,11 +24,3 @@ export interface QueenStats {
   agents: AgentStats[];
 }
 
-export interface Onboarding {
-  id: string;
-  clientName: string;
-  plan: string;
-
-  salesperson: string;
-  createdAt: string;
-}
