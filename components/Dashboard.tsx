@@ -81,8 +81,15 @@ function mergeAndRank(
   roster: AgentStats[],
   live: Record<string, AgentLiveStats>,
 ): AgentStats[] {
+  // Build a lowercase index of the live data so the lookup is case-insensitive.
+  // The API returns canonical names but this guards against any future drift.
+  const liveCI: Record<string, AgentLiveStats> = {};
+  for (const [key, val] of Object.entries(live)) {
+    liveCI[key.toLowerCase()] = val;
+  }
+
   const merged = roster.map((agent) => {
-    const stats = live[agent.name];
+    const stats = liveCI[agent.name.toLowerCase()];
     return stats ? { ...agent, ...stats } : agent;
   });
 

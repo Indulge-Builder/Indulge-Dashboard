@@ -1,131 +1,57 @@
 /**
  * GET /api/agents
  *
- * Fetches every row from the `tickets` table, then for each row checks whether
- * `agent_name` belongs to one of the known roster members. Only matching rows
- * are counted. The queendom assignment comes from the roster (single source of
- * truth), not from the `queendom_name` column, so inconsistent DB values can
- * never mis-bucket an agent.
+ * Pulls every row from the `tickets` table, then for each roster agent runs
+ * three explicit filters — exactly the same logic as the user described:
  *
- * Per-agent metrics (IST, same logic as /api/tickets):
+ *   Assigned Today    = agent_name match  AND  created_at  is today (IST)
+ *   Completed Today   = agent_name match  AND  status is Resolved/Closed
+ *                       AND  resolved_at is today (IST)
+ *   Completed Month   = agent_name match  AND  status is Resolved/Closed
+ *                       AND  resolved_at is this month (IST)
  *
- *   tasksAssignedToday      – created_at  date  = today
- *   tasksCompletedToday     – resolved_at date  = today   AND status ∈ COMPLETED
- *   tasksCompletedThisMonth – resolved_at month = this month AND status ∈ COMPLETED
- *
- * Response:
- *   {
- *     ananyshree: Record<agentName, { tasksAssignedToday, tasksCompletedToday, tasksCompletedThisMonth }>,
- *     anishqa:    Record<agentName, { ... }>
- *   }
+ * All name comparisons are case-insensitive so "pranav gadekar" in the DB
+ * matches "Pranav Gadekar" in the roster and vice-versa.
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { NextResponse }  from "next/server";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Ticket row shape ─────────────────────────────────────────────────────────
 interface TicketRow {
-  agent_name: string | null;
-  status: string | null;
-  created_at: string | null;
+  agent_name:  string | null;
+  status:      string | null;
+  created_at:  string | null;
   resolved_at: string | null;
 }
 
-interface AgentBucket {
-  tasksAssignedToday: number;
-  tasksCompletedToday: number;
-  tasksCompletedThisMonth: number;
-}
-
-// ─── Build roster lookup once at module load ──────────────────────────────────
-// Maps every known agent name → their queendom so we can look up any ticket row
-// in O(1) without touching queendom_name from the DB.
-const AGENT_QUEENDOM = new Map<string, "ananyshree" | "anishqa">();
-for (const name of ROSTER_ANANYSHREE) AGENT_QUEENDOM.set(name, "ananyshree");
-for (const name of ROSTER_ANISHQA) AGENT_QUEENDOM.set(name, "anishqa");
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-const COMPLETED = new Set(["resolved", "closed"]);
+// ─── IST date helpers ─────────────────────────────────────────────────────────
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
 
-// ─── IST helpers (identical to /api/tickets) ─────────────────────────────────
 function istToday(): { day: string; month: string } {
   const now = new Date(Date.now() + IST_OFFSET_MS);
-  const y = now.getUTCFullYear();
-  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(now.getUTCDate()).padStart(2, "0");
+  const y   = now.getUTCFullYear();
+  const mo  = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d   = String(now.getUTCDate()).padStart(2, "0");
   return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
 }
 
-function dateParts(s: string): { day: string; month: string } {
-  return { day: s.slice(0, 10), month: s.slice(0, 7) };
-}
+// Slices the YYYY-MM-DD prefix from any timestamp string Supabase returns.
+// Works with "2026-03-06 13:14:19 +0530", "2026-03-06T13:14:19+00:00", etc.
+function toDay(ts: string | null): string   { return (ts ?? "").slice(0, 10); }
+function toMonth(ts: string | null): string { return (ts ?? "").slice(0, 7);  }
 
-// ─── Aggregation ─────────────────────────────────────────────────────────────
-function aggregate(rows: TicketRow[]): {
-  ananyshree: Record<string, AgentBucket>;
-  anishqa: Record<string, AgentBucket>;
-} {
-  const { day: todayIST, month: thisMonthIST } = istToday();
+const RESOLVED = new Set(["resolved", "closed"]);
+const isResolved = (status: string | null) =>
+  RESOLVED.has((status ?? "").toLowerCase().trim());
 
-  const buckets: Record<string, AgentBucket> = {};
-
-  // Pre-populate every roster member with zeros so agents with no tickets
-  // today still appear in the response.
-  for (const name of Array.from(AGENT_QUEENDOM.keys())) {
-    buckets[name] = {
-      tasksAssignedToday: 0,
-      tasksCompletedToday: 0,
-      tasksCompletedThisMonth: 0,
-    };
-  }
-
-  for (const row of rows) {
-    const agentName = (row.agent_name ?? "").trim();
-    if (!agentName) continue;
-
-    // Only process tickets whose agent is in our roster
-    if (!AGENT_QUEENDOM.has(agentName)) continue;
-
-    const status = (row.status ?? "").toLowerCase().trim();
-    const bucket = buckets[agentName];
-
-    // ── Assigned today: ticket was created today ──────────────────────────────
-    if (row.created_at && dateParts(row.created_at).day === todayIST) {
-      bucket.tasksAssignedToday++;
-    }
-
-    // ── Completed today / this month ──────────────────────────────────────────
-    if (COMPLETED.has(status) && row.resolved_at) {
-      const { day, month } = dateParts(row.resolved_at);
-      if (day === todayIST) bucket.tasksCompletedToday++;
-      if (month === thisMonthIST) bucket.tasksCompletedThisMonth++;
-    }
-  }
-
-  // ── Split into queendom buckets ───────────────────────────────────────────
-  const ananyshree: Record<string, AgentBucket> = {};
-  const anishqa: Record<string, AgentBucket> = {};
-
-  for (const [name, stats] of Object.entries(buckets)) {
-    if (AGENT_QUEENDOM.get(name) === "ananyshree") ananyshree[name] = stats;
-    else anishqa[name] = stats;
-  }
-
-  return { ananyshree, anishqa };
-}
-
-// ─── GET /api/agents ──────────────────────────────────────────────────────────
+// ─── GET handler ──────────────────────────────────────────────────────────────
 export async function GET() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const url        = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? "";
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-  if (
-    !url ||
-    !serviceKey ||
-    serviceKey === "paste_your_service_role_key_here"
-  ) {
+  if (!url || !serviceKey || serviceKey === "paste_your_service_role_key_here") {
     return NextResponse.json(
       { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
       { status: 503 },
@@ -136,7 +62,7 @@ export async function GET() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Fetch entire tickets table — only the columns we need
+  // Pull entire tickets table — only the four columns we need
   const { data, error } = await db
     .from("tickets")
     .select("agent_name, status, created_at, resolved_at");
@@ -146,21 +72,56 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const { day: todayIST, month: thisMonthIST } = istToday();
-  console.info(
-    `[/api/agents] IST today: ${todayIST} | month: ${thisMonthIST} |`,
-    `${data.length} total rows fetched`,
+  const tickets = data as TicketRow[];
+  const { day: TODAY, month: THIS_MONTH } = istToday();
+
+  console.info(`[/api/agents] ${tickets.length} tickets fetched | IST today: ${TODAY}`);
+
+  // ── Three filters per agent ───────────────────────────────────────────────
+  function calcAgent(agentName: string) {
+    const nameLower = agentName.toLowerCase();
+
+    const assignedToday = tickets.filter(
+      (t) => t.agent_name?.toLowerCase() === nameLower
+          && toDay(t.created_at) === TODAY,
+    ).length;
+
+    // Only count tickets CREATED today that are now resolved.
+    // This keeps completed ≤ assigned so the fraction "done / got today" is ≤ 1.
+    // (Backlog tickets resolved today are excluded — they belong to a past day's tally.)
+    const completedToday = tickets.filter(
+      (t) => t.agent_name?.toLowerCase() === nameLower
+          && isResolved(t.status)
+          && toDay(t.created_at) === TODAY,
+    ).length;
+
+    const completedThisMonth = tickets.filter(
+      (t) => t.agent_name?.toLowerCase() === nameLower
+          && isResolved(t.status)
+          && toMonth(t.resolved_at) === THIS_MONTH,
+    ).length;
+
+    console.info(
+      `[/api/agents]  ${agentName.padEnd(26)}`,
+      `assigned=${assignedToday}  done_today=${completedToday}  this_month=${completedThisMonth}`,
+    );
+
+    return {
+      tasksAssignedToday:      assignedToday,
+      tasksCompletedToday:     completedToday,
+      tasksCompletedThisMonth: completedThisMonth,
+    };
+  }
+
+  // ── Build response grouped by queendom ────────────────────────────────────
+  const ananyshree: Record<string, ReturnType<typeof calcAgent>> = {};
+  for (const name of ROSTER_ANANYSHREE) ananyshree[name] = calcAgent(name);
+
+  const anishqa: Record<string, ReturnType<typeof calcAgent>> = {};
+  for (const name of ROSTER_ANISHQA) anishqa[name] = calcAgent(name);
+
+  return NextResponse.json(
+    { ananyshree, anishqa },
+    { headers: { "Cache-Control": "no-store" } },
   );
-
-  const stats = aggregate(data as TicketRow[]);
-
-  const aAgents = Object.keys(stats.ananyshree).length;
-  const iAgents = Object.keys(stats.anishqa).length;
-  console.info(
-    `[/api/agents] processed → ${aAgents} Ananyshree, ${iAgents} Anishqa agents`,
-  );
-
-  return NextResponse.json(stats, {
-    headers: { "Cache-Control": "no-store" },
-  });
 }

@@ -8,7 +8,7 @@ export const ROSTER_ANISHQA: string[] = [
   "Pawani Tiwari",
   "Sagar Ali",
   "Savio Francis Fernandes",
-  "pranav gadekar",
+  "Pranav Gadekar",
   "Dhanush K",
   "Archana S",
   "Aniruddha Morajkar",
