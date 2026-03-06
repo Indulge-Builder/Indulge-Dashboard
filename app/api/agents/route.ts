@@ -21,20 +21,20 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { NextResponse }  from "next/server";
+import { NextResponse } from "next/server";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TicketRow {
-  agent_name:  string | null;
-  status:      string | null;
-  created_at:  string | null;
+  agent_name: string | null;
+  status: string | null;
+  created_at: string | null;
   resolved_at: string | null;
 }
 
 interface AgentBucket {
-  tasksAssignedToday:      number;
-  tasksCompletedToday:     number;
+  tasksAssignedToday: number;
+  tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
 }
 
@@ -43,18 +43,18 @@ interface AgentBucket {
 // in O(1) without touching queendom_name from the DB.
 const AGENT_QUEENDOM = new Map<string, "ananyshree" | "anishqa">();
 for (const name of ROSTER_ANANYSHREE) AGENT_QUEENDOM.set(name, "ananyshree");
-for (const name of ROSTER_ANISHQA)    AGENT_QUEENDOM.set(name, "anishqa");
+for (const name of ROSTER_ANISHQA) AGENT_QUEENDOM.set(name, "anishqa");
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const COMPLETED     = new Set(["resolved", "closed"]);
+const COMPLETED = new Set(["resolved", "closed"]);
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
 
 // ─── IST helpers (identical to /api/tickets) ─────────────────────────────────
 function istToday(): { day: string; month: string } {
   const now = new Date(Date.now() + IST_OFFSET_MS);
-  const y   = now.getUTCFullYear();
-  const mo  = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const d   = String(now.getUTCDate()).padStart(2, "0");
+  const y = now.getUTCFullYear();
+  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
   return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
 }
 
@@ -65,7 +65,7 @@ function dateParts(s: string): { day: string; month: string } {
 // ─── Aggregation ─────────────────────────────────────────────────────────────
 function aggregate(rows: TicketRow[]): {
   ananyshree: Record<string, AgentBucket>;
-  anishqa:    Record<string, AgentBucket>;
+  anishqa: Record<string, AgentBucket>;
 } {
   const { day: todayIST, month: thisMonthIST } = istToday();
 
@@ -73,10 +73,10 @@ function aggregate(rows: TicketRow[]): {
 
   // Pre-populate every roster member with zeros so agents with no tickets
   // today still appear in the response.
-  for (const name of AGENT_QUEENDOM.keys()) {
+  for (const name of Array.from(AGENT_QUEENDOM.keys())) {
     buckets[name] = {
-      tasksAssignedToday:      0,
-      tasksCompletedToday:     0,
+      tasksAssignedToday: 0,
+      tasksCompletedToday: 0,
       tasksCompletedThisMonth: 0,
     };
   }
@@ -99,18 +99,18 @@ function aggregate(rows: TicketRow[]): {
     // ── Completed today / this month ──────────────────────────────────────────
     if (COMPLETED.has(status) && row.resolved_at) {
       const { day, month } = dateParts(row.resolved_at);
-      if (day   === todayIST)     bucket.tasksCompletedToday++;
+      if (day === todayIST) bucket.tasksCompletedToday++;
       if (month === thisMonthIST) bucket.tasksCompletedThisMonth++;
     }
   }
 
   // ── Split into queendom buckets ───────────────────────────────────────────
   const ananyshree: Record<string, AgentBucket> = {};
-  const anishqa:    Record<string, AgentBucket> = {};
+  const anishqa: Record<string, AgentBucket> = {};
 
   for (const [name, stats] of Object.entries(buckets)) {
     if (AGENT_QUEENDOM.get(name) === "ananyshree") ananyshree[name] = stats;
-    else                                            anishqa[name]    = stats;
+    else anishqa[name] = stats;
   }
 
   return { ananyshree, anishqa };
@@ -118,10 +118,14 @@ function aggregate(rows: TicketRow[]): {
 
 // ─── GET /api/agents ──────────────────────────────────────────────────────────
 export async function GET() {
-  const url        = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? "";
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-  if (!url || !serviceKey || serviceKey === "paste_your_service_role_key_here") {
+  if (
+    !url ||
+    !serviceKey ||
+    serviceKey === "paste_your_service_role_key_here"
+  ) {
     return NextResponse.json(
       { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
       { status: 503 },
@@ -152,7 +156,9 @@ export async function GET() {
 
   const aAgents = Object.keys(stats.ananyshree).length;
   const iAgents = Object.keys(stats.anishqa).length;
-  console.info(`[/api/agents] processed → ${aAgents} Ananyshree, ${iAgents} Anishqa agents`);
+  console.info(
+    `[/api/agents] processed → ${aAgents} Ananyshree, ${iAgents} Anishqa agents`,
+  );
 
   return NextResponse.json(stats, {
     headers: { "Cache-Control": "no-store" },
