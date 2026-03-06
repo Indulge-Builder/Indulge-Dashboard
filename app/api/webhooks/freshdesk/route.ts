@@ -6,12 +6,12 @@
  *
  * Expected JSON body — map your Freshdesk automation variables like this:
  *   {
- *     "ticket_id":     "{{ticket.id}}",
- *     "status":        "{{ticket.status}}",
- *     "queendom_name": "{{ticket.group.name}}",
- *     "agent_name":    "{{ticket.agent.name}}",
- *     "created_at":    "{{ticket.created_at}}",
- *     "resolved_at":   "{{ticket.resolved_at}}"
+ *     "ticket_id":          "{{ticket.id}}",
+ *     "status":             "{{ticket.status}}",
+ *     "queendom_name":      "{{ticket.group.name}}",
+ *     "agent_name":         "{{ticket.agent.name}}",
+ *     "ticket_created_at":  "{{ticket.created_at}}",
+ *     "resolved_date_time": "{{ticket.resolved_at}}"
  *   }
  *
  * Supabase table DDL (run once):
@@ -32,12 +32,12 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 interface FreshdeskPayload {
-  ticket_id:     string | number;
-  status:        string;
-  queendom_name: string;
-  agent_name?:   string; // {{ticket.agent.name}}
-  created_at?:   string; // {{ticket.created_at}}
-  resolved_at?:  string; // {{ticket.resolved_at}} — empty string when not yet resolved
+  ticket_id:          string | number;
+  status:             string;
+  queendom_name:      string;
+  agent_name?:        string; // {{ticket.agent.name}}
+  ticket_created_at?: string; // {{ticket.created_at}}
+  resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
 }
 
 // Completed statuses — resolved_at is stamped
@@ -55,8 +55,8 @@ const ACTIVE_STATUSES = new Set([
 
 function adminClient() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL    ?? "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY   ?? "",
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 }
@@ -67,11 +67,17 @@ const isValidDate = (v: string | undefined): v is string =>
 
 export async function POST(req: NextRequest) {
   // ── Guard: env vars must be present ───────────────────────────────────────
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? "";
-  const serviceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-  if (!supabaseUrl || !serviceKey || serviceKey === "paste_your_service_role_key_here") {
-    console.error("[freshdesk webhook] SUPABASE_SERVICE_ROLE_KEY is not configured");
+  if (
+    !supabaseUrl ||
+    !serviceKey ||
+    serviceKey === "paste_your_service_role_key_here"
+  ) {
+    console.error(
+      "[freshdesk webhook] SUPABASE_SERVICE_ROLE_KEY is not configured",
+    );
     return NextResponse.json(
       { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
       { status: 503 },
@@ -86,7 +92,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { ticket_id, status, queendom_name, agent_name, created_at, resolved_at } = payload;
+  const {
+    ticket_id,
+    status,
+    queendom_name,
+    agent_name,
+    ticket_created_at,
+    resolved_date_time,
+  } = payload;
 
   if (!ticket_id || !status || !queendom_name) {
     console.error("[freshdesk webhook] missing required fields →", {
@@ -102,22 +115,22 @@ export async function POST(req: NextRequest) {
 
   // ── Build upsert row ───────────────────────────────────────────────────────
   const statusLower = status.toLowerCase().trim();
-  const now         = new Date().toISOString();
+  const now = new Date().toISOString();
 
   const row: Record<string, unknown> = {
-    ticket_id:     String(ticket_id),
+    ticket_id: String(ticket_id),
     status,
     queendom_name,
-    agent_name:    agent_name?.trim() || null,
+    agent_name: agent_name?.trim() || null,
     // Use Freshdesk's creation timestamp when valid; fall back to now()
     // only for genuinely new tickets where Freshdesk omits the field.
-    created_at: isValidDate(created_at) ? created_at : now,
+    created_at: isValidDate(ticket_created_at) ? ticket_created_at : now,
     // resolved_at is determined by status, not passed through blindly —
     // Freshdesk can send an empty string for unresolved tickets.
     resolved_at: (() => {
       if (RESOLVED_STATUSES.has(statusLower)) {
         // Use Freshdesk's timestamp if valid, otherwise stamp now.
-        return isValidDate(resolved_at) ? resolved_at : now;
+        return isValidDate(resolved_date_time) ? resolved_date_time : now;
       }
       if (ACTIVE_STATUSES.has(statusLower)) {
         // Re-opened ticket — clear resolved_at so it no longer counts as solved.
@@ -155,7 +168,12 @@ export async function POST(req: NextRequest) {
     .select("ticket_id");
 
   if (updateError) {
-    console.error("[freshdesk webhook] update error:", updateError.message, "| cols:", updateCols);
+    console.error(
+      "[freshdesk webhook] update error:",
+      updateError.message,
+      "| cols:",
+      updateCols,
+    );
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
@@ -163,12 +181,15 @@ export async function POST(req: NextRequest) {
   // updated is an empty array (not null) when no row matched the .eq() filter,
   // which means this is a brand-new ticket Freshdesk is telling us about.
   if (!updated || updated.length === 0) {
-    const { error: insertError } = await db
-      .from("tickets")
-      .insert(row);
+    const { error: insertError } = await db.from("tickets").insert(row);
 
     if (insertError) {
-      console.error("[freshdesk webhook] insert error:", insertError.message, "| row:", row);
+      console.error(
+        "[freshdesk webhook] insert error:",
+        insertError.message,
+        "| row:",
+        row,
+      );
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
