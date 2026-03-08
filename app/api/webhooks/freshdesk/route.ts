@@ -101,6 +101,8 @@ export async function POST(req: NextRequest) {
     resolved_date_time,
   } = payload;
 
+  console.info("[freshdesk webhook] incoming payload →", JSON.stringify(payload, null, 2));
+
   if (!ticket_id || !status || !queendom_name) {
     console.error("[freshdesk webhook] missing required fields →", {
       ticket_id,
