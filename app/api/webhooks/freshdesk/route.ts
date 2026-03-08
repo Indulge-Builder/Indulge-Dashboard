@@ -32,10 +32,10 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 interface FreshdeskPayload {
-  ticket_id:          string | number;
-  status:             string;
-  queendom_name:      string;
-  agent_name?:        string; // {{ticket.agent.name}}
+  ticket_id: string | number;
+  status: string;
+  queendom_name: string;
+  agent_name: string; // {{ticket.agent.name}}
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
 }
@@ -104,7 +104,14 @@ export async function POST(req: NextRequest) {
   console.info(
     "[freshdesk webhook] incoming payload →",
     JSON.stringify(
-      { ticket_id, status, queendom_name, agent_name, ticket_created_at, resolved_date_time },
+      {
+        ticket_id,
+        status,
+        queendom_name,
+        agent_name,
+        ticket_created_at,
+        resolved_date_time,
+      },
       null,
       2,
     ),
@@ -130,7 +137,7 @@ export async function POST(req: NextRequest) {
     ticket_id: String(ticket_id),
     status,
     queendom_name,
-    agent_name: agent_name && agent_name.trim().length > 0 ? agent_name.trim() : null,
+    agent_name,
   };
 
   // Include created_at only when Freshdesk sends a valid timestamp.
@@ -145,7 +152,9 @@ export async function POST(req: NextRequest) {
   // For terminal statuses (e.g. "Did not solve"), the key is omitted entirely
   // so the ON CONFLICT UPDATE leaves the existing DB value untouched.
   if (RESOLVED_STATUSES.has(statusLower)) {
-    row.resolved_at = isValidDate(resolved_date_time) ? resolved_date_time : now;
+    row.resolved_at = isValidDate(resolved_date_time)
+      ? resolved_date_time
+      : now;
   } else if (ACTIVE_STATUSES.has(statusLower)) {
     // Re-opened ticket — clear resolved_at so it no longer counts as solved.
     row.resolved_at = null;

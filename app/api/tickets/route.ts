@@ -46,7 +46,7 @@ interface AggregatedStats {
 }
 
 // ─── Status sets ─────────────────────────────────────────────────────────────
-const COMPLETED = new Set(["resolved", "closed"]);
+const COMPLETED = new Set(["resolved"]);
 
 const ACTIVE = new Set([
   "open",
@@ -58,18 +58,18 @@ const ACTIVE = new Set([
 ]);
 
 // ─── IST date helpers ────────────────────────────────────────────────────────
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000 // UTC+5:30
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
 
 /**
  * Returns today's IST date as "YYYY-MM-DD" and this month as "YYYY-MM".
  * Hardcoded offset so it works on any server timezone (Vercel/Render = UTC).
  */
 function istToday(): { day: string; month: string } {
-  const nowIST = new Date(Date.now() + IST_OFFSET_MS)
-  const y  = nowIST.getUTCFullYear()
-  const mo = String(nowIST.getUTCMonth() + 1).padStart(2, "0")
-  const d  = String(nowIST.getUTCDate()).padStart(2, "0")
-  return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` }
+  const nowIST = new Date(Date.now() + IST_OFFSET_MS);
+  const y = nowIST.getUTCFullYear();
+  const mo = String(nowIST.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(nowIST.getUTCDate()).padStart(2, "0");
+  return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
 }
 
 /**
@@ -86,12 +86,12 @@ function istToday(): { day: string; month: string } {
  *              "2026-03-01T21:38:49.123456+00:00"
  */
 function dateParts(s: string): { day: string; month: string } {
-  return { day: s.slice(0, 10), month: s.slice(0, 7) }
+  return { day: s.slice(0, 10), month: s.slice(0, 7) };
 }
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
 function aggregate(rows: TicketRow[]): AggregatedStats {
-  const { day: todayIST, month: thisMonthIST } = istToday()
+  const { day: todayIST, month: thisMonthIST } = istToday();
 
   const result: AggregatedStats = {
     ananyshree: {
@@ -119,19 +119,23 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
 
     // ── 1. Total This Month ───────────────────────────────────────────────────
     if (row.created_at && dateParts(row.created_at).month === thisMonthIST) {
-      bucket.totalThisMonth++
+      bucket.totalThisMonth++;
     }
 
     // ── 2 & 3. Solved This Month / Solved Today ───────────────────────────────
     if (COMPLETED.has(status) && row.resolved_at) {
-      const { day, month } = dateParts(row.resolved_at)
-      if (month === thisMonthIST) bucket.solvedThisMonth++
-      if (day   === todayIST)    bucket.solvedToday++
+      const { day, month } = dateParts(row.resolved_at);
+      if (month === thisMonthIST) bucket.solvedThisMonth++;
+      if (day === todayIST) bucket.solvedToday++;
     }
 
     // ── 4. Pending to Resolve (this month only) ───────────────────────────────
-    if (ACTIVE.has(status) && row.created_at && dateParts(row.created_at).month === thisMonthIST) {
-      bucket.pendingToResolve++
+    if (
+      ACTIVE.has(status) &&
+      row.created_at &&
+      dateParts(row.created_at).month === thisMonthIST
+    ) {
+      bucket.pendingToResolve++;
     }
   }
 
