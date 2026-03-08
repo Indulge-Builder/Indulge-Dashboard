@@ -124,87 +124,56 @@ export async function POST(req: NextRequest) {
     status,
     queendom_name,
     agent_name: agent_name?.trim() || null,
-    // Use Freshdesk's creation timestamp when valid; fall back to now()
-    // only for genuinely new tickets where Freshdesk omits the field.
-    created_at: isValidDate(ticket_created_at) ? ticket_created_at : now,
-    // resolved_at is determined by status, not passed through blindly —
-    // Freshdesk can send an empty string for unresolved tickets.
-    resolved_at: (() => {
-      if (RESOLVED_STATUSES.has(statusLower)) {
-        // Use Freshdesk's timestamp if valid, otherwise stamp now.
-        return isValidDate(resolved_date_time) ? resolved_date_time : now;
-      }
-      if (ACTIVE_STATUSES.has(statusLower)) {
-        // Re-opened ticket — clear resolved_at so it no longer counts as solved.
-        return null;
-      }
-      // Terminal statuses like "Did not solve" — leave resolved_at unchanged.
-      return undefined;
-    })(),
   };
 
-  // Remove resolved_at from the row entirely when it should remain unchanged
-  // (undefined means "don't touch this column on conflict update").
-  if (row.resolved_at === undefined) {
-    delete row.resolved_at;
+  // Include created_at only when Freshdesk sends a valid timestamp.
+  // On INSERT without it, the DB DEFAULT NOW() applies automatically.
+  // On conflict UPDATE, omitting it preserves the original creation time.
+  if (isValidDate(ticket_created_at)) {
+    row.created_at = ticket_created_at;
   }
 
-  const db = adminClient();
+  // resolved_at is determined by status category, not passed through blindly.
+  // Freshdesk can send an empty string for unresolved tickets.
+  // For terminal statuses (e.g. "Did not solve"), the key is omitted entirely
+  // so the ON CONFLICT UPDATE leaves the existing DB value untouched.
+  if (RESOLVED_STATUSES.has(statusLower)) {
+    row.resolved_at = isValidDate(resolved_date_time) ? resolved_date_time : now;
+  } else if (ACTIVE_STATUSES.has(statusLower)) {
+    // Re-opened ticket — clear resolved_at so it no longer counts as solved.
+    row.resolved_at = null;
+  }
+
   const ticketIdStr = String(ticket_id);
 
-  // ── Step 1: attempt UPDATE on the existing row ─────────────────────────────
-  // Only touch the columns that legitimately change on a status update.
-  // created_at is intentionally excluded — we never overwrite the original
-  // ticket creation time when processing a status-change event.
-  const updateCols: Record<string, unknown> = {
-    status,
-    queendom_name,
-    agent_name: agent_name?.trim() || null,
-  };
-  if ("resolved_at" in row) updateCols.resolved_at = row.resolved_at;
-
-  const { data: updated, error: updateError } = await db
+  // ── Upsert ─────────────────────────────────────────────────────────────────
+  // Columns intentionally omitted from `row` are excluded from the generated
+  // ON CONFLICT DO UPDATE SET clause, so their existing DB values are preserved:
+  //
+  //   created_at  — only included when Freshdesk sends a valid timestamp;
+  //                 omitting it on conflict preserves the original creation time,
+  //                 and the DB DEFAULT NOW() covers brand-new tickets.
+  //
+  //   resolved_at — omitted for terminal statuses (e.g. "Did not solve") so the
+  //                 existing value is left untouched on conflict.
+  const { error } = await adminClient()
     .from("tickets")
-    .update(updateCols)
-    .eq("ticket_id", ticketIdStr)
-    .select("ticket_id");
+    .upsert(row, { onConflict: "ticket_id" });
 
-  if (updateError) {
+  if (error) {
     console.error(
-      "[freshdesk webhook] update error:",
-      updateError.message,
-      "| cols:",
-      updateCols,
+      "[freshdesk webhook] upsert error:",
+      error.message,
+      "| row:",
+      row,
     );
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // ── Step 2: INSERT only when the ticket does not exist yet ─────────────────
-  // updated is an empty array (not null) when no row matched the .eq() filter,
-  // which means this is a brand-new ticket Freshdesk is telling us about.
-  if (!updated || updated.length === 0) {
-    const { error: insertError } = await db.from("tickets").insert(row);
-
-    if (insertError) {
-      console.error(
-        "[freshdesk webhook] insert error:",
-        insertError.message,
-        "| row:",
-        row,
-      );
-      return NextResponse.json({ error: insertError.message }, { status: 500 });
-    }
-
-    console.info(
-      `[freshdesk webhook] INSERT ticket ${ticketIdStr} → "${status}" (${queendom_name})`,
-      `| created_at: ${row.created_at} | resolved_at: ${row.resolved_at ?? "null"}`,
-    );
-  } else {
-    console.info(
-      `[freshdesk webhook] UPDATE ticket ${ticketIdStr} → "${status}" (${queendom_name})`,
-      `| resolved_at: ${updateCols.resolved_at ?? "null/unchanged"}`,
-    );
-  }
+  console.info(
+    `[freshdesk webhook] upserted ticket ${ticketIdStr} → "${status}" (${queendom_name})`,
+    `| resolved_at: ${(row.resolved_at as string | null | undefined) ?? "unchanged"}`,
+  );
 
   return NextResponse.json({ ok: true, ticket_id: ticketIdStr });
 }
