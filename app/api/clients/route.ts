@@ -73,10 +73,6 @@ export async function GET() {
 
   const stats = aggregate(data as ClientRow[]);
 
-  // Log so you can verify in terminal on first load
-  const total = stats.ananyshree.total + stats.anishqa.total;
-  console.info(`[/api/clients] fetched ${total} clients total →`, stats);
-
   return NextResponse.json(stats, {
     headers: {
       // Never cache — always fresh for a live dashboard

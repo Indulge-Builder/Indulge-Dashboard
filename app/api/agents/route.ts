@@ -15,14 +15,14 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { NextResponse }  from "next/server";
+import { NextResponse } from "next/server";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
 
 // ─── Ticket row shape ─────────────────────────────────────────────────────────
 interface TicketRow {
-  agent_name:  string | null;
-  status:      string | null;
-  created_at:  string | null;
+  agent_name: string | null;
+  status: string | null;
+  created_at: string | null;
   resolved_at: string | null;
 }
 
@@ -31,16 +31,20 @@ const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
 
 function istToday(): { day: string; month: string } {
   const now = new Date(Date.now() + IST_OFFSET_MS);
-  const y   = now.getUTCFullYear();
-  const mo  = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const d   = String(now.getUTCDate()).padStart(2, "0");
+  const y = now.getUTCFullYear();
+  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
   return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
 }
 
 // Slices the YYYY-MM-DD prefix from any timestamp string Supabase returns.
 // Works with "2026-03-06 13:14:19 +0530", "2026-03-06T13:14:19+00:00", etc.
-function toDay(ts: string | null): string   { return (ts ?? "").slice(0, 10); }
-function toMonth(ts: string | null): string { return (ts ?? "").slice(0, 7);  }
+function toDay(ts: string | null): string {
+  return (ts ?? "").slice(0, 10);
+}
+function toMonth(ts: string | null): string {
+  return (ts ?? "").slice(0, 7);
+}
 
 const RESOLVED = new Set(["resolved", "closed"]);
 const isResolved = (status: string | null) =>
@@ -48,10 +52,14 @@ const isResolved = (status: string | null) =>
 
 // ─── GET handler ──────────────────────────────────────────────────────────────
 export async function GET() {
-  const url        = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? "";
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
-  if (!url || !serviceKey || serviceKey === "paste_your_service_role_key_here") {
+  if (
+    !url ||
+    !serviceKey ||
+    serviceKey === "paste_your_service_role_key_here"
+  ) {
     return NextResponse.json(
       { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
       { status: 503 },
@@ -75,40 +83,36 @@ export async function GET() {
   const tickets = data as TicketRow[];
   const { day: TODAY, month: THIS_MONTH } = istToday();
 
-  console.info(`[/api/agents] ${tickets.length} tickets fetched | IST today: ${TODAY}`);
-
   // ── Three filters per agent ───────────────────────────────────────────────
   function calcAgent(agentName: string) {
     const nameLower = agentName.toLowerCase();
 
     const assignedToday = tickets.filter(
-      (t) => t.agent_name?.toLowerCase() === nameLower
-          && toDay(t.created_at) === TODAY,
+      (t) =>
+        t.agent_name?.toLowerCase() === nameLower &&
+        toDay(t.created_at) === TODAY,
     ).length;
 
     // Only count tickets CREATED today that are now resolved.
     // This keeps completed ≤ assigned so the fraction "done / got today" is ≤ 1.
     // (Backlog tickets resolved today are excluded — they belong to a past day's tally.)
     const completedToday = tickets.filter(
-      (t) => t.agent_name?.toLowerCase() === nameLower
-          && isResolved(t.status)
-          && toDay(t.created_at) === TODAY,
+      (t) =>
+        t.agent_name?.toLowerCase() === nameLower &&
+        isResolved(t.status) &&
+        toDay(t.created_at) === TODAY,
     ).length;
 
     const completedThisMonth = tickets.filter(
-      (t) => t.agent_name?.toLowerCase() === nameLower
-          && isResolved(t.status)
-          && toMonth(t.resolved_at) === THIS_MONTH,
+      (t) =>
+        t.agent_name?.toLowerCase() === nameLower &&
+        isResolved(t.status) &&
+        toMonth(t.resolved_at) === THIS_MONTH,
     ).length;
 
-    console.info(
-      `[/api/agents]  ${agentName.padEnd(26)}`,
-      `assigned=${assignedToday}  done_today=${completedToday}  this_month=${completedThisMonth}`,
-    );
-
     return {
-      tasksAssignedToday:      assignedToday,
-      tasksCompletedToday:     completedToday,
+      tasksAssignedToday: assignedToday,
+      tasksCompletedToday: completedToday,
       tasksCompletedThisMonth: completedThisMonth,
     };
   }

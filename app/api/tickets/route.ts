@@ -154,12 +154,6 @@ export async function GET() {
     );
   }
 
-  // ── Log current IST date for easy debugging ──────────────────────────────────
-  const { day: todayIST, month: thisMonthIST } = istToday()
-  console.info(
-    `[/api/tickets] IST today: ${todayIST} | IST month: ${thisMonthIST}`,
-  );
-
   const db = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -174,18 +168,6 @@ export async function GET() {
   }
 
   const stats = aggregate(data as TicketRow[]);
-
-  console.info(
-    `[/api/tickets] ${data.length} rows fetched →`,
-    `Ananyshree: total=${stats.ananyshree.totalThisMonth}`,
-    `solved_month=${stats.ananyshree.solvedThisMonth}`,
-    `solved_today=${stats.ananyshree.solvedToday}`,
-    `pending=${stats.ananyshree.pendingToResolve}`,
-    `| Anishqa: total=${stats.anishqa.totalThisMonth}`,
-    `solved_month=${stats.anishqa.solvedThisMonth}`,
-    `solved_today=${stats.anishqa.solvedToday}`,
-    `pending=${stats.anishqa.pendingToResolve}`,
-  );
 
   return NextResponse.json(stats, {
     headers: { "Cache-Control": "no-store" },
