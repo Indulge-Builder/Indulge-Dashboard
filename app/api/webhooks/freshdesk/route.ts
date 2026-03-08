@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
 
   console.info(
     `[freshdesk webhook] upserted ticket ${ticketIdStr} → "${status}" (${queendom_name})`,
-    `| resolved_at: ${(row.resolved_at as string | null | undefined) ?? "unchanged"}`,
+    `| agent_name: ${(row.agent_name as string | null) ?? "null"} | resolved_at: ${(row.resolved_at as string | null | undefined) ?? "unchanged"}`,
   );
 
   return NextResponse.json({ ok: true, ticket_id: ticketIdStr });
