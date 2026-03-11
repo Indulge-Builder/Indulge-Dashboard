@@ -276,10 +276,8 @@ export default function CelebrationOverlay({
 
               {/* Avatar face */}
               <div
-                className="celebration-avatar-glow relative flex items-center justify-center"
+                className="celebration-avatar-glow relative flex items-center justify-center w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] md:w-[168px] md:h-[168px]"
                 style={{
-                  width: 168,
-                  height: 168,
                   borderRadius: "50%",
                   background:
                     "radial-gradient(circle at 38% 35%, #3A2910 0%, #1E1208 55%, #0E0905 100%)",
@@ -292,7 +290,7 @@ export default function CelebrationOverlay({
                   style={{ border: "1px solid rgba(212,175,55,0.12)" }}
                 />
                 <span
-                  className="font-playfair text-[3.8rem] text-gold-300 tracking-widest"
+                  className="font-playfair text-[clamp(2.2rem,3.5vw,3.8rem)] text-gold-300 tracking-widest"
                   style={{
                     textShadow:
                       "0 0 18px rgba(212,175,55,0.85), " +
@@ -322,7 +320,7 @@ export default function CelebrationOverlay({
               </p>
 
               {/* Hero name — shimmer gradient */}
-              <h2 className="celebration-shimmer-text font-playfair text-[3.6rem] tracking-[0.15em] leading-none">
+              <h2 className="celebration-shimmer-text font-playfair text-[clamp(2rem,4vw,3.6rem)] tracking-[0.15em] leading-none">
                 {agentName}
               </h2>
 

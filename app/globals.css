@@ -6,9 +6,19 @@
 
 html,
 body {
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Lock to viewport on tablets and up */
+@media (min-width: 768px) {
+  html,
+  body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
 }
 
 /* ── Noise texture overlay on the whole body ── */

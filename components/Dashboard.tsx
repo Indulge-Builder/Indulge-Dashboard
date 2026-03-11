@@ -268,7 +268,7 @@ export default function Dashboard() {
 
   // ───────────────────────────────────────────────────────────────────────────
   return (
-    <div className="relative flex flex-col w-screen h-screen bg-[#040302] overflow-hidden">
+    <div className="relative flex flex-col w-full min-h-screen md:w-screen md:h-screen bg-[#040302] overflow-auto md:overflow-hidden">
       {/* Full-screen ambient radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -286,8 +286,8 @@ export default function Dashboard() {
         onComplete={() => setCelebrationAgent(null)}
       />
 
-      {/* ── Two panels fill all remaining height ── */}
-      <div className="relative flex flex-1 min-h-0">
+      {/* ── Two panels: side-by-side on md+, stacked on mobile ── */}
+      <div className="relative flex flex-1 min-h-0 flex-col md:flex-row">
         <QueendomPanel
           name="Ananyshree"
           stats={ananyshreeStats}
@@ -295,9 +295,9 @@ export default function Dashboard() {
           delay={0}
         />
 
-        {/* ── Gold centre divider ─────────────────────────────────────────── */}
+        {/* ── Gold centre divider — md+ only ──────────────────────────────── */}
         <motion.div
-          className="relative flex-shrink-0 flex flex-col items-center justify-center"
+          className="hidden md:flex relative flex-shrink-0 flex-col items-center justify-center"
           style={{ width: "36px" }}
           initial={{ scaleY: 0, opacity: 0 }}
           animate={{ scaleY: 1, opacity: 1 }}
@@ -369,6 +369,9 @@ export default function Dashboard() {
             />
           </motion.div>
         </motion.div>
+
+        {/* ── Horizontal divider — mobile only ───────────────────────────── */}
+        <div className="md:hidden w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent flex-shrink-0" />
 
         <QueendomPanel
           name="Anishqa"

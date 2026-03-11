@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle, Activity, Ticket, CalendarDays } from "lucide-react";
+import { CheckCircle, Activity, CalendarDays } from "lucide-react";
 import AnimatedCounter from "./AnimatedCounter";
 import GoldPill from "./GoldPill";
 import AgentLeaderboard from "./AgentLeaderboard";
+import DailyQueendomMetrics from "./DailyQueendomMetrics";
 import type { QueenStats } from "@/lib/types";
 
 interface QueendomPanelProps {
@@ -40,8 +41,8 @@ export default function QueendomPanel({
 
   return (
     <motion.section
-      className="relative flex-1 flex flex-col min-h-0 overflow-hidden"
-      style={{ padding: "2vh 3vw" }}
+      className="relative flex-1 flex flex-col min-h-[85svh] md:min-h-0 overflow-hidden"
+      style={{ padding: "2vh clamp(12px, 3vw, 40px)" }}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -66,7 +67,7 @@ export default function QueendomPanel({
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/40" />
         </div>
 
-        <h2 className="font-playfair text-[4rem] tracking-[0.25em] text-champagne uppercase leading-none">
+        <h2 className="font-playfair text-[clamp(2rem,4vw,4rem)] tracking-[0.25em] text-champagne uppercase leading-none">
           {name}
         </h2>
         <p className="font-inter text-[12px] tracking-[0.7em] uppercase text-gold-500/40 mt-[4px] mb-[1vh]">
@@ -85,11 +86,16 @@ export default function QueendomPanel({
         </div>
       </motion.div>
 
-      {/* ── Ticket Performance (compact) ── */}
+      {/* ── Daily Queendom Metrics ── */}
+      <motion.div className="flex-shrink-0" variants={itemVariants}>
+        <DailyQueendomMetrics tickets={stats.tickets} delay={delay} />
+      </motion.div>
+
+      {/* ── Monthly Ticket Performance ── */}
       <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={itemVariants}>
         <div
           className="glass gold-border-glow rounded-2xl relative overflow-hidden"
-          style={{ padding: "1.6vh 2vw" }}
+          style={{ padding: "1.6vh clamp(10px, 2vw, 28px)" }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] to-transparent pointer-events-none rounded-2xl" />
 
@@ -98,13 +104,13 @@ export default function QueendomPanel({
             <div className="flex flex-col items-center justify-center text-center flex-shrink-0">
               <div className="flex items-center gap-1.5 mb-[0.4vh]">
                 <CheckCircle size={13} className="text-emerald-400/70" />
-                <p className="font-inter text-[14px] tracking-[0.4em] uppercase text-emerald-400/70">
+                <p className="font-inter text-[clamp(10px,1.1vw,14px)] tracking-[0.4em] uppercase text-emerald-400/70">
                   Solved Today
                 </p>
               </div>
               <AnimatedCounter
                 value={stats.tickets.solvedToday}
-                className="font-edu text-[6rem] leading-none text-emerald-400 emerald-glow-hero tabular-nums"
+                className="font-edu text-[clamp(3.5rem,5.5vw,6rem)] leading-none text-emerald-400 emerald-glow-hero tabular-nums"
                 delay={delay + 1000}
               />
             </div>
@@ -117,20 +123,20 @@ export default function QueendomPanel({
               {/* Total Received */}
               <div
                 className="flex-1 bg-black/40 rounded-xl border border-gold-500/[0.11] flex flex-col items-center justify-center text-center"
-                style={{ padding: "1.2vh 0.8vw" }}
+                style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
               >
                 <div className="flex items-center gap-1 mb-[0.3vh]">
                   <CalendarDays size={13} className="text-gold-500/50" />
-                  <p className="font-inter text-[13px] tracking-[0.3em] uppercase text-amber-400/65">
+                  <p className="font-inter text-[clamp(10px,1vw,13px)] tracking-[0.3em] uppercase text-amber-400/65">
                     Received
                   </p>
                 </div>
                 <AnimatedCounter
                   value={stats.tickets.totalThisMonth}
-                  className="font-edu text-[3.2rem] leading-none text-champagne tabular-nums"
+                  className="font-edu text-[clamp(2rem,2.8vw,3.2rem)] leading-none text-champagne tabular-nums"
                   delay={delay + 1200}
                 />
-                <p className="font-inter text-[12px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
+                <p className="font-inter text-[clamp(9px,0.9vw,12px)] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
                   This Month
                 </p>
               </div>
@@ -138,7 +144,7 @@ export default function QueendomPanel({
               {/* Pending */}
               <div
                 className="flex-1 bg-black/50 rounded-xl border border-amber-500/[0.18] flex flex-col items-center justify-center text-center"
-                style={{ padding: "1.2vh 0.8vw" }}
+                style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
               >
                 <div className="flex items-center gap-1.5 mb-[0.3vh]">
                   <span className="relative flex h-[8px] w-[8px] flex-shrink-0">
@@ -154,16 +160,16 @@ export default function QueendomPanel({
                     <span className="relative inline-flex rounded-full h-[8px] w-[8px] bg-amber-400" />
                   </span>
                   <Activity size={13} className="text-amber-400/65" />
-                  <p className="font-inter text-[13px] tracking-[0.3em] uppercase text-amber-400/65">
+                  <p className="font-inter text-[clamp(10px,1vw,13px)] tracking-[0.3em] uppercase text-amber-400/65">
                     Pending
                   </p>
                 </div>
                 <AnimatedCounter
                   value={stats.tickets.pendingToResolve}
-                  className="font-edu text-[3.2rem] leading-none text-rosegold tabular-nums"
+                  className="font-edu text-[clamp(2rem,2.8vw,3.2rem)] leading-none text-rosegold tabular-nums"
                   delay={delay + 1350}
                 />
-                <p className="font-inter text-[12px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
+                <p className="font-inter text-[clamp(9px,0.9vw,12px)] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
                   To Resolve
                 </p>
               </div>
@@ -175,7 +181,7 @@ export default function QueendomPanel({
       {/* ── Agent Leaderboard (fills remaining height) ── */}
       <motion.div
         className="flex-1 min-h-0 flex flex-col glass gold-border-glow rounded-2xl relative overflow-hidden"
-        style={{ padding: "1.6vh 2vw" }}
+        style={{ padding: "1.6vh clamp(10px, 2vw, 28px)" }}
         variants={itemVariants}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
