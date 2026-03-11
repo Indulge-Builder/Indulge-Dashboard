@@ -32,8 +32,11 @@ interface TicketRow {
 
 interface TicketBucket {
   totalThisMonth: number;
+  receivedToday: number;
+  resolvedThisMonth: number;
   solvedToday: number;
   pendingToResolve: number;
+  overdueCount: number;
 }
 
 interface AggregatedStats {
@@ -89,9 +92,18 @@ function dateParts(s: string): { day: string; month: string } {
 function aggregate(rows: TicketRow[]): AggregatedStats {
   const { day: todayIST, month: thisMonthIST } = istToday();
 
+  const empty = (): TicketBucket => ({
+    totalThisMonth: 0,
+    receivedToday: 0,
+    resolvedThisMonth: 0,
+    solvedToday: 0,
+    pendingToResolve: 0,
+    overdueCount: 0,
+  });
+
   const result: AggregatedStats = {
-    ananyshree: { totalThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
-    anishqa:    { totalThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
+    ananyshree: empty(),
+    anishqa:    empty(),
   };
 
   for (const row of rows) {
@@ -103,23 +115,33 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     else if (queendom.includes("anishqa")) bucket = result.anishqa;
     if (!bucket) continue;
 
+    const createdDay   = row.created_at ? dateParts(row.created_at).day   : "";
+    const createdMonth = row.created_at ? dateParts(row.created_at).month : "";
+
     // ── 1. Total This Month ───────────────────────────────────────────────────
-    if (row.created_at && dateParts(row.created_at).month === thisMonthIST) {
-      bucket.totalThisMonth++;
+    if (createdMonth === thisMonthIST) bucket.totalThisMonth++;
+
+    // ── 2. Received Today (any status) ───────────────────────────────────────
+    if (createdDay === todayIST) bucket.receivedToday++;
+
+    // ── 3. Resolved This Month ────────────────────────────────────────────────
+    if (COMPLETED.has(status) && row.resolved_at) {
+      if (dateParts(row.resolved_at).month === thisMonthIST) bucket.resolvedThisMonth++;
     }
 
-    // ── 2. Solved Today ───────────────────────────────────────────────────────
+    // ── 4. Solved Today ───────────────────────────────────────────────────────
     if (COMPLETED.has(status) && row.resolved_at) {
       if (dateParts(row.resolved_at).day === todayIST) bucket.solvedToday++;
     }
 
-    // ── 4. Pending to Resolve (this month only) ───────────────────────────────
-    if (
-      ACTIVE.has(status) &&
-      row.created_at &&
-      dateParts(row.created_at).month === thisMonthIST
-    ) {
+    // ── 5. Pending to Resolve (active, this month) ────────────────────────────
+    if (ACTIVE.has(status) && createdMonth === thisMonthIST) {
       bucket.pendingToResolve++;
+    }
+
+    // ── 6. Overdue (active tickets created BEFORE today — backlog) ────────────
+    if (ACTIVE.has(status) && createdDay < todayIST && createdDay !== "") {
+      bucket.overdueCount++;
     }
   }
 

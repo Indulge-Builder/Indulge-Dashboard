@@ -30,8 +30,11 @@ const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
 const ZERO_MEMBERS: MemberStats = { total: 0 };
 const ZERO_TICKETS: TicketStats = {
   totalThisMonth: 0,
+  receivedToday: 0,
+  resolvedThisMonth: 0,
   solvedToday: 0,
   pendingToResolve: 0,
+  overdueCount: 0,
 };
 
 const INIT_ANANYSHREE: QueenStats = {
@@ -63,6 +66,7 @@ interface AgentLiveStats {
   tasksAssignedToday: number;
   tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
+  overdueCount: number;
 }
 
 interface AgentApiResponse {
@@ -268,7 +272,7 @@ export default function Dashboard() {
 
   // ───────────────────────────────────────────────────────────────────────────
   return (
-    <div className="relative flex flex-col w-full min-h-screen md:w-screen md:h-screen bg-[#040302] overflow-auto md:overflow-hidden">
+    <div className="relative flex flex-col w-screen h-screen bg-[#040302] overflow-hidden">
       {/* Full-screen ambient radial glow */}
       <div
         className="absolute inset-0 pointer-events-none"

@@ -50,6 +50,16 @@ const RESOLVED = new Set(["resolved", "closed"]);
 const isResolved = (status: string | null) =>
   RESOLVED.has((status ?? "").toLowerCase().trim());
 
+// Active (open) statuses — mirrors the set used in /api/tickets
+const ACTIVE = new Set([
+  "open",
+  "pending",
+  "nudge client",
+  "nudge vendor",
+  "ongoing delivery",
+  "invoice due",
+]);
+
 // ─── GET handler ──────────────────────────────────────────────────────────────
 export async function GET() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
@@ -95,7 +105,6 @@ export async function GET() {
 
     // Only count tickets CREATED today that are now resolved.
     // This keeps completed ≤ assigned so the fraction "done / got today" is ≤ 1.
-    // (Backlog tickets resolved today are excluded — they belong to a past day's tally.)
     const completedToday = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
@@ -110,10 +119,21 @@ export async function GET() {
         toMonth(t.resolved_at) === THIS_MONTH,
     ).length;
 
+    // Overdue: active (open) tickets assigned to this agent that were created
+    // before today — tickets that have been sitting in the backlog.
+    const overdueCount = tickets.filter(
+      (t) =>
+        t.agent_name?.toLowerCase() === nameLower &&
+        ACTIVE.has((t.status ?? "").toLowerCase().trim()) &&
+        toDay(t.created_at) < TODAY &&
+        toDay(t.created_at) !== "",
+    ).length;
+
     return {
       tasksAssignedToday: assignedToday,
       tasksCompletedToday: completedToday,
       tasksCompletedThisMonth: completedThisMonth,
+      overdueCount,
     };
   }
 

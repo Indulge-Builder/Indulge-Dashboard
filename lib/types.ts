@@ -3,9 +3,12 @@ export interface MemberStats {
 }
 
 export interface TicketStats {
-  totalThisMonth: number; // all tickets where created_at is within this calendar month
-  solvedToday: number;    // Resolved | Closed  AND  resolved_at within today
-  pendingToResolve: number; // any active / open status — no date gate
+  totalThisMonth: number;    // all tickets created within this calendar month
+  receivedToday: number;     // all tickets created today (any status)
+  resolvedThisMonth: number; // resolved/closed tickets where resolved_at is this month
+  solvedToday: number;       // resolved/closed tickets where resolved_at is today
+  pendingToResolve: number;  // active-status tickets created this month
+  overdueCount: number;      // active-status tickets created BEFORE today (backlog)
 }
 
 export interface AgentStats {
@@ -15,6 +18,7 @@ export interface AgentStats {
   tasksAssignedToday: number;
   tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
+  overdueCount: number;      // active tickets assigned to this agent created before today
 }
 
 export interface QueenStats {
