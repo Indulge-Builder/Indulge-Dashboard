@@ -101,22 +101,6 @@ export async function POST(req: NextRequest) {
     resolved_date_time,
   } = payload;
 
-  console.info(
-    "[freshdesk webhook] incoming payload →",
-    JSON.stringify(
-      {
-        ticket_id,
-        status,
-        queendom_name,
-        agent_name,
-        ticket_created_at,
-        resolved_date_time,
-      },
-      null,
-      2,
-    ),
-  );
-
   if (!ticket_id || !status || !queendom_name) {
     console.error("[freshdesk webhook] missing required fields →", {
       ticket_id,
@@ -161,8 +145,6 @@ export async function POST(req: NextRequest) {
   }
 
   const ticketIdStr = String(ticket_id);
-
-  console.info("[freshdesk webhook] built row →", JSON.stringify(row, null, 2));
 
   // ── Upsert ─────────────────────────────────────────────────────────────────
   // Columns intentionally omitted from `row` are excluded from the generated

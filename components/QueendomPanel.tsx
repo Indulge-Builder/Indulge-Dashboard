@@ -1,12 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  CheckCircle,
-  Activity,
-  Ticket,
-  CalendarDays,
-} from "lucide-react";
+import { CheckCircle, Activity, Ticket, CalendarDays } from "lucide-react";
 import AnimatedCounter from "./AnimatedCounter";
 import GoldPill from "./GoldPill";
 import AgentLeaderboard from "./AgentLeaderboard";
@@ -67,14 +62,14 @@ export default function QueendomPanel({
         {/* Ornamental rule */}
         <div className="flex items-center gap-4 w-full mb-[0.8vh]">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/40" />
-          <span className="text-gold-500/35 text-[9px]">✦</span>
+          <span className="text-gold-500/35 text-[14px]">✦</span>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/40" />
         </div>
 
-        <h2 className="font-playfair text-[2.6rem] tracking-[0.25em] text-champagne uppercase leading-none">
+        <h2 className="font-playfair text-[4rem] tracking-[0.25em] text-champagne uppercase leading-none">
           {name}
         </h2>
-        <p className="font-inter text-[8px] tracking-[0.7em] uppercase text-gold-500/40 mt-[3px] mb-[1vh]">
+        <p className="font-inter text-[12px] tracking-[0.7em] uppercase text-gold-500/40 mt-[4px] mb-[1vh]">
           Queendom
         </p>
 
@@ -83,48 +78,39 @@ export default function QueendomPanel({
         {/* Ornamental rule */}
         <div className="flex items-center gap-4 w-full mt-[1vh]">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/20" />
-          <span className="font-inter text-[7px] tracking-[0.5em] text-gold-500/20">✦ &nbsp; ✦</span>
+          <span className="font-Noto Serif   text-[11px] tracking-[0.5em] text-gold-500/20">
+            ✦ &nbsp; ✦
+          </span>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/20" />
         </div>
       </motion.div>
 
       {/* ── Ticket Performance (compact) ── */}
-      <motion.div
-        className="flex-shrink-0 mb-[1.6vh]"
-        variants={itemVariants}
-      >
+      <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={itemVariants}>
         <div
           className="glass gold-border-glow rounded-2xl relative overflow-hidden"
           style={{ padding: "1.6vh 2vw" }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] to-transparent pointer-events-none rounded-2xl" />
 
-          {/* Label */}
-          <div className="flex items-center gap-2 mb-[1.2vh]">
-            <Ticket size={11} className="text-gold-500/50" />
-            <span className="font-inter text-[12px] tracking-[0.45em] uppercase text-gold-500/50">
-              Ticket Performance
-            </span>
-          </div>
-
           <div className="flex items-center gap-[2vw]">
             {/* Hero: Solved Today */}
             <div className="flex flex-col items-center justify-center text-center flex-shrink-0">
               <div className="flex items-center gap-1.5 mb-[0.4vh]">
-                <CheckCircle size={10} className="text-emerald-400/70" />
-                <p className="font-inter text-[10px] tracking-[0.4em] uppercase text-emerald-400/70">
+                <CheckCircle size={13} className="text-emerald-400/70" />
+                <p className="font-inter text-[14px] tracking-[0.4em] uppercase text-emerald-400/70">
                   Solved Today
                 </p>
               </div>
               <AnimatedCounter
                 value={stats.tickets.solvedToday}
-                className="font-edu text-[4.5rem] leading-none text-emerald-400 emerald-glow-hero tabular-nums"
+                className="font-edu text-[6rem] leading-none text-emerald-400 emerald-glow-hero tabular-nums"
                 delay={delay + 1000}
               />
             </div>
 
             {/* Divider */}
-            <div className="h-16 w-px bg-gradient-to-b from-transparent via-gold-500/20 to-transparent flex-shrink-0" />
+            <div className="h-20 w-px bg-gradient-to-b from-transparent via-gold-500/20 to-transparent flex-shrink-0" />
 
             {/* Secondary stats */}
             <div className="flex gap-[1.2vw] flex-1">
@@ -134,17 +120,17 @@ export default function QueendomPanel({
                 style={{ padding: "1.2vh 0.8vw" }}
               >
                 <div className="flex items-center gap-1 mb-[0.3vh]">
-                  <CalendarDays size={9} className="text-gold-500/50" />
-                  <p className="font-inter text-[9px] tracking-[0.3em] uppercase text-amber-400/65">
+                  <CalendarDays size={13} className="text-gold-500/50" />
+                  <p className="font-inter text-[13px] tracking-[0.3em] uppercase text-amber-400/65">
                     Received
                   </p>
                 </div>
                 <AnimatedCounter
                   value={stats.tickets.totalThisMonth}
-                  className="font-edu text-[2.4rem] leading-none text-champagne tabular-nums"
+                  className="font-edu text-[3.2rem] leading-none text-champagne tabular-nums"
                   delay={delay + 1200}
                 />
-                <p className="font-inter text-[8px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
+                <p className="font-inter text-[12px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
                   This Month
                 </p>
               </div>
@@ -155,25 +141,29 @@ export default function QueendomPanel({
                 style={{ padding: "1.2vh 0.8vw" }}
               >
                 <div className="flex items-center gap-1.5 mb-[0.3vh]">
-                  <span className="relative flex h-[6px] w-[6px] flex-shrink-0">
+                  <span className="relative flex h-[8px] w-[8px] flex-shrink-0">
                     <motion.span
                       className="absolute inline-flex h-full w-full rounded-full bg-amber-400/45"
                       animate={{ scale: [1, 2.8, 1], opacity: [0.65, 0, 0.65] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
                     />
-                    <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-amber-400" />
+                    <span className="relative inline-flex rounded-full h-[8px] w-[8px] bg-amber-400" />
                   </span>
-                  <Activity size={9} className="text-amber-400/65" />
-                  <p className="font-inter text-[9px] tracking-[0.3em] uppercase text-amber-400/65">
+                  <Activity size={13} className="text-amber-400/65" />
+                  <p className="font-inter text-[13px] tracking-[0.3em] uppercase text-amber-400/65">
                     Pending
                   </p>
                 </div>
                 <AnimatedCounter
                   value={stats.tickets.pendingToResolve}
-                  className="font-edu text-[2.4rem] leading-none text-rosegold tabular-nums"
+                  className="font-edu text-[3.2rem] leading-none text-rosegold tabular-nums"
                   delay={delay + 1350}
                 />
-                <p className="font-inter text-[8px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
+                <p className="font-inter text-[12px] tracking-[0.25em] uppercase text-gold-500/50 mt-[0.3vh]">
                   To Resolve
                 </p>
               </div>

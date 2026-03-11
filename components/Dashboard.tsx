@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import {
@@ -16,6 +16,7 @@ import type {
 } from "@/lib/types";
 import TopBar from "./TopBar";
 import QueendomPanel from "./QueendomPanel";
+import CelebrationOverlay from "./CelebrationOverlay";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fixed rosters — all stats start at 0 and are filled in by /api/agents
@@ -29,7 +30,6 @@ const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
 const ZERO_MEMBERS: MemberStats = { total: 0 };
 const ZERO_TICKETS: TicketStats = {
   totalThisMonth: 0,
-  solvedThisMonth: 0,
   solvedToday: 0,
   pendingToResolve: 0,
 };
@@ -107,6 +107,14 @@ export default function Dashboard() {
   const [ananyshreeStats, setAnanyshreeStats] =
     useState<QueenStats>(INIT_ANANYSHREE);
   const [anishqaStats, setAnishqaStats] = useState<QueenStats>(INIT_ANISHQA);
+
+  // ── Celebration state ────────────────────────────────────────────────────────
+  const [celebrationAgent, setCelebrationAgent] = useState<string | null>(null);
+
+  // Tracks the last known completedToday score per agent (keyed by name).
+  // On the very first population (map is empty) we store values without
+  // triggering a celebration — this prevents false positives on page load.
+  const prevScoresRef = useRef<Map<string, number>>(new Map());
 
   // ── /api/clients — active member counts ─────────────────────────────────────
   const fetchMembers = useCallback(async () => {
@@ -220,6 +228,44 @@ export default function Dashboard() {
     };
   }, [fetchMembers, fetchTickets, fetchAgents]);
 
+  // ── Celebration detection ────────────────────────────────────────────────────
+  // Runs whenever either queendom's agents array is updated.
+  // Compares each agent's completedToday against the previously stored value.
+  // The first call (empty map) just seeds the map — no celebration fires.
+  useEffect(() => {
+    const allCurrent = [
+      ...ananyshreeStats.agents,
+      ...anishqaStats.agents,
+    ];
+
+    const prevMap = prevScoresRef.current;
+    const isInitialSeed = prevMap.size === 0;
+    let celebCandidate: string | null = null;
+
+    if (!isInitialSeed) {
+      for (const agent of allCurrent) {
+        const prev = prevMap.get(agent.name) ?? 0;
+        if (agent.tasksCompletedToday > prev) {
+          celebCandidate = agent.name;
+          break;
+        }
+      }
+    }
+
+    // Always update the map with latest values
+    for (const agent of allCurrent) {
+      prevMap.set(agent.name, agent.tasksCompletedToday);
+    }
+
+    // Only trigger if no celebration is already running — avoids stacking
+    if (celebCandidate && !celebrationAgent) {
+      setCelebrationAgent(celebCandidate);
+    }
+  // celebrationAgent intentionally omitted: we only want to react to
+  // agent score changes, not to the celebration state itself
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ananyshreeStats.agents, anishqaStats.agents]);
+
   // ───────────────────────────────────────────────────────────────────────────
   return (
     <div className="relative flex flex-col w-screen h-screen bg-[#040302] overflow-hidden">
@@ -234,6 +280,12 @@ export default function Dashboard() {
 
       <TopBar />
 
+      {/* ── Hero celebration overlay ── */}
+      <CelebrationOverlay
+        agentName={celebrationAgent}
+        onComplete={() => setCelebrationAgent(null)}
+      />
+
       {/* ── Two panels fill all remaining height ── */}
       <div className="relative flex flex-1 min-h-0">
         <QueendomPanel
@@ -243,25 +295,79 @@ export default function Dashboard() {
           delay={0}
         />
 
-        {/* Gold centre divider */}
+        {/* ── Gold centre divider ─────────────────────────────────────────── */}
         <motion.div
-          className="relative flex-shrink-0 flex items-center justify-center"
-          style={{ width: 1 }}
+          className="relative flex-shrink-0 flex flex-col items-center justify-center"
+          style={{ width: "36px" }}
           initial={{ scaleY: 0, opacity: 0 }}
           animate={{ scaleY: 1, opacity: 1 }}
           transition={{
-            duration: 1.1,
-            delay: 0.4,
+            duration: 1.3,
+            delay: 0.5,
             ease: [0.25, 0.46, 0.45, 0.94],
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gold-500/30 to-transparent" />
-          <motion.div
-            className="relative w-[7px] h-[7px] rounded-full bg-gold-500/70 flex-shrink-0 z-10"
-            style={{ boxShadow: "0 0 12px 3px rgba(201,168,76,0.55)" }}
-            animate={{ opacity: [0.7, 1, 0.7] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          {/* Faint ambient wash — barely perceptible, just warms the seam */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse 160% 50% at 50% 50%, rgba(201,168,76,0.032), transparent)",
+            }}
           />
+
+          {/* The hairline */}
+          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-gold-500/[0.22] to-transparent" />
+
+          {/* Barely-there inner bloom — blends into background */}
+          <div
+            className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[4px] pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 8%, rgba(201,168,76,0.07) 30%, rgba(201,168,76,0.11) 50%, rgba(201,168,76,0.07) 70%, transparent 92%)",
+              filter: "blur(2px)",
+            }}
+          />
+
+          {/* Ornament cluster — very quiet, slow breath */}
+          <motion.div
+            className="relative z-10 flex flex-col items-center"
+            style={{ gap: "9px" }}
+            animate={{ opacity: [0.35, 0.65, 0.35] }}
+            transition={{
+              duration: 5.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            {/* Top pip */}
+            <div
+              className="w-[4px] h-[4px] bg-gold-400/35 flex-shrink-0"
+              style={{ transform: "rotate(45deg)" }}
+            />
+
+            {/* Centre orb */}
+            <motion.div
+              className="w-[8px] h-[8px] rounded-full flex-shrink-0"
+              style={{
+                background: "rgba(201,168,76,0.75)",
+                boxShadow:
+                  "0 0 0 1px rgba(201,168,76,0.15), 0 0 8px 2px rgba(201,168,76,0.20)",
+              }}
+              animate={{ scale: [1, 1.08, 1] }}
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Bottom pip */}
+            <div
+              className="w-[4px] h-[4px] bg-gold-400/35 flex-shrink-0"
+              style={{ transform: "rotate(45deg)" }}
+            />
+          </motion.div>
         </motion.div>
 
         <QueendomPanel

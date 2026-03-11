@@ -4,16 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --gold-primary:  #C9A84C;
-  --gold-light:    #D4AF50;
-  --gold-glow:     rgba(201, 168, 76, 0.35);
-  --bg-primary:    #040302;
-  --bg-card:       rgba(14, 11, 8, 0.80);
-  --text-primary:  #F7E7CE;
-  --text-muted:    rgba(247, 231, 206, 0.45);
-}
-
 html,
 body {
   width: 100vw;
@@ -43,14 +33,6 @@ body::before {
       0 0 50px rgba(201, 168, 76, 0.25);
   }
 
-  .gold-glow-hero {
-    text-shadow:
-      0 0 18px rgba(201, 168, 76, 0.90),
-      0 0 45px rgba(201, 168, 76, 0.55),
-      0 0 90px rgba(201, 168, 76, 0.28),
-      0 0 160px rgba(201, 168, 76, 0.10);
-  }
-
   .emerald-glow-hero {
     text-shadow:
       0 0 18px rgba(52, 211, 153, 0.90),
@@ -72,14 +54,44 @@ body::before {
     border: 1px solid rgba(201, 168, 76, 0.12);
   }
 
-  .glass-light {
-    background: rgba(25, 20, 12, 0.55);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(201, 168, 76, 0.18);
-  }
-
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Celebration overlay utilities ── */
+  .celebration-backdrop {
+    background: rgba(4, 3, 2, 0.76);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  }
+
+  .celebration-avatar-glow {
+    box-shadow:
+      0 0 0 1px  rgba(212, 175, 55, 0.40),
+      0 0 40px 8px  rgba(212, 175, 55, 0.28),
+      0 0 90px 20px rgba(212, 175, 55, 0.14),
+      0 0 160px 40px rgba(212, 175, 55, 0.06);
+  }
+
+  .celebration-name-glow {
+    text-shadow:
+      0 0 28px rgba(247, 231, 206, 0.50),
+      0 2px 24px rgba(0, 0, 0, 0.60);
+  }
+
+  .celebration-shimmer-text {
+    background: linear-gradient(
+      90deg,
+      #ECC96A 0%,
+      #FDF9EF 35%,
+      #D4AF37 55%,
+      #FDF9EF 75%,
+      #ECC96A 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: text-shimmer 3s linear infinite;
   }
 }

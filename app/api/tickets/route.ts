@@ -5,10 +5,7 @@
  *
  *   totalThisMonth   – tickets where created_at is within this month
  *
- *   solvedThisMonth  – Resolved | Closed  AND  resolved_at is within this month
- *
- *   solvedToday      – Resolved | Closed  AND  resolved_at is within today
- *                      (IST midnight → now)
+ *   solvedToday      – Resolved  AND  resolved_at is within today (IST midnight → now)
  *
  *   pendingToResolve – any active status (Open, Pending, Nudge Client …)
  *                      AND created_at is within this month
@@ -35,7 +32,6 @@ interface TicketRow {
 
 interface TicketBucket {
   totalThisMonth: number;
-  solvedThisMonth: number;
   solvedToday: number;
   pendingToResolve: number;
 }
@@ -94,18 +90,8 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
   const { day: todayIST, month: thisMonthIST } = istToday();
 
   const result: AggregatedStats = {
-    ananyshree: {
-      totalThisMonth: 0,
-      solvedThisMonth: 0,
-      solvedToday: 0,
-      pendingToResolve: 0,
-    },
-    anishqa: {
-      totalThisMonth: 0,
-      solvedThisMonth: 0,
-      solvedToday: 0,
-      pendingToResolve: 0,
-    },
+    ananyshree: { totalThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
+    anishqa:    { totalThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
   };
 
   for (const row of rows) {
@@ -122,11 +108,9 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
       bucket.totalThisMonth++;
     }
 
-    // ── 2 & 3. Solved This Month / Solved Today ───────────────────────────────
+    // ── 2. Solved Today ───────────────────────────────────────────────────────
     if (COMPLETED.has(status) && row.resolved_at) {
-      const { day, month } = dateParts(row.resolved_at);
-      if (month === thisMonthIST) bucket.solvedThisMonth++;
-      if (day === todayIST) bucket.solvedToday++;
+      if (dateParts(row.resolved_at).day === todayIST) bucket.solvedToday++;
     }
 
     // ── 4. Pending to Resolve (this month only) ───────────────────────────────

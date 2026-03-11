@@ -16,7 +16,7 @@ interface AggregatedStats {
   anishqa: QueenBucket;
 }
 
-// ─── Aggregation (same logic as client-side, now runs on the server) ──────────
+// ─── Aggregation ──────────────────────────────────────────────────────────────
 function aggregate(rows: ClientRow[]): AggregatedStats {
   const result: AggregatedStats = {
     ananyshree: { total: 0 },

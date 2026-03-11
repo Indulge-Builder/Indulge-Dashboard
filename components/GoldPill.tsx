@@ -20,7 +20,7 @@ export default function GoldPill({ count, delay = 0 }: GoldPillProps) {
       <Users size={15} strokeWidth={2.5} />
       <AnimatedCounter
         value={count}
-        className="font-inter text-[1rem] leading-none tabular-nums"
+        className="font-baskerville text-[1rem] leading-none tabular-nums"
         delay={delay * 1000 + 400}
       />
     </motion.div>
