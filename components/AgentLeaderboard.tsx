@@ -2,36 +2,20 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import { Crown } from "lucide-react";
+import { Trophy, Crown } from "lucide-react";
 import type { AgentStats } from "@/lib/types";
 
-// ── Ring constants ────────────────────────────────────────────────────────────
+// ── Ring constants (base SVG canvas size — scaled via CSS) ───────────────────
 const RING_SIZE = 80;
 const RING_R = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RING_R;
 
-// ── 5-column TV grid ─────────────────────────────────────────────────────────
-// Columns: [avatar | name | runrate (daily) | monthly | overdue]
-//
-// Sizing philosophy:
-//   • Avatar column = slightly wider than the ring itself to breathe with the Crown badge
-//   • Name = 1fr (greedy — fills all remaining space)
-//   • Runrate = wide enough for "42 / 68" at large font; centred
-//   • Monthly = single number, right-aligned
-//   • Overdue = compact amber warning number, right-aligned
-//
-// At xl (≥1280px — typical 1920-wide TV):
-//   Fixed cols: 5.5+11+7+5.5 rem = 29rem = ~464px
-//   Gaps (4×): 4 × 1.5rem = 6rem = ~96px
-//   Panel padding: ~36px each side → grid ≈ 878px
-//   Name (1fr) = 878 − 464 − 96 ≈ 318px → ample for most names (truncate handles overflow)
+// ── Responsive 5-column grid: [rank | avatar | name | runrate | monthly] ─────
+// Shared by both the sticky header and every data row for pixel-perfect alignment.
 const GRID_COLS =
-  "grid-cols-[3rem_1fr_7rem_4.5rem_4rem] " +
-  "lg:grid-cols-[4.5rem_1fr_9.5rem_6rem_5rem] " +
-  "xl:grid-cols-[5.5rem_1fr_11rem_7rem_5.5rem]";
-
-// Shared gap class — kept in one place so header and rows always match
-const GRID_GAP = "gap-x-2 lg:gap-x-4 xl:gap-x-6";
+  "grid-cols-[1.5rem_3rem_1fr_7rem_4.5rem] " +
+  "sm:grid-cols-[1.8rem_4rem_1fr_9rem_6rem] " +
+  "lg:grid-cols-[2.5rem_5.5rem_1fr_12rem_8rem]";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(" ");
@@ -41,8 +25,8 @@ function getInitials(name: string): string {
 }
 
 // ── Animated number ───────────────────────────────────────────────────────────
-// Detects live value changes and plays a soft blur-fade-in. Intentionally
-// self-contained so no ancestor motion animation can interfere with it.
+// When the value changes (live data update), the numeral performs a soft
+// blur-fade-in — subtle enough for ambient viewing, unmistakable for ops staff.
 interface AnimatedValueProps {
   value: number;
   className?: string;
@@ -79,45 +63,29 @@ function AnimatedValue({ value, className, style }: AnimatedValueProps) {
 }
 
 // ── Performance Ring ──────────────────────────────────────────────────────────
-// When `isTopRanked` is true, a gold-glowing Crown is pinned above the ring
-// instead of a separate rank-number column.
+// SVG arc progress ring wrapping the agent's initials avatar.
+// key={offset} on <motion.circle> forces a remount — and therefore a
+// re-animation from zero — on every live data push.
 interface RingProps {
   name: string;
-  pct: number;
+  pct: number; // 0 – 1
   animDelay: number;
-  isTopRanked?: boolean;
 }
 
-function PerformanceRing({
-  name,
-  pct,
-  animDelay,
-  isTopRanked = false,
-}: RingProps) {
+function PerformanceRing({ name, pct, animDelay }: RingProps) {
   const clampedPct = Math.min(Math.max(pct, 0), 1);
   const offset = CIRCUMFERENCE * (1 - clampedPct);
 
   return (
-    <div className="relative flex-shrink-0 w-[48px] h-[48px] lg:w-[64px] lg:h-[64px] xl:w-[76px] xl:h-[76px]">
-      {/* Crown — rank 1 only, floats just above the ring */}
-      {isTopRanked && (
-        <div className="absolute -top-[9px] left-1/2 -translate-x-1/2 z-20 flex items-center justify-center">
-          <Crown
-            className="w-[12px] h-[12px] lg:w-[15px] lg:h-[15px] xl:w-[17px] xl:h-[17px] text-gold-400"
-            style={{
-              filter:
-                "drop-shadow(0 0 5px rgba(201,168,76,0.95)) drop-shadow(0 0 14px rgba(201,168,76,0.55))",
-            }}
-          />
-        </div>
-      )}
-
+    // Container scales fluidly; SVG uses viewBox so it fills whatever size
+    <div className="relative flex-shrink-0 w-[48px] h-[48px] sm:w-[60px] sm:h-[60px] lg:w-[80px] lg:h-[80px]">
       {/* SVG arc — rotated so the arc starts at 12 o'clock */}
       <svg
         viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
         className="absolute inset-0 -rotate-90 w-full h-full"
         style={{ overflow: "visible" }}
       >
+        {/* Faint track */}
         <circle
           cx={RING_SIZE / 2}
           cy={RING_SIZE / 2}
@@ -126,7 +94,7 @@ function PerformanceRing({
           stroke="rgba(255,255,255,0.06)"
           strokeWidth="2.5"
         />
-        {/* key={offset} forces arc remount on every live data push */}
+        {/* Warm-gold progress arc */}
         <motion.circle
           key={offset}
           cx={RING_SIZE / 2}
@@ -148,12 +116,12 @@ function PerformanceRing({
         />
       </svg>
 
-      {/* Initials — centred inside the ring */}
+      {/* Initials — centered inside the ring, with a hairline circular border */}
       <div
         className="absolute inset-0 flex items-center justify-center rounded-full"
         style={{ border: "1px solid rgba(201,168,76,0.14)" }}
       >
-        <span className="font-playfair text-[0.6rem] lg:text-[0.8rem] xl:text-[0.95rem] tracking-widest text-gold-400 select-none">
+        <span className="font-playfair text-[0.65rem] sm:text-[0.85rem] lg:text-[1.05rem] tracking-widest text-gold-400 select-none">
           {getInitials(name)}
         </span>
       </div>
@@ -161,12 +129,42 @@ function PerformanceRing({
   );
 }
 
+// ── Rank badge ────────────────────────────────────────────────────────────────
+// Rank 1 shows a glowing crown instead of the numeral "1".
+// All other ranks show their number in restrained white/30.
+function RankBadge({ rank }: { rank: number }) {
+  if (rank === 1) {
+    return (
+      <div className="flex justify-end items-center pr-[2px]">
+        <Crown
+          className="text-gold-400 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]"
+          style={{
+            filter:
+              "drop-shadow(0 0 6px rgba(201,168,76,0.80)) drop-shadow(0 0 14px rgba(201,168,76,0.40))",
+          }}
+        />
+      </div>
+    );
+  }
+  return (
+    <span className="font-inter text-[clamp(0.9rem,1.3vw,1.6rem)] font-semibold tabular-nums text-right block select-none leading-none text-white/30">
+      {rank}
+    </span>
+  );
+}
+
+// ── Row variants ──────────────────────────────────────────────────────────────
+const rowVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: (delay: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94], delay },
+  }),
+  exit: { opacity: 0, transition: { duration: 0.25 } },
+};
+
 // ── Agent row ─────────────────────────────────────────────────────────────────
-// LIVE UPDATE FIX (preserved from previous session):
-//   animate target is always { opacity: 1, y: 0 } — a stable object Framer
-//   Motion won't re-animate when the same values are already in place.
-//   Entrance delay is frozen at mount via useRef so re-ranks (index change)
-//   never re-trigger the entrance animation and mask AnimatedValue glows.
 interface RowProps {
   agent: AgentStats;
   index: number;
@@ -174,88 +172,68 @@ interface RowProps {
 }
 
 function AgentRow({ agent, index, baseDelay }: RowProps) {
+  const rowDelay = baseDelay + index * 0.07;
+  const ringDelay = rowDelay + 0.25;
   const rank = index + 1;
-
-  // Lock entrance delay at mount — index shifts on re-rank but delay stays frozen
-  const entranceDelay = useRef(baseDelay + index * 0.06).current;
-  const ringDelay     = useRef(entranceDelay + 0.22).current;
 
   const pct =
     agent.tasksAssignedToday > 0
       ? agent.tasksCompletedToday / agent.tasksAssignedToday
       : 0;
 
+  // Wrap row + divider in a single motion.div so AnimatePresence can track
+  // them as one unit and layout animations stay coherent during re-ranks.
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
+      variants={rowVariants}
+      custom={rowDelay}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       transition={{
-        opacity: { duration: 0.5,  ease: [0.25, 0.46, 0.45, 0.94], delay: entranceDelay },
-        y:       { duration: 0.5,  ease: [0.25, 0.46, 0.45, 0.94], delay: entranceDelay },
-        layout:  { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] },
+        layout: { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] },
       }}
     >
-      {/* 5-column data grid */}
+      {/* Data grid */}
       <div
-        className={`grid ${GRID_COLS} ${GRID_GAP} items-center px-2 lg:px-3 py-[1.05vh] rounded-xl hover:bg-white/[0.025] transition-colors duration-300 group`}
+        className={`grid ${GRID_COLS} items-center gap-x-2 sm:gap-x-3 lg:gap-x-5 px-2 sm:px-3 py-[1vh] sm:py-[1.3vh] rounded-xl hover:bg-white/[0.025] transition-colors duration-300 group`}
       >
-        {/* Col 1 — Avatar ring (Crown badge for rank 1) */}
-        <PerformanceRing
-          name={agent.name}
-          pct={pct}
-          animDelay={ringDelay}
-          isTopRanked={rank === 1}
-        />
+        {/* Col 1 — Rank */}
+        <RankBadge rank={rank} />
 
-        {/* Col 2 — Agent name */}
-        <p className="font-baskerville text-[clamp(0.82rem,1.4vw,1.9rem)] tracking-wide text-champagne leading-none truncate font-medium">
+        {/* Col 2 — Avatar ring */}
+        <PerformanceRing name={agent.name} pct={pct} animDelay={ringDelay} />
+
+        {/* Col 3 — Agent name */}
+        <p className="font-baskerville text-[clamp(0.85rem,1.5vw,2rem)] tracking-wide text-champagne leading-none truncate font-medium">
           {agent.name}
         </p>
 
-        {/* Col 3 — Daily Runrate: completed / assigned */}
-        <div className="flex items-baseline justify-center gap-[3px] lg:gap-[5px]">
+        {/* Col 4 — RUNRATE: completed / assigned */}
+        <div className="flex items-baseline justify-center gap-[4px] sm:gap-[6px]">
           <AnimatedValue
             value={agent.tasksCompletedToday}
-            className="font-edu text-[clamp(1.4rem,2.3vw,2.9rem)] leading-none text-gold-400 tabular-nums font-semibold"
-            style={{ textShadow: "0 0 16px rgba(201,168,76,0.40)" }}
+            className="font-edu text-[clamp(1.5rem,2.4vw,3rem)] leading-none text-gold-400 tabular-nums font-semibold"
+            style={{ textShadow: "0 0 18px rgba(201,168,76,0.45)" }}
           />
-          <span className="font-inter text-[clamp(0.75rem,0.85vw,1.2rem)] text-white/20 leading-none">
+          <span className="font-inter text-[clamp(0.8rem,0.9vw,1.3rem)] text-white/20 leading-none font-medium">
             /
           </span>
           <AnimatedValue
             value={agent.tasksAssignedToday}
-            className="font-inter text-[clamp(0.9rem,1.3vw,1.7rem)] text-white/38 leading-none tabular-nums"
+            className="font-inter text-[clamp(1rem,1.4vw,1.8rem)] text-white/40 leading-none tabular-nums font-medium"
           />
         </div>
 
-        {/* Col 4 — Monthly total resolved */}
-        <div className="flex justify-end">
+        {/* Col 5 — MONTHLY total */}
+        <div className="flex justify-end pr-1">
           <AnimatedValue
             value={agent.tasksCompletedThisMonth}
-            className="font-edu text-[clamp(1.2rem,1.9vw,2.7rem)] leading-none tabular-nums font-semibold"
+            className="font-edu text-[clamp(1.3rem,2vw,2.8rem)] leading-none tabular-nums font-semibold"
             style={{
-              color: rank === 1 ? "rgba(201,168,76,0.85)" : "rgba(190,190,190,0.55)",
-            }}
-          />
-        </div>
-
-        {/* Col 5 — Overdue / backlog tickets (amber warning accent) */}
-        <div className="flex justify-end">
-          <AnimatedValue
-            value={agent.overdueCount}
-            className="font-edu text-[clamp(1.2rem,1.9vw,2.7rem)] leading-none tabular-nums font-semibold"
-            style={{
-              // Escalate visual weight: 0 is near-invisible, any value glows amber
               color:
-                agent.overdueCount > 0
-                  ? "rgba(217,119,6,0.88)"
-                  : "rgba(217,119,6,0.22)",
-              textShadow:
-                agent.overdueCount > 0
-                  ? "0 0 14px rgba(217,119,6,0.35)"
-                  : "none",
+                rank === 1 ? "rgba(201,168,76,0.82)" : "rgba(190,190,190,0.60)",
             }}
           />
         </div>
@@ -278,35 +256,33 @@ export default function AgentLeaderboard({
   queendomDelay = 0,
 }: AgentLeaderboardProps) {
   return (
-    <div className="flex flex-col flex-1 min-h-0">
-      {/* Scroll container — overflow-y-auto lets users scroll to see all agents
-          while the vh math guarantees ≥4 rows are visible without any scroll. */}
+    <div className="flex flex-col flex-6 min-h-0">
+      {/* Scroll container */}
       <div className="flex-1 min-h-0 overflow-y-auto">
+        {/* ── Sticky header: section label + column labels ── */}
+        <div
+          className={`sticky top-0 z-10 backdrop-blur-sm border-b border-gold-500/[0.12] flex-shrink-0`}
+        >
+          {/* Section label row */}
 
-        {/* ── Sticky column header ── */}
-        <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gold-500/[0.12] flex-shrink-0">
-          <div className={`grid ${GRID_COLS} ${GRID_GAP} px-2 lg:px-3 pb-[0.8vh]`}>
+          {/* Column label row */}
+          <div className={`grid ${GRID_COLS} gap-x-2 sm:gap-x-3 lg:gap-x-5 px-2 sm:px-3 pb-[0.9vh]`}>
+            <span /> {/* rank */}
             <span /> {/* avatar */}
-            <span className="font-inter text-[clamp(0.55rem,0.78vw,0.95rem)] tracking-[0.45em] uppercase text-yellow-500/60 font-semibold pl-0.5">
+            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-yellow-500/65 font-semibold pl-0.5">
               Agent
             </span>
-            <span className="font-inter text-[clamp(0.55rem,0.78vw,0.95rem)] tracking-[0.45em] uppercase text-yellow-500/60 font-semibold text-center">
+            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-yellow-500/65 font-semibold text-center">
               Runrate
             </span>
-            <span className="font-inter text-[clamp(0.55rem,0.78vw,0.95rem)] tracking-[0.45em] uppercase text-yellow-500/60 font-semibold text-right">
+            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-yellow-500/65 font-semibold text-right pr-1">
               Monthly
-            </span>
-            <span
-              className="font-inter text-[clamp(0.55rem,0.78vw,0.95rem)] tracking-[0.45em] uppercase font-semibold text-right"
-              style={{ color: "rgba(217,119,6,0.55)" }}
-            >
-              Overdue
             </span>
           </div>
         </div>
 
-        {/* Agent rows — AnimatePresence with layout for smooth live re-ranks */}
-        <div className="pt-[0.4vh]">
+        {/* Agent rows with layout-aware AnimatePresence for smooth re-ranks */}
+        <div className="pt-[0.5vh]">
           <AnimatePresence mode="popLayout">
             {agents.map((agent, i) => (
               <AgentRow

@@ -1,21 +1,19 @@
 "use client"
 
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
 
 interface AnimatedCounterProps {
-  value:      number
+  value:     number
   className?: string
-  style?:     React.CSSProperties
   /** Delay in ms — only honoured on the very first render (entrance stagger).
    *  Real-time updates animate immediately so the live feel isn't delayed. */
-  delay?:     number
+  delay?:    number
 }
 
 export default function AnimatedCounter({
   value,
   className,
-  style,
   delay = 600,
 }: AnimatedCounterProps) {
   const motionValue  = useMotionValue(0)
@@ -34,5 +32,5 @@ export default function AnimatedCounter({
     return () => clearTimeout(timer)
   }, [value, motionValue, delay])
 
-  return <motion.span className={className} style={style}>{displayValue}</motion.span>
+  return <motion.span className={className}>{displayValue}</motion.span>
 }
