@@ -1,20 +1,21 @@
 /**
  * GET /api/tickets
  *
- * Aggregates four metrics per queendom from the `tickets` table:
+ * Aggregates six metrics per queendom from the `tickets` table:
  *
- *   totalThisMonth   – tickets where created_at is within this month
+ *   totalThisMonth    – tickets where created_at (IST) is within this month
+ *   receivedToday     – tickets where created_at (IST) is today
+ *   resolvedThisMonth – resolved/closed tickets where resolved_at (IST) is this month
+ *   solvedToday       – resolved/closed tickets where resolved_at (IST) is today
+ *   pendingToResolve  – active-status tickets created this month (IST)
+ *   overdueCount      – active-status tickets created BEFORE today (IST)
  *
- *   solvedToday      – Resolved  AND  resolved_at is within today (IST midnight → now)
- *
- *   pendingToResolve – any active status (Open, Pending, Nudge Client …)
- *                      AND created_at is within this month
- *
- * ── TIMEZONE NOTE ────────────────────────────────────────────────────────────
- * All timestamps in this pipeline are IST (Freshdesk → Supabase → dashboard).
- * The IST offset (UTC+5:30) is hardcoded so "today" and "this month" boundaries
- * are always IST midnight — identical behaviour on a local IST machine, Vercel
- * (UTC), and Render (UTC). Never rely on the server's local clock for this.
+ * ── TIMEZONE HANDLING ─────────────────────────────────────────────────────────
+ * Supabase returns TIMESTAMPTZ values as UTC strings regardless of how they
+ * were inserted (e.g. "2026-03-11T07:14:19+00:00"). dateParts() converts each
+ * UTC instant to the IST equivalent (UTC+5:30) before extracting the calendar
+ * date, so "today" and "this month" boundaries always match IST midnight — the
+ * same reference used by istToday().
  * ─────────────────────────────────────────────────────────────────────────────
  *
  * Returns: { ananyshree: TicketStats, anishqa: TicketStats }
@@ -24,28 +25,28 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 interface TicketRow {
-  status: string | null;
+  status:        string | null;
   queendom_name: string | null;
-  created_at: string | null;
-  resolved_at: string | null;
+  created_at:    string | null;
+  resolved_at:   string | null;
 }
 
 interface TicketBucket {
-  totalThisMonth: number;
-  receivedToday: number;
+  totalThisMonth:    number;
+  receivedToday:     number;
   resolvedThisMonth: number;
-  solvedToday: number;
-  pendingToResolve: number;
-  overdueCount: number;
+  solvedToday:       number;
+  pendingToResolve:  number;
+  overdueCount:      number;
 }
 
 interface AggregatedStats {
   ananyshree: TicketBucket;
-  anishqa: TicketBucket;
+  anishqa:    TicketBucket;
 }
 
-// ─── Status sets ─────────────────────────────────────────────────────────────
-const COMPLETED = new Set(["resolved"]);
+// ── Status sets ───────────────────────────────────────────────────────────────
+const COMPLETED = new Set(["resolved", "closed"]);
 
 const ACTIVE = new Set([
   "open",
@@ -56,49 +57,65 @@ const ACTIVE = new Set([
   "invoice due",
 ]);
 
-// ─── IST date helpers ────────────────────────────────────────────────────────
+// ── IST date helpers ──────────────────────────────────────────────────────────
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
 
 /**
- * Returns today's IST date as "YYYY-MM-DD" and this month as "YYYY-MM".
- * Hardcoded offset so it works on any server timezone (Vercel/Render = UTC).
+ * Returns the current IST calendar date ("YYYY-MM-DD") and month ("YYYY-MM").
+ * Hard-coded offset so this is always correct on UTC servers (Vercel / Render).
  */
 function istToday(): { day: string; month: string } {
   const nowIST = new Date(Date.now() + IST_OFFSET_MS);
-  const y = nowIST.getUTCFullYear();
+  const y  = nowIST.getUTCFullYear();
   const mo = String(nowIST.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(nowIST.getUTCDate()).padStart(2, "0");
+  const d  = String(nowIST.getUTCDate()).padStart(2, "0");
   return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
 }
 
 /**
- * Extracts the date (YYYY-MM-DD) and month (YYYY-MM) prefix from a timestamp
- * string exactly as it is stored in Supabase — no timezone conversion.
+ * Converts a timestamp stored in Supabase (returned as UTC) to the IST
+ * calendar date and month.
  *
- * All timestamps in this system are IST values stored as-is (the date part
- * you see in the Supabase table IS the IST date). Comparing prefixes is
- * therefore both simpler and correct, regardless of what timezone suffix
- * Supabase appends when returning the data.
+ * WHY: PostgreSQL TIMESTAMPTZ normalises everything to UTC. Supabase returns
+ * values like "2026-03-11T07:14:19+00:00". If we naively slice the first 10
+ * characters we get the UTC date, which differs from the IST date for any
+ * timestamp between midnight IST (18:30 UTC previous day) and 05:30 IST
+ * (00:00 UTC). Applying the IST offset before slicing gives the correct IST
+ * calendar date in all cases.
  *
- * Works with:  "2026-03-01 21:38:49"
- *              "2026-03-01T21:38:49+00:00"
- *              "2026-03-01T21:38:49.123456+00:00"
+ * FALLBACK: if the string cannot be parsed as a Date (e.g. a bare "YYYY-MM-DD"
+ * with no time component), we fall back to prefix slicing — this preserves
+ * backward compatibility with any pre-existing rows that may already hold the
+ * IST date stored as a plain text-like value.
  */
 function dateParts(s: string): { day: string; month: string } {
-  return { day: s.slice(0, 10), month: s.slice(0, 7) };
+  const utc = new Date(s);
+  if (isNaN(utc.getTime())) {
+    // Non-parseable string → treat as already an IST-formatted prefix
+    return { day: s.slice(0, 10), month: s.slice(0, 7) };
+  }
+  // Shift UTC instant to IST wall-clock time, then read UTC fields (which now
+  // reflect IST calendar values because we added the offset).
+  const ist = new Date(utc.getTime() + IST_OFFSET_MS);
+  const day = [
+    ist.getUTCFullYear(),
+    String(ist.getUTCMonth() + 1).padStart(2, "0"),
+    String(ist.getUTCDate()).padStart(2, "0"),
+  ].join("-");
+  return { day, month: day.slice(0, 7) };
 }
 
-// ─── Aggregation ─────────────────────────────────────────────────────────────
+// ── Aggregation ───────────────────────────────────────────────────────────────
 function aggregate(rows: TicketRow[]): AggregatedStats {
   const { day: todayIST, month: thisMonthIST } = istToday();
 
   const empty = (): TicketBucket => ({
-    totalThisMonth: 0,
-    receivedToday: 0,
+    totalThisMonth:    0,
+    receivedToday:     0,
     resolvedThisMonth: 0,
-    solvedToday: 0,
-    pendingToResolve: 0,
-    overdueCount: 0,
+    solvedToday:       0,
+    pendingToResolve:  0,
+    overdueCount:      0,
   });
 
   const result: AggregatedStats = {
@@ -108,39 +125,40 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
 
   for (const row of rows) {
     const queendom = (row.queendom_name ?? "").toLowerCase().trim();
-    const status = (row.status ?? "").toLowerCase().trim();
+    const status   = (row.status        ?? "").toLowerCase().trim();
 
     let bucket: TicketBucket | null = null;
-    if (queendom.includes("ananyshree")) bucket = result.ananyshree;
-    else if (queendom.includes("anishqa")) bucket = result.anishqa;
+    if (queendom.includes("ananyshree"))      bucket = result.ananyshree;
+    else if (queendom.includes("anishqa"))    bucket = result.anishqa;
     if (!bucket) continue;
 
-    const createdDay   = row.created_at ? dateParts(row.created_at).day   : "";
-    const createdMonth = row.created_at ? dateParts(row.created_at).month : "";
+    // Derive IST calendar dates from the stored UTC timestamps
+    const { day: createdDay, month: createdMonth } =
+      row.created_at ? dateParts(row.created_at) : { day: "", month: "" };
 
-    // ── 1. Total This Month ───────────────────────────────────────────────────
+    // ── 1. Total This Month ─────────────────────────────────────────────────
     if (createdMonth === thisMonthIST) bucket.totalThisMonth++;
 
-    // ── 2. Received Today (any status) ───────────────────────────────────────
+    // ── 2. Received Today ───────────────────────────────────────────────────
     if (createdDay === todayIST) bucket.receivedToday++;
 
-    // ── 3. Resolved This Month ────────────────────────────────────────────────
+    // ── 3. Resolved This Month ──────────────────────────────────────────────
     if (COMPLETED.has(status) && row.resolved_at) {
       if (dateParts(row.resolved_at).month === thisMonthIST) bucket.resolvedThisMonth++;
     }
 
-    // ── 4. Solved Today ───────────────────────────────────────────────────────
+    // ── 4. Solved Today ─────────────────────────────────────────────────────
     if (COMPLETED.has(status) && row.resolved_at) {
       if (dateParts(row.resolved_at).day === todayIST) bucket.solvedToday++;
     }
 
-    // ── 5. Pending to Resolve (active, this month) ────────────────────────────
+    // ── 5. Pending to Resolve (active, created this month) ──────────────────
     if (ACTIVE.has(status) && createdMonth === thisMonthIST) {
       bucket.pendingToResolve++;
     }
 
-    // ── 6. Overdue (active tickets created BEFORE today — backlog) ────────────
-    if (ACTIVE.has(status) && createdDay < todayIST && createdDay !== "") {
+    // ── 6. Overdue (active, created BEFORE today) ───────────────────────────
+    if (ACTIVE.has(status) && createdDay !== "" && createdDay < todayIST) {
       bucket.overdueCount++;
     }
   }
@@ -148,16 +166,12 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
   return result;
 }
 
-// ─── GET handler ─────────────────────────────────────────────────────────────
+// ── GET handler ───────────────────────────────────────────────────────────────
 export async function GET() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  const url        = process.env.NEXT_PUBLIC_SUPABASE_URL        ?? "";
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY       ?? "";
 
-  if (
-    !url ||
-    !serviceKey ||
-    serviceKey === "paste_your_service_role_key_here"
-  ) {
+  if (!url || !serviceKey || serviceKey === "paste_your_service_role_key_here") {
     return NextResponse.json(
       { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
       { status: 503 },
