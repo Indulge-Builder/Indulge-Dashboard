@@ -63,6 +63,8 @@ interface AgentLiveStats {
   tasksAssignedToday: number;
   tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
+  tasksAssignedThisMonth: number;
+  pendingScore: number;
 }
 
 interface AgentApiResponse {
@@ -74,8 +76,8 @@ interface AgentApiResponse {
 // Merges live stats into a roster, preserving order.
 // Agents not present in the API response keep their current values (stay at 0
 // on first render, then hold last-known values on partial updates).
-// After merging, sort descending by completedToday → thisMonth so the
-// best performer always floats to the top of the leaderboard.
+// After merging, sort descending by today's performance so every resolved
+// ticket causes a live re-rank — maximum energy on the office dashboard.
 // ─────────────────────────────────────────────────────────────────────────────
 function mergeAndRank(
   roster: AgentStats[],
@@ -93,11 +95,24 @@ function mergeAndRank(
     return stats ? { ...agent, ...stats } : agent;
   });
 
-  return merged.sort(
-    (a, b) =>
+  // Rank by today's completed count (live energy).
+  // Tie-break 1: today's completion rate (resolved ÷ assigned today).
+  // Tie-break 2: monthly resolved count as a deeper tiebreaker.
+  return merged.sort((a, b) => {
+    const todayRateA =
+      a.tasksAssignedToday > 0
+        ? a.tasksCompletedToday / a.tasksAssignedToday
+        : 0;
+    const todayRateB =
+      b.tasksAssignedToday > 0
+        ? b.tasksCompletedToday / b.tasksAssignedToday
+        : 0;
+    return (
       b.tasksCompletedToday - a.tasksCompletedToday ||
-      b.tasksCompletedThisMonth - a.tasksCompletedThisMonth,
-  );
+      todayRateB - todayRateA ||
+      b.tasksCompletedThisMonth - a.tasksCompletedThisMonth
+    );
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

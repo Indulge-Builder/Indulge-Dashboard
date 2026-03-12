@@ -46,10 +46,11 @@ function toMonth(ts: string | null): string {
   return (ts ?? "").slice(0, 7);
 }
 
-// Only "resolved" counts — "closed" is excluded, consistent with the
-// queendom panel's solvedToday and pendingToResolve metrics.
 const isResolved = (status: string | null) =>
   (status ?? "").toLowerCase().trim() === "resolved";
+
+const isClosed = (status: string | null) =>
+  (status ?? "").toLowerCase().trim() === "closed";
 
 // ─── GET handler ──────────────────────────────────────────────────────────────
 export async function GET() {
@@ -123,10 +124,27 @@ export async function GET() {
         toMonth(t.resolved_at) === THIS_MONTH,
     ).length;
 
+    const assignedThisMonth = tickets.filter(
+      (t) =>
+        t.agent_name?.toLowerCase() === nameLower &&
+        toMonth(t.created_at) === THIS_MONTH,
+    ).length;
+
+    // All tickets assigned to this agent that are neither resolved nor closed —
+    // represents their current open workload regardless of when they were created.
+    const pendingScore = tickets.filter(
+      (t) =>
+        t.agent_name?.toLowerCase() === nameLower &&
+        !isResolved(t.status) &&
+        !isClosed(t.status),
+    ).length;
+
     return {
       tasksAssignedToday: assignedToday,
       tasksCompletedToday: completedToday,
       tasksCompletedThisMonth: completedThisMonth,
+      tasksAssignedThisMonth: assignedThisMonth,
+      pendingScore,
     };
   }
 

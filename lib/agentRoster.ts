@@ -44,5 +44,7 @@ export function buildRoster(
     tasksAssignedToday: 0,
     tasksCompletedToday: 0,
     tasksCompletedThisMonth: 0,
+    tasksAssignedThisMonth: 0,
+    pendingScore: 0,
   }));
 }

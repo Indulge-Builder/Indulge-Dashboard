@@ -15,6 +15,8 @@ export interface AgentStats {
   tasksAssignedToday: number;
   tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
+  tasksAssignedThisMonth: number;
+  pendingScore: number;
 }
 
 export interface QueenStats {
