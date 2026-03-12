@@ -31,11 +31,15 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
+type WebhookType = "upsert" | "update" | "deletion";
+
 interface FreshdeskPayload {
+  webhook_type?: WebhookType;
   ticket_id: string | number;
-  status: string;
-  queendom_name: string;
-  agent_name: string; // {{ticket.agent.name}}
+  // Fields below are only present for upsert/update webhooks.
+  status?: string;
+  queendom_name?: string;
+  agent_name?: string; // {{ticket.agent.name}}
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
 }
@@ -92,23 +96,47 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const {
-    ticket_id,
-    status,
-    queendom_name,
-    agent_name,
-    ticket_created_at,
-    resolved_date_time,
-  } = payload;
+  if (!payload.ticket_id) {
+    return NextResponse.json(
+      { error: "Missing required field: ticket_id" },
+      { status: 400 },
+    );
+  }
 
-  if (!ticket_id || !status || !queendom_name) {
+  const ticketIdStr = String(payload.ticket_id);
+
+  // ── Deletion branch ────────────────────────────────────────────────────────
+  if (payload.webhook_type === "deletion") {
+    const { error } = await adminClient()
+      .from("tickets")
+      .delete()
+      .eq("ticket_id", ticketIdStr);
+
+    if (error) {
+      console.error(
+        `[freshdesk webhook] deletion error for ticket ${ticketIdStr}:`,
+        error.message,
+      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    console.info(
+      `[freshdesk webhook] deleted ticket ${ticketIdStr} from dashboard`,
+    );
+    return NextResponse.json({ ok: true, deleted: ticketIdStr });
+  }
+
+  // ── Upsert / update branch ─────────────────────────────────────────────────
+  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time } = payload;
+
+  if (!status || !queendom_name) {
     console.error("[freshdesk webhook] missing required fields →", {
-      ticket_id,
+      ticket_id: ticketIdStr,
       status,
       queendom_name,
     });
     return NextResponse.json(
-      { error: "Missing required fields: ticket_id, status, queendom_name" },
+      { error: "Missing required fields: status, queendom_name" },
       { status: 400 },
     );
   }
@@ -118,7 +146,7 @@ export async function POST(req: NextRequest) {
   const now = new Date().toISOString();
 
   const row: Record<string, unknown> = {
-    ticket_id: String(ticket_id),
+    ticket_id: ticketIdStr,
     status,
     queendom_name,
     agent_name,
@@ -143,8 +171,6 @@ export async function POST(req: NextRequest) {
     // Re-opened ticket — clear resolved_at so it no longer counts as solved.
     row.resolved_at = null;
   }
-
-  const ticketIdStr = String(ticket_id);
 
   // ── Upsert ─────────────────────────────────────────────────────────────────
   // Columns intentionally omitted from `row` are excluded from the generated
