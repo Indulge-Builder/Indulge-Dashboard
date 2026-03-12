@@ -3,13 +3,14 @@
  *
  * Aggregates three metrics per queendom from the `tickets` table:
  *
- *   totalThisMonth   – all tickets created this calendar month
+ *   resolvedThisMonth – tickets whose resolved_at falls within this calendar
+ *                       month AND status is "resolved" or "closed"
  *
- *   solvedToday      – tickets created today AND resolved today
- *                      (status = "resolved" only; "closed" is excluded)
+ *   solvedToday       – tickets resolved today
+ *                       (status = "resolved" only; "closed" is excluded)
  *
- *   pendingToResolve – tickets created this month whose status is neither
- *                      "resolved" nor "closed" (every other status counts)
+ *   pendingToResolve  – tickets created this month whose status is neither
+ *                       "resolved" nor "closed" (every other status counts)
  *
  * ── TIMEZONE NOTE ────────────────────────────────────────────────────────────
  * All timestamps in this pipeline are IST (Freshdesk → Supabase → dashboard).
@@ -32,7 +33,7 @@ interface TicketRow {
 }
 
 interface TicketBucket {
-  totalThisMonth: number;
+  resolvedThisMonth: number;
   solvedToday: number;
   pendingToResolve: number;
 }
@@ -87,8 +88,8 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
   const { day: todayIST, month: thisMonthIST } = istToday();
 
   const result: AggregatedStats = {
-    ananyshree: { totalThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
-    anishqa:    { totalThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
+    ananyshree: { resolvedThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
+    anishqa:    { resolvedThisMonth: 0, solvedToday: 0, pendingToResolve: 0 },
   };
 
   for (const row of rows) {
@@ -100,9 +101,13 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     else if (queendom.includes("anishqa")) bucket = result.anishqa;
     if (!bucket) continue;
 
-    // ── 1. Total This Month ───────────────────────────────────────────────────
-    if (row.created_at && dateParts(row.created_at).month === thisMonthIST) {
-      bucket.totalThisMonth++;
+    // ── 1. Resolved This Month ────────────────────────────────────────────────
+    if (
+      TERMINAL.has(status) &&
+      row.resolved_at &&
+      dateParts(row.resolved_at).month === thisMonthIST
+    ) {
+      bucket.resolvedThisMonth++;
     }
 
     // ── 2. Solved Today ───────────────────────────────────────────────────────

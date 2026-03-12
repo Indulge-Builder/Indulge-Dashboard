@@ -3,9 +3,9 @@ export interface MemberStats {
 }
 
 export interface TicketStats {
-  totalThisMonth: number; // all tickets where created_at is within this calendar month
-  solvedToday: number;    // Resolved | Closed  AND  resolved_at within today
-  pendingToResolve: number; // any active / open status — no date gate
+  resolvedThisMonth: number; // tickets with resolved_at within this calendar month (resolved or closed)
+  solvedToday: number;       // Resolved | Closed  AND  resolved_at within today
+  pendingToResolve: number;  // any active / open status — no date gate
 }
 
 export interface AgentStats {

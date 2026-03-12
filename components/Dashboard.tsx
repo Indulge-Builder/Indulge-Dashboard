@@ -29,7 +29,7 @@ const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
 // ─────────────────────────────────────────────────────────────────────────────
 const ZERO_MEMBERS: MemberStats = { total: 0 };
 const ZERO_TICKETS: TicketStats = {
-  totalThisMonth: 0,
+  resolvedThisMonth: 0,
   solvedToday: 0,
   pendingToResolve: 0,
 };

@@ -28,12 +28,9 @@ export default function GoldPill({ count, delay = 0 }: GoldPillProps) {
       />
       <AnimatedCounter
         value={count}
-        className="font-inter text-[clamp(0.78rem,1.1vw,1rem)] leading-none tabular-nums text-gold-300 font-semibold tracking-widest"
+        className="font-inter text-[clamp(0.82rem,1.15vw,1.05rem)] leading-none tabular-nums text-gold-300 font-bold tracking-widest"
         delay={delay * 1000 + 400}
       />
-      <span className="font-inter text-[clamp(0.6rem,0.75vw,0.8rem)] tracking-[0.45em] uppercase text-gold-500/45 leading-none">
-        Members
-      </span>
     </motion.div>
   );
 }
