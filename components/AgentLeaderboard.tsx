@@ -35,13 +35,13 @@ interface AnimatedValueProps {
 
 function AnimatedValue({ value, className, style }: AnimatedValueProps) {
   const prevRef = useRef(value);
-  const [glowing, setGlowing] = useState(false);
+  const [flashing, setFlashing] = useState(false);
 
   useEffect(() => {
     if (prevRef.current !== value) {
       prevRef.current = value;
-      setGlowing(true);
-      const t = setTimeout(() => setGlowing(false), 750);
+      setFlashing(true);
+      const t = setTimeout(() => setFlashing(false), 650);
       return () => clearTimeout(t);
     }
   }, [value]);
@@ -50,12 +50,9 @@ function AnimatedValue({ value, className, style }: AnimatedValueProps) {
     <motion.span
       className={className}
       style={style}
-      animate={
-        glowing
-          ? { opacity: [0.3, 1], filter: ["blur(4px)", "blur(0px)"] }
-          : { opacity: 1, filter: "blur(0px)" }
-      }
-      transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+      // opacity-only fade — no blur/filter, safe for low-end GPU
+      animate={{ opacity: flashing ? [0.35, 1] : 1 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
     >
       {value}
     </motion.span>
@@ -94,7 +91,7 @@ function PerformanceRing({ name, pct, animDelay }: RingProps) {
           stroke="rgba(255,255,255,0.06)"
           strokeWidth="2.5"
         />
-        {/* Warm-gold progress arc */}
+        {/* Warm-gold progress arc — tween only, no drop-shadow filter */}
         <motion.circle
           key={offset}
           cx={RING_SIZE / 2}
@@ -108,11 +105,11 @@ function PerformanceRing({ name, pct, animDelay }: RingProps) {
           initial={{ strokeDashoffset: CIRCUMFERENCE }}
           animate={{ strokeDashoffset: offset }}
           transition={{
-            duration: 1.8,
-            ease: [0.25, 0.46, 0.45, 0.94],
+            type: "tween",
+            duration: 1.2,
+            ease: "easeOut",
             delay: animDelay,
           }}
-          style={{ filter: "drop-shadow(0 0 5px rgba(201,168,76,0.40))" }}
         />
       </svg>
 
@@ -136,13 +133,8 @@ function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) {
     return (
       <div className="flex justify-end items-center pr-[2px]">
-        <Crown
-          className="text-gold-400 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]"
-          style={{
-            filter:
-              "drop-shadow(0 0 6px rgba(201,168,76,0.80)) drop-shadow(0 0 14px rgba(201,168,76,0.40))",
-          }}
-        />
+        {/* drop-shadow filter removed — not composited on low-end GPU */}
+        <Crown className="text-gold-400 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 lg:w-[22px] lg:h-[22px]" />
       </div>
     );
   }
@@ -191,9 +183,12 @@ function AgentRow({ agent, index, baseDelay }: RowProps) {
       initial="hidden"
       animate="visible"
       exit="exit"
+      // Tween layout transition — spring physics too expensive on TV CPU
+      // will-change lets the GPU pre-allocate a compositing layer for this row
       transition={{
-        layout: { duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] },
+        layout: { type: "tween", ease: "easeInOut", duration: 0.5 },
       }}
+      style={{ willChange: "transform, opacity" }}
     >
       {/* Data grid */}
       <div
@@ -215,7 +210,6 @@ function AgentRow({ agent, index, baseDelay }: RowProps) {
           <AnimatedValue
             value={agent.tasksCompletedToday}
             className="font-edu text-[clamp(1.5rem,2.4vw,3rem)] leading-none text-gold-400 tabular-nums font-semibold"
-            style={{ textShadow: "0 0 18px rgba(201,168,76,0.45)" }}
           />
           <span className="font-inter text-[clamp(0.8rem,0.9vw,1.3rem)] text-white/20 leading-none font-medium">
             /
@@ -259,9 +253,9 @@ export default function AgentLeaderboard({
     <div className="flex flex-col flex-6 min-h-0">
       {/* Scroll container */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {/* ── Sticky header: section label + column labels ── */}
+        {/* ── Sticky header — solid bg, no backdrop-blur ── */}
         <div
-          className={`sticky top-0 z-10 backdrop-blur-sm border-b border-gold-500/[0.12] flex-shrink-0`}
+          className="sticky top-0 z-10 bg-[#120F0D]/95 border-b border-gold-500/[0.12] flex-shrink-0"
         >
           {/* Section label row */}
 
