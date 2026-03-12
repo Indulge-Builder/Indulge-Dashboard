@@ -52,12 +52,14 @@ export default function TopBar() {
         <h1 className="font-playfair text-[clamp(1.25rem,2.8vw,2.6rem)] tracking-[0.3em] sm:tracking-[0.38em] text-gold-400 gold-glow uppercase leading-none whitespace-nowrap">
           Indulge Global
         </h1>
-        <div className="hidden sm:flex items-center gap-3 mt-[6px]">
-          <div className="h-px w-8 sm:w-16 bg-gradient-to-r from-transparent to-gold-500/50" />
-          <span className="font-inter text-[clamp(9px,0.85vw,13px)] tracking-[0.55em] uppercase text-gold-500/40">
+        <div className="hidden sm:flex items-center gap-2 mt-[7px]">
+          <span className="text-gold-500/25 text-[10px] leading-none">✦</span>
+          <div className="h-px w-6 sm:w-12 bg-gradient-to-r from-transparent to-gold-500/40" />
+          <span className="font-inter text-[clamp(8px,0.78vw,12px)] tracking-[0.60em] uppercase text-gold-500/38 whitespace-nowrap">
             Live Operations
           </span>
-          <div className="h-px w-8 sm:w-16 bg-gradient-to-l from-transparent to-gold-500/50" />
+          <div className="h-px w-6 sm:w-12 bg-gradient-to-l from-transparent to-gold-500/40" />
+          <span className="text-gold-500/25 text-[10px] leading-none">✦</span>
         </div>
       </div>
 

@@ -269,13 +269,13 @@ export default function AgentLeaderboard({
           <div className={`grid ${GRID_COLS} gap-x-2 sm:gap-x-3 lg:gap-x-5 px-2 sm:px-3 pb-[0.9vh]`}>
             <span /> {/* rank */}
             <span /> {/* avatar */}
-            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-yellow-500/65 font-semibold pl-0.5">
+            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-gold-400/55 font-semibold pl-0.5">
               Agent
             </span>
-            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-yellow-500/65 font-semibold text-center">
+            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-gold-400/55 font-semibold text-center">
               Runrate
             </span>
-            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-yellow-500/65 font-semibold text-right pr-1">
+            <span className="font-inter text-[clamp(0.6rem,0.85vw,1rem)] tracking-[0.45em] uppercase text-gold-400/55 font-semibold text-right pr-1">
               Monthly
             </span>
           </div>

@@ -50,7 +50,7 @@ const config: Config = {
       fontFamily: {
         playfair: ["var(--font-playfair)", "serif"],
         inter: ["var(--font-inter)", "sans-serif"],
-        edu: ["var(--font-google-sans)", "sans-serif"],
+        edu: ["var(--font-edu)", "'Edu AU VIC WA NT Hand Arrows'", "cursive"],
         baskerville: ["var(--font-libre-baskerville)", "serif"],
       },
       keyframes: {

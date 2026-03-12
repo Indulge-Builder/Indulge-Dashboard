@@ -59,29 +59,27 @@ export default function QueendomPanel({
         className="relative flex flex-col items-center text-center mb-[1.8vh] flex-shrink-0"
         variants={itemVariants}
       >
-        {/* Ornamental rule */}
-        <div className="flex items-center gap-4 w-full mb-[0.8vh]">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/40" />
-          <span className="text-gold-500/35 text-[14px]">✦</span>
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/40" />
+        {/* Top ornamental rule */}
+        <div className="flex items-center gap-3 w-full mb-[0.9vh]">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
+          <span className="text-gold-400/55 text-[clamp(12px,1.1vw,16px)] leading-none">✦</span>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
         </div>
 
-        <h2 className="font-playfair text-[clamp(2rem,4vw,4rem)] tracking-[0.25em] text-champagne uppercase leading-none">
+        <h2 className="font-playfair text-[clamp(2rem,4vw,4rem)] tracking-[0.28em] text-gold-400 queen-name-glow uppercase leading-none">
           {name}
         </h2>
-        <p className="font-inter text-[12px] tracking-[0.7em] uppercase text-gold-500/40 mt-[4px] mb-[1vh]">
+        <p className="font-inter text-[clamp(9px,0.82vw,12px)] tracking-[0.75em] uppercase text-gold-500/38 mt-[5px] mb-[1.1vh]">
           Queendom
         </p>
 
         <GoldPill count={stats.members.total} delay={delay / 1000 + 0.5} />
 
-        {/* Ornamental rule */}
-        <div className="flex items-center gap-4 w-full mt-[1vh]">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/20" />
-          <span className="font-Noto Serif   text-[11px] tracking-[0.5em] text-gold-500/20">
-            ✦ &nbsp; ✦
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/20" />
+        {/* Bottom ornamental rule */}
+        <div className="flex items-center gap-3 w-full mt-[1.1vh]">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-500/18" />
+          <span className="text-[clamp(9px,0.9vw,12px)] tracking-[0.65em] text-gold-500/22 leading-none">✦ &nbsp; ✦</span>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-500/18" />
         </div>
       </motion.div>
 

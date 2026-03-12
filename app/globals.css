@@ -1,8 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Hand+Arrows&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Hand+Arrows:wght@400..700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Font CSS variable — lets Tailwind's font-edu class resolve correctly ── */
+:root {
+  --font-edu: 'Edu AU VIC WA NT Hand Arrows', cursive;
+}
 
 html,
 body {
@@ -37,10 +42,20 @@ body::before {
 
 /* ── Reusable utilities ── */
 @layer utilities {
+  /* Queen / branding title glow — warm gold, multi-layer depth */
+  .queen-name-glow {
+    text-shadow:
+      0 0 16px rgba(212, 175, 55, 0.70),
+      0 0 40px rgba(212, 175, 55, 0.38),
+      0 0 80px rgba(212, 175, 55, 0.16),
+      0 2px 4px rgba(0, 0, 0, 0.55);
+  }
+
   .gold-glow {
     text-shadow:
-      0 0 20px rgba(201, 168, 76, 0.55),
-      0 0 50px rgba(201, 168, 76, 0.25);
+      0 0 18px rgba(201, 168, 76, 0.65),
+      0 0 45px rgba(201, 168, 76, 0.30),
+      0 0 90px rgba(201, 168, 76, 0.12);
   }
 
   .emerald-glow-hero {
@@ -53,8 +68,9 @@ body::before {
 
   .gold-border-glow {
     box-shadow:
-      0 0 20px rgba(201, 168, 76, 0.10),
-      inset 0 0 30px rgba(201, 168, 76, 0.04);
+      0 0 24px rgba(201, 168, 76, 0.12),
+      0 0 48px rgba(201, 168, 76, 0.05),
+      inset 0 0 32px rgba(201, 168, 76, 0.04);
   }
 
   .glass {
@@ -62,6 +78,17 @@ body::before {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(201, 168, 76, 0.12);
+  }
+
+  /* Gold-tinted glassmorphism — for pill badges and floating chips */
+  .glass-pill {
+    background: rgba(12, 9, 5, 0.78);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    border: 1px solid rgba(201, 168, 76, 0.32);
+    box-shadow:
+      0 0 18px rgba(201, 168, 76, 0.08),
+      inset 0 1px 0 rgba(201, 168, 76, 0.10);
   }
 
   .tabular-nums {
