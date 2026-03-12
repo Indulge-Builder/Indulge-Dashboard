@@ -1,14 +1,15 @@
 /**
  * GET /api/tickets
  *
- * Aggregates four metrics per queendom from the `tickets` table:
+ * Aggregates three metrics per queendom from the `tickets` table:
  *
- *   totalThisMonth   – tickets where created_at is within this month
+ *   totalThisMonth   – all tickets created this calendar month
  *
- *   solvedToday      – Resolved  AND  resolved_at is within today (IST midnight → now)
+ *   solvedToday      – tickets created today AND resolved today
+ *                      (status = "resolved" only; "closed" is excluded)
  *
- *   pendingToResolve – any active status (Open, Pending, Nudge Client …)
- *                      AND created_at is within this month
+ *   pendingToResolve – tickets created this month whose status is neither
+ *                      "resolved" nor "closed" (every other status counts)
  *
  * ── TIMEZONE NOTE ────────────────────────────────────────────────────────────
  * All timestamps in this pipeline are IST (Freshdesk → Supabase → dashboard).
@@ -42,16 +43,12 @@ interface AggregatedStats {
 }
 
 // ─── Status sets ─────────────────────────────────────────────────────────────
-const COMPLETED = new Set(["resolved"]);
 
-const ACTIVE = new Set([
-  "open",
-  "pending",
-  "nudge client",
-  "nudge vendor",
-  "ongoing delivery",
-  "invoice due",
-]);
+// Only "resolved" counts for solvedToday.
+const RESOLVED_STATUS = "resolved";
+
+// Both "resolved" and "closed" are terminal — excluded from pendingToResolve.
+const TERMINAL = new Set(["resolved", "closed"]);
 
 // ─── IST date helpers ────────────────────────────────────────────────────────
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
@@ -109,13 +106,24 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     }
 
     // ── 2. Solved Today ───────────────────────────────────────────────────────
-    if (COMPLETED.has(status) && row.resolved_at) {
-      if (dateParts(row.resolved_at).day === todayIST) bucket.solvedToday++;
+    // Tickets created today AND resolved today. Status must be "resolved";
+    // "closed" tickets are not counted here.
+    if (
+      status === RESOLVED_STATUS &&
+      row.created_at &&
+      row.resolved_at &&
+      dateParts(row.created_at).day === todayIST &&
+      dateParts(row.resolved_at).day === todayIST
+    ) {
+      bucket.solvedToday++;
     }
 
-    // ── 4. Pending to Resolve (this month only) ───────────────────────────────
+    // ── 3. Pending to Resolve (this month only) ───────────────────────────────
+    // Any ticket this month that is neither "resolved" nor "closed".
+    // Using exclusion (not a fixed allowlist) so new Freshdesk statuses
+    // are automatically counted without any code change.
     if (
-      ACTIVE.has(status) &&
+      !TERMINAL.has(status) &&
       row.created_at &&
       dateParts(row.created_at).month === thisMonthIST
     ) {
@@ -146,16 +154,29 @@ export async function GET() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data, error } = await db
-    .from("tickets")
-    .select("status, queendom_name, created_at, resolved_at");
+  // Supabase PostgREST enforces a server-side max-rows cap of 1000 that
+  // .limit() alone cannot override. Paginate in 1000-row batches instead.
+  const PAGE = 1000;
+  let allRows: TicketRow[] = [];
+  let from = 0;
 
-  if (error) {
-    console.error("[/api/tickets] Supabase error:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  while (true) {
+    const { data, error } = await db
+      .from("tickets")
+      .select("status, queendom_name, created_at, resolved_at")
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      console.error("[/api/tickets] Supabase error:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    allRows = allRows.concat(data as TicketRow[]);
+    if ((data as TicketRow[]).length < PAGE) break;
+    from += PAGE;
   }
 
-  const stats = aggregate(data as TicketRow[]);
+  const stats = aggregate(allRows);
 
   return NextResponse.json(stats, {
     headers: { "Cache-Control": "no-store" },

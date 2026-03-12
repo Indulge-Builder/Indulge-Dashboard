@@ -46,9 +46,10 @@ function toMonth(ts: string | null): string {
   return (ts ?? "").slice(0, 7);
 }
 
-const RESOLVED = new Set(["resolved", "closed"]);
+// Only "resolved" counts — "closed" is excluded, consistent with the
+// queendom panel's solvedToday and pendingToResolve metrics.
 const isResolved = (status: string | null) =>
-  RESOLVED.has((status ?? "").toLowerCase().trim());
+  (status ?? "").toLowerCase().trim() === "resolved";
 
 // ─── GET handler ──────────────────────────────────────────────────────────────
 export async function GET() {
@@ -70,17 +71,29 @@ export async function GET() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Pull entire tickets table — only the four columns we need
-  const { data, error } = await db
-    .from("tickets")
-    .select("agent_name, status, created_at, resolved_at");
+  // Supabase PostgREST enforces a server-side max-rows cap of 1000 that
+  // .limit() alone cannot override. Paginate in 1000-row batches instead.
+  const PAGE = 1000;
+  let allRows: TicketRow[] = [];
+  let from = 0;
 
-  if (error) {
-    console.error("[/api/agents] Supabase error:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  while (true) {
+    const { data, error } = await db
+      .from("tickets")
+      .select("agent_name, status, created_at, resolved_at")
+      .range(from, from + PAGE - 1);
+
+    if (error) {
+      console.error("[/api/agents] Supabase error:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    allRows = allRows.concat(data as TicketRow[]);
+    if ((data as TicketRow[]).length < PAGE) break;
+    from += PAGE;
   }
 
-  const tickets = data as TicketRow[];
+  const tickets = allRows;
   const { day: TODAY, month: THIS_MONTH } = istToday();
 
   // ── Three filters per agent ───────────────────────────────────────────────
