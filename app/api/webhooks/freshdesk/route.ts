@@ -5,6 +5,8 @@
  * the Supabase `tickets` table using the service-role key (bypasses RLS).
  *
  * Expected JSON body — map your Freshdesk automation variables like this:
+ *
+ *   Upsert/update:
  *   {
  *     "ticket_id":          "{{ticket.id}}",
  *     "status":             "{{ticket.status}}",
@@ -13,6 +15,13 @@
  *     "ticket_created_at":  "{{ticket.created_at}}",
  *     "resolved_date_time": "{{ticket.resolved_at}}"
  *   }
+ *
+ *   Deletion (ticket deleted in Freshdesk):
+ *   {
+ *     "webhook_type": "deletion",
+ *     "ticket_id":    "{{ticket.id}}"
+ *   }
+ *   Also accepts: webhook_type "delete" or "ticket_deleted"; or event/type instead of webhook_type.
  *
  * Supabase table DDL (run once):
  * ─────────────────────────────────────────────────────────────────────────────
@@ -35,7 +44,8 @@ type WebhookType = "upsert" | "update" | "deletion";
 
 interface FreshdeskPayload {
   webhook_type?: WebhookType;
-  ticket_id: string | number;
+  ticket_id?: string | number;
+  ticket?: { id?: string | number };
   // Fields below are only present for upsert/update webhooks.
   status?: string;
   queendom_name?: string;
@@ -96,21 +106,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!payload.ticket_id) {
+  // Resolve ticket_id — support both top-level and nested (e.g. payload.ticket.id)
+  const ticketIdRaw =
+    payload.ticket_id ?? (payload as { ticket?: { id?: string | number } }).ticket?.id;
+  if (!ticketIdRaw) {
     return NextResponse.json(
       { error: "Missing required field: ticket_id" },
       { status: 400 },
     );
   }
 
-  const ticketIdStr = String(payload.ticket_id);
+  const ticketIdStr = String(ticketIdRaw);
+
+  // Detect deletion — Freshdesk may send webhook_type, event, or type
+  const webhookType = (
+    payload.webhook_type ??
+    (payload as { event?: string }).event ??
+    (payload as { type?: string }).type ??
+    ""
+  ).toLowerCase();
+
+  const isDeletion =
+    webhookType === "deletion" ||
+    webhookType === "delete" ||
+    webhookType === "ticket_deleted";
 
   // ── Deletion branch ────────────────────────────────────────────────────────
-  if (payload.webhook_type === "deletion") {
-    const { error } = await adminClient()
+  if (isDeletion) {
+    console.info(
+      `[freshdesk webhook] handling deletion for ticket ${ticketIdStr}`,
+    );
+    const { data: deleted, error } = await adminClient()
       .from("tickets")
       .delete()
-      .eq("ticket_id", ticketIdStr);
+      .eq("ticket_id", ticketIdStr)
+      .select("ticket_id");
 
     if (error) {
       console.error(
@@ -120,10 +150,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    console.info(
-      `[freshdesk webhook] deleted ticket ${ticketIdStr} from dashboard`,
-    );
-    return NextResponse.json({ ok: true, deleted: ticketIdStr });
+    const rowCount = Array.isArray(deleted) ? deleted.length : 0;
+    if (rowCount === 0) {
+      console.warn(
+        `[freshdesk webhook] deletion: ticket ${ticketIdStr} not found in DB (already gone or never synced)`,
+      );
+    } else {
+      console.info(
+        `[freshdesk webhook] deleted ticket ${ticketIdStr} from dashboard`,
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      deleted: ticketIdStr,
+      rows_removed: rowCount,
+    });
   }
 
   // ── Upsert / update branch ─────────────────────────────────────────────────
