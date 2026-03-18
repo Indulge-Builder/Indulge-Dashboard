@@ -88,7 +88,7 @@ export async function GET() {
     const jokerRows = (rows ?? []) as JokerRow[];
     const { day: TODAY, month: THIS_MONTH } = istToday();
 
-    function aggregateForJoker(jokerName: string): JokerStats {
+    const aggregateForJoker = (jokerName: string): JokerStats => {
       const nameLower = jokerName.toLowerCase();
       const matching = jokerRows.filter(
         (r) => (r.joker_name ?? "").toLowerCase().trim() === nameLower,
@@ -122,7 +122,7 @@ export async function GET() {
         acceptedToday,
         totalThisMonth,
       };
-    }
+    };
 
     const result: Record<string, JokerStats> = {};
     for (const [name, queendom] of Object.entries(JOKER_ROSTER)) {
