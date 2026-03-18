@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Edu+AU+VIC+WA+NT+Hand+Arrows:wght@400..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Luxury Noir Design System ─────────────────────────────────────────────── */
+:root {
+  --font-edu: 'Edu AU VIC WA NT Hand Arrows', cursive;
+  --font-cinzel: 'Cinzel', serif;
+  --obsidian: #050505;
+  --liquid-gold-start: #D4AF37;
+  --liquid-gold-end: #F9E27E;
+  --gold-border: rgba(212, 175, 55, 0.20);
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--obsidian);
+}
+
+/* Lock to viewport on tablets and up */
+@media (min-width: 768px) {
+  html,
+  body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/* ── Noise texture overlay ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { display: none; }
+
+/* ── Glassmorphism: 1px gold border (20%), backdrop blur ── */
+@layer utilities {
+  .glass {
+    background: rgba(5, 5, 5, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--gold-border);
+  }
+
+  .glass-pill {
+    background: rgba(5, 5, 5, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--gold-border);
+  }
+
+  .gold-border-glow {
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.08) inset;
+  }
+
+  /* Queen / branding — Roman typography glow */
+  .queen-name-glow {
+    text-shadow:
+      0 0 20px rgba(212, 175, 55, 0.75),
+      0 0 50px rgba(212, 175, 55, 0.40),
+      0 0 100px rgba(212, 175, 55, 0.18),
+      0 2px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  .gold-glow {
+    text-shadow:
+      0 0 20px rgba(212, 175, 55, 0.70),
+      0 0 50px rgba(212, 175, 55, 0.35),
+      0 0 100px rgba(212, 175, 55, 0.15);
+  }
+
+  /* Emerald glow for Today — subtle, not excessive */
+  .emerald-glow-hero {
+    text-shadow:
+      0 0 16px rgba(52, 211, 153, 0.45),
+      0 0 36px rgba(52, 211, 153, 0.2);
+  }
+
+  /* Joker metric box — distinct gold border */
+  .joker-box {
+    border: 1px solid rgba(249, 226, 126, 0.35);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.06) 0%, rgba(249, 226, 126, 0.03) 100%);
+  }
+
+  /* Monthly Error — subtle red glow for overdue */
+  .monthly-error-glow {
+    text-shadow: 0 0 8px rgba(220, 38, 38, 0.5);
+  }
+
+  /* Error column Overdue — Neon Red (#FF0000) with subtle outer glow when is_escalated > 0 */
+  .error-overdue-glow {
+    color: #FF0000;
+    text-shadow: 0 0 6px #FF0000, 0 0 12px rgba(255, 0, 0, 0.5);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Celebration overlay */
+  .celebration-backdrop {
+    background: rgba(5, 5, 5, 0.94);
+  }
+
+  .celebration-avatar-glow {
+    box-shadow:
+      0 0 0 1px  rgba(212, 175, 55, 0.45),
+      0 0 45px 10px  rgba(212, 175, 55, 0.30),
+      0 0 100px 24px rgba(212, 175, 55, 0.16),
+      0 0 180px 45px rgba(212, 175, 55, 0.08);
+  }
+
+  .celebration-name-glow {
+    text-shadow:
+      0 0 30px rgba(247, 231, 206, 0.55),
+      0 2px 28px rgba(0, 0, 0, 0.65);
+  }
+
+  .celebration-shimmer-text {
+    background: linear-gradient(
+      90deg,
+      #D4AF37 0%,
+      #F9E27E 35%,
+      #FDF9EF 55%,
+      #F9E27E 75%,
+      #D4AF37 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: text-shimmer 3s linear infinite;
+  }
+
+  /* TV: GPU layers — prevents flattening when card + particles overlap */
+  .celebration-container {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+
+  /* Gold sweep — sharp light hitting physical gold bar, runs once */
+  .celebration-name-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(255, 215, 0, 0.4) 50%,
+      transparent 100%
+    );
+    animation: gold-sweep 1.2s ease-in-out 0.4s forwards;
+  }
+
+  @keyframes gold-sweep {
+    0% {
+      transform: translateX(-150%) skewX(-25deg);
+    }
+    100% {
+      transform: translateX(150%) skewX(-25deg);
+    }
+  }
+
+
+  /* Row win shimmer — travels across on celebration */
+  .row-win-shimmer {
+    animation: row-shimmer 1.2s ease-out forwards;
+  }
+
+  @keyframes row-shimmer {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Ticker marquee — seamless infinite horizontal scroll, GPU-accelerated */
+  .ticker-paused {
+    animation-play-state: paused !important;
+  }
+
+  @keyframes ticker-scroll {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  /* Joker Recommendations Ticker — Framer Motion smooth glide */
+  .ticker-container {
+    display: flex;
+    white-space: nowrap;
+    width: max-content;
+    align-items: center;
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4rem; /* Wide spacing for luxury feel */
+    font-size: 1.75rem; /* Large enough for TV / 15 feet */
+    color: #F9E27E; /* Soft Gold */
+  }
+
+  /* Special Dates — "BIG DAY" breathing glow for Today cards */
+  @keyframes birthday-pulse {
+    0% {
+      box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+      transform: scale(1.05);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
+      transform: scale(1.07);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+      transform: scale(1.05);
+    }
+  }
+
+  .today-highlight {
+    border: 2px solid #D4AF37;
+    animation: birthday-pulse 3s infinite ease-in-out;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2200 100%);
+  }
+
+  /* RenewalsPanel — gold gradient text for names */
+  .renewal-card-text {
+    background: linear-gradient(to bottom, #F9E27E 0%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* RenewalsPanel — vertical gold separator (20% opacity) */
+  .vertical-separator {
+    width: 1px;
+    height: 80%;
+    background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.2), transparent);
+  }
+
+  /* Gold outer glow for renewal counter */
+  .drop-shadow-gold {
+    filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6))
+            drop-shadow(0 0 24px rgba(212, 175, 55, 0.35))
+            drop-shadow(0 0 40px rgba(212, 175, 55, 0.2));
+  }
+}
