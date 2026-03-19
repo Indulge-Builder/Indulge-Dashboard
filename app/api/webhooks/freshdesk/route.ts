@@ -56,10 +56,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
-type WebhookType = "upsert" | "update" | "deletion";
-
 interface FreshdeskPayload {
-  webhook_type?: WebhookType;
+  webhook_type?: string; // "resolution", "sla_breached", "deletion", etc.
   ticket_id?: string | number;
   id?: string | number; // alias for ticket_id (Freshdesk: {{ticket.id}})
   ticket?: { id?: string | number };
@@ -120,9 +118,34 @@ export async function POST(req: NextRequest) {
   // ── Parse body ─────────────────────────────────────────────────────────────
   let payload: FreshdeskPayload;
   try {
-    payload = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    const contentType = req.headers.get("content-type") ?? "";
+    const text = await req.text();
+    if (!text || text.trim().length === 0) {
+      console.error("[freshdesk webhook] 400: empty body");
+      return NextResponse.json(
+        { error: "Empty body", code: "EMPTY_BODY" },
+        { status: 400 },
+      );
+    }
+    if (contentType.includes("application/x-www-form-urlencoded")) {
+      const params = new URLSearchParams(text);
+      payload = Object.fromEntries(params) as unknown as FreshdeskPayload;
+    } else {
+      let toParse = text;
+      // Fail-safe: fix "is_escalated": with no value (invalid JSON from Freshdesk)
+      toParse = toParse.replace(
+        /"is_escalated"\s*:\s*(?=[,}\]])/g,
+        '"is_escalated": false',
+      );
+      payload = JSON.parse(toParse) as FreshdeskPayload;
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Parse error";
+    console.error("[freshdesk webhook] 400: Invalid JSON —", msg);
+    return NextResponse.json(
+      { error: "Invalid JSON body", code: "INVALID_JSON", detail: msg },
+      { status: 400 },
+    );
   }
 
   // Resolve ticket_id — support ticket_id, id, or nested payload.ticket.id
@@ -131,8 +154,9 @@ export async function POST(req: NextRequest) {
     payload.id ??
     (payload as { ticket?: { id?: string | number } }).ticket?.id;
   if (!ticketIdRaw) {
+    console.error("[freshdesk webhook] 400: missing ticket_id — keys:", Object.keys(payload));
     return NextResponse.json(
-      { error: "Missing required field: ticket_id or id" },
+      { error: "Missing required field: ticket_id or id", code: "MISSING_TICKET_ID" },
       { status: 400 },
     );
   }
@@ -193,12 +217,22 @@ export async function POST(req: NextRequest) {
   // When only is_escalated is sent, we PATCH that field only — never overwrite
   // status, queendom_name, agent_name, etc. Sync state: if ticket is Resolved,
   // force is_escalated=false regardless of payload (safety check).
+  // Fail-safe: accept is_escalated as boolean, string "true"/"false", or 1/0.
+  const hasStatusAndQueendom = !!(payload.status && payload.queendom_name);
   const isEscalatedPayload =
-    typeof payload.is_escalated === "boolean" &&
-    (!payload.status || !payload.queendom_name);
+    !hasStatusAndQueendom &&
+    ("is_escalated" in payload || payload.webhook_type === "sla_breached");
 
   if (isEscalatedPayload) {
     const client = adminClient();
+
+    // Normalize is_escalated: accept true, "true", 1; webhook_type sla_breached → true; else → false
+    const rawEscalated = payload.is_escalated;
+    const parsedEscalated =
+      rawEscalated === true ||
+      rawEscalated === "true" ||
+      rawEscalated === 1 ||
+      (payload.webhook_type === "sla_breached" && !("is_escalated" in payload));
 
     // Safety: fetch current status — if Resolved/Closed, force is_escalated=false
     const { data: existing } = await client
@@ -209,7 +243,7 @@ export async function POST(req: NextRequest) {
 
     const statusLower = (existing?.status ?? "").toLowerCase().trim();
     const isResolved = RESOLVED_STATUSES.has(statusLower);
-    const effectiveEscalated = isResolved ? false : payload.is_escalated;
+    const effectiveEscalated = isResolved ? false : parsedEscalated;
 
     const { error } = await client
       .from("tickets")
@@ -224,7 +258,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    if (isResolved && payload.is_escalated) {
+    if (isResolved && parsedEscalated) {
       console.info(
         `[freshdesk webhook] ticket ${ticketIdStr} is Resolved — forced is_escalated=false (ignored payload true)`,
       );
@@ -251,13 +285,18 @@ export async function POST(req: NextRequest) {
   const resolvedTimestamp = payload.resolved_date_time ?? payload.resolved_at;
 
   if (!status || !queendom_name) {
-    console.error("[freshdesk webhook] missing required fields →", {
+    console.error("[freshdesk webhook] 400: missing status/queendom →", {
       ticket_id: ticketIdStr,
-      status,
-      queendom_name,
+      hasStatus: !!status,
+      hasQueendom: !!queendom_name,
+      keys: Object.keys(payload),
     });
     return NextResponse.json(
-      { error: "Missing required fields: status, queendom_name" },
+      {
+        error: "Missing required fields: status, queendom_name",
+        code: "MISSING_STATUS_QUEENDOM",
+        ticket_id: ticketIdStr,
+      },
       { status: 400 },
     );
   }
