@@ -1,5 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ClientRow {
@@ -42,25 +42,8 @@ function aggregate(rows: ClientRow[]): AggregatedStats {
 // Uses the service role key — runs on the server only, bypasses RLS entirely.
 // The key is never sent to the browser.
 export async function GET() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-  if (
-    !url ||
-    !serviceKey ||
-    serviceKey === "paste_your_service_role_key_here"
-  ) {
-    // Graceful fallback: return empty stats so dashboard still renders
-    return NextResponse.json(
-      { ananyshree: { total: 0 }, anishqa: { total: 0 } },
-      { headers: { "Cache-Control": "no-store" } },
-    );
-  }
-
-  // Server-side admin client — auth.persistSession must be false for API routes
-  const db = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const { db, response } = requireSupabaseAdminOr503();
+  if (response || !db) return response;
 
   const { data, error } = await db
     .from("clients")

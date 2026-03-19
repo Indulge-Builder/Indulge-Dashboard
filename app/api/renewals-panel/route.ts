@@ -11,8 +11,8 @@
  *      ALTER PUBLICATION supabase_realtime ADD TABLE public.members;
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
 type QueendomId = "ananyshree" | "anishqa";
 
@@ -39,23 +39,8 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-  if (!url || !serviceKey || serviceKey === "paste_your_service_role_key_here") {
-    return NextResponse.json(
-      {
-        totalRenewalsThisMonth: 0,
-        renewals: [],
-        assignments: [],
-      },
-      { headers: { "Cache-Control": "no-store" } }
-    );
-  }
-
-  const db = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const { db, response } = requireSupabaseAdminOr503();
+  if (response || !db) return response;
 
   const monthPrefix = getThisMonthFilter();
 

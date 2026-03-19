@@ -83,9 +83,17 @@ interface RenewalsPanelData {
 function toTicketRow(
   raw: Record<string, unknown> | null
 ): TicketRowMinimal | null {
-  if (!raw || typeof raw.id !== "string") return null;
+  if (!raw) return null;
+  const rawId = raw.id ?? raw.ticket_id;
+  if (rawId == null) return null;
+
+  // Supabase realtime payload can expose either `id` or `ticket_id`, and
+  // IDs may be numeric depending on schema. Normalize to string for state keys.
+  const id = String(rawId);
+  if (!id) return null;
+
   return {
-    id: raw.id,
+    id,
     status: (raw.status as string | null) ?? null,
     queendom_name: (raw.queendom_name as string | null) ?? null,
     agent_name: (raw.agent_name as string | null) ?? null,
@@ -294,7 +302,7 @@ export default function Dashboard() {
             setRecommendations((prev) =>
               [
                 {
-                  id: (r.id as string) ?? crypto.randomUUID(),
+                  id: String(r.id ?? crypto.randomUUID()),
                   city: ((r.city as string) ?? "").trim() || "Unknown",
                   type: ((r.type as string) ?? "").trim() || "Experience",
                   suggestion:
@@ -305,7 +313,8 @@ export default function Dashboard() {
             );
           } else if (payload.eventType === "UPDATE" && payload.new) {
             const r = payload.new as Record<string, unknown>;
-            const id = r.id as string;
+            const id = String(r.id ?? "");
+            if (!id) return;
             setRecommendations((prev) =>
               prev.map((x) =>
                 x.id === id
@@ -322,7 +331,8 @@ export default function Dashboard() {
               )
             );
           } else if (payload.eventType === "DELETE" && payload.old) {
-            const id = (payload.old as Record<string, unknown>).id as string;
+            const id = String((payload.old as Record<string, unknown>).id ?? "");
+            if (!id) return;
             setRecommendations((prev) => prev.filter((x) => x.id !== id));
           }
           fetchJokers();
@@ -348,6 +358,11 @@ export default function Dashboard() {
               setTicketRows((prev) =>
                 prev.map((r) => (r.id === row.id ? row : r))
               );
+          } else if (payload.eventType === "DELETE" && payload.old) {
+            const oldRow = toTicketRow(payload.old as Record<string, unknown>);
+            if (oldRow) {
+              setTicketRows((prev) => prev.filter((r) => r.id !== oldRow.id));
+            }
           }
         }
       )

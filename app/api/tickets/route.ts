@@ -21,8 +21,8 @@
  * Returns: { ananyshree: TicketStats, anishqa: TicketStats }
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
 interface TicketRow {
   status: string | null;
@@ -152,38 +152,8 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
 
 // ─── GET handler ─────────────────────────────────────────────────────────────
 export async function GET() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-  if (
-    !url ||
-    !serviceKey ||
-    serviceKey === "paste_your_service_role_key_here"
-  ) {
-    return NextResponse.json(
-      {
-        ananyshree: {
-          totalReceived: 0,
-          resolvedThisMonth: 0,
-          solvedToday: 0,
-          pendingToResolve: 0,
-          jokerSuggestion: 0,
-        },
-        anishqa: {
-          totalReceived: 0,
-          resolvedThisMonth: 0,
-          solvedToday: 0,
-          pendingToResolve: 0,
-          jokerSuggestion: 0,
-        },
-      },
-      { headers: { "Cache-Control": "no-store" } },
-    );
-  }
-
-  const db = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const { db, response } = requireSupabaseAdminOr503();
+  if (response || !db) return response;
 
   // Supabase PostgREST enforces a server-side max-rows cap of 1000 that
   // .limit() alone cannot override. Paginate in 1000-row batches instead.

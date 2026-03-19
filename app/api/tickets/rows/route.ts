@@ -6,31 +6,17 @@
  * created_at, resolved_at, is_escalated, tags. No heavy text columns.
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import type { TicketRowMinimal } from "@/lib/ticketAggregation";
+import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
 const SELECT_COLS =
   "id:ticket_id, status, queendom_name, agent_name, created_at, resolved_at, is_escalated, tags";
 const PAGE = 1000;
 
 export async function GET() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-  if (
-    !url ||
-    !serviceKey ||
-    serviceKey === "paste_your_service_role_key_here"
-  ) {
-    return NextResponse.json([], {
-      headers: { "Cache-Control": "no-store" },
-    });
-  }
-
-  const db = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const { db, response } = requireSupabaseAdminOr503();
+  if (response || !db) return response;
 
   let allRows: TicketRowMinimal[] = [];
   let from = 0;

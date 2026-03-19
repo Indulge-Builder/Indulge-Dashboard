@@ -6,8 +6,8 @@
  * Ordered by created_at DESC so newest recommendations appear first.
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
 interface JokerRecommendationRow {
   id: string;
@@ -26,22 +26,8 @@ export interface JokerRecommendationItem {
 
 export async function GET() {
   try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-    if (
-      !url ||
-      !serviceKey ||
-      serviceKey === "paste_your_service_role_key_here"
-    ) {
-      return NextResponse.json([] as JokerRecommendationItem[], {
-        headers: { "Cache-Control": "no-store" },
-      });
-    }
-
-    const db = createClient(url, serviceKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+    const { db, response } = requireSupabaseAdminOr503();
+    if (response || !db) return response;
 
     const { data: rows, error } = await db
       .from("jokers")

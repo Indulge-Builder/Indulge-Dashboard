@@ -75,7 +75,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               key={item.id}
               layout
               initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: isTodayCard ? 1.05 : 1 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className={`
@@ -89,9 +89,10 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                 isTodayCard
                   ? {
                       background:
-                        "linear-gradient(135deg, rgba(74,21,32,0.95) 0%, rgba(13,40,24,0.92) 50%, rgba(26,42,26,0.95) 100%), radial-gradient(ellipse 80% 100% at 20% 50%, rgba(212,175,55,0.08), transparent 50%)",
-                      border: "1px solid rgba(212,175,55,0.4)",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                        "linear-gradient(140deg, rgba(30,16,22,0.96) 0%, rgba(64,22,38,0.95) 34%, rgba(20,46,34,0.94) 68%, rgba(18,28,22,0.96) 100%), radial-gradient(circle at 14% 18%, rgba(249,226,126,0.2) 0%, rgba(249,226,126,0.05) 22%, transparent 48%), radial-gradient(circle at 88% 86%, rgba(212,175,55,0.18) 0%, transparent 52%)",
+                      border: "1px solid rgba(212,175,55,0.58)",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,0.09), inset 0 -1px 0 rgba(15,10,8,0.45), 0 0 0 1px rgba(249,226,126,0.12)",
                     }
                   : isAnniversary
                     ? {

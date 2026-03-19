@@ -14,9 +14,9 @@
  * matches "Pranav Gadekar" in the roster and vice-versa.
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
+import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
 // ─── Ticket row shape ─────────────────────────────────────────────────────────
 interface TicketRow {
@@ -55,41 +55,8 @@ const isClosed = (status: string | null) =>
 
 // ─── GET handler ──────────────────────────────────────────────────────────────
 export async function GET() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-  if (
-    !url ||
-    !serviceKey ||
-    serviceKey === "paste_your_service_role_key_here"
-  ) {
-    const emptyAgents = (names: string[]) =>
-      Object.fromEntries(
-        names.map((n) => [
-          n,
-          {
-            tasksAssignedToday: 0,
-            tasksCompletedToday: 0,
-            tasksCompletedThisMonth: 0,
-            tasksAssignedThisMonth: 0,
-            pendingScore: 0,
-            overdueCount: 0,
-            escalatedCount: 0,
-          },
-        ]),
-      );
-    return NextResponse.json(
-      {
-        ananyshree: emptyAgents(ROSTER_ANANYSHREE),
-        anishqa: emptyAgents(ROSTER_ANISHQA),
-      },
-      { headers: { "Cache-Control": "no-store" } },
-    );
-  }
-
-  const db = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const { db, response } = requireSupabaseAdminOr503();
+  if (response || !db) return response;
 
   // Supabase PostgREST enforces a server-side max-rows cap of 1000 that
   // .limit() alone cannot override. Paginate in 1000-row batches instead.

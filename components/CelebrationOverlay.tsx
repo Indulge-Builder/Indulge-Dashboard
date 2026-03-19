@@ -20,8 +20,11 @@ function getInitials(name: string): string {
 // ─── Web Audio chime (unchanged) ───────────────────────────────────────────────
 function playSuccessSound() {
   try {
-    const ctx = new (window.AudioContext ||
-      (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext!)();
+    const ctx = new (
+      window.AudioContext ||
+      (window as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext!
+    )();
     const master = ctx.createGain();
     master.gain.setValueAtTime(0.14, ctx.currentTime);
     master.connect(ctx.destination);
@@ -64,19 +67,34 @@ const GOLD_DUST_COUNT = 12;
 const GOLD_COLORS = ["#D4AF37", "#ECC96A", "#F9E27E", "#F7E7CE"];
 
 const GoldDustParticles = memo(function GoldDustParticles() {
-  const particles = useMemo(() => Array.from({ length: GOLD_DUST_COUNT }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / GOLD_DUST_COUNT + (Math.random() - 0.5) * 0.4;
-    const distance = 80 + Math.random() * 60;
-    const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance;
-    const delay = 0.1 + Math.random() * 0.15;
-    const duration = 0.6 + Math.random() * 0.2;
-    const size = 4 + Math.random() * 6;
-    return { tx, ty, delay, duration, size, color: GOLD_COLORS[i % GOLD_COLORS.length] };
-  }), []);
+  const particles = useMemo(
+    () =>
+      Array.from({ length: GOLD_DUST_COUNT }, (_, i) => {
+        const angle =
+          (Math.PI * 2 * i) / GOLD_DUST_COUNT + (Math.random() - 0.5) * 0.4;
+        const distance = 80 + Math.random() * 60;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        const delay = 0.1 + Math.random() * 0.15;
+        const duration = 0.6 + Math.random() * 0.2;
+        const size = 4 + Math.random() * 6;
+        return {
+          tx,
+          ty,
+          delay,
+          duration,
+          size,
+          color: GOLD_COLORS[i % GOLD_COLORS.length],
+        };
+      }),
+    [],
+  );
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+    <div
+      className="absolute inset-0 pointer-events-none overflow-hidden"
+      aria-hidden
+    >
       {particles.map((p, i) => (
         <motion.div
           key={i}
@@ -112,26 +130,31 @@ const GoldDustParticles = memo(function GoldDustParticles() {
 });
 
 // ─── Agent Card (memo'd inner) ─────────────────────────────────────────────────
-const AgentCard = memo(function AgentCard({ agentName }: { agentName: string }) {
+const AgentCard = memo(function AgentCard({
+  agentName,
+}: {
+  agentName: string;
+}) {
   return (
-    <div className="relative flex flex-col items-center gap-6 z-10 select-none">
+    <div className="relative flex flex-col items-center gap-10 z-10 select-none">
       {/* Agent Icon — circular, gold drop-shadow */}
       <div
         className="relative flex items-center justify-center rounded-full flex-shrink-0"
         style={{
-          width: 120,
-          height: 120,
+          width: 220,
+          height: 220,
           boxShadow:
             "0 0 0 1px rgba(212,175,55,0.4), " +
             "0 0 40px 12px rgba(212,175,55,0.35), " +
             "0 0 80px 24px rgba(212,175,55,0.15)",
-          background: "radial-gradient(circle at 38% 35%, #3A2910 0%, #1E1208 55%, #0E0905 100%)",
+          background:
+            "radial-gradient(circle at 38% 35%, #3A2910 0%, #1E1208 55%, #0E0905 100%)",
           border: "1.5px solid rgba(212,175,55,0.5)",
           transform: "translate3d(0,0,0)",
         }}
       >
         <span
-          className="font-cinzel text-4xl tracking-[0.2em] text-gold-300"
+          className="font-cinzel text-7xl tracking-[0.2em] text-gold-300"
           style={{
             textShadow: "0 0 20px rgba(212,175,55,0.8)",
             transform: "translate3d(0,0,0)",
@@ -142,11 +165,11 @@ const AgentCard = memo(function AgentCard({ agentName }: { agentName: string }) 
       </div>
 
       {/* Name card with gold flash sweep */}
-      <div className="relative flex flex-col items-center gap-2">
-        <p className="font-inter text-xs tracking-[0.5em] uppercase text-gold-500/80">
+      <div className="relative flex flex-col items-center gap-4">
+        <p className="font-inter text-2xl sm:text-3xl tracking-[0.4em] uppercase text-gold-500/80">
           Ticket Resolved
         </p>
-        <div className="relative overflow-hidden rounded-lg px-6 py-2">
+        <div className="relative overflow-hidden rounded-xl px-12 py-4">
           {/* Gold flash sweep — diagonal gradient, runs once */}
           <div
             className="celebration-name-flash absolute inset-0 pointer-events-none"
@@ -154,7 +177,7 @@ const AgentCard = memo(function AgentCard({ agentName }: { agentName: string }) 
             aria-hidden
           />
           <h2
-            className="font-cinzel text-2xl sm:text-3xl tracking-[0.15em] text-gold-300 relative z-10"
+            className="font-cinzel text-7xl sm:text-8xl tracking-[0.15em] text-gold-300 relative z-10"
             style={{
               textShadow: "0 0 24px rgba(212,175,55,0.5)",
               transform: "translate3d(0,0,0)",
@@ -163,7 +186,7 @@ const AgentCard = memo(function AgentCard({ agentName }: { agentName: string }) 
             {agentName}
           </h2>
         </div>
-        <span className="font-inter text-xs tracking-[0.4em] uppercase text-gold-400/70">
+        <span className="font-inter text-2xl sm:text-3xl tracking-[0.35em] uppercase text-gold-400/70">
           + 1 Point
         </span>
       </div>
@@ -173,7 +196,10 @@ const AgentCard = memo(function AgentCard({ agentName }: { agentName: string }) 
 
 // ─── Celebration Overlay (memo'd, GPU-optimized) ───────────────────────────────
 
-function CelebrationOverlayInner({ agentName, onComplete }: CelebrationOverlayProps) {
+function CelebrationOverlayInner({
+  agentName,
+  onComplete,
+}: CelebrationOverlayProps) {
   const reducedMotion = useReducedMotion();
   const isVisible = agentName !== null;
 

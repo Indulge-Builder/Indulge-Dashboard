@@ -24,6 +24,14 @@ function getInitials(name: string): string {
     : name.slice(0, 2).toUpperCase();
 }
 
+function usePrevious<T>(value: T): T | undefined {
+  const ref = useRef<T | undefined>(undefined);
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
+}
+
 // ── Carbon Fiber / Silk SVG texture for Joker row ───────────────────────────
 const JOKER_TEXTURE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cdefs%3E%3Cpattern id='silk' width='8' height='8' patternUnits='userSpaceOnUse'%3E%3Cpath d='M0 0h1v8H0V0zm2 0h1v8H2V0zm4 0h1v8H4V0zm6 0h1v8H6V0z' fill='rgba(212,175,55,0.04)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23silk)'/%3E%3C/svg%3E")`;
 
@@ -32,34 +40,56 @@ interface AnimatedValueProps {
   value: number;
   className?: string;
   style?: React.CSSProperties;
+  highlightOnIncrease?: boolean;
 }
 
 const AnimatedValue = memo(function AnimatedValue({
   value,
   className,
   style,
+  highlightOnIncrease = false,
 }: AnimatedValueProps) {
-  const prevRef = useRef(value);
-  const [flashing, setFlashing] = useState(false);
+  const prev = usePrevious(value);
+  const [changePulse, setChangePulse] = useState(0);
+  const increased = prev !== undefined && value > prev;
 
   useEffect(() => {
-    if (prevRef.current !== value) {
-      prevRef.current = value;
-      setFlashing(true);
-      const t = setTimeout(() => setFlashing(false), 650);
-      return () => clearTimeout(t);
+    if (prev !== undefined && prev !== value) {
+      setChangePulse((n) => n + 1);
     }
-  }, [value]);
+  }, [prev, value]);
 
   return (
-    <motion.span
-      className={className}
+    <span
+      className={`relative inline-grid place-items-center ${className ?? ""}`}
       style={style}
-      animate={{ opacity: flashing ? [0.35, 1] : 1 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
     >
-      {value}
-    </motion.span>
+      <motion.span
+        key={`base-${changePulse}-${value}`}
+        style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+        animate={
+          increased
+            ? { scale: [1.3, 1], opacity: [0.85, 1] }
+            : { scale: 1, opacity: 1 }
+        }
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        {value}
+      </motion.span>
+      {highlightOnIncrease && increased && (
+        <motion.span
+          key={`emerald-${changePulse}-${value}`}
+          className="absolute inset-0 grid place-items-center text-emerald-400"
+          style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+          initial={{ opacity: 0.95, scale: 1.3 }}
+          animate={{ opacity: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          aria-hidden
+        >
+          {value}
+        </motion.span>
+      )}
+    </span>
   );
 });
 
@@ -162,6 +192,9 @@ const AgentRow = memo(function AgentRow({
   const received = agent.tasksAssignedToday ?? 0;
   const today = agent.tasksCompletedToday ?? 0;
   const todayPct = received > 0 ? today / received : 0;
+  const prevToday = usePrevious(today);
+  const prevPending = usePrevious(agent.pendingScore ?? 0);
+  const [surgeKey, setSurgeKey] = useState(0);
 
   // Memoized Error column counts — stable during WebSocket updates
   const { pending, overdue } = useMemo(
@@ -172,6 +205,15 @@ const AgentRow = memo(function AgentRow({
     [agent.pendingScore, agent.escalatedCount],
   );
   const hasOverdue = overdue > 0;
+
+  useEffect(() => {
+    const todayIncreased = prevToday !== undefined && today > prevToday;
+    const pendingIncreased =
+      prevPending !== undefined && pending > prevPending;
+    if (todayIncreased || pendingIncreased) {
+      setSurgeKey((n) => n + 1);
+    }
+  }, [today, pending, prevToday, prevPending]);
 
   return (
     <motion.div
@@ -184,9 +226,47 @@ const AgentRow = memo(function AgentRow({
       transition={{
         layout: { type: "tween", ease: "easeInOut", duration: 0.5 },
       }}
-      style={{ willChange: "transform, opacity" }}
+      style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
       className="relative overflow-hidden rounded-xl"
     >
+      {surgeKey > 0 && (
+        <motion.div
+          key={`surge-bg-${surgeKey}`}
+          className="absolute inset-0 pointer-events-none z-[1] rounded-xl"
+          style={{
+            backgroundColor: "rgba(201,168,76,0.3)",
+            willChange: "transform, opacity",
+            transform: "translateZ(0)",
+          }}
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: [0.9, 0], scale: [0.98, 1] }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        />
+      )}
+      {surgeKey > 0 && (
+        <motion.div
+          key={`surge-sweep-${surgeKey}`}
+          className="absolute inset-0 pointer-events-none z-[2] overflow-hidden rounded-xl"
+          style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: [1, 1, 0] }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <motion.div
+            className="absolute inset-y-0 w-[45%]"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.82) 20%, transparent 100%)",
+              willChange: "transform, opacity",
+              transform: "translateZ(0)",
+            }}
+            initial={{ x: "-100%" }}
+            animate={{ x: "200%" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          />
+        </motion.div>
+      )}
+
       {/* Win shimmer overlay — travels across row when ticket completed */}
       {isWinning && (
         <motion.div
@@ -213,24 +293,44 @@ const AgentRow = memo(function AgentRow({
       )}
 
       <div
-        className={`grid ${GRID_COLS} items-center gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 py-[1vh] sm:py-[1.2vh] rounded-xl transition-colors duration-300 group relative hover:bg-white/[0.025]`}
+        className={`grid ${GRID_COLS} items-center gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 py-[1vh] sm:py-[1.2vh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
       >
-        <AgentIcon
-          name={agent.name}
-          pct={todayPct}
-          animDelay={ringDelay}
-          showCrown={rank === 1}
-        />
+        <motion.div
+          style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+          animate={
+            surgeKey > 0
+              ? { scale: [1, 4, 1], opacity: [1, 1, 1] }
+              : { scale: 1, opacity: 1 }
+          }
+          transition={{ duration: 0.75, ease: "easeOut" }}
+        >
+          <AgentIcon
+            name={agent.name}
+            pct={todayPct}
+            animDelay={ringDelay}
+            showCrown={rank === 1}
+          />
+        </motion.div>
 
-        <p className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-champagne leading-none truncate pl-2">
+        <motion.p
+          className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-champagne leading-none truncate pl-2"
+          style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
+          animate={
+            surgeKey > 0
+              ? { scale: [1, 4, 1], opacity: [1, 1, 1] }
+              : { scale: 1, opacity: 1 }
+          }
+          transition={{ duration: 0.75, ease: "easeOut" }}
+        >
           {agent.name}
-        </p>
+        </motion.p>
 
         {/* Column 3: Today Score — today / received */}
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={today}
             className="font-edu text-[clamp(1.4rem,2.2vw,2.8rem)] leading-none text-green-400 tabular-nums font-semibold"
+            highlightOnIncrease
           />
           <span className="font-inter text-[clamp(0.75rem,0.9vw,1.2rem)] text-white/25 leading-none">
             /
@@ -265,6 +365,7 @@ const AgentRow = memo(function AgentRow({
           <AnimatedValue
             value={pending}
             className="font-edu text-[clamp(1.2rem,1.8vw,2.5rem)] leading-none tabular-nums font-semibold text-red-400"
+            highlightOnIncrease
           />
           <span className="font-edu text-[clamp(1.2rem,1.8vw,2.5rem)] leading-none tabular-nums font-bold text-white/30">
             /

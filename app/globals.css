@@ -224,22 +224,17 @@ body::before {
   @keyframes birthday-pulse {
     0% {
       box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
-      transform: scale(1.05);
     }
     50% {
       box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
-      transform: scale(1.07);
     }
     100% {
       box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
-      transform: scale(1.05);
     }
   }
 
   .today-highlight {
-    border: 2px solid #D4AF37;
     animation: birthday-pulse 3s infinite ease-in-out;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2a2200 100%);
   }
 
   /* RenewalsPanel — gold gradient text for names */

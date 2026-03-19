@@ -53,8 +53,8 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
 type WebhookType = "upsert" | "update" | "deletion";
 
@@ -85,36 +85,13 @@ const ACTIVE_STATUSES = new Set([
   "invoice due",
 ]);
 
-function adminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
-}
-
 // Freshdesk sends "" or "null" for unset timestamp fields — treat those as null.
 const isValidDate = (v: string | undefined): v is string =>
   typeof v === "string" && v.trim().length >= 10 && !isNaN(Date.parse(v));
 
 export async function POST(req: NextRequest) {
-  // ── Guard: env vars must be present ───────────────────────────────────────
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-
-  if (
-    !supabaseUrl ||
-    !serviceKey ||
-    serviceKey === "paste_your_service_role_key_here"
-  ) {
-    console.error(
-      "[freshdesk webhook] SUPABASE_SERVICE_ROLE_KEY is not configured",
-    );
-    return NextResponse.json(
-      { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
-      { status: 503 },
-    );
-  }
+  const { db, response } = requireSupabaseAdminOr503();
+  if (response || !db) return response;
 
   // ── Parse body ─────────────────────────────────────────────────────────────
   let rawBody = await req.text();
@@ -177,7 +154,7 @@ export async function POST(req: NextRequest) {
     console.info(
       `[freshdesk webhook] handling deletion for ticket ${ticketIdStr}`,
     );
-    const { data: deleted, error } = await adminClient()
+    const { data: deleted, error } = await db
       .from("tickets")
       .delete()
       .eq("ticket_id", ticketIdStr)
@@ -218,7 +195,7 @@ export async function POST(req: NextRequest) {
     (!payload.status || !payload.queendom_name);
 
   if (isEscalatedPayload) {
-    const client = adminClient();
+    const client = db;
 
     // Safety: fetch current status — if Resolved/Closed, force is_escalated=false
     const { data: existing } = await client
@@ -336,7 +313,7 @@ export async function POST(req: NextRequest) {
   //
   //   resolved_at — omitted for terminal statuses (e.g. "Did not solve") so the
   //                 existing value is left untouched on conflict.
-  const { error } = await adminClient()
+  const { error } = await db
     .from("tickets")
     .upsert(row, { onConflict: "ticket_id" });
 
