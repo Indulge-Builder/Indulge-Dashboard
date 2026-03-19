@@ -40,7 +40,15 @@ export async function GET(req: NextRequest) {
   }
 
   const { db, response } = requireSupabaseAdminOr503();
-  if (response || !db) return response;
+  if (!db) {
+    return (
+      response ??
+      NextResponse.json(
+        { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
+        { status: 503 },
+      )
+    );
+  }
 
   const monthPrefix = getThisMonthFilter();
 

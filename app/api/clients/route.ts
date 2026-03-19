@@ -43,7 +43,15 @@ function aggregate(rows: ClientRow[]): AggregatedStats {
 // The key is never sent to the browser.
 export async function GET() {
   const { db, response } = requireSupabaseAdminOr503();
-  if (response || !db) return response;
+  if (!db) {
+    return (
+      response ??
+      NextResponse.json(
+        { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
+        { status: 503 },
+      )
+    );
+  }
 
   const { data, error } = await db
     .from("clients")
