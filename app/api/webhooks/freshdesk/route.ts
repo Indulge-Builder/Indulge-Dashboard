@@ -117,12 +117,20 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Parse body ─────────────────────────────────────────────────────────────
+  const rawBody = await req.text();
   let payload: FreshdeskPayload;
   try {
-    payload = await req.json();
-  } catch {
+    payload = JSON.parse(rawBody) as FreshdeskPayload;
+  } catch (parseErr) {
+    console.error("[freshdesk webhook] 400 Invalid JSON body", {
+      parseError: String(parseErr),
+      rawBodyPreview: rawBody?.slice?.(0, 500),
+    });
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
+
+  // Log full payload for debugging 400s — visible in Vercel Function Logs
+  console.log("[freshdesk webhook] received payload:", JSON.stringify(payload));
 
   // Resolve ticket_id — support ticket_id, id, or nested payload.ticket.id
   const ticketIdRaw =
@@ -130,6 +138,11 @@ export async function POST(req: NextRequest) {
     payload.id ??
     (payload as { ticket?: { id?: string | number } }).ticket?.id;
   if (!ticketIdRaw) {
+    console.error("[freshdesk webhook] 400 Missing ticket_id or id", {
+      payload,
+      hasTicketId: !!payload.ticket_id,
+      hasId: !!payload.id,
+    });
     return NextResponse.json(
       { error: "Missing required field: ticket_id or id" },
       { status: 400 },
@@ -248,10 +261,11 @@ export async function POST(req: NextRequest) {
   const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time, is_escalated } = payload;
 
   if (!status || !queendom_name) {
-    console.error("[freshdesk webhook] missing required fields →", {
+    console.error("[freshdesk webhook] 400 Missing status or queendom_name", {
       ticket_id: ticketIdStr,
-      status,
-      queendom_name,
+      status: status ?? "(missing)",
+      queendom_name: queendom_name ?? "(missing)",
+      fullPayload: payload,
     });
     return NextResponse.json(
       { error: "Missing required fields: status, queendom_name" },
