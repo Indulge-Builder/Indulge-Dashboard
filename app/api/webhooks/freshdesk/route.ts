@@ -68,7 +68,7 @@ interface FreshdeskPayload {
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
   resolved_at?: string; // Freshdesk resolution webhook sends this directly
-  is_escalated?: boolean;
+  is_escalated?: boolean | string | number; // Freshdesk may send "true", 1, etc.
 }
 
 // Completed statuses — resolved_at is stamped
