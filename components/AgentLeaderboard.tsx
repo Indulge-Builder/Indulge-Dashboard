@@ -222,7 +222,7 @@ const AgentRow = memo(function AgentRow({
           showCrown={rank === 1}
         />
 
-        <p className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-champagne leading-none truncate">
+        <p className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-champagne leading-none truncate pl-2">
           {agent.name}
         </p>
 
@@ -333,7 +333,7 @@ const JokerRow = memo(function JokerRow({
           pct={totalSuggestions > 0 ? acceptedCount / totalSuggestions : 0}
           animDelay={baseDelay + 0.25}
         />
-        <p className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-gold-300 leading-none truncate">
+        <p className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-gold-300 leading-none truncate pl-2">
           {jokerName}
         </p>
         {/* Col 3: Total accepted suggestions */}
@@ -402,7 +402,7 @@ export default function AgentLeaderboard({
             className={`grid ${GRID_COLS} gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 pb-[0.9vh]`}
           >
             <span />
-            <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold pl-0.5">
+            <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold pl-2">
               Genies
             </span>
             <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-green-400 font-semibold text-center">

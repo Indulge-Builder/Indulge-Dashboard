@@ -184,7 +184,7 @@ export function aggregateAgentStats(rows: TicketRowMinimal[]): {
   return { ananyshree, anishqa };
 }
 
-/** Merge live stats into roster and rank by today's performance. */
+/** Merge live stats into roster and rank by monthly volume (today as tie-breaker). */
 export function mergeAndRankAgents(
   rows: TicketRowMinimal[]
 ): { ananyshree: AgentStats[]; anishqa: AgentStats[] } {
@@ -207,21 +207,11 @@ export function mergeAndRankAgents(
       const stats = r[agent.name.toLowerCase()];
       return stats ? { ...agent, ...stats } : agent;
     });
-    return merged.sort((a, b) => {
-      const rateA =
-        a.tasksAssignedToday > 0
-          ? a.tasksCompletedToday / a.tasksAssignedToday
-          : 0;
-      const rateB =
-        b.tasksAssignedToday > 0
-          ? b.tasksCompletedToday / b.tasksAssignedToday
-          : 0;
-      return (
-        b.tasksCompletedToday - a.tasksCompletedToday ||
-        rateB - rateA ||
-        b.tasksCompletedThisMonth - a.tasksCompletedThisMonth
-      );
-    });
+    return merged.sort(
+      (a, b) =>
+        b.tasksCompletedThisMonth - a.tasksCompletedThisMonth ||
+        b.tasksCompletedToday - a.tasksCompletedToday
+    );
   };
   return {
     ananyshree: merge(rosterA, live.ananyshree),
