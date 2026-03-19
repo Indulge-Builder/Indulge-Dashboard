@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import { Check } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import AnimatedCounter from "./AnimatedCounter";
 
 interface RenewalsPanelProps {
-  queendomId: "ananyshree" | "anishqa";
+  /** Data from parent (Dashboard); no internal fetch or Supabase. */
+  data: {
+    totalRenewalsThisMonth: number;
+    renewals: string[];
+    assignments: string[];
+  };
   delay?: number;
-}
-
-interface PanelData {
-  totalRenewalsThisMonth: number;
-  renewals: string[];
-  assignments: string[];
 }
 
 function NameRow({ name, isNew }: { name: string; isNew: boolean }) {
@@ -36,61 +33,9 @@ function NameRow({ name, isNew }: { name: string; isNew: boolean }) {
 }
 
 export default function RenewalsPanel({
-  queendomId,
+  data,
   delay = 0,
 }: RenewalsPanelProps) {
-  const [data, setData] = useState<PanelData>({
-    totalRenewalsThisMonth: 0,
-    renewals: [],
-    assignments: [],
-  });
-
-  const fetchData = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/renewals-panel?queendom=${queendomId}`, {
-        cache: "no-store",
-      });
-      if (!res.ok) return;
-      const json: PanelData = await res.json();
-      setData(json);
-    } catch (err) {
-      console.error("[RenewalsPanel] fetch failed:", err);
-    }
-  }, [queendomId]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // Supabase Realtime: INSERT on renewals or members → refresh + animation
-  useEffect(() => {
-    if (!supabase) return;
-
-    const renewalsChannel = supabase
-      .channel(`renewals-${queendomId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "renewals" },
-        () => fetchData(),
-      )
-      .subscribe();
-
-    const membersChannel = supabase
-      .channel(`members-${queendomId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "members" },
-        () => fetchData(),
-      )
-      .subscribe();
-
-    return () => {
-      supabase?.removeChannel(renewalsChannel);
-      supabase?.removeChannel(membersChannel);
-    };
-  }, [queendomId, fetchData]);
-
   return (
     <div
       className="flex items-stretch gap-4 glass gold-border-glow rounded-2xl relative overflow-hidden"

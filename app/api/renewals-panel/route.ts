@@ -60,10 +60,10 @@ export async function GET(req: NextRequest) {
   const monthPrefix = getThisMonthFilter();
 
   try {
-    // ── Renewals: fetch and filter in memory (schema-flexible) ─────────────────
+    // ── Renewals: only columns needed for count + latest names ─────────────────
     const { data: renewalsRows, error: renewalsErr } = await db
       .from("renewals")
-      .select("*")
+      .select("group, client_name, created_at")
       .order("created_at", { ascending: false })
       .limit(200);
 
@@ -88,11 +88,11 @@ export async function GET(req: NextRequest) {
       console.error("[/api/renewals-panel] renewals error:", renewalsErr.message);
     }
 
-    // ── Members (assignments): latest 2 by created_at desc ─────────────────────
+    // ── Members (assignments): only columns needed for list ────────────────────
     let latestAssignments: string[] = [];
     const { data: membersRows, error: membersErr } = await db
       .from("members")
-      .select("*")
+      .select("group, client_name, created_at")
       .order("created_at", { ascending: false })
       .limit(100);
 

@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "import-tickets": "tsx scripts/importTickets.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "csv-parser": "^3.0.0",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.363.0",
     "next": "^16.1.6",
@@ -18,6 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "tsx": "^4.7.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",

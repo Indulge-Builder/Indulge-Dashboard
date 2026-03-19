@@ -10,12 +10,19 @@ import SpecialDates from "@/components/SpecialDates";
 import type { QueenStats } from "@/lib/types";
 import { getJokerNameForQueendom } from "@/lib/agentRoster";
 
+interface RenewalsPanelData {
+  totalRenewalsThisMonth: number;
+  renewals: string[];
+  assignments: string[];
+}
+
 interface QueendomPanelProps {
   name: string;
   stats: QueenStats;
   side: "left" | "right";
   delay?: number;
   celebrationAgent?: string | null;
+  renewalsData?: RenewalsPanelData;
 }
 
 const itemVariants = {
@@ -81,6 +88,7 @@ export default function QueendomPanel({
   side,
   delay = 0,
   celebrationAgent = null,
+  renewalsData,
 }: QueendomPanelProps) {
   const radialOrigin = side === "left" ? "25% 45%" : "75% 45%";
 
@@ -220,7 +228,7 @@ export default function QueendomPanel({
       {/* ── RenewalsPanel: Counter | Renewals | Assignments ────────────────── */}
       <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={itemVariants}>
         <RenewalsPanel
-          queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
+          data={renewalsData ?? { totalRenewalsThisMonth: 0, renewals: [], assignments: [] }}
           delay={delay + 1300}
         />
       </motion.div>

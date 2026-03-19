@@ -1,13 +1,21 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? ""
-const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 /**
- * Returns a Supabase client only when both env vars are present.
- * The dashboard falls back to dummy data when this is null.
+ * Singleton Supabase browser client.
+ * Must be instantiated exactly once outside the React render tree — never inside
+ * a component or hook that runs on every render, to avoid connection leaks and
+ * excessive DB usage. This module is evaluated once; the same instance is reused.
  */
-export const supabase =
-  supabaseUrl && supabaseKey
-    ? createClient(supabaseUrl, supabaseKey)
-    : null
+let _client: SupabaseClient | null = null;
+
+function getClient(): SupabaseClient | null {
+  if (!supabaseUrl || !supabaseKey) return null;
+  if (_client) return _client;
+  _client = createClient(supabaseUrl, supabaseKey);
+  return _client;
+}
+
+export const supabase = getClient();

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useCallback, useEffect } from "react";
+import { memo, useState, useCallback } from "react";
 import {
   Utensils,
   MapPin,
@@ -9,7 +9,6 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import type { JokerRecommendationItem } from "@/app/api/jokers/recommendations/route";
 
 // ── Map jokers.type (string) to Lucide icon ─────────────────────────────────
@@ -148,50 +147,14 @@ const TickerItem = memo(function TickerItem({
 }, tickerItemPropsAreEqual);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Joker Recommendations Ticker — live data, infinite scroll, TV-optimized
+// Joker Recommendations Ticker — data from parent only; no fetch or Supabase
 // ─────────────────────────────────────────────────────────────────────────────
-function RecommendationTickerInner() {
-  const [recommendations, setRecommendations] = useState<
-    JokerRecommendationItem[]
-  >([]);
+function RecommendationTickerInner({
+  recommendations,
+}: {
+  recommendations: JokerRecommendationItem[];
+}) {
   const [isPaused, setIsPaused] = useState(false);
-
-  const fetchRecommendations = useCallback(async () => {
-    try {
-      const res = await fetch("/api/jokers/recommendations", {
-        cache: "no-store",
-      });
-      if (!res.ok) return;
-      const data: JokerRecommendationItem[] = await res.json();
-      setRecommendations(data);
-    } catch (err) {
-      console.error("[RecommendationTicker] fetch failed:", err);
-    }
-  }, []);
-
-  // Initial fetch + Supabase Realtime subscription
-  useEffect(() => {
-    fetchRecommendations();
-
-    if (!supabase) return;
-
-    const channel = supabase
-      .channel("jokers-recommendations-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "jokers" },
-        () => fetchRecommendations(),
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED")
-          console.info("[Realtime] jokers-recommendations-channel active");
-      });
-
-    return () => {
-      supabase?.removeChannel(channel);
-    };
-  }, [fetchRecommendations]);
-
   const tripledList = tripleList(recommendations);
   const doubledForScroll =
     tripledList.length > 0 ? [...tripledList, ...tripledList] : [];

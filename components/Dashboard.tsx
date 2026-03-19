@@ -15,13 +15,19 @@ import type {
   AgentStats,
   JokerStats,
 } from "@/lib/types";
+import type { TicketRowMinimal } from "@/lib/ticketAggregation";
+import {
+  aggregateTicketStats,
+  mergeAndRankAgents,
+} from "@/lib/ticketAggregation";
+import type { JokerRecommendationItem } from "@/app/api/jokers/recommendations/route";
 import TopBar from "./TopBar";
 import QueendomPanel from "./QueendomPanel";
 import CelebrationOverlay from "./CelebrationOverlay";
 import RecommendationTicker from "./RecommendationTicker";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Fixed rosters — all stats start at 0 and are filled in by /api/agents
+// Fixed rosters — stats filled from ticket rows (initial load + Realtime patch)
 // ─────────────────────────────────────────────────────────────────────────────
 const AGENTS_ANANYSHREE = buildRoster(ROSTER_ANANYSHREE, "ananyshree");
 const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
@@ -67,94 +73,87 @@ interface MemberApiResponse {
   anishqa: MemberStats;
 }
 
-interface TicketApiResponse {
-  ananyshree: TicketStats;
-  anishqa: TicketStats;
+interface RenewalsPanelData {
+  totalRenewalsThisMonth: number;
+  renewals: string[];
+  assignments: string[];
 }
 
-// Per-agent live stats keyed by agent name
-interface AgentLiveStats {
-  tasksAssignedToday: number;
-  tasksCompletedToday: number;
-  tasksCompletedThisMonth: number;
-  tasksAssignedThisMonth: number;
-  pendingScore: number;
-  overdueCount: number;
-  escalatedCount: number;
-}
-
-interface AgentApiResponse {
-  ananyshree: Record<string, AgentLiveStats>;
-  anishqa: Record<string, AgentLiveStats>;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Merges live stats into a roster, preserving order.
-// Agents not present in the API response keep their current values (stay at 0
-// on first render, then hold last-known values on partial updates).
-// After merging, sort descending by today's performance so every resolved
-// ticket causes a live re-rank — maximum energy on the office dashboard.
-// ─────────────────────────────────────────────────────────────────────────────
-function mergeAndRank(
-  roster: AgentStats[],
-  live: Record<string, AgentLiveStats>,
-): AgentStats[] {
-  // Build a lowercase index of the live data so the lookup is case-insensitive.
-  // The API returns canonical names but this guards against any future drift.
-  const liveCI: Record<string, AgentLiveStats> = {};
-  for (const [key, val] of Object.entries(live)) {
-    liveCI[key.toLowerCase()] = val;
-  }
-
-  const merged = roster.map((agent) => {
-    const stats = liveCI[agent.name.toLowerCase()];
-    return stats ? { ...agent, ...stats } : agent;
-  });
-
-  // Rank by today's completed count (live energy).
-  // Tie-break 1: today's completion rate (resolved ÷ assigned today).
-  // Tie-break 2: monthly resolved count as a deeper tiebreaker.
-  return merged.sort((a, b) => {
-    const todayRateA =
-      a.tasksAssignedToday > 0
-        ? a.tasksCompletedToday / a.tasksAssignedToday
-        : 0;
-    const todayRateB =
-      b.tasksAssignedToday > 0
-        ? b.tasksCompletedToday / b.tasksAssignedToday
-        : 0;
-    return (
-      b.tasksCompletedToday - a.tasksCompletedToday ||
-      todayRateB - todayRateA ||
-      b.tasksCompletedThisMonth - a.tasksCompletedThisMonth
-    );
-  });
+// ── Normalize Realtime payload to TicketRowMinimal (id required for patch)
+function toTicketRow(
+  raw: Record<string, unknown> | null
+): TicketRowMinimal | null {
+  if (!raw || typeof raw.id !== "string") return null;
+  return {
+    id: raw.id,
+    status: (raw.status as string | null) ?? null,
+    queendom_name: (raw.queendom_name as string | null) ?? null,
+    agent_name: (raw.agent_name as string | null) ?? null,
+    created_at: (raw.created_at as string | null) ?? null,
+    resolved_at: (raw.resolved_at as string | null) ?? null,
+    is_escalated: (raw.is_escalated as boolean | null) ?? null,
+    tags: (raw.tags as Record<string, unknown> | null) ?? null,
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Dashboard
+// Dashboard — single source of truth; children receive data via props only
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Dashboard() {
+  const [ticketRows, setTicketRows] = useState<TicketRowMinimal[]>([]);
   const [ananyshreeStats, setAnanyshreeStats] =
     useState<QueenStats>(INIT_ANANYSHREE);
   const [anishqaStats, setAnishqaStats] = useState<QueenStats>(INIT_ANISHQA);
-
-  // ── Celebration state ────────────────────────────────────────────────────────
+  const [recommendations, setRecommendations] = useState<
+    JokerRecommendationItem[]
+  >([]);
+  const [renewalsAnanyshree, setRenewalsAnanyshree] =
+    useState<RenewalsPanelData>({
+      totalRenewalsThisMonth: 0,
+      renewals: [],
+      assignments: [],
+    });
+  const [renewalsAnishqa, setRenewalsAnishqa] = useState<RenewalsPanelData>({
+    totalRenewalsThisMonth: 0,
+    renewals: [],
+    assignments: [],
+  });
   const [celebrationAgent, setCelebrationAgent] = useState<string | null>(null);
-
-  // Tracks the last known completedToday score per agent (keyed by name).
-  // On the very first population (map is empty) we store values without
-  // triggering a celebration — this prevents false positives on page load.
   const prevScoresRef = useRef<Map<string, number>>(new Map());
 
-  // ── /api/clients — active member counts ─────────────────────────────────────
+  // Derive ticket + agent stats from ticket rows (no DB)
+  useEffect(() => {
+    if (ticketRows.length === 0) return;
+    const ticketStats = aggregateTicketStats(ticketRows);
+    const { ananyshree: agentsA, anishqa: agentsB } =
+      mergeAndRankAgents(ticketRows);
+    setAnanyshreeStats((prev) => ({
+      ...prev,
+      tickets: ticketStats.ananyshree,
+      agents: agentsA,
+    }));
+    setAnishqaStats((prev) => ({
+      ...prev,
+      tickets: ticketStats.anishqa,
+      agents: agentsB,
+    }));
+  }, [ticketRows]);
+
+  const fetchTicketRows = useCallback(async () => {
+    try {
+      const res = await fetch("/api/tickets/rows", { cache: "no-store" });
+      if (!res.ok) return;
+      const rows: TicketRowMinimal[] = await res.json();
+      setTicketRows(Array.isArray(rows) ? rows : []);
+    } catch (err) {
+      console.error("[Dashboard] fetchTicketRows failed:", err);
+    }
+  }, []);
+
   const fetchMembers = useCallback(async () => {
     try {
       const res = await fetch("/api/clients", { cache: "no-store" });
-      if (!res.ok) {
-        console.error("[Dashboard] /api/clients →", res.status, res.statusText);
-        return;
-      }
+      if (!res.ok) return;
       const data: MemberApiResponse = await res.json();
       setAnanyshreeStats((prev) => ({ ...prev, members: data.ananyshree }));
       setAnishqaStats((prev) => ({ ...prev, members: data.anishqa }));
@@ -163,30 +162,10 @@ export default function Dashboard() {
     }
   }, []);
 
-  // ── /api/tickets — queendom-level ticket metrics ─────────────────────────────
-  const fetchTickets = useCallback(async () => {
-    try {
-      const res = await fetch("/api/tickets", { cache: "no-store" });
-      if (!res.ok) {
-        console.error("[Dashboard] /api/tickets →", res.status, res.statusText);
-        return;
-      }
-      const data: TicketApiResponse = await res.json();
-      setAnanyshreeStats((prev) => ({ ...prev, tickets: data.ananyshree }));
-      setAnishqaStats((prev) => ({ ...prev, tickets: data.anishqa }));
-    } catch (err) {
-      console.error("[Dashboard] fetchTickets failed:", err);
-    }
-  }, []);
-
-  // ── /api/jokers — Joker metrics from jokers table ───────────────────────────
   const fetchJokers = useCallback(async () => {
     try {
       const res = await fetch("/api/jokers", { cache: "no-store" });
-      if (!res.ok) {
-        console.error("[Dashboard] /api/jokers →", res.status, res.statusText);
-        return;
-      }
+      if (!res.ok) return;
       const data: { ananyshree: JokerStats; anishqa: JokerStats } =
         await res.json();
       setAnanyshreeStats((prev) => ({ ...prev, joker: data.ananyshree }));
@@ -196,126 +175,217 @@ export default function Dashboard() {
     }
   }, []);
 
-  // ── /api/agents — per-agent stats; merges into roster & re-ranks ────────────
-  const fetchAgents = useCallback(async () => {
+  const fetchRecommendations = useCallback(async () => {
     try {
-      const res = await fetch("/api/agents", { cache: "no-store" });
-      if (!res.ok) {
-        console.error("[Dashboard] /api/agents →", res.status, res.statusText);
-        return;
-      }
-      const data: AgentApiResponse = await res.json();
-
-      setAnanyshreeStats((prev) => ({
-        ...prev,
-        agents: mergeAndRank(prev.agents, data.ananyshree),
-      }));
-      setAnishqaStats((prev) => ({
-        ...prev,
-        agents: mergeAndRank(prev.agents, data.anishqa),
-      }));
+      const res = await fetch("/api/jokers/recommendations", {
+        cache: "no-store",
+      });
+      if (!res.ok) return;
+      const data: JokerRecommendationItem[] = await res.json();
+      setRecommendations(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("[Dashboard] fetchAgents failed:", err);
+      console.error("[Dashboard] fetchRecommendations failed:", err);
     }
   }, []);
 
-  // ── Fetch everything in parallel ─────────────────────────────────────────────
-  const fetchAll = useCallback(
-    () =>
-      Promise.all([
-        fetchMembers(),
-        fetchTickets(),
-        fetchAgents(),
-        fetchJokers(),
-      ]),
-    [fetchMembers, fetchTickets, fetchAgents, fetchJokers],
+  const fetchRenewals = useCallback(
+    async (queendom: "ananyshree" | "anishqa") => {
+      try {
+        const res = await fetch(
+          `/api/renewals-panel?queendom=${queendom}`,
+          { cache: "no-store" }
+        );
+        if (!res.ok) return;
+        const data: RenewalsPanelData = await res.json();
+        if (queendom === "ananyshree") setRenewalsAnanyshree(data);
+        else setRenewalsAnishqa(data);
+      } catch (err) {
+        console.error("[Dashboard] fetchRenewals failed:", err);
+      }
+    },
+    []
   );
 
-  // ── Initial load ─────────────────────────────────────────────────────────────
+  const fetchAll = useCallback(() => {
+    return Promise.all([
+      fetchTicketRows(),
+      fetchMembers(),
+      fetchJokers(),
+      fetchRecommendations(),
+      fetchRenewals("ananyshree"),
+      fetchRenewals("anishqa"),
+    ]);
+  }, [
+    fetchTicketRows,
+    fetchMembers,
+    fetchJokers,
+    fetchRecommendations,
+    fetchRenewals,
+  ]);
+
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  // ── 20-second polling fallback ───────────────────────────────────────────────
-  useEffect(() => {
-    const id = setInterval(fetchAll, 20_000);
-    return () => clearInterval(id);
-  }, [fetchAll]);
-
-  // ── Supabase Realtime subscriptions ─────────────────────────────────────────
-  // clients table  → refresh member counts
-  // tickets table  → refresh both queendom-level stats AND per-agent stats
+  // Realtime: optimistic patch only; no polling — subscriptions are the source of truth
   useEffect(() => {
     if (!supabase) return;
 
     const clientsChannel = supabase
-      .channel("clients-channel")
+      .channel("dashboard-clients")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "clients" },
-        () => fetchMembers(),
+        (payload) => {
+          const newRow = payload.new as Record<string, unknown> | null;
+          const oldRow = payload.old as Record<string, unknown> | null;
+          const group = (v: Record<string, unknown> | null) =>
+            ((v?.group ?? v?.queendom) as string)?.toLowerCase() ?? "";
+          const active = (v: Record<string, unknown> | null) =>
+            (v?.latest_subscription_status as string) === "Active";
+          if (payload.eventType === "INSERT" && newRow && active(newRow)) {
+            const g = group(newRow);
+            if (g.includes("ananyshree"))
+              setAnanyshreeStats((p) => ({
+                ...p,
+                members: { total: (p.members.total ?? 0) + 1 },
+              }));
+            else if (g.includes("anishqa"))
+              setAnishqaStats((p) => ({
+                ...p,
+                members: { total: (p.members.total ?? 0) + 1 },
+              }));
+          } else if (
+            payload.eventType === "DELETE" &&
+            oldRow &&
+            active(oldRow)
+          ) {
+            const g = group(oldRow);
+            if (g.includes("ananyshree"))
+              setAnanyshreeStats((p) => ({
+                ...p,
+                members: {
+                  total: Math.max(0, (p.members.total ?? 0) - 1),
+                },
+              }));
+            else if (g.includes("anishqa"))
+              setAnishqaStats((p) => ({
+                ...p,
+                members: {
+                  total: Math.max(0, (p.members.total ?? 0) - 1),
+                },
+              }));
+          }
+        }
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED")
-          console.info("[Realtime] clients-channel active");
+          console.info("[Realtime] dashboard-clients active");
       });
 
     const jokersChannel = supabase
-      .channel("jokers-channel")
+      .channel("dashboard-jokers")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "jokers" },
-        () => fetchJokers(),
+        (payload) => {
+          if (payload.eventType === "INSERT" && payload.new) {
+            const r = payload.new as Record<string, unknown>;
+            setRecommendations((prev) =>
+              [
+                {
+                  id: (r.id as string) ?? crypto.randomUUID(),
+                  city: ((r.city as string) ?? "").trim() || "Unknown",
+                  type: ((r.type as string) ?? "").trim() || "Experience",
+                  suggestion:
+                    ((r.suggestion as string) ?? "").trim() || "—",
+                },
+                ...prev,
+              ].slice(0, 15)
+            );
+          } else if (payload.eventType === "UPDATE" && payload.new) {
+            const r = payload.new as Record<string, unknown>;
+            const id = r.id as string;
+            setRecommendations((prev) =>
+              prev.map((x) =>
+                x.id === id
+                  ? {
+                      id,
+                      city:
+                        ((r.city as string) ?? "").trim() || "Unknown",
+                      type:
+                        ((r.type as string) ?? "").trim() || "Experience",
+                      suggestion:
+                        ((r.suggestion as string) ?? "").trim() || "—",
+                    }
+                  : x
+              )
+            );
+          } else if (payload.eventType === "DELETE" && payload.old) {
+            const id = (payload.old as Record<string, unknown>).id as string;
+            setRecommendations((prev) => prev.filter((x) => x.id !== id));
+          }
+          fetchJokers();
+        }
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED")
-          console.info("[Realtime] jokers-channel active");
+          console.info("[Realtime] dashboard-jokers active");
       });
 
     const ticketsChannel = supabase
-      .channel("tickets-channel")
+      .channel("dashboard-tickets")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "tickets" },
         (payload) => {
-          // Optimistic update: on INSERT, increment Total Received immediately
           if (payload.eventType === "INSERT" && payload.new) {
-            const row = payload.new as { queendom_name?: string | null };
-            const q = (row?.queendom_name ?? "").toLowerCase();
-            if (q.includes("ananyshree")) {
-              setAnanyshreeStats((prev) => ({
-                ...prev,
-                tickets: {
-                  ...prev.tickets,
-                  totalReceived: (prev.tickets.totalReceived ?? 0) + 1,
-                },
-              }));
-            } else if (q.includes("anishqa")) {
-              setAnishqaStats((prev) => ({
-                ...prev,
-                tickets: {
-                  ...prev.tickets,
-                  totalReceived: (prev.tickets.totalReceived ?? 0) + 1,
-                },
-              }));
-            }
+            const row = toTicketRow(payload.new as Record<string, unknown>);
+            if (row) setTicketRows((prev) => [...prev, row]);
+          } else if (payload.eventType === "UPDATE" && payload.new) {
+            const row = toTicketRow(payload.new as Record<string, unknown>);
+            if (row)
+              setTicketRows((prev) =>
+                prev.map((r) => (r.id === row.id ? row : r))
+              );
           }
-          // Refresh from API to ensure consistency
-          fetchTickets();
-          fetchAgents();
-        },
+        }
       )
       .subscribe((status) => {
         if (status === "SUBSCRIBED")
-          console.info("[Realtime] tickets-channel active");
+          console.info("[Realtime] dashboard-tickets active");
+      });
+
+    const renewalsChannel = supabase
+      .channel("dashboard-renewals")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "renewals" },
+        () => {
+          fetchRenewals("ananyshree");
+          fetchRenewals("anishqa");
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "members" },
+        () => {
+          fetchRenewals("ananyshree");
+          fetchRenewals("anishqa");
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED")
+          console.info("[Realtime] dashboard-renewals active");
       });
 
     return () => {
       supabase?.removeChannel(clientsChannel);
       supabase?.removeChannel(jokersChannel);
       supabase?.removeChannel(ticketsChannel);
+      supabase?.removeChannel(renewalsChannel);
     };
-  }, [fetchMembers, fetchTickets, fetchAgents, fetchJokers]);
+  }, [fetchJokers, fetchRenewals]);
 
   // ── Celebration detection ────────────────────────────────────────────────────
   // Runs whenever either queendom's agents array is updated.
@@ -380,6 +450,7 @@ export default function Dashboard() {
           side="left"
           delay={0}
           celebrationAgent={celebrationAgent}
+          renewalsData={renewalsAnanyshree}
         />
 
         {/* ── Gold centre divider — md+ only ──────────────────────────────── */}
@@ -466,11 +537,12 @@ export default function Dashboard() {
           side="right"
           delay={150}
           celebrationAgent={celebrationAgent}
+          renewalsData={renewalsAnishqa}
         />
       </div>
 
-      {/* Ticker: Recommendation bar */}
-      <RecommendationTicker />
+      {/* Ticker: Recommendation bar — data from Dashboard only */}
+      <RecommendationTicker recommendations={recommendations} />
     </div>
   );
 }

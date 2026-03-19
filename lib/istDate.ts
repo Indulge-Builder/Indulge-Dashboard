@@ -49,3 +49,8 @@ export function toISTDay(ts: string | null | undefined): string {
   if (isNaN(utc.getTime())) return ts.slice(0, 10);
   return IST_FORMATTER.format(utc);
 }
+
+/** IST calendar month "YYYY-MM" for a timestamp. */
+export function toISTMonth(ts: string | null | undefined): string {
+  return toISTDay(ts).slice(0, 7);
+}
