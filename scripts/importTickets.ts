@@ -96,7 +96,9 @@ function readCsv(filePath: string): Promise<TicketRow[]> {
 async function main() {
   const csvPath = process.argv[2];
   if (!csvPath) {
-    console.error("Usage: npx tsx scripts/importTickets.ts <path-to-tickets.csv>");
+    console.error(
+      "Usage: npx tsx scripts/importTickets.ts <path-to-tickets.csv>",
+    );
     process.exit(1);
   }
 
@@ -108,8 +110,14 @@ async function main() {
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-  if (!supabaseUrl || !serviceKey || serviceKey === "paste_your_service_role_key_here") {
-    console.error("Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
+  if (
+    !supabaseUrl ||
+    !serviceKey ||
+    serviceKey === "paste_your_service_role_key_here"
+  ) {
+    console.error(
+      "Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+    );
     process.exit(1);
   }
 
@@ -143,7 +151,7 @@ async function main() {
 
     totalUpserted += batch.length;
     console.log(
-      `Batch ${batchIndex}: upserted ${batch.length} rows (total so far: ${totalUpserted})`
+      `Batch ${batchIndex}: upserted ${batch.length} rows (total so far: ${totalUpserted})`,
     );
   }
 

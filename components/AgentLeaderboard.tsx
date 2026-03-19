@@ -388,7 +388,8 @@ export default function AgentLeaderboard({
 }: AgentLeaderboardProps) {
   const hasJoker = joker != null && jokerName != null && jokerName.length > 0;
   const rowCount = agents.length + (hasJoker ? 1 : 0);
-  const minHeightRem = HEADER_HEIGHT_REM + Math.max(rowCount, 1) * ROW_HEIGHT_REM;
+  const minHeightRem =
+    HEADER_HEIGHT_REM + Math.max(rowCount, 1) * ROW_HEIGHT_REM;
 
   return (
     <div
@@ -411,7 +412,7 @@ export default function AgentLeaderboard({
               Monthly
             </span>
             <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-red-400 font-semibold text-center">
-              Error
+              Pending
             </span>
           </div>
         </div>
