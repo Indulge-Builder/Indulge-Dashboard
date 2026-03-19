@@ -1,22 +1,21 @@
 /**
  * GET /api/tickets
  *
- * Aggregates three metrics per queendom from the `tickets` table:
+ * Aggregates metrics per queendom from the `tickets` table:
  *
- *   resolvedThisMonth – tickets whose resolved_at falls within this calendar
+ *   resolvedThisMonth – tickets whose resolved_at falls within this IST
  *                       month AND status is "resolved" or "closed"
  *
- *   solvedToday       – tickets resolved today
- *                       (status = "resolved" only; "closed" is excluded)
+ *   solvedToday       – tickets CREATED today (IST) that are now resolved.
+ *                       (status = "resolved" only; "closed" excluded)
+ *                       Uses same date logic as /api/agents for consistency.
  *
- *   pendingToResolve  – tickets created this month whose status is neither
- *                       "resolved" nor "closed" (every other status counts)
+ *   pendingToResolve  – tickets created this IST month whose status is neither
+ *                       "resolved" nor "closed"
  *
  * ── TIMEZONE NOTE ────────────────────────────────────────────────────────────
- * All timestamps in this pipeline are IST (Freshdesk → Supabase → dashboard).
- * The IST offset (UTC+5:30) is hardcoded so "today" and "this month" boundaries
- * are always IST midnight — identical behaviour on a local IST machine, Vercel
- * (UTC), and Render (UTC). Never rely on the server's local clock for this.
+ * Uses identical istToday/toDay/toMonth logic as /api/agents so queendom
+ * solvedToday matches the sum of agents' tasksCompletedToday.
  * ─────────────────────────────────────────────────────────────────────────────
  *
  * Returns: { ananyshree: TicketStats, anishqa: TicketStats }
@@ -54,39 +53,24 @@ const RESOLVED_STATUS = "resolved";
 // Both "resolved" and "closed" are terminal — excluded from pendingToResolve.
 const TERMINAL = new Set(["resolved", "closed"]);
 
-// ─── IST date helpers ────────────────────────────────────────────────────────
+// ─── IST date helpers (identical to /api/agents) ─────────────────────────────
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
 
-/**
- * Returns today's IST date as "YYYY-MM-DD" and this month as "YYYY-MM".
- * Hardcoded offset so it works on any server timezone (Vercel/Render = UTC).
- */
 function istToday(): { day: string; month: string } {
-  const nowIST = new Date(Date.now() + IST_OFFSET_MS);
-  const y = nowIST.getUTCFullYear();
-  const mo = String(nowIST.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(nowIST.getUTCDate()).padStart(2, "0");
+  const now = new Date(Date.now() + IST_OFFSET_MS);
+  const y = now.getUTCFullYear();
+  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
   return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
 }
 
-/**
- * Extracts the date (YYYY-MM-DD) and month (YYYY-MM) in IST from a timestamp.
- *
- * Supabase stores TIMESTAMPTZ in UTC. The raw string prefix (s.slice(0,10))
- * is the UTC date, not IST — so a ticket resolved at 2 AM IST March 19 would
- * be stored as 8:30 PM UTC March 18 and incorrectly excluded. We parse the
- * timestamp and shift to IST before extracting the date.
- */
-function datePartsInIST(s: string | null): { day: string; month: string } | null {
-  if (!s || s.trim().length < 10) return null;
-  const ms = Date.parse(s);
-  if (isNaN(ms)) return null;
-  const istMs = ms + IST_OFFSET_MS;
-  const istDate = new Date(istMs);
-  const y = istDate.getUTCFullYear();
-  const mo = String(istDate.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(istDate.getUTCDate()).padStart(2, "0");
-  return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
+// Slices the YYYY-MM-DD prefix from any timestamp string Supabase returns.
+// Same as agents: "2026-03-06 13:14:19 +0530", "2026-03-06T13:14:19+00:00", etc.
+function toDay(ts: string | null): string {
+  return (ts ?? "").slice(0, 10);
+}
+function toMonth(ts: string | null): string {
+  return (ts ?? "").slice(0, 7);
 }
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
@@ -122,39 +106,33 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     // ── 0. Total Received (all rows for this queendom) ─────────────────────────
     bucket.totalReceived++;
 
-    const resolvedParts = datePartsInIST(row.resolved_at);
-    const createdParts = datePartsInIST(row.created_at);
+    const createdDay = toDay(row.created_at);
+    const createdMonth = toMonth(row.created_at);
+    const resolvedMonth = toMonth(row.resolved_at);
 
     // ── 1. Resolved This Month ────────────────────────────────────────────────
     if (
       TERMINAL.has(status) &&
-      resolvedParts &&
-      resolvedParts.month === thisMonthIST
+      row.resolved_at &&
+      resolvedMonth === thisMonthIST
     ) {
       bucket.resolvedThisMonth++;
     }
 
     // ── 2. Solved Today ───────────────────────────────────────────────────────
-    // Tickets created today AND resolved today. Status must be "resolved";
-    // "closed" tickets are not counted here.
+    // Tickets CREATED today that are now resolved. Same logic as agents'
+    // tasksCompletedToday: created_at day === TODAY, status = "resolved".
     if (
       status === RESOLVED_STATUS &&
-      createdParts &&
-      resolvedParts &&
-      createdParts.day === todayIST &&
-      resolvedParts.day === todayIST
+      createdDay === todayIST
     ) {
       bucket.solvedToday++;
     }
 
     // ── 3. Pending to Resolve (this month only) ───────────────────────────────
-    // Any ticket this month that is neither "resolved" nor "closed".
-    // Using exclusion (not a fixed allowlist) so new Freshdesk statuses
-    // are automatically counted without any code change.
     if (
       !TERMINAL.has(status) &&
-      createdParts &&
-      createdParts.month === thisMonthIST
+      createdMonth === thisMonthIST
     ) {
       bucket.pendingToResolve++;
     }
