@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Heart } from "lucide-react";
 import { getSpecialDates } from "@/lib/specialDates";
@@ -36,13 +36,33 @@ interface SpecialDatesProps {
 }
 
 export default function SpecialDates({ queendomId }: SpecialDatesProps) {
+  // Tick at midnight so the "today" card vanishes as soon as the day ends (e.g. dashboard left on overnight)
+  const [dateKey, setDateKey] = useState(() => new Date().toDateString());
+  const midnightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const scheduleNextMidnight = () => {
+      const now = new Date();
+      const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+      return setTimeout(() => {
+        setDateKey(new Date().toDateString());
+        midnightTimeoutRef.current = scheduleNextMidnight();
+      }, msUntilMidnight);
+    };
+    midnightTimeoutRef.current = scheduleNextMidnight();
+    return () => {
+      if (midnightTimeoutRef.current) clearTimeout(midnightTimeoutRef.current);
+    };
+  }, []);
+
   const filteredDates = useMemo(() => {
     return getSpecialDates()
       .filter((d) => d.queendom === queendomId)
       .filter((d) => isCurrentMonth(d.date))
       .filter((d) => !isDatePassed(d.date))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [queendomId]);
+  }, [queendomId, dateKey]);
 
   return (
     <div className="flex flex-col gap-3 overflow-y-auto pb-2 w-full">

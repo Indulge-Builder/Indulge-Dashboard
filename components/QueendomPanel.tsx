@@ -252,7 +252,7 @@ export default function QueendomPanel({
           />
         </div>
         {/* ── Special Dates (right of Team Leaderboard) ── */}
-        <div className="flex-shrink-0 md:w-[clamp(280px,32vw,420px)] flex flex-col items-center md:border-l border-gold-500/20 md:pl-4 pt-4 md:pt-0 md:border-t-0 border-t border-gold-500/20">
+        <div className="flex-shrink-0 md:w-[clamp(320px,38vw,520px)] flex flex-col items-center md:border-l border-gold-500/20 md:pl-4 pt-4 md:pt-0 md:border-t-0 border-t border-gold-500/20">
           <div className="flex items-center gap-3 w-full mb-[1.8vh]">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
             <p className="font-inter font-semibold text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne flex-shrink-0">

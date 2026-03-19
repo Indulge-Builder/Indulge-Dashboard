@@ -11,11 +11,11 @@ const RING_SIZE = 80;
 const RING_R = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RING_R;
 
-// ── Grid: [Icon | Name | Today Score | Monthly Score | Monthly Error] ───────
+// ── Grid: [Icon | Name | Today Score | Monthly Score | Monthly Pending/Overdue] ───────
 const GRID_COLS =
-  "grid-cols-[3rem_minmax(0,1fr)_6.5rem_7rem_5rem] " +
-  "sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_9rem_6.5rem] " +
-  "lg:grid-cols-[4.5rem_minmax(0,1fr)_10rem_11rem_8rem]";
+  "grid-cols-[3rem_minmax(0,1fr)_7.5rem_8rem_6rem] " +
+  "sm:grid-cols-[3.5rem_minmax(0,1fr)_9rem_10rem_7.5rem] " +
+  "lg:grid-cols-[4.5rem_minmax(0,1fr)_12rem_12rem_12rem]";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(" ");
