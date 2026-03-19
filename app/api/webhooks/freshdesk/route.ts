@@ -117,7 +117,15 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Parse body ─────────────────────────────────────────────────────────────
-  const rawBody = await req.text();
+  let rawBody = await req.text();
+
+  // Freshdesk sometimes sends "is_escalated": \n} (empty value) when the
+  // variable is unset — invalid JSON. Fix before parsing.
+  rawBody = rawBody.replace(
+    /"is_escalated"\s*:\s*(?=\s*[,\}\]])/g,
+    '"is_escalated": false',
+  );
+
   let payload: FreshdeskPayload;
   try {
     payload = JSON.parse(rawBody) as FreshdeskPayload;
