@@ -69,6 +69,7 @@ interface FreshdeskPayload {
   agent_name?: string; // {{ticket.agent.name}}
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
+  resolved_at?: string; // Freshdesk resolution webhook sends this directly
   is_escalated?: boolean;
 }
 
@@ -245,7 +246,9 @@ export async function POST(req: NextRequest) {
   // ── Full sync branch (Status Change automation) ────────────────────────────
   // Requires status + queendom_name. Sync state: if status is Resolved, force
   // is_escalated=false regardless of payload (safety check).
-  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time, is_escalated } = payload;
+  const { status, queendom_name, agent_name, ticket_created_at } = payload;
+  // Freshdesk sends resolved_at (resolution webhook) or resolved_date_time (custom mapping)
+  const resolvedTimestamp = payload.resolved_date_time ?? payload.resolved_at;
 
   if (!status || !queendom_name) {
     console.error("[freshdesk webhook] missing required fields →", {
@@ -285,22 +288,22 @@ export async function POST(req: NextRequest) {
   // For terminal statuses (e.g. "Did not solve"), the key is omitted entirely
   // so the ON CONFLICT UPDATE leaves the existing DB value untouched.
   if (RESOLVED_STATUSES.has(statusLower)) {
-    row.resolved_at = isValidDate(resolved_date_time)
-      ? resolved_date_time
+    row.resolved_at = isValidDate(resolvedTimestamp)
+      ? resolvedTimestamp
       : now;
     // Sync state: Resolved → force is_escalated=false (ignores payload)
     row.is_escalated = false;
   } else if (ACTIVE_STATUSES.has(statusLower)) {
     // Re-opened ticket — clear resolved_at so it no longer counts as solved.
     row.resolved_at = null;
-    // Only update is_escalated when explicitly provided in payload
-    if (typeof is_escalated === "boolean") {
-      row.is_escalated = is_escalated;
+    // Fail-safe: if is_escalated is in payload but empty/invalid, treat as false
+    if ("is_escalated" in payload) {
+      row.is_escalated = payload.is_escalated === true;
     }
   } else {
-    // Other statuses (e.g. "Did not solve") — update is_escalated if provided
-    if (typeof is_escalated === "boolean") {
-      row.is_escalated = is_escalated;
+    // Other statuses (e.g. "Did not solve") — fail-safe: empty/invalid → false
+    if ("is_escalated" in payload) {
+      row.is_escalated = payload.is_escalated === true;
     }
   }
 

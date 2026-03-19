@@ -70,20 +70,23 @@ function istToday(): { day: string; month: string } {
 }
 
 /**
- * Extracts the date (YYYY-MM-DD) and month (YYYY-MM) prefix from a timestamp
- * string exactly as it is stored in Supabase — no timezone conversion.
+ * Extracts the date (YYYY-MM-DD) and month (YYYY-MM) in IST from a timestamp.
  *
- * All timestamps in this system are IST values stored as-is (the date part
- * you see in the Supabase table IS the IST date). Comparing prefixes is
- * therefore both simpler and correct, regardless of what timezone suffix
- * Supabase appends when returning the data.
- *
- * Works with:  "2026-03-01 21:38:49"
- *              "2026-03-01T21:38:49+00:00"
- *              "2026-03-01T21:38:49.123456+00:00"
+ * Supabase stores TIMESTAMPTZ in UTC. The raw string prefix (s.slice(0,10))
+ * is the UTC date, not IST — so a ticket resolved at 2 AM IST March 19 would
+ * be stored as 8:30 PM UTC March 18 and incorrectly excluded. We parse the
+ * timestamp and shift to IST before extracting the date.
  */
-function dateParts(s: string): { day: string; month: string } {
-  return { day: s.slice(0, 10), month: s.slice(0, 7) };
+function datePartsInIST(s: string | null): { day: string; month: string } | null {
+  if (!s || s.trim().length < 10) return null;
+  const ms = Date.parse(s);
+  if (isNaN(ms)) return null;
+  const istMs = ms + IST_OFFSET_MS;
+  const istDate = new Date(istMs);
+  const y = istDate.getUTCFullYear();
+  const mo = String(istDate.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(istDate.getUTCDate()).padStart(2, "0");
+  return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
 }
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
@@ -91,8 +94,20 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
   const { day: todayIST, month: thisMonthIST } = istToday();
 
   const result: AggregatedStats = {
-    ananyshree: { totalReceived: 0, resolvedThisMonth: 0, solvedToday: 0, pendingToResolve: 0, jokerSuggestion: 0 },
-    anishqa:    { totalReceived: 0, resolvedThisMonth: 0, solvedToday: 0, pendingToResolve: 0, jokerSuggestion: 0 },
+    ananyshree: {
+      totalReceived: 0,
+      resolvedThisMonth: 0,
+      solvedToday: 0,
+      pendingToResolve: 0,
+      jokerSuggestion: 0,
+    },
+    anishqa: {
+      totalReceived: 0,
+      resolvedThisMonth: 0,
+      solvedToday: 0,
+      pendingToResolve: 0,
+      jokerSuggestion: 0,
+    },
   };
 
   for (const row of rows) {
@@ -107,11 +122,14 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     // ── 0. Total Received (all rows for this queendom) ─────────────────────────
     bucket.totalReceived++;
 
+    const resolvedParts = datePartsInIST(row.resolved_at);
+    const createdParts = datePartsInIST(row.created_at);
+
     // ── 1. Resolved This Month ────────────────────────────────────────────────
     if (
       TERMINAL.has(status) &&
-      row.resolved_at &&
-      dateParts(row.resolved_at).month === thisMonthIST
+      resolvedParts &&
+      resolvedParts.month === thisMonthIST
     ) {
       bucket.resolvedThisMonth++;
     }
@@ -121,10 +139,10 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     // "closed" tickets are not counted here.
     if (
       status === RESOLVED_STATUS &&
-      row.created_at &&
-      row.resolved_at &&
-      dateParts(row.created_at).day === todayIST &&
-      dateParts(row.resolved_at).day === todayIST
+      createdParts &&
+      resolvedParts &&
+      createdParts.day === todayIST &&
+      resolvedParts.day === todayIST
     ) {
       bucket.solvedToday++;
     }
@@ -135,16 +153,17 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     // are automatically counted without any code change.
     if (
       !TERMINAL.has(status) &&
-      row.created_at &&
-      dateParts(row.created_at).month === thisMonthIST
+      createdParts &&
+      createdParts.month === thisMonthIST
     ) {
       bucket.pendingToResolve++;
     }
 
     // ── 4. Joker Suggestion — tickets with tags.joker_suggestion set ──────────
-    const jokerVal = row.tags && typeof row.tags === "object" && "joker_suggestion" in row.tags
-      ? (row.tags as { joker_suggestion?: unknown }).joker_suggestion
-      : undefined;
+    const jokerVal =
+      row.tags && typeof row.tags === "object" && "joker_suggestion" in row.tags
+        ? (row.tags as { joker_suggestion?: unknown }).joker_suggestion
+        : undefined;
     if (jokerVal != null && jokerVal !== "") {
       bucket.jokerSuggestion++;
     }
@@ -165,8 +184,20 @@ export async function GET() {
   ) {
     return NextResponse.json(
       {
-        ananyshree: { totalReceived: 0, resolvedThisMonth: 0, solvedToday: 0, pendingToResolve: 0, jokerSuggestion: 0 },
-        anishqa: { totalReceived: 0, resolvedThisMonth: 0, solvedToday: 0, pendingToResolve: 0, jokerSuggestion: 0 },
+        ananyshree: {
+          totalReceived: 0,
+          resolvedThisMonth: 0,
+          solvedToday: 0,
+          pendingToResolve: 0,
+          jokerSuggestion: 0,
+        },
+        anishqa: {
+          totalReceived: 0,
+          resolvedThisMonth: 0,
+          solvedToday: 0,
+          pendingToResolve: 0,
+          jokerSuggestion: 0,
+        },
       },
       { headers: { "Cache-Control": "no-store" } },
     );
@@ -205,7 +236,10 @@ export async function GET() {
             .range(fallbackFrom, fallbackFrom + PAGE - 1);
           if (fb.error) {
             console.error("[/api/tickets] Supabase error:", fb.error.message);
-            return NextResponse.json({ error: fb.error.message }, { status: 500 });
+            return NextResponse.json(
+              { error: fb.error.message },
+              { status: 500 },
+            );
           }
           const rows = (fb.data as Record<string, unknown>[]).map((r) => ({
             ...r,
