@@ -76,10 +76,10 @@ export default function RenewalsPanel({
       {/* ── Vertical Divider (1px gold, 20% opacity) ────────────────────────── */}
       <div className="vertical-separator flex-shrink-0 self-center" />
 
-      {/* ── New Members / Assignments (Right) ────────────────────────────────── */}
+      {/* ── Latest members (Right) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-4 min-w-0">
         <p className="font-inter font-semibold text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
-          LATEST ASSIGNMENTS
+          Latest Members
         </p>
         <div className="flex flex-col items-center gap-3 w-full">
           {data.assignments.length === 0 ? (

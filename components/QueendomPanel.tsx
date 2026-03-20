@@ -225,7 +225,7 @@ export default function QueendomPanel({
         </div>
       </motion.div>
 
-      {/* ── RenewalsPanel: Counter | Renewals | Assignments ────────────────── */}
+      {/* ── RenewalsPanel: Counter | Renewals | Latest members ───────────────── */}
       <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={itemVariants}>
         <RenewalsPanel
           data={renewalsData ?? { totalRenewalsThisMonth: 0, renewals: [], assignments: [] }}
