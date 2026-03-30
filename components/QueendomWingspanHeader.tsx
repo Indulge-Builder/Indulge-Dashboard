@@ -34,7 +34,11 @@ function MetricPill({
         boxShadow: [...GOLD_AURA],
       }}
       transition={{
-        opacity: { duration: 0.55, delay: delaySec, ease: [0.25, 0.46, 0.45, 0.94] },
+        opacity: {
+          duration: 0.55,
+          delay: delaySec,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        },
         x: { duration: 0.55, delay: delaySec, ease: [0.25, 0.46, 0.45, 0.94] },
         boxShadow: {
           duration: 7,
@@ -53,9 +57,13 @@ function MetricPill({
 const metricLabelClass =
   "font-inter shrink-0 font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.25em] uppercase leading-none";
 
+/** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
+const pillNumberSizeClass =
+  "text-[clamp(1.95rem,3.12vw,3.055rem)]";
+
 /** White readout with a softer gold aura than `gold-glow` on paid — still “ours,” still cherished */
 const unpaidNumberClass =
-  "font-inter text-[clamp(1.5rem,2.4vw,2.35rem)] font-bold leading-none tracking-widest text-white tabular-nums [text-shadow:0_0_12px_rgba(212,175,55,0.42),0_0_26px_rgba(212,175,55,0.2),0_1px_0_rgba(253,230,138,0.28)]";
+  `font-inter ${pillNumberSizeClass} font-bold leading-none tracking-widest text-white tabular-nums [text-shadow:0_0_12px_rgba(212,175,55,0.42),0_0_26px_rgba(212,175,55,0.2),0_1px_0_rgba(253,230,138,0.28)]`;
 
 interface QueendomWingspanHeaderProps {
   name: string;
@@ -85,7 +93,7 @@ export default function QueendomWingspanHeader({
             <span className={`${metricLabelClass} text-champagne`}>Paid</span>
             <AnimatedCounter
               value={membersTotal}
-              className="font-inter text-[clamp(1.5rem,2.4vw,2.35rem)] font-bold leading-none tracking-widest text-gold-300 tabular-nums gold-glow"
+              className={`font-inter ${pillNumberSizeClass} font-bold leading-none tracking-widest text-gold-300 tabular-nums gold-glow`}
               delay={leftDelay}
               slideOnChange
             />
