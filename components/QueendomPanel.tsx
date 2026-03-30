@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
-import GoldPill from "./GoldPill";
+import QueendomWingspanHeader from "./QueendomWingspanHeader";
 import AgentLeaderboard from "./AgentLeaderboard";
 import RenewalsPanel from "./RenewalsPanel";
 import SpecialDates from "@/components/SpecialDates";
@@ -50,7 +50,7 @@ function MetricBox({
   labelColor = "text-champagne",
   valueColor = "text-champagne",
 }: {
-  label: string;
+  label: ReactNode;
   value: number;
   delay: number;
   slideOnChange?: boolean;
@@ -131,31 +131,30 @@ export default function QueendomPanel({
         }}
       />
 
-      {/* ── Header: centered title + Gold Pill below ── */}
+      {/* ── Wingspan header: metrics | name | metrics (luxury broadcast) ── */}
       <motion.div
-        className="relative flex flex-col items-center text-center mb-[1.8vh] flex-shrink-0"
+        className="relative mb-[1.6vh] flex w-full min-w-0 flex-shrink-0 flex-col items-center"
         variants={itemVariants}
       >
-        {/* Top ornamental rule */}
-        <div className="flex items-center gap-3 w-full mb-[0.9vh]">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
+        <div className="mb-[1.1vh] flex w-full items-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/25 to-gold-500/40" />
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/25 to-gold-500/40" />
         </div>
 
-        <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
-          <h2 className="font-cinzel text-5xl min-[900px]:text-6xl xl:text-7xl tracking-[0.28em] text-gold-400 queen-name-glow uppercase leading-none font-bold">
-            {name}
-          </h2>
-          <GoldPill count={stats.members.total} delay={delay / 1000 + 0.5} />
-        </div>
-        <p className="font-inter text-[clamp(18px,1.6vw,24px)] tracking-[0.65em] uppercase text-gold-500/55 font-semibold mt-[5px] mb-[1.1vh]">
+        <QueendomWingspanHeader
+          name={name}
+          membersTotal={safeNum(stats.members.total)}
+          complimentaryCount={safeNum(stats.members.celebrityActive)}
+          delayMs={delay}
+        />
+
+        <p className="font-inter mb-[0.9vh] mt-[0.35vh] text-[clamp(19px,2.05vw,32px)] font-semibold uppercase tracking-[0.42em] text-gold-300 gold-glow">
           Queendom
         </p>
 
-        {/* Bottom ornamental rule */}
-        <div className="flex items-center gap-3 w-full mt-[1.1vh]">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/28 to-gold-500/45" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/28 to-gold-500/45" />
+        <div className="flex w-full items-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/22 to-gold-500/38" />
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/22 to-gold-500/38" />
         </div>
       </motion.div>
 
@@ -171,7 +170,7 @@ export default function QueendomPanel({
             {/* 1. Total Solved Today — ANCHOR (Green Glow) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
               <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
-                Today
+                Resolved <br /> (Today)
               </p>
               <AnimatedCounter
                 value={solvedToday}
@@ -183,7 +182,13 @@ export default function QueendomPanel({
 
             {/* 2. Total Received — count of all tickets for this queendom */}
             <MetricBox
-              label="Received"
+              label={
+                <>
+                  Received
+                  <br />
+                  (This Month)
+                </>
+              }
               value={totalReceived}
               delay={delay + 900}
               slideOnChange
@@ -191,7 +196,13 @@ export default function QueendomPanel({
 
             {/* 3. Total Solved Month — resolve column for current month */}
             <MetricBox
-              label="Resolved"
+              label={
+                <>
+                  Resolved
+                  <br />
+                  (This Month)
+                </>
+              }
               value={resolvedThisMonth}
               delay={delay + 1000}
               slideOnChange
@@ -201,7 +212,13 @@ export default function QueendomPanel({
 
             {/* 4. Pending — yet to score */}
             <MetricBox
-              label="Pending"
+              label={
+                <>
+                  Pending
+                  <br />
+                  (This Month)
+                </>
+              }
               value={pendingToResolve}
               delay={delay + 1100}
               slideOnChange
@@ -212,7 +229,7 @@ export default function QueendomPanel({
             {/* 5. Spoiled — total accepted score for this Queendom's Joker */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
               <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
-                Spoiled
+                Spoiled <br /> (This Month)
               </p>
               <AnimatedCounter
                 value={jokerAccepted}
@@ -228,7 +245,13 @@ export default function QueendomPanel({
       {/* ── RenewalsPanel: Counter | Renewals | Latest members ───────────────── */}
       <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={itemVariants}>
         <RenewalsPanel
-          data={renewalsData ?? { totalRenewalsThisMonth: 0, renewals: [], assignments: [] }}
+          data={
+            renewalsData ?? {
+              totalRenewalsThisMonth: 0,
+              renewals: [],
+              assignments: [],
+            }
+          }
           delay={delay + 1300}
         />
       </motion.div>

@@ -17,6 +17,7 @@
 import { NextResponse } from "next/server";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
 
 // ─── Ticket row shape ─────────────────────────────────────────────────────────
 interface TicketRow {
@@ -25,26 +26,6 @@ interface TicketRow {
   created_at: string | null;
   resolved_at: string | null;
   is_escalated: boolean | null;
-}
-
-// ─── IST date helpers ─────────────────────────────────────────────────────────
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
-
-function istToday(): { day: string; month: string } {
-  const now = new Date(Date.now() + IST_OFFSET_MS);
-  const y = now.getUTCFullYear();
-  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(now.getUTCDate()).padStart(2, "0");
-  return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
-}
-
-// Slices the YYYY-MM-DD prefix from any timestamp string Supabase returns.
-// Works with "2026-03-06 13:14:19 +0530", "2026-03-06T13:14:19+00:00", etc.
-function toDay(ts: string | null): string {
-  return (ts ?? "").slice(0, 10);
-}
-function toMonth(ts: string | null): string {
-  return (ts ?? "").slice(0, 7);
 }
 
 const isResolved = (status: string | null) =>
@@ -98,7 +79,7 @@ export async function GET(): Promise<Response> {
     const assignedToday = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
-        toDay(t.created_at) === TODAY,
+        toISTDay(t.created_at) === TODAY,
     ).length;
 
     // Only count tickets CREATED today that are now resolved.
@@ -108,20 +89,20 @@ export async function GET(): Promise<Response> {
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
         isResolved(t.status) &&
-        toDay(t.created_at) === TODAY,
+        toISTDay(t.created_at) === TODAY,
     ).length;
 
     const completedThisMonth = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
         isResolved(t.status) &&
-        toMonth(t.resolved_at) === THIS_MONTH,
+        toISTMonth(t.resolved_at) === THIS_MONTH,
     ).length;
 
     const assignedThisMonth = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
-        toMonth(t.created_at) === THIS_MONTH,
+        toISTMonth(t.created_at) === THIS_MONTH,
     ).length;
 
     // All tickets assigned to this agent that are neither resolved nor closed —

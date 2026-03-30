@@ -5,10 +5,12 @@ import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 interface ClientRow {
   group: string | null;
   latest_subscription_status: "Active" | "Expired" | null;
+  latest_subscription_membership_type: string | null;
 }
 
 interface QueenBucket {
   total: number;
+  celebrityActive: number;
 }
 
 interface AggregatedStats {
@@ -16,11 +18,18 @@ interface AggregatedStats {
   anishqa: QueenBucket;
 }
 
+function isCelebrityMembership(type: string | null | undefined): boolean {
+  return (type ?? "").trim().toLowerCase() === "celebrity";
+}
+
 // ─── Aggregation ──────────────────────────────────────────────────────────────
+// All rows are pre-filtered to latest_subscription_status = Active.
+// total: paid roster — Active and membership is anything except Celebrity.
+// celebrityActive: Active and membership = Celebrity (second pill / complimentary).
 function aggregate(rows: ClientRow[]): AggregatedStats {
   const result: AggregatedStats = {
-    ananyshree: { total: 0 },
-    anishqa: { total: 0 },
+    ananyshree: { total: 0, celebrityActive: 0 },
+    anishqa: { total: 0, celebrityActive: 0 },
   };
 
   for (const row of rows) {
@@ -32,7 +41,11 @@ function aggregate(rows: ClientRow[]): AggregatedStats {
 
     if (!bucket) continue;
 
-    bucket.total++;
+    if (isCelebrityMembership(row.latest_subscription_membership_type)) {
+      bucket.celebrityActive++;
+    } else {
+      bucket.total++;
+    }
   }
 
   return result;
@@ -55,7 +68,7 @@ export async function GET() {
 
   const { data, error } = await db
     .from("clients")
-    .select("group, latest_subscription_status")
+    .select("group, latest_subscription_status, latest_subscription_membership_type")
     .eq("latest_subscription_status", "Active");
 
   if (error) {

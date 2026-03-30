@@ -82,9 +82,7 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
       bucket.pendingToResolve++;
     }
     const jokerVal =
-      row.tags &&
-      typeof row.tags === "object" &&
-      "joker_suggestion" in row.tags
+      row.tags && typeof row.tags === "object" && "joker_suggestion" in row.tags
         ? (row.tags as { joker_suggestion?: unknown }).joker_suggestion
         : undefined;
     if (jokerVal != null && jokerVal !== "") {
@@ -110,7 +108,7 @@ interface AgentLiveStats {
 
 function calcAgent(
   rows: TicketRowMinimal[],
-  agentName: string
+  agentName: string,
 ): AgentLiveStats {
   const nameLower = agentName.toLowerCase();
   const TODAY = istToday().day;
@@ -123,39 +121,39 @@ function calcAgent(
   const assignedToday = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
-      toISTDay(t.created_at) === TODAY
+      toISTDay(t.created_at) === TODAY,
   ).length;
   const completedToday = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
       isResolved(t.status) &&
-      toISTDay(t.created_at) === TODAY
+      toISTDay(t.created_at) === TODAY,
   ).length;
   const completedThisMonth = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
       isResolved(t.status) &&
-      toISTMonth(t.resolved_at) === THIS_MONTH
+      toISTMonth(t.resolved_at) === THIS_MONTH,
   ).length;
   const assignedThisMonth = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
-      toISTMonth(t.created_at) === THIS_MONTH
+      toISTMonth(t.created_at) === THIS_MONTH,
   ).length;
   const pendingTickets = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
       !isResolved(t.status) &&
-      !isClosed(t.status)
+      !isClosed(t.status),
   );
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     .toISOString()
     .slice(0, 10);
   const overdueCount = pendingTickets.filter(
-    (t) => (t.created_at ?? "").slice(0, 10) < sevenDaysAgo
+    (t) => (t.created_at ?? "").slice(0, 10) < sevenDaysAgo,
   ).length;
   const escalatedCount = pendingTickets.filter(
-    (t) => t.is_escalated === true
+    (t) => t.is_escalated === true,
   ).length;
 
   return {
@@ -185,9 +183,10 @@ export function aggregateAgentStats(rows: TicketRowMinimal[]): {
 }
 
 /** Merge live stats into roster and rank by monthly volume (today as tie-breaker). */
-export function mergeAndRankAgents(
-  rows: TicketRowMinimal[]
-): { ananyshree: AgentStats[]; anishqa: AgentStats[] } {
+export function mergeAndRankAgents(rows: TicketRowMinimal[]): {
+  ananyshree: AgentStats[];
+  anishqa: AgentStats[];
+} {
   const live = aggregateAgentStats(rows);
   const rosterA = buildRoster(ROSTER_ANANYSHREE, "ananyshree");
   const rosterB = buildRoster(ROSTER_ANISHQA, "anishqa");
@@ -200,7 +199,7 @@ export function mergeAndRankAgents(
   };
   const merge = (
     roster: AgentStats[],
-    rec: Record<string, AgentLiveStats>
+    rec: Record<string, AgentLiveStats>,
   ): AgentStats[] => {
     const r = liveCI(rec);
     const merged = roster.map((agent) => {
@@ -210,7 +209,7 @@ export function mergeAndRankAgents(
     return merged.sort(
       (a, b) =>
         b.tasksCompletedThisMonth - a.tasksCompletedThisMonth ||
-        b.tasksCompletedToday - a.tasksCompletedToday
+        b.tasksCompletedToday - a.tasksCompletedToday,
     );
   };
   return {

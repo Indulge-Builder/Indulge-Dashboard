@@ -12,6 +12,7 @@
 import { NextResponse } from "next/server";
 import { JOKER_ROSTER } from "@/lib/agentRoster";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
 
 interface JokerRow {
   joker_name: string | null;
@@ -25,24 +26,6 @@ interface JokerStats {
   pendingSuggestions: number;
   acceptedToday: number;
   totalThisMonth: number;
-}
-
-// ─── IST date helpers ────────────────────────────────────────────────────────
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
-
-function istToday(): { day: string; month: string } {
-  const now = new Date(Date.now() + IST_OFFSET_MS);
-  const y = now.getUTCFullYear();
-  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(now.getUTCDate()).padStart(2, "0");
-  return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
-}
-
-function toDay(ts: string | null): string {
-  return (ts ?? "").slice(0, 10);
-}
-function toMonth(ts: string | null): string {
-  return (ts ?? "").slice(0, 7);
 }
 
 const emptyStats: JokerStats = {
@@ -98,8 +81,8 @@ export async function GET() {
 
       for (const row of matching) {
         const resp = (row.response ?? "").toLowerCase().trim();
-        const rowDay = toDay(row.date);
-        const rowMonth = toMonth(row.date);
+        const rowDay = toISTDay(row.date);
+        const rowMonth = toISTMonth(row.date);
 
         if (resp === "yes") {
           acceptedCount++;

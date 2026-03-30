@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import {
   buildRoster,
@@ -22,7 +21,7 @@ import {
 } from "@/lib/ticketAggregation";
 import type { JokerRecommendationItem } from "@/app/api/jokers/recommendations/route";
 import TopBar from "./TopBar";
-import QueendomPanel from "./QueendomPanel";
+import DashboardController from "./DashboardController";
 import CelebrationOverlay from "./CelebrationOverlay";
 import RecommendationTicker from "./RecommendationTicker";
 
@@ -35,7 +34,7 @@ const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
 // ─────────────────────────────────────────────────────────────────────────────
 // Zero initial state — every counter animates up from 0 on first load
 // ─────────────────────────────────────────────────────────────────────────────
-const ZERO_MEMBERS: MemberStats = { total: 0 };
+const ZERO_MEMBERS: MemberStats = { total: 0, celebrityActive: 0 };
 const ZERO_TICKETS: TicketStats = {
   totalReceived: 0,
   resolvedThisMonth: 0,
@@ -244,46 +243,8 @@ export default function Dashboard() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "clients" },
-        (payload) => {
-          const newRow = payload.new as Record<string, unknown> | null;
-          const oldRow = payload.old as Record<string, unknown> | null;
-          const group = (v: Record<string, unknown> | null) =>
-            ((v?.group ?? v?.queendom) as string)?.toLowerCase() ?? "";
-          const active = (v: Record<string, unknown> | null) =>
-            (v?.latest_subscription_status as string) === "Active";
-          if (payload.eventType === "INSERT" && newRow && active(newRow)) {
-            const g = group(newRow);
-            if (g.includes("ananyshree"))
-              setAnanyshreeStats((p) => ({
-                ...p,
-                members: { total: (p.members.total ?? 0) + 1 },
-              }));
-            else if (g.includes("anishqa"))
-              setAnishqaStats((p) => ({
-                ...p,
-                members: { total: (p.members.total ?? 0) + 1 },
-              }));
-          } else if (
-            payload.eventType === "DELETE" &&
-            oldRow &&
-            active(oldRow)
-          ) {
-            const g = group(oldRow);
-            if (g.includes("ananyshree"))
-              setAnanyshreeStats((p) => ({
-                ...p,
-                members: {
-                  total: Math.max(0, (p.members.total ?? 0) - 1),
-                },
-              }));
-            else if (g.includes("anishqa"))
-              setAnishqaStats((p) => ({
-                ...p,
-                members: {
-                  total: Math.max(0, (p.members.total ?? 0) - 1),
-                },
-              }));
-          }
+        () => {
+          fetchMembers();
         }
       )
       .subscribe((status) => {
@@ -351,7 +312,16 @@ export default function Dashboard() {
         (payload) => {
           if (payload.eventType === "INSERT" && payload.new) {
             const row = toTicketRow(payload.new as Record<string, unknown>);
-            if (row) setTicketRows((prev) => [...prev, row]);
+            if (row)
+              setTicketRows((prev) => {
+                const i = prev.findIndex((r) => r.id === row.id);
+                if (i >= 0) {
+                  const next = [...prev];
+                  next[i] = row;
+                  return next;
+                }
+                return [...prev, row];
+              });
           } else if (payload.eventType === "UPDATE" && payload.new) {
             const row = toTicketRow(payload.new as Record<string, unknown>);
             if (row)
@@ -400,7 +370,7 @@ export default function Dashboard() {
       supabase?.removeChannel(ticketsChannel);
       supabase?.removeChannel(renewalsChannel);
     };
-  }, [fetchJokers, fetchRenewals]);
+  }, [fetchJokers, fetchMembers, fetchRenewals]);
 
   // ── Celebration detection ────────────────────────────────────────────────────
   // Runs whenever either queendom's agents array is updated.
@@ -457,104 +427,14 @@ export default function Dashboard() {
         onComplete={() => setCelebrationAgent(null)}
       />
 
-      {/* ── Two panels: side-by-side on md+, stacked on mobile ── */}
-      <div className="relative flex flex-1 min-h-0 flex-col md:flex-row">
-        <QueendomPanel
-          name="Ananyshree"
-          stats={ananyshreeStats}
-          side="left"
-          delay={0}
-          celebrationAgent={celebrationAgent}
-          renewalsData={renewalsAnanyshree}
-        />
-
-        {/* ── Gold centre divider — md+ only ──────────────────────────────── */}
-        <motion.div
-          className="hidden md:flex relative flex-shrink-0 flex-col items-center justify-center"
-          style={{ width: "36px" }}
-          initial={{ scaleY: 0, opacity: 0 }}
-          animate={{ scaleY: 1, opacity: 1 }}
-          transition={{
-            duration: 1.3,
-            delay: 0.5,
-            ease: [0.25, 0.46, 0.45, 0.94],
-          }}
-        >
-          {/* Faint ambient wash — barely perceptible, just warms the seam */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(ellipse 160% 50% at 50% 50%, rgba(201,168,76,0.032), transparent)",
-            }}
-          />
-
-          {/* The hairline */}
-          <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-gold-500/[0.22] to-transparent" />
-
-          {/* Barely-there inner bloom — blends into background */}
-          <div
-            className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[4px] pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to bottom, transparent 8%, rgba(201,168,76,0.07) 30%, rgba(201,168,76,0.11) 50%, rgba(201,168,76,0.07) 70%, transparent 92%)",
-              filter: "blur(2px)",
-            }}
-          />
-
-          {/* Ornament cluster — very quiet, slow breath */}
-          <motion.div
-            className="relative z-10 flex flex-col items-center"
-            style={{ gap: "9px" }}
-            animate={{ opacity: [0.35, 0.65, 0.35] }}
-            transition={{
-              duration: 5.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            {/* Top pip */}
-            <div
-              className="w-[4px] h-[4px] bg-gold-400/35 flex-shrink-0"
-              style={{ transform: "rotate(45deg)" }}
-            />
-
-            {/* Centre orb */}
-            <motion.div
-              className="w-[8px] h-[8px] rounded-full flex-shrink-0"
-              style={{
-                background: "rgba(201,168,76,0.75)",
-                boxShadow:
-                  "0 0 0 1px rgba(201,168,76,0.15), 0 0 8px 2px rgba(201,168,76,0.20)",
-              }}
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{
-                duration: 5.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-
-            {/* Bottom pip */}
-            <div
-              className="w-[4px] h-[4px] bg-gold-400/35 flex-shrink-0"
-              style={{ transform: "rotate(45deg)" }}
-            />
-          </motion.div>
-        </motion.div>
-
-        {/* ── Horizontal divider — mobile only ───────────────────────────── */}
-        <div className="md:hidden w-full h-px bg-gradient-to-r from-transparent via-gold-500/20 to-transparent flex-shrink-0" />
-
-        <QueendomPanel
-          name="Anishqa"
-          stats={anishqaStats}
-          side="right"
-          delay={150}
-          celebrationAgent={celebrationAgent}
-          renewalsData={renewalsAnishqa}
-        />
-      </div>
+      {/* ── TV broadcast: Concierge ↔ Onboarding (auto) + ArrowRight skip ── */}
+      <DashboardController
+        ananyshreeStats={ananyshreeStats}
+        anishqaStats={anishqaStats}
+        renewalsAnanyshree={renewalsAnanyshree}
+        renewalsAnishqa={renewalsAnishqa}
+        celebrationAgent={celebrationAgent}
+      />
 
       {/* Ticker: Recommendation bar — data from Dashboard only */}
       <RecommendationTicker recommendations={recommendations} />

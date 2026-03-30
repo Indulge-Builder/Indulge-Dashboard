@@ -40,13 +40,23 @@ export function toISTDay(ts: string | null | undefined): string {
     s = s.replace(" ", "T");
   }
 
+  // Datetime without timezone: treat as UTC (Supabase TIMESTAMPTZ + Freshdesk
+  // webhooks use UTC). Parsing as local time breaks IST day on browsers/TVs
+  // not set to Asia/Kolkata.
+  if (s.includes("T")) {
+    const rest = s.slice(s.indexOf("T") + 1);
+    if (rest && !/[zZ]|[+-]\d/.test(rest)) {
+      s = `${s}Z`;
+    }
+  }
+
   // "+HH" short offset → "+HH:00"
   if (s.includes("T")) {
     s = s.replace(/([+-]\d{2})$/, "$1:00");
   }
 
   const utc = new Date(s);
-  if (isNaN(utc.getTime())) return ts.slice(0, 10);
+  if (isNaN(utc.getTime())) return "";
   return IST_FORMATTER.format(utc);
 }
 

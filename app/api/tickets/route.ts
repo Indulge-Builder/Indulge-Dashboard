@@ -14,8 +14,8 @@
  *                       "resolved" nor "closed"
  *
  * ── TIMEZONE NOTE ────────────────────────────────────────────────────────────
- * Uses identical istToday/toDay/toMonth logic as /api/agents so queendom
- * solvedToday matches the sum of agents' tasksCompletedToday.
+ * Uses lib/istDate (Asia/Kolkata) — same as Dashboard client aggregation and
+ * /api/agents — never slice the ISO prefix (that is the UTC calendar date).
  * ─────────────────────────────────────────────────────────────────────────────
  *
  * Returns: { ananyshree: TicketStats, anishqa: TicketStats }
@@ -23,6 +23,7 @@
 
 import { NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
 
 interface TicketRow {
   status: string | null;
@@ -52,26 +53,6 @@ const RESOLVED_STATUS = "resolved";
 
 // Both "resolved" and "closed" are terminal — excluded from pendingToResolve.
 const TERMINAL = new Set(["resolved", "closed"]);
-
-// ─── IST date helpers (identical to /api/agents) ─────────────────────────────
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
-
-function istToday(): { day: string; month: string } {
-  const now = new Date(Date.now() + IST_OFFSET_MS);
-  const y = now.getUTCFullYear();
-  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(now.getUTCDate()).padStart(2, "0");
-  return { day: `${y}-${mo}-${d}`, month: `${y}-${mo}` };
-}
-
-// Slices the YYYY-MM-DD prefix from any timestamp string Supabase returns.
-// Same as agents: "2026-03-06 13:14:19 +0530", "2026-03-06T13:14:19+00:00", etc.
-function toDay(ts: string | null): string {
-  return (ts ?? "").slice(0, 10);
-}
-function toMonth(ts: string | null): string {
-  return (ts ?? "").slice(0, 7);
-}
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
 function aggregate(rows: TicketRow[]): AggregatedStats {
@@ -106,9 +87,9 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     // ── 0. Total Received (all rows for this queendom) ─────────────────────────
     bucket.totalReceived++;
 
-    const createdDay = toDay(row.created_at);
-    const createdMonth = toMonth(row.created_at);
-    const resolvedMonth = toMonth(row.resolved_at);
+    const createdDay = toISTDay(row.created_at);
+    const createdMonth = toISTMonth(row.created_at);
+    const resolvedMonth = toISTMonth(row.resolved_at);
 
     // ── 1. Resolved This Month ────────────────────────────────────────────────
     if (

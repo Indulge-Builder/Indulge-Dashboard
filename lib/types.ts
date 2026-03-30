@@ -1,12 +1,15 @@
 export interface MemberStats {
+  /** Active clients in this Queendom whose membership is not Celebrity (paid roster). */
   total: number;
+  /** Active Celebrity-tier clients in this Queendom (complimentary / unpaid pill). */
+  celebrityActive: number;
 }
 
 export interface TicketStats {
   totalReceived: number; // count of ALL rows in tickets where queendom_name matches
   totalThisMonth?: number; // deprecated: use totalReceived
   resolvedThisMonth: number; // tickets with resolved_at within this calendar month (resolved or closed)
-  solvedToday: number; // Resolved | Closed  AND  resolved_at within today
+  solvedToday: number; // status "resolved" AND created_at is today (IST); not "closed", not resolved_at-based
   pendingToResolve: number; // any active / open status — no date gate
   jokerSuggestion: number; // tickets with tags.joker_suggestion set (legacy)
 }
