@@ -427,7 +427,7 @@ export default function Dashboard() {
         onComplete={() => setCelebrationAgent(null)}
       />
 
-      {/* ── TV broadcast: Concierge ↔ Onboarding (auto) + ArrowRight skip ── */}
+      {/* ── Concierge ↔ Onboarding (manual only; ArrowLeft/ArrowRight) ── */}
       <DashboardController
         ananyshreeStats={ananyshreeStats}
         anishqaStats={anishqaStats}

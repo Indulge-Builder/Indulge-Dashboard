@@ -1,5 +1,5 @@
 export interface MemberStats {
-  /** Active clients in this Queendom whose membership is not Celebrity (paid roster). */
+  /** Active clients whose membership is Premium, Genie, Monthly Trial, or Standard (paid pill). */
   total: number;
   /** Active Celebrity-tier clients in this Queendom (complimentary / unpaid pill). */
   celebrityActive: number;

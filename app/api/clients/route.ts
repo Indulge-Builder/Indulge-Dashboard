@@ -18,14 +18,33 @@ interface AggregatedStats {
   anishqa: QueenBucket;
 }
 
+/**
+ * Paid roster — Supabase `latest_subscription_membership_type` values (trimmed,
+ * case-insensitive; internal spaces normalized).
+ */
+const PAID_MEMBERSHIP_TYPES = new Set([
+  "premium",
+  "genie",
+  "monthly trial",
+  "standard",
+]);
+
+function normMembership(type: string | null | undefined): string {
+  return (type ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
 function isCelebrityMembership(type: string | null | undefined): boolean {
-  return (type ?? "").trim().toLowerCase() === "celebrity";
+  return normMembership(type) === "celebrity";
+}
+
+function isPaidMembership(type: string | null | undefined): boolean {
+  return PAID_MEMBERSHIP_TYPES.has(normMembership(type));
 }
 
 // ─── Aggregation ──────────────────────────────────────────────────────────────
 // All rows are pre-filtered to latest_subscription_status = Active.
-// total: paid roster — Active and membership is anything except Celebrity.
-// celebrityActive: Active and membership = Celebrity (second pill / complimentary).
+// total: paid — membership is Premium, Genie, Monthly Trial, or Standard.
+// celebrityActive: membership = Celebrity (unpaid / complimentary pill).
 function aggregate(rows: ClientRow[]): AggregatedStats {
   const result: AggregatedStats = {
     ananyshree: { total: 0, celebrityActive: 0 },
@@ -41,9 +60,10 @@ function aggregate(rows: ClientRow[]): AggregatedStats {
 
     if (!bucket) continue;
 
-    if (isCelebrityMembership(row.latest_subscription_membership_type)) {
+    const tier = row.latest_subscription_membership_type;
+    if (isCelebrityMembership(tier)) {
       bucket.celebrityActive++;
-    } else {
+    } else if (isPaidMembership(tier)) {
       bucket.total++;
     }
   }

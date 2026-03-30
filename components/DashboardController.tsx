@@ -50,21 +50,9 @@ export default function DashboardController({
 }: DashboardControllerProps) {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("concierge");
 
-  // TV auto-rotate (40s concierge / 20s onboarding) — production only; dev stays on the current screen until ArrowRight.
-  useEffect(() => {
-    if (process.env.NODE_ENV !== "production") {
-      return;
-    }
-    const ms = activeScreen === "concierge" ? 40_000 : 20_000;
-    const id = window.setInterval(() => {
-      setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
-    }, ms);
-    return () => clearInterval(id);
-  }, [activeScreen]);
-
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "ArrowRight") return;
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
       e.preventDefault();
       setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
     };
