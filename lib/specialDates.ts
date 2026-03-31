@@ -5,7 +5,7 @@ import type { SpecialDate } from "./types";
 // Queendom alternates: odd index = ananyshree, even = anishqa (adjust as needed).
 interface SpecialDateRaw {
   fullName: string;
-  dateOfBirth: string; // YYYY-MM-DD
+  dateOfBirth?: string; // YYYY-MM-DD
   anniversary?: string; // YYYY-MM-DD
   queendom: "ananyshree" | "anishqa";
 }
@@ -112,6 +112,36 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
     anniversary: "2009-06-02",
     queendom: "anishqa",
   },
+  // ─── April ────────────────────────────────────────────────────────────────
+  { fullName: "George S Marak", anniversary: "2000-04-26", queendom: "ananyshree" },
+  { fullName: "Shafi Shoukath", dateOfBirth: "1996-04-24", queendom: "anishqa" },
+  { fullName: "Siddharth Kothari", dateOfBirth: "1991-04-17", queendom: "anishqa" },
+  { fullName: "Darshil Shah", dateOfBirth: "1991-04-14", queendom: "ananyshree" },
+  { fullName: "Anirudh", dateOfBirth: "1984-04-16", queendom: "ananyshree" },
+  { fullName: "Srinivas Jampani", anniversary: "2012-04-09", queendom: "anishqa" },
+  {
+    fullName: "Sanjay Gaddipati Chowdary",
+    dateOfBirth: "1982-04-29",
+    queendom: "anishqa",
+  },
+  { fullName: "Abhishek Dutta", anniversary: "2007-04-28", queendom: "anishqa" },
+  { fullName: "Narendra Rao", dateOfBirth: "1975-04-11", queendom: "anishqa" },
+  { fullName: "Vivek Lohia", anniversary: "2004-04-15", queendom: "anishqa" },
+  { fullName: "Tushar Jani", dateOfBirth: "1953-04-29", queendom: "anishqa" },
+  { fullName: "Kamal Agarwal", dateOfBirth: "2000-04-03", queendom: "ananyshree" },
+  { fullName: "Anu Mehta", dateOfBirth: "2000-04-05", queendom: "ananyshree" },
+  { fullName: "Pankil Yadav", dateOfBirth: "2000-04-15", queendom: "ananyshree" },
+  {
+    fullName: "Seema Patil",
+    dateOfBirth: "2000-04-20",
+    anniversary: "2000-04-17",
+    queendom: "ananyshree",
+  },
+  { fullName: "Ansh Anand", dateOfBirth: "2000-04-24", queendom: "ananyshree" },
+  { fullName: "Pruthviraj GK", dateOfBirth: "2000-04-29", queendom: "ananyshree" },
+  { fullName: "Adarsh Narahari", dateOfBirth: "2000-04-30", queendom: "anishqa" },
+  { fullName: "Shreya", dateOfBirth: "2000-04-30", queendom: "anishqa" },
+  { fullName: "Sandeep Mehta", anniversary: "2000-04-30", queendom: "anishqa" },
 ];
 
 // ─── Builder ─────────────────────────────────────────────────────────────────
@@ -128,14 +158,16 @@ export function getSpecialDates(): SpecialDate[] {
   let id = 0;
 
   for (const raw of SPECIAL_DATES_RAW) {
-    const monthDayDob = toMonthDay(raw.dateOfBirth);
-    result.push({
-      id: `sd-${++id}`,
-      clientName: raw.fullName,
-      date: `${year}-${monthDayDob}`,
-      type: "birthday",
-      queendom: raw.queendom,
-    });
+    if (raw.dateOfBirth) {
+      const monthDayDob = toMonthDay(raw.dateOfBirth);
+      result.push({
+        id: `sd-${++id}`,
+        clientName: raw.fullName,
+        date: `${year}-${monthDayDob}`,
+        type: "birthday",
+        queendom: raw.queendom,
+      });
+    }
 
     if (raw.anniversary) {
       const monthDayAnniv = toMonthDay(raw.anniversary);

@@ -5,21 +5,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Heart } from "lucide-react";
 import { getSpecialDates } from "@/lib/specialDates";
 
+function parseYmd(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function formatDay(dateStr: string): string {
-  const [, , day] = dateStr.split("-");
-  return day;
+  return new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(parseYmd(dateStr));
+}
+
+function formatMonth(dateStr: string): string {
+  return new Intl.DateTimeFormat("en-GB", { month: "short" }).format(parseYmd(dateStr));
 }
 
 function isToday(dateStr: string): boolean {
   const today = new Date();
   const [y, m, d] = dateStr.split("-").map(Number);
   return today.getFullYear() === y && today.getMonth() === m - 1 && today.getDate() === d;
-}
-
-function isCurrentMonth(dateStr: string): boolean {
-  const today = new Date();
-  const [, m] = dateStr.split("-").map(Number);
-  return m === today.getMonth() + 1;
 }
 
 function isDatePassed(dateStr: string): boolean {
@@ -59,13 +61,12 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
   const filteredDates = useMemo(() => {
     return getSpecialDates()
       .filter((d) => d.queendom === queendomId)
-      .filter((d) => isCurrentMonth(d.date))
       .filter((d) => !isDatePassed(d.date))
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [queendomId, dateKey]);
 
   return (
-    <div className="flex flex-col gap-3 overflow-y-auto pb-2 w-full">
+    <div className="flex h-full flex-col gap-3 overflow-y-auto pb-2 w-full">
       <AnimatePresence mode="popLayout">
         {filteredDates.map((item) => {
           const isTodayCard = isToday(item.date);
@@ -109,9 +110,14 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                       }
               }
             >
-              <span className="font-edu font-bold text-[clamp(2rem,4vw,3rem)] tabular-nums text-champagne/95 leading-none flex-shrink-0">
-                {formatDay(item.date)}
-              </span>
+              <div className="flex flex-col items-center justify-center leading-none flex-shrink-0">
+                <span className="font-edu font-bold text-[clamp(2rem,4vw,3rem)] tabular-nums text-champagne/95">
+                  {formatDay(item.date)}
+                </span>
+                <span className="text-[11px] font-inter uppercase tracking-[0.25em] text-champagne/70 mt-1">
+                  {formatMonth(item.date)}
+                </span>
+              </div>
               <div className="flex items-center justify-center gap-2 flex-1 min-w-0">
                 {isTodayCard && (
                   <Gift
