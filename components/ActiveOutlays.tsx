@@ -61,13 +61,16 @@ function rowToDisplay(
 
 const PAID_EXIT_MS = 2500;
 
+/** Bound in-memory list so long TV uptimes do not grow unbounded. */
+const MAX_OUTLAYS = 10;
+
 /** Match JokerMetricsStrip `JokerMetricBox` label — Ideas / Response / Acceptance */
 const FINANCES_LEDGER_HEADER_LABEL_CLASS =
-  "font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.25em] uppercase text-champagne leading-none";
+  "font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase text-champagne leading-none";
 
 /** Match OnboardingPanel `ONBOARDING_LEDGER_CELL_FONT` — ledger rows */
 const FINANCES_LEDGER_CELL_FONT =
-  "clamp(1.05rem, min(2.4vmin, 3vh), 3.25rem)";
+  "clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem)";
 
 function OutlayLedgerRow({
   o,
@@ -79,25 +82,25 @@ function OutlayLedgerRow({
   const cell = { fontSize: FINANCES_LEDGER_CELL_FONT } as CSSProperties;
   return (
     <div
-      className={`grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_auto] items-center gap-x-2 border-b border-gold-500/[0.07] py-[clamp(8px,min(1.4vmin,1.5vh),18px)] sm:gap-x-3 ${
+      className={`grid min-w-0 grid-cols-3 items-center gap-x-2 border-b border-gold-500/[0.07] py-[clamp(8px,min(1.4vmin,1.5vh),18px)] sm:gap-x-3 ${
         o.pending ? "" : "bg-emerald-500/[0.08]"
       }`}
       aria-hidden={ariaHidden}
     >
       <span
-        className="min-w-0 truncate px-1 text-left font-inter font-semibold uppercase leading-none tracking-[0.1em] text-champagne"
+        className="min-w-0 justify-self-center truncate px-1 text-center font-inter font-semibold uppercase leading-none tracking-[0.1em] text-champagne"
         style={cell}
       >
         {o.client_name}
       </span>
       <span
-        className="min-w-0 truncate px-1 text-left font-inter font-medium leading-none text-champagne/90"
+        className="min-w-0 justify-self-center truncate px-1 text-center font-inter font-medium leading-none text-champagne/90"
         style={cell}
       >
         {o.task}
       </span>
       <span
-        className={`shrink-0 px-1 text-right font-cinzel font-semibold tabular-nums leading-none ${
+        className={`min-w-0 justify-self-center truncate px-1 text-center font-cinzel font-semibold tabular-nums leading-none ${
           o.pending ? "text-amber-300" : "text-emerald-300"
         }`}
         style={cell}
@@ -116,11 +119,14 @@ interface ActiveOutlaysProps {
   queendomId: QueendomId;
   /** Stagger with other QueendomPanel motion (optional) */
   delayMs?: number;
+  /** When true, fills remaining vertical space in a flex column. */
+  fillRemaining?: boolean;
 }
 
 export default function ActiveOutlays({
   queendomId,
   delayMs = 0,
+  fillRemaining = false,
 }: ActiveOutlaysProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [outlays, setOutlays] = useState<DisplayOutlay[]>([]);
@@ -179,7 +185,7 @@ export default function ActiveOutlays({
         const d = rowToDisplay(raw as Record<string, unknown>, true);
         if (d) rows.push(d);
       }
-      setOutlays(rows);
+      setOutlays(rows.slice(0, MAX_OUTLAYS));
     })();
 
     return () => {
@@ -211,7 +217,7 @@ export default function ActiveOutlays({
             if (!d) return;
             setOutlays((prev) => {
               if (prev.some((x) => x.id === d.id)) return prev;
-              return [d, ...prev];
+              return [d, ...prev].slice(0, MAX_OUTLAYS);
             });
             return;
           }
@@ -238,7 +244,7 @@ export default function ActiveOutlays({
               if (!d) return;
               setOutlays((prev) => {
                 const i = prev.findIndex((x) => x.id === id);
-                if (i < 0) return [...prev, d];
+                if (i < 0) return [d, ...prev].slice(0, MAX_OUTLAYS);
                 const next = [...prev];
                 next[i] = { ...d, pending: prev[i].pending };
                 return next;
@@ -298,7 +304,7 @@ export default function ActiveOutlays({
     return (
       <div className="flex-shrink-0 mt-2 w-full border-t border-gold-500/15 pt-3">
         <div
-          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-inter text-[clamp(0.8rem,1vw,0.95rem)] text-white/40"
+          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-inter text-[clamp(0.9rem,1.15vw,1.05rem)] text-white/40"
           style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
         >
           Finances unavailable (configure Supabase env).
@@ -309,25 +315,35 @@ export default function ActiveOutlays({
 
   /** Same section title as JokerMetricsStrip compact + QueendomPanel “Special Dates” */
   const sectionTitleClass =
-    "font-inter font-semibold text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne";
+    "font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne";
 
   const metricLabelClass =
-    "font-inter font-semibold text-[clamp(14px,1.5vw,20px)] tracking-[0.22em] uppercase text-amber-300 mb-[0.4vh]";
+    "font-inter font-semibold text-[clamp(16px,1.75vw,23px)] tracking-[0.22em] uppercase text-amber-300 mb-[0.4vh]";
 
   const floatingValueClass =
-    "font-cinzel font-bold text-6xl min-[900px]:text-7xl leading-none tracking-[0.06em] text-amber-400 tabular-nums";
+    "font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-amber-400 tabular-nums";
 
   const suffixClass =
-    "font-inter text-[clamp(1.35rem,2.2vw,2.25rem)] font-semibold text-amber-300/90";
+    "font-inter text-[clamp(1.5rem,2.45vw,2.5rem)] font-semibold text-amber-300/90";
 
   return (
     <motion.div
-      className="flex min-w-0 flex-shrink-0 flex-col"
+      className={
+        fillRemaining
+          ? "flex min-h-0 min-w-0 flex-1 flex-col"
+          : "flex min-w-0 flex-shrink-0 flex-col"
+      }
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: delayMs / 1000, duration: 0.5 }}
     >
-      <div className="mt-2 w-full border-t border-gold-500/15 pt-3">
+      <div
+        className={
+          fillRemaining
+            ? "mt-2 flex min-h-0 w-full flex-1 flex-col border-t border-gold-500/15 pt-3"
+            : "mt-2 w-full border-t border-gold-500/15 pt-3"
+        }
+      >
         {/* Luxury section rail — matches QueendomPanel “Special Dates” / wingspan dividers */}
         <div className="relative mb-[1.4vh] flex w-full min-w-0 flex-shrink-0 items-center gap-3">
           <div className="h-px min-w-0 flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/48" />
@@ -337,10 +353,18 @@ export default function ActiveOutlays({
           <div className="h-px min-w-0 flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/48" />
         </div>
 
-        <div className="flex min-h-0 w-full min-w-0 flex-col gap-3 md:flex-row md:items-stretch md:gap-4">
+        <div
+          className={
+            fillRemaining
+              ? "flex min-h-0 w-full min-w-0 flex-1 flex-col gap-3 md:flex-row md:items-start md:gap-4"
+              : "flex min-h-0 w-full min-w-0 flex-col gap-3 md:flex-row md:items-stretch md:gap-4"
+          }
+        >
           {/* Left on desktop — scorecard: capital pending (₹ in thousands + k) */}
           <div
-            className="joker-box flex w-full shrink-0 flex-col items-center justify-center self-stretch rounded-xl border border-liquid-gold-end/35 text-center md:w-[clamp(168px,26%,240px)]"
+            className={`joker-box flex w-full shrink-0 flex-col items-center justify-center rounded-xl border border-liquid-gold-end/35 text-center md:w-[clamp(168px,26%,240px)] ${
+              fillRemaining ? "md:self-start" : "self-stretch"
+            }`}
             style={{ padding: "1.2vh clamp(8px, 1vw, 16px)" }}
           >
             <p className={metricLabelClass}>
@@ -349,7 +373,7 @@ export default function ActiveOutlays({
               pending
             </p>
             <div className="flex items-baseline justify-center gap-0.5">
-              <span className="font-inter text-[clamp(1.1rem,1.8vw,1.75rem)] font-semibold text-amber-200/80">
+              <span className="font-inter text-[clamp(1.2rem,2vw,1.95rem)] font-semibold text-amber-200/80">
                 ₹
               </span>
               <AnimatedCounter
@@ -365,51 +389,64 @@ export default function ActiveOutlays({
           </div>
 
           {/* Right on desktop — vertical marquee ledger (OnboardingPanel pattern) */}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col md:min-h-[min(28vh,280px)]">
-            <div className="relative mb-2 border-b border-gold-500/10 pb-3">
-              <div
-                className={`grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_auto] gap-x-1 sm:gap-x-2 md:gap-x-4 ${FINANCES_LEDGER_HEADER_LABEL_CLASS}`}
-              >
-                <span className="min-w-0 truncate px-1 text-left">Client</span>
-                <span className="min-w-0 truncate px-1 text-left">Task</span>
-                <span className="min-w-0 shrink-0 px-1 text-right">Amt</span>
-              </div>
-            </div>
-
-            <div className="relative min-h-0 flex-1 overflow-hidden">
-              {outlays.length === 0 ? (
-                <p className="py-8 text-center font-inter text-[clamp(14px,1.4vw,17px)] text-champagne/40">
-                  No pending items
-                </p>
-              ) : (
+          <div
+            className={`flex min-h-0 min-w-0 flex-1 flex-col ${
+              fillRemaining ? "md:self-stretch" : "md:min-h-[min(28vh,280px)]"
+            }`}
+          >
+            <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-gold-500/20 bg-black/25 shadow-[0_0_0_1px_rgba(201,168,76,0.06)]">
+              <div className="relative border-b border-gold-500/15 bg-gradient-to-b from-gold-500/[0.06] to-transparent px-2 py-3">
                 <div
-                  className={
-                    prefersReducedMotion
-                      ? "flex flex-col"
-                      : "onboarding-ledger-track flex flex-col"
-                  }
-                  style={
-                    prefersReducedMotion
-                      ? undefined
-                      : ({
-                          "--onboarding-ledger-duration": ledgerScrollDuration,
-                        } as CSSProperties)
-                  }
+                  className={`grid grid-cols-3 items-center gap-x-1 sm:gap-x-2 md:gap-x-4 ${FINANCES_LEDGER_HEADER_LABEL_CLASS}`}
                 >
-                  {outlays.map((o) => (
-                    <OutlayLedgerRow key={o.id} o={o} />
-                  ))}
-                  {!prefersReducedMotion
-                    ? outlays.map((o) => (
-                        <OutlayLedgerRow
-                          key={`${o.id}-dup`}
-                          o={o}
-                          ariaHidden
-                        />
-                      ))
-                    : null}
+                  <span className="min-w-0 justify-self-center truncate px-1 text-center">
+                    Client
+                  </span>
+                  <span className="min-w-0 justify-self-center truncate px-1 text-center">
+                    Task
+                  </span>
+                  <span className="min-w-0 justify-self-center truncate px-1 text-center">
+                    Amount
+                  </span>
                 </div>
-              )}
+              </div>
+
+              <div className="relative min-h-0 flex-1 overflow-hidden">
+                {outlays.length === 0 ? (
+                  <p className="py-8 text-center font-inter text-[clamp(16px,1.6vw,19px)] text-champagne/40">
+                    No pending items
+                  </p>
+                ) : (
+                  <div
+                    className={
+                      prefersReducedMotion
+                        ? "flex flex-col"
+                        : "onboarding-ledger-track flex flex-col"
+                    }
+                    style={
+                      prefersReducedMotion
+                        ? undefined
+                        : ({
+                            "--onboarding-ledger-duration":
+                              ledgerScrollDuration,
+                          } as CSSProperties)
+                    }
+                  >
+                    {outlays.map((o) => (
+                      <OutlayLedgerRow key={o.id} o={o} />
+                    ))}
+                    {!prefersReducedMotion
+                      ? outlays.map((o) => (
+                          <OutlayLedgerRow
+                            key={`${o.id}-dup`}
+                            o={o}
+                            ariaHidden
+                          />
+                        ))
+                      : null}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

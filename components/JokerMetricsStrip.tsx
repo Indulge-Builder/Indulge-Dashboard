@@ -14,19 +14,21 @@ function JokerMetricBox({
   delay,
   valueClassName,
   suffix,
+  suffixClassName,
 }: {
   label: ReactNode;
   value: number;
   delay: number;
   valueClassName?: string;
   suffix?: ReactNode;
+  suffixClassName?: string;
 }) {
   // Labels match QueendomPanel `MetricBox`; values match hero `AnimatedCounter`.
   const labelClass =
-    "font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.25em] uppercase text-champagne mb-[0.2vh]";
-  const defaultValueClass = `font-cinzel font-bold text-7xl min-[900px]:text-8xl leading-none tracking-[0.06em] text-gold-300 tabular-nums`;
-  const suffixClass =
-    "font-inter text-[clamp(1.25rem,2vw,2rem)] text-white/45 font-semibold";
+    "font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase text-champagne mb-[0.2vh]";
+  const defaultValueClass = `font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums`;
+  const defaultSuffixClass =
+    "font-inter text-[clamp(1.4rem,2.25vw,2.25rem)] text-white/45 font-semibold";
 
   return (
     <div
@@ -42,7 +44,7 @@ function JokerMetricBox({
           slideOnChange
         />
         {suffix != null ? (
-          <span className={suffixClass}>{suffix}</span>
+          <span className={suffixClassName ?? defaultSuffixClass}>{suffix}</span>
         ) : null}
       </div>
     </div>
@@ -73,6 +75,10 @@ export default function JokerMetricsStrip({
   );
   const yesCount = useMemo(() => safeNum(joker.acceptedCount), [joker.acceptedCount]);
   const rejected = useMemo(() => safeNum(joker.rejectedCount), [joker.rejectedCount]);
+  const totalRows = useMemo(
+    () => safeNum(joker.totalSent ?? joker.totalSuggestions),
+    [joker.totalSent, joker.totalSuggestions],
+  );
 
   const acceptancePct = useMemo(() => {
     const decided = yesCount + rejected;
@@ -80,13 +86,13 @@ export default function JokerMetricsStrip({
   }, [yesCount, rejected]);
 
   const yesValueClass =
-    "font-cinzel font-bold text-7xl min-[900px]:text-8xl leading-none tracking-[0.06em] text-emerald-400 tabular-nums";
+    "font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-emerald-400 tabular-nums";
   const accValueClass =
-    "font-cinzel font-bold text-7xl min-[900px]:text-8xl leading-none tracking-[0.06em] text-gold-300 tabular-nums";
+    "font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums";
 
   /** Same section title as QueendomPanel “Special Dates”. */
   const jokerTitleClass =
-    "font-inter font-semibold text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne";
+    "font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne";
 
   const innerGrid = (
     <div
@@ -97,18 +103,24 @@ export default function JokerMetricsStrip({
       }
     >
       <JokerMetricBox
-        label="Ideas"
+        label="Recommendations"
         value={uniqueIdeas}
         delay={baseDelayMs + 150}
       />
       <JokerMetricBox
-        label="Response"
+        label="Responses"
         value={yesCount}
         delay={baseDelayMs + 250}
         valueClassName={yesValueClass}
+        suffix={
+          <>
+            / {totalRows}
+          </>
+        }
+        suffixClassName="font-inter text-[clamp(1.4rem,2.25vw,2.25rem)] text-champagne/45 font-semibold"
       />
       <JokerMetricBox
-        label="Acceptance"
+        label="Acceptance Rate"
         value={acceptancePct}
         delay={baseDelayMs + 350}
         valueClassName={accValueClass}

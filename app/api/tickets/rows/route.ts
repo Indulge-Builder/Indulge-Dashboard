@@ -9,6 +9,7 @@
 import { NextResponse } from "next/server";
 import type { TicketRowMinimal } from "@/lib/ticketAggregation";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { getCurrentIstMonthUtcBounds } from "@/lib/istMonthBounds";
 
 const SELECT_COLS =
   "id:ticket_id, status, queendom_name, agent_name, created_at, resolved_at, is_escalated, tags";
@@ -26,6 +27,24 @@ export async function GET() {
     );
   }
 
+  const { startUtcIso: startOfMonthISTUtcIso } = getCurrentIstMonthUtcBounds();
+  // Safety: always include old tickets that are still pending (status not Resolved/Closed),
+  // even if they were created before the current IST month.
+  //
+  // Note: status in the DB may have inconsistent casing; we exclude common variants.
+  const resolvedClosedVariants = [
+    "resolved",
+    "Resolved",
+    "RESOLVED",
+    "closed",
+    "Closed",
+    "CLOSED",
+  ];
+  const orFilter = [
+    `created_at.gte.${startOfMonthISTUtcIso}`,
+    `status.not.in.(${resolvedClosedVariants.join(",")})`,
+  ].join(",");
+
   let allRows: TicketRowMinimal[] = [];
   let from = 0;
 
@@ -33,6 +52,7 @@ export async function GET() {
     const { data, error } = await db
       .from("tickets")
       .select(SELECT_COLS)
+      .or(orFilter)
       .range(from, from + PAGE - 1);
 
     if (error) {
@@ -49,6 +69,7 @@ export async function GET() {
             .select(
               "id:ticket_id, status, queendom_name, agent_name, created_at, resolved_at, is_escalated",
             )
+            .or(orFilter)
             .range(fbFrom, fbFrom + PAGE - 1);
           if (fbErr) {
             console.error("[/api/tickets/rows] Supabase error:", fbErr.message);

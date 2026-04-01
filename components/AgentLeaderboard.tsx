@@ -214,15 +214,11 @@ const AgentRow = memo(function AgentRow({
 
   return (
     <motion.div
-      layout
       variants={rowVariants}
       custom={rowDelay}
       initial="hidden"
       animate="visible"
       exit="exit"
-      transition={{
-        layout: { type: "tween", ease: "easeInOut", duration: 0.5 },
-      }}
       style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
       className="relative overflow-hidden rounded-xl"
     >
@@ -310,7 +306,7 @@ const AgentRow = memo(function AgentRow({
         </motion.div>
 
         <motion.p
-          className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-champagne leading-none truncate pl-2"
+          className="font-baskerville font-semibold text-[clamp(0.95rem,1.55vw,1.95rem)] tracking-wide text-champagne leading-none truncate pl-2"
           style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
           animate={
             surgeKey > 0
@@ -326,15 +322,15 @@ const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={today}
-            className="font-edu text-[clamp(1.4rem,2.2vw,2.8rem)] leading-none text-green-400 tabular-nums font-semibold"
+            className="font-edu text-[clamp(1.55rem,2.45vw,3.1rem)] leading-none text-green-400 tabular-nums font-semibold"
             highlightOnIncrease
           />
-          <span className="font-inter text-[clamp(0.75rem,0.9vw,1.2rem)] text-white/25 leading-none">
+          <span className="font-inter text-[clamp(0.85rem,1.05vw,1.35rem)] text-white/25 leading-none">
             /
           </span>
           <AnimatedValue
             value={received}
-            className="font-inter text-[clamp(1rem,1.3vw,1.6rem)] text-white/40 leading-none tabular-nums"
+            className="font-inter text-[clamp(1.1rem,1.45vw,1.8rem)] text-white/40 leading-none tabular-nums"
           />
         </div>
 
@@ -342,18 +338,18 @@ const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={agent.tasksCompletedThisMonth ?? 0}
-            className="font-edu tabular-nums font-semibold leading-none text-[clamp(1.4rem,2.2vw,2.8rem)]"
+            className="font-edu tabular-nums font-semibold leading-none text-[clamp(1.55rem,2.45vw,3.1rem)]"
             style={{
               color:
                 rank === 1 ? "rgba(212,175,55,0.9)" : "rgba(190,190,190,0.75)",
             }}
           />
-          <span className="font-inter text-[clamp(0.75rem,0.9vw,1.2rem)] text-white/25 leading-none">
+          <span className="font-inter text-[clamp(0.85rem,1.05vw,1.35rem)] text-white/25 leading-none">
             /
           </span>
           <AnimatedValue
             value={agent.tasksAssignedThisMonth ?? 0}
-            className="font-inter text-[clamp(1rem,1.3vw,1.6rem)] text-white/40 leading-none tabular-nums"
+            className="font-inter text-[clamp(1.1rem,1.45vw,1.8rem)] text-white/40 leading-none tabular-nums"
           />
         </div>
 
@@ -361,15 +357,15 @@ const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={pending}
-            className="font-edu text-[clamp(1.2rem,1.8vw,2.5rem)] leading-none tabular-nums font-semibold text-red-400"
+            className="font-edu text-[clamp(1.35rem,2.05vw,2.75rem)] leading-none tabular-nums font-semibold text-red-400"
             highlightOnIncrease
           />
-          <span className="font-edu text-[clamp(1.2rem,1.8vw,2.5rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-edu text-[clamp(1.35rem,2.05vw,2.75rem)] leading-none tabular-nums font-bold text-white/30">
             /
           </span>
           <AnimatedValue
             value={overdue}
-            className={`font-edu text-[clamp(1.2rem,1.8vw,2.5rem)] leading-none tabular-nums font-bold ${
+            className={`font-edu text-[clamp(1.35rem,2.05vw,2.75rem)] leading-none tabular-nums font-bold ${
               hasOverdue ? "error-overdue-glow" : "text-white/40"
             }`}
           />
@@ -394,45 +390,43 @@ export default function AgentLeaderboard({
   celebrationAgent = null,
 }: AgentLeaderboardProps) {
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="sticky top-0 z-10 bg-obsidian/98 border-b border-gold-500/20 flex-shrink-0 backdrop-blur-sm">
-          <div
-            className={`grid ${GRID_COLS} gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 pb-[0.9vh]`}
-          >
-            <span />
-            <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold pl-2">
-              Genies
-            </span>
-            <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-green-400 font-semibold text-center">
-              Today
-            </span>
-            <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne font-semibold text-center">
-              Monthly
-            </span>
-            <span className="font-inter text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-red-400 font-semibold text-center">
-              Pending
-            </span>
-          </div>
+    <div className="flex w-full flex-col">
+      <div className="z-10 bg-obsidian/98 border-b border-gold-500/20 flex-shrink-0 backdrop-blur-sm">
+        <div
+          className={`grid ${GRID_COLS} gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 pb-[0.9vh]`}
+        >
+          <span />
+          <span className="font-inter text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold pl-2">
+            Genies
+          </span>
+          <span className="font-inter text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-green-400 font-semibold text-center">
+            Today
+          </span>
+          <span className="font-inter text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne font-semibold text-center">
+            Monthly
+          </span>
+          <span className="font-inter text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-red-400 font-semibold text-center">
+            Pending
+          </span>
         </div>
+      </div>
 
-        <div className="pt-[0.5vh]">
-          <AnimatePresence mode="popLayout">
-            {agents.map((agent, i) => (
-              <AgentRow
-                key={agent.id}
-                agent={agent}
-                index={i}
-                totalAgents={agents.length}
-                baseDelay={queendomDelay}
-                isWinning={
-                  celebrationAgent !== null &&
-                  agent.name.toLowerCase() === celebrationAgent.toLowerCase()
-                }
-              />
-            ))}
-          </AnimatePresence>
-        </div>
+      <div className="pt-[0.5vh]">
+        <AnimatePresence>
+          {agents.map((agent, i) => (
+            <AgentRow
+              key={agent.id}
+              agent={agent}
+              index={i}
+              totalAgents={agents.length}
+              baseDelay={queendomDelay}
+              isWinning={
+                celebrationAgent !== null &&
+                agent.name.toLowerCase() === celebrationAgent.toLowerCase()
+              }
+            />
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );

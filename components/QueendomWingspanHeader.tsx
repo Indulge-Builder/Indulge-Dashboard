@@ -55,11 +55,11 @@ function MetricPill({
 
 /** Matches `MetricBox` / 5-metric hero label typography in QueendomPanel */
 const metricLabelClass =
-  "font-inter shrink-0 font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.25em] uppercase leading-none";
+  "font-inter shrink-0 font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase leading-none";
 
 /** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
 const pillNumberSizeClass =
-  "text-[clamp(1.95rem,3.12vw,3.055rem)]";
+  "text-[clamp(2.15rem,3.45vw,3.45rem)]";
 
 /** White readout with a softer gold aura than `gold-glow` on paid — still “ours,” still cherished */
 const unpaidNumberClass =
@@ -101,7 +101,7 @@ export default function QueendomWingspanHeader({
         </div>
 
         {/* Center — Queendom name (original broadcast styling) */}
-        <h2 className="font-cinzel min-w-0 justify-self-center px-2 text-center text-5xl min-[900px]:text-6xl xl:text-7xl tracking-[0.28em] text-gold-400 queen-name-glow uppercase leading-none font-bold">
+        <h2 className="font-cinzel min-w-0 justify-self-center px-2 text-center text-6xl min-[900px]:text-7xl xl:text-8xl tracking-[0.28em] text-gold-400 queen-name-glow uppercase leading-none font-bold">
           {name}
         </h2>
 

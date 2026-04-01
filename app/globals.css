@@ -22,8 +22,12 @@ body {
   background: var(--obsidian);
 }
 
-/* Lock to viewport on tablets and up */
+/* Lock to viewport on tablets and up; larger root type for TV / distance viewing */
 @media (min-width: 768px) {
+  html {
+    font-size: 112.5%;
+  }
+
   html,
   body {
     width: 100vw;
@@ -50,17 +54,13 @@ body::before {
 /* ── Glassmorphism: 1px gold border (20%), backdrop blur ── */
 @layer utilities {
   .glass {
-    background: rgba(5, 5, 5, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--gold-border);
+    background: rgba(10, 10, 10, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.18);
   }
 
   .glass-pill {
-    background: rgba(5, 5, 5, 0.88);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--gold-border);
+    background: rgba(10, 10, 10, 0.88);
+    border: 1px solid rgba(212, 175, 55, 0.18);
   }
 
   .gold-border-glow {
@@ -223,25 +223,8 @@ body::before {
     display: inline-flex;
     align-items: center;
     padding: 0 4rem; /* Wide spacing for luxury feel */
-    font-size: 1.75rem; /* Large enough for TV / 15 feet */
+    font-size: 2rem; /* TV / distance — matches scaled dashboard type */
     color: #f9e27e; /* Soft Gold */
-  }
-
-  /* Special Dates — "BIG DAY" breathing glow for Today cards */
-  @keyframes birthday-pulse {
-    0% {
-      box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
-    }
-    50% {
-      box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
-    }
-    100% {
-      box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
-    }
-  }
-
-  .today-highlight {
-    animation: birthday-pulse 3s infinite ease-in-out;
   }
 
   /* RenewalsPanel — gold gradient text for names */

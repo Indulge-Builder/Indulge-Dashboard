@@ -21,7 +21,7 @@ function NameRow({ name, isNew }: { name: string; isNew: boolean }) {
         strokeWidth={2.5}
       />
       <span
-        className={`font-inter font-semibold text-[clamp(1.25rem,2.2vw,1.75rem)] truncate renewal-card-text ${
+        className={`font-inter font-semibold text-[clamp(1.4rem,2.45vw,1.95rem)] truncate renewal-card-text ${
           isNew ? "celebration-shimmer-text" : ""
         }`}
         style={{ maxWidth: "100%" }}
@@ -44,12 +44,12 @@ export default function RenewalsPanel({
       <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] to-transparent pointer-events-none rounded-2xl" />
       {/* ── Counter (Left) — same as Spoiled card (joker-box, text-gold-300) ──── */}
       <div className="flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[clamp(140px,18vw,200px)] joker-box rounded-xl border border-liquid-gold-end/35 px-4 py-3">
-        <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
+        <p className="font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
           RENEWALS
         </p>
         <AnimatedCounter
           value={data.totalRenewalsThisMonth}
-          className="font-edu text-7xl min-[900px]:text-8xl leading-none text-gold-300 tabular-nums"
+          className="font-edu text-8xl min-[900px]:text-9xl leading-none text-gold-300 tabular-nums"
           delay={delay + 200}
           slideOnChange
         />
@@ -57,12 +57,12 @@ export default function RenewalsPanel({
 
       {/* ── Renewals List (Center) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-4 min-w-0">
-        <p className="font-inter font-semibold text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
+        <p className="font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
           Latest Renewals
         </p>
         <div className="flex flex-col items-center gap-3 w-full">
           {data.renewals.length === 0 ? (
-            <p className="font-inter font-semibold text-[clamp(1.25rem,2.2vw,1.75rem)] text-champagne/50">
+            <p className="font-inter font-semibold text-[clamp(1.4rem,2.45vw,1.95rem)] text-champagne/50">
               —
             </p>
           ) : (
@@ -78,12 +78,12 @@ export default function RenewalsPanel({
 
       {/* ── Latest members (Right) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-4 min-w-0">
-        <p className="font-inter font-semibold text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
+        <p className="font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
           Latest Members
         </p>
         <div className="flex flex-col items-center gap-3 w-full">
           {data.assignments.length === 0 ? (
-            <p className="font-inter font-semibold text-[clamp(1.25rem,2.2vw,1.75rem)] text-champagne/50">
+            <p className="font-inter font-semibold text-[clamp(1.4rem,2.45vw,1.95rem)] text-champagne/50">
               —
             </p>
           ) : (

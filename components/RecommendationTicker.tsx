@@ -125,13 +125,13 @@ const TickerItem = memo(function TickerItem({
           />
         </div>
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <span className="font-cinzel font-semibold text-[clamp(1.2rem,1.8vw,1.9rem)] text-white/95 tracking-wide whitespace-nowrap">
+          <span className="font-cinzel font-semibold text-[clamp(1.35rem,2.05vw,2.15rem)] text-white/95 tracking-wide whitespace-nowrap">
             {item.city}
           </span>
-          <span className="text-gold-400/60 font-cinzel text-[clamp(1rem,1.4vw,1.5rem)]">
+          <span className="text-gold-400/60 font-cinzel text-[clamp(1.15rem,1.6vw,1.7rem)]">
             |
           </span>
-          <span className="font-baskerville font-semibold text-[clamp(1.2rem,1.8vw,1.9rem)] tracking-wide text-champagne truncate max-w-[20ch] sm:max-w-[28ch]">
+          <span className="font-baskerville font-semibold text-[clamp(1.35rem,2.05vw,2.15rem)] tracking-wide text-champagne truncate max-w-[20ch] sm:max-w-[28ch]">
             {item.suggestion}
           </span>
         </div>
@@ -172,7 +172,7 @@ function RecommendationTickerInner({
           background: "rgba(5, 5, 5, 0.92)",
         }}
       >
-        <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1rem,1.5vw,1.5rem)] tracking-widest uppercase">
+        <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1.15rem,1.7vw,1.7rem)] tracking-widest uppercase">
           Loading recommendations…
         </p>
       </div>

@@ -70,7 +70,6 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
           return (
             <motion.div
               key={item.id}
-              layout
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
@@ -79,7 +78,6 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                 relative flex-shrink-0 flex w-full min-h-[clamp(70px,10vh,100px)]
                 flex-row items-center justify-between gap-4
                 rounded-xl overflow-hidden px-4 py-3
-                ${isTodayCard ? "today-highlight" : ""}
                 ${isAnniversary ? "anniversary-highlight" : ""}
               `}
               style={
@@ -87,9 +85,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                   ? {
                       background:
                         "linear-gradient(140deg, rgba(30,16,22,0.96) 0%, rgba(64,22,38,0.95) 34%, rgba(20,46,34,0.94) 68%, rgba(18,28,22,0.96) 100%), radial-gradient(circle at 14% 18%, rgba(249,226,126,0.2) 0%, rgba(249,226,126,0.05) 22%, transparent 48%), radial-gradient(circle at 88% 86%, rgba(212,175,55,0.18) 0%, transparent 52%)",
-                      border: "1px solid rgba(212,175,55,0.58)",
-                      boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,0.09), inset 0 -1px 0 rgba(15,10,8,0.45), 0 0 0 1px rgba(249,226,126,0.12)",
+                      border: "2px solid #d4af37",
                     }
                   : isAnniversary
                     ? {
@@ -108,7 +104,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
             >
               <>
                 <div className="flex items-center justify-center leading-none flex-shrink-0">
-                  <span className="font-edu font-bold text-[clamp(2rem,4vw,3rem)] tabular-nums text-champagne/95">
+                  <span className="font-edu font-bold text-[clamp(2.25rem,4.4vw,3.4rem)] tabular-nums text-champagne/95">
                     {formatDay(item.date)}
                   </span>
                 </div>
@@ -130,7 +126,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                       aria-hidden
                     />
                   )}
-                  <span className="font-baskerville font-semibold text-[clamp(1.25rem,2.2vw,1.75rem)] text-champagne/90 truncate text-center leading-tight">
+                  <span className="font-baskerville font-semibold text-[clamp(1.4rem,2.45vw,1.95rem)] text-champagne/90 truncate text-center leading-tight">
                     {item.clientName}
                   </span>
                 </div>

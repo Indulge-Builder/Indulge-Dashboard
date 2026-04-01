@@ -107,10 +107,7 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     // ── 2. Solved Today ───────────────────────────────────────────────────────
     // Tickets CREATED today that are now resolved. Same logic as agents'
     // tasksCompletedToday: created_at day === TODAY, status = "resolved".
-    if (
-      status === RESOLVED_STATUS &&
-      createdDay === todayIST
-    ) {
+    if (status === RESOLVED_STATUS && createdDay === todayIST) {
       bucket.solvedToday++;
     }
 

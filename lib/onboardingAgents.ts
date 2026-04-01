@@ -12,6 +12,32 @@ export const ONBOARDING_AGENT_DISPLAY_NAMES = [
 export type OnboardingAgentDisplayName =
   (typeof ONBOARDING_AGENT_DISPLAY_NAMES)[number];
 
+/**
+ * Zoho CRM sends owner full names in webhooks; we store canonical `display_name`.
+ * Keys: normalized lowercase single spaces (trim + collapse whitespace).
+ */
+const ZOHO_FULL_NAME_TO_DISPLAY: Record<string, OnboardingAgentDisplayName> = {
+  "amit agarwal": "Amit",
+  "samson fernandes": "Samson",
+  "meghana singh": "Meghana",
+};
+
+/**
+ * Map Zoho `agent_name` (full name or first name only) to canonical display name.
+ */
+export function normalizeZohoAgentName(raw: string): string {
+  const trimmed = raw.trim().replace(/\s+/g, " ");
+  if (!trimmed) return "";
+  const asKey = trimmed.toLowerCase();
+  const fromFull = ZOHO_FULL_NAME_TO_DISPLAY[asKey];
+  if (fromFull) return fromFull;
+  const firstWord = trimmed.split(" ")[0] ?? trimmed;
+  const match = ONBOARDING_AGENT_DISPLAY_NAMES.find(
+    (n) => n.toLowerCase() === firstWord.toLowerCase(),
+  );
+  return match ?? trimmed;
+}
+
 /** Card order + stable ids for portraits (OnboardingPanel). */
 export const ONBOARDING_AGENT_CARDS: readonly {
   id: string;

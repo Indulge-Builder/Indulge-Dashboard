@@ -34,18 +34,27 @@ const blurTransition = {
 };
 
 const screenVariants = {
-  initial: { opacity: 0, filter: "blur(4px)" },
+  initial: { opacity: 0 },
   animate: {
     opacity: 1,
-    filter: "blur(0px)",
     transition: blurTransition,
   },
   exit: {
     opacity: 0,
-    filter: "blur(4px)",
     transition: blurTransition,
   },
 };
+
+/** TV browsers / remotes often omit `key` or use legacy keyCode; fullscreen can eat events before bubble. */
+function isFreezeToggleKey(e: KeyboardEvent): boolean {
+  if (e.key === "p" || e.key === "P") return true;
+  if (e.key === " " || e.code === "Space") return true;
+  if (e.key === "Enter" || e.code === "Enter" || e.code === "NumpadEnter") return true;
+  if (e.code === "MediaPlayPause") return true;
+  // Legacy WebKit / embedded TV engines
+  if (typeof e.keyCode === "number" && e.keyCode === 13) return true;
+  return false;
+}
 
 export default function DashboardController({
   className,
@@ -69,9 +78,9 @@ export default function DashboardController({
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // TV remotes commonly send Enter / OK. Space works on keyboards.
-      if (e.key === "Enter" || e.key === " ") {
+      if (isFreezeToggleKey(e)) {
         e.preventDefault();
+        e.stopPropagation();
         setIsFrozen((v) => !v);
         return;
       }
@@ -79,30 +88,40 @@ export default function DashboardController({
       e.preventDefault();
       setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    // Capture: run before other handlers / fullscreen UI; helps TV + embedded browsers.
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
   return (
     <div
-      className={`relative flex min-h-0 w-full min-w-0 flex-1 ${className ?? ""}`}
+      className={`relative flex h-full min-h-0 w-full min-w-0 flex-1 ${className ?? ""}`}
     >
-      {isFrozen ? (
-        <div className="pointer-events-none absolute right-4 top-4 z-50 rounded-full border border-gold-500/30 bg-black/35 px-4 py-2 font-inter text-sm tracking-[0.35em] text-gold-300 backdrop-blur-md">
-          PAUSED
-        </div>
-      ) : null}
+      {/* Always clickable: TV remotes often fail to deliver Enter to window; use pointer + P key + OK */}
+      <button
+        type="button"
+        aria-pressed={isFrozen}
+        aria-label={isFrozen ? "Resume auto-switching" : "Pause on this screen"}
+        className={`absolute right-3 top-3 z-[100] min-h-[48px] min-w-[140px] rounded-full border px-5 py-2.5 font-inter text-base font-semibold tracking-[0.2em] shadow-lg backdrop-blur-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/80 ${
+          isFrozen
+            ? "border-emerald-500/50 bg-emerald-950/75 text-emerald-200"
+            : "border-gold-500/40 bg-black/50 text-gold-200 hover:bg-black/65"
+        }`}
+        onClick={() => setIsFrozen((v) => !v)}
+      >
+        {isFrozen ? "RESUME" : "PAUSE"}
+      </button>
       <AnimatePresence mode="wait">
         {activeScreen === "concierge" ? (
           <motion.div
             key="concierge"
-            className="flex w-full flex-1 min-h-0 min-w-0 flex-col gap-8 md:flex-row md:items-stretch"
+            className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col gap-8 md:flex-row md:items-stretch"
             variants={screenVariants}
             initial="initial"
             animate="animate"
             exit="exit"
           >
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col md:basis-0">
               <QueendomPanel
                 name="Ananyshree"
                 stats={ananyshreeStats}
@@ -139,7 +158,7 @@ export default function DashboardController({
 
             <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-gold-500/25 to-transparent md:hidden" />
 
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col md:basis-0">
               <QueendomPanel
                 name="Anishqa"
                 stats={anishqaStats}

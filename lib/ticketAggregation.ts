@@ -3,7 +3,12 @@
  * Used so Realtime can patch state (INSERT/UPDATE) without refetching.
  */
 
-import { istToday, toISTDay, toISTMonth } from "./istDate";
+import {
+  istToday,
+  toISTDay,
+  toISTMonth,
+  utcMillisFromDbTimestamp,
+} from "./istDate";
 import type { TicketStats, AgentStats } from "./types";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "./agentRoster";
 import { buildRoster } from "./agentRoster";
@@ -213,4 +218,27 @@ export function mergeAndRankAgents(rows: TicketRowMinimal[]): {
     ananyshree: merge(rosterA, live.ananyshree),
     anishqa: merge(rosterB, live.anishqa),
   };
+}
+
+/** Max rows in Dashboard client state so Realtime + long uptimes cannot grow unbounded. */
+export const MAX_TICKET_ROWS_IN_DASHBOARD_STATE = 5000;
+
+/**
+ * Keep only tickets whose created_at falls in the current IST calendar month
+ * (matches aggregateTicketStats / mergeAndRankAgents gates), then cap count
+ * (newest first) if the month is extremely large.
+ */
+export function pruneTicketRowsForDashboardState(
+  rows: TicketRowMinimal[],
+): TicketRowMinimal[] {
+  const thisMonth = istToday().month;
+  const inMonth = rows.filter((r) => toISTMonth(r.created_at) === thisMonth);
+  if (inMonth.length <= MAX_TICKET_ROWS_IN_DASHBOARD_STATE) return inMonth;
+  return [...inMonth]
+    .sort((a, b) => {
+      const ta = utcMillisFromDbTimestamp(a.created_at) ?? 0;
+      const tb = utcMillisFromDbTimestamp(b.created_at) ?? 0;
+      return tb - ta;
+    })
+    .slice(0, MAX_TICKET_ROWS_IN_DASHBOARD_STATE);
 }

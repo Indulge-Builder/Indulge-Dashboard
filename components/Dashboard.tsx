@@ -18,6 +18,7 @@ import type { TicketRowMinimal } from "@/lib/ticketAggregation";
 import {
   aggregateTicketStats,
   mergeAndRankAgents,
+  pruneTicketRowsForDashboardState,
 } from "@/lib/ticketAggregation";
 import type { JokerRecommendationItem } from "@/app/api/jokers/recommendations/route";
 import TopBar from "./TopBar";
@@ -154,7 +155,9 @@ export default function Dashboard() {
       const res = await fetch("/api/tickets/rows", { cache: "no-store" });
       if (!res.ok) return;
       const rows: TicketRowMinimal[] = await res.json();
-      setTicketRows(Array.isArray(rows) ? rows : []);
+      setTicketRows(
+        pruneTicketRowsForDashboardState(Array.isArray(rows) ? rows : []),
+      );
     } catch (err) {
       console.error("[Dashboard] fetchTicketRows failed:", err);
     }
@@ -236,6 +239,14 @@ export default function Dashboard() {
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
+
+  // Re-prune when IST month rolls (no realtime event required to drop last month’s rows)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setTicketRows((prev) => pruneTicketRowsForDashboardState(prev));
+    }, 5 * 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   // Realtime: optimistic patch only; no polling — subscriptions are the source of truth
   useEffect(() => {
@@ -321,15 +332,17 @@ export default function Dashboard() {
                 if (i >= 0) {
                   const next = [...prev];
                   next[i] = row;
-                  return next;
+                  return pruneTicketRowsForDashboardState(next);
                 }
-                return [...prev, row];
+                return pruneTicketRowsForDashboardState([...prev, row]);
               });
           } else if (payload.eventType === "UPDATE" && payload.new) {
             const row = toTicketRow(payload.new as Record<string, unknown>);
             if (row)
               setTicketRows((prev) =>
-                prev.map((r) => (r.id === row.id ? row : r))
+                pruneTicketRowsForDashboardState(
+                  prev.map((r) => (r.id === row.id ? row : r)),
+                ),
               );
           } else if (payload.eventType === "DELETE" && payload.old) {
             const oldRow = toTicketRow(payload.old as Record<string, unknown>);

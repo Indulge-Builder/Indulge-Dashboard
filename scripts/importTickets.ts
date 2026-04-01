@@ -26,6 +26,7 @@ if (fs.existsSync(envPath)) {
   }
 }
 import csv from "csv-parser";
+import { timestampStringToIsoUtcForDb } from "@/lib/istDate";
 
 const BATCH_SIZE = 400;
 
@@ -44,10 +45,7 @@ interface TicketRow {
 
 function parseTimestamp(value: string | undefined): string | null {
   if (value == null || String(value).trim() === "") return null;
-  const trimmed = String(value).trim();
-  const parsed = new Date(trimmed);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return parsed.toISOString();
+  return timestampStringToIsoUtcForDb(String(value).trim());
 }
 
 function transformRow(row: CsvRow): TicketRow | null {

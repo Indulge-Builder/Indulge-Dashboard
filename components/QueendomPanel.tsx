@@ -65,13 +65,13 @@ function MetricBox({
       style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
     >
       <p
-        className={`font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
+        className={`font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
       >
         {label}
       </p>
       <AnimatedCounter
         value={value}
-        className={`font-cinzel font-bold text-7xl min-[900px]:text-8xl leading-none tracking-[0.06em] ${valueColor} tabular-nums`}
+        className={`font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] ${valueColor} tabular-nums`}
         delay={delay}
         slideOnChange={slideOnChange}
       />
@@ -125,14 +125,13 @@ export default function QueendomPanel({
     [stats.joker?.uniqueSuggestionsCount],
   );
   const jokerTotalReach = useMemo(
-    () =>
-      safeNum(stats.joker?.totalSent ?? stats.joker?.totalSuggestions),
+    () => safeNum(stats.joker?.totalSent ?? stats.joker?.totalSuggestions),
     [stats.joker?.totalSent, stats.joker?.totalSuggestions],
   );
 
   return (
     <motion.section
-      className="relative flex-1 flex flex-col min-h-[85svh] md:min-h-0 overflow-y-auto overflow-x-hidden"
+      className="relative flex min-h-[85svh] flex-1 flex-col overflow-y-auto overflow-x-hidden md:min-h-0 md:h-full"
       style={{ padding: "2vh clamp(12px, 3vw, 40px)" }}
       variants={containerVariants}
       initial="hidden"
@@ -163,7 +162,7 @@ export default function QueendomPanel({
           delayMs={delay}
         />
 
-        <p className="font-inter mb-[0.9vh] mt-[0.35vh] text-[clamp(19px,2.05vw,32px)] font-semibold uppercase tracking-[0.42em] text-gold-300 gold-glow">
+        <p className="font-inter mb-[0.9vh] mt-[0.35vh] text-[clamp(22px,2.35vw,38px)] font-semibold uppercase tracking-[0.42em] text-gold-300 gold-glow">
           Queendom
         </p>
 
@@ -184,12 +183,12 @@ export default function QueendomPanel({
           <div className="grid grid-cols-2 min-[700px]:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 w-full">
             {/* 1. Total Solved Today — ANCHOR (Green Glow) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
-              <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
+              <p className="font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
                 Resolved <br /> (Today)
               </p>
               <AnimatedCounter
                 value={solvedToday}
-                className="font-cinzel font-bold text-7xl min-[900px]:text-8xl leading-none tracking-[0.06em] text-emerald-400 emerald-glow-hero tabular-nums"
+                className="font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-emerald-400 emerald-glow-hero tabular-nums"
                 delay={delay + 800}
                 slideOnChange
               />
@@ -243,16 +242,16 @@ export default function QueendomPanel({
 
             {/* 5. Spoiled — accepted wins; funnel = unique ideas × reach */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
-              <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.3em] uppercase text-champagne mb-[0.25vh]">
+              <p className="font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.3em] uppercase text-champagne mb-[0.25vh]">
                 Spoiled
               </p>
-              <p className="font-inter mb-[0.45vh] text-lg tracking-widest opacity-70 text-champagne">
+              <p className="font-inter mb-[0.45vh] text-xl tracking-widest opacity-70 text-champagne">
                 {jokerUniqueIdeas.toLocaleString("en-IN")} IDEAS •{" "}
                 {jokerTotalReach.toLocaleString("en-IN")} REACH
               </p>
               <AnimatedCounter
                 value={jokerAccepted}
-                className="font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums"
+                className="font-cinzel font-bold text-9xl min-[900px]:text-[9rem] leading-none tracking-[0.06em] text-gold-300 tabular-nums"
                 delay={delay + 1200}
                 slideOnChange
               />
@@ -277,19 +276,17 @@ export default function QueendomPanel({
 
       {/* ── Agent Leaderboard (left) + Special Dates (right) ── */}
       <motion.div
-        className="flex-1 min-h-0 flex flex-col md:flex-row gap-4 glass gold-border-glow rounded-2xl relative overflow-hidden"
+        className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl glass gold-border-glow md:flex-row md:items-stretch"
         style={{ padding: "1.6vh clamp(10px, 2vw, 28px)" }}
         variants={itemVariants}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0 overflow-hidden">
-          <div className="min-h-0 flex-1 overflow-hidden">
-            <AgentLeaderboard
-              agents={stats.agents}
-              queendomDelay={delay / 1000 + 0.3}
-              celebrationAgent={celebrationAgent}
-            />
-          </div>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0">
+          <AgentLeaderboard
+            agents={stats.agents}
+            queendomDelay={delay / 1000 + 0.3}
+            celebrationAgent={celebrationAgent}
+          />
           {stats.joker != null && jokerDisplayName != null ? (
             <JokerMetricsStrip
               compact
@@ -301,13 +298,14 @@ export default function QueendomPanel({
           <ActiveOutlays
             queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
             delayMs={delay + 1580}
+            fillRemaining
           />
         </div>
         {/* ── Special Dates (right of Team Leaderboard) ── */}
-        <div className="flex-shrink-0 md:w-[clamp(320px,38vw,520px)] flex flex-col items-center md:border-l border-gold-500/20 md:pl-4 pt-4 md:pt-0 md:border-t-0 border-t border-gold-500/20">
+        <div className="flex-shrink-0 md:w-[clamp(320px,38vw,520px)] flex flex-col items-center md:border-l md:pl-4 pt-4 md:pt-0 md:border-t-0 border-t border-gold-500/20">
           <div className="flex items-center gap-3 w-full mb-[1.8vh]">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-            <p className="font-inter font-semibold text-[clamp(0.9rem,1.2vw,1.4rem)] tracking-[0.4em] uppercase text-champagne flex-shrink-0">
+            <p className="font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne flex-shrink-0">
               Special Dates
             </p>
             <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />

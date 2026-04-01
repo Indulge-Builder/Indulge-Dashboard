@@ -154,7 +154,7 @@ const AgentCard = memo(function AgentCard({
         }}
       >
         <span
-          className="font-cinzel text-7xl tracking-[0.2em] text-gold-300"
+          className="font-cinzel text-8xl tracking-[0.2em] text-gold-300"
           style={{
             textShadow: "0 0 20px rgba(212,175,55,0.8)",
             transform: "translate3d(0,0,0)",
@@ -166,7 +166,7 @@ const AgentCard = memo(function AgentCard({
 
       {/* Name card with gold flash sweep */}
       <div className="relative flex flex-col items-center gap-4">
-        <p className="font-inter text-2xl sm:text-3xl tracking-[0.4em] uppercase text-gold-500/80">
+        <p className="font-inter text-3xl sm:text-4xl tracking-[0.4em] uppercase text-gold-500/80">
           Ticket Resolved
         </p>
         <div className="relative overflow-hidden rounded-xl px-12 py-4">
@@ -177,7 +177,7 @@ const AgentCard = memo(function AgentCard({
             aria-hidden
           />
           <h2
-            className="font-cinzel text-7xl sm:text-8xl tracking-[0.15em] text-gold-300 relative z-10"
+            className="font-cinzel text-8xl sm:text-9xl tracking-[0.15em] text-gold-300 relative z-10"
             style={{
               textShadow: "0 0 24px rgba(212,175,55,0.5)",
               transform: "translate3d(0,0,0)",
@@ -186,7 +186,7 @@ const AgentCard = memo(function AgentCard({
             {agentName}
           </h2>
         </div>
-        <span className="font-inter text-2xl sm:text-3xl tracking-[0.35em] uppercase text-gold-400/70">
+        <span className="font-inter text-3xl sm:text-4xl tracking-[0.35em] uppercase text-gold-400/70">
           + 1 Point
         </span>
       </div>

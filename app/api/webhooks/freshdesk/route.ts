@@ -55,6 +55,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { timestampStringToIsoUtcForDb } from "@/lib/istDate";
 
 type WebhookType = "upsert" | "update" | "deletion";
 
@@ -284,7 +285,8 @@ export async function POST(req: NextRequest) {
   // On INSERT without it, the DB DEFAULT NOW() applies automatically.
   // On conflict UPDATE, omitting it preserves the original creation time.
   if (isValidDate(ticket_created_at)) {
-    row.created_at = ticket_created_at;
+    const normalizedCreated = timestampStringToIsoUtcForDb(ticket_created_at.trim());
+    row.created_at = normalizedCreated ?? ticket_created_at.trim();
   }
 
   // resolved_at is determined by status category, not passed through blindly.
@@ -293,7 +295,8 @@ export async function POST(req: NextRequest) {
   // so the ON CONFLICT UPDATE leaves the existing DB value untouched.
   if (RESOLVED_STATUSES.has(statusLower)) {
     row.resolved_at = isValidDate(resolved_date_time)
-      ? resolved_date_time
+      ? timestampStringToIsoUtcForDb(resolved_date_time.trim()) ??
+        resolved_date_time.trim()
       : now;
     // Sync state: Resolved → force is_escalated=false (ignores payload)
     row.is_escalated = false;

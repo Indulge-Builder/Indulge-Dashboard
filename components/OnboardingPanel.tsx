@@ -77,8 +77,8 @@ function sortLedgerNewestFirst(
   );
 }
 
-/** Max rows in the scrolling ledger (newest first; matches API limit). */
-const LIVE_LEDGER_MAX = 25;
+/** Max rows in the scrolling ledger (newest first; strict TV memory cap). */
+const LIVE_LEDGER_MAX = 6;
 
 /**
  * Maps a Supabase INSERT row (snake_case) to OnboardingLedgerRow.
@@ -125,33 +125,33 @@ function ledgerRowFromInsertPayload(
  * (avoids vw-only or breakpoint jumps).
  */
 const ONBOARDING_CARD_TITLE_FONT =
-  "clamp(1.05rem, min(2.6vmin, 3vh), 3.5rem)";
+  "clamp(1.15rem, min(2.85vmin, 3.3vh), 3.85rem)";
 
 const ONBOARDING_AGENT_NAME_FONT =
-  "clamp(1.35rem, min(3.5vmin, 4vh), 4.75rem)";
+  "clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem)";
 
 const ONBOARDING_METRIC_VALUE_FONT =
-  "clamp(1.35rem, min(4vmin, 4.8vh), 5.25rem)";
+  "clamp(1.5rem, min(4.4vmin, 5.2vh), 5.75rem)";
 
 /** Attempted (This Month) / Closures (Last 30 Days) / Leads (Today) subtitles */
 const ONBOARDING_METRIC_SUBTITLE_FONT =
-  "clamp(1.15rem, min(3.2vmin, 3.6vh), 2.2rem)";
+  "clamp(1.25rem, min(3.5vmin, 3.95vh), 2.45rem)";
 
 const ONBOARDING_METRIC_SUBTITLE_CLASS =
   "font-inter font-semibold uppercase leading-snug tracking-[0.22em]";
 
 /** Page + ledger headings */
 const ONBOARDING_PAGE_TITLE_FONT =
-  "clamp(1.85rem, min(4.2vmin, 5.5vh), 4rem)";
+  "clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem)";
 
 const ONBOARDING_LEDGER_TITLE_FONT =
-  "clamp(1.5rem, min(3.5vmin, 4.5vh), 3.5rem)";
+  "clamp(1.65rem, min(3.85vmin, 4.9vh), 3.85rem)";
 
 const ONBOARDING_LEDGER_HEADER_FONT =
-  "clamp(0.95rem, min(2.1vmin, 2.6vh), 1.85rem)";
+  "clamp(1.05rem, min(2.35vmin, 2.85vh), 2.05rem)";
 
 const ONBOARDING_LEDGER_CELL_FONT =
-  "clamp(1.05rem, min(2.4vmin, 3vh), 3.25rem)";
+  "clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem)";
 
 function ConversionLedgerRow({
   row,
@@ -271,10 +271,6 @@ function EliteAgentCard({
             src={agentPortraitSrc(agent)}
             alt=""
             className="absolute inset-0 h-full w-full scale-[1.02] select-none object-cover object-[50%_22%]"
-            style={{
-              filter:
-                "brightness(1.1) saturate(1.22) contrast(1.1)",
-            }}
           />
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.06]"
@@ -466,11 +462,6 @@ export default function OnboardingPanel() {
 
   useEffect(() => {
     void load();
-  }, [load]);
-
-  useEffect(() => {
-    const id = window.setInterval(() => void load(), 10_000);
-    return () => clearInterval(id);
   }, [load]);
 
   useEffect(() => {

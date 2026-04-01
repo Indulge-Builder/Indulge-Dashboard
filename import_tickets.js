@@ -31,14 +31,37 @@ function pick(row, ...names) {
   return undefined;
 }
 
+/**
+ * Same rules as lib/istDate.ts: naive datetimes = Asia/Kolkata; explicit Z/offset = as given.
+ * Keep in sync when changing ticket timestamp parsing.
+ */
+function utcMillisFromExportTimestamp(str) {
+  let s = String(str).trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:/.test(s)) s = s.replace(" ", "T");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    s = `${s}T00:00:00+05:30`;
+  } else if (s.includes("T")) {
+    const rest = s.slice(s.indexOf("T") + 1);
+    if (rest && !/[zZ]|[+-]\d/.test(rest)) s = `${s}+05:30`;
+  } else return null;
+  if (s.includes("T")) s = s.replace(/([+-]\d{2})$/, "$1:00");
+  const t = new Date(s).getTime();
+  return Number.isNaN(t) ? null : t;
+}
+
+function toIsoUtcFromExportTimestamp(str) {
+  const ms = utcMillisFromExportTimestamp(str);
+  if (ms == null) return null;
+  return new Date(ms).toISOString();
+}
+
 /** "", "NULL" (any case), or undefined → null; otherwise ISO string or null if unparsable. */
 function normalizeResolvedAt(raw) {
   if (raw === undefined || raw === null) return null;
   const s = String(raw).trim();
   if (s === "" || s.toUpperCase() === "NULL") return null;
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+  return toIsoUtcFromExportTimestamp(s);
 }
 
 /** Empty, whitespace-only, or "FALSE" (any case) → false; "TRUE"/"1" → true. */
@@ -65,8 +88,8 @@ function transformRow(row) {
   if (!queendom_name) return null;
 
   const createdRaw = pick(row, "created_at", "Created time");
-  const created = new Date(String(createdRaw ?? "").trim());
-  if (Number.isNaN(created.getTime())) return null;
+  const created_at = toIsoUtcFromExportTimestamp(String(createdRaw ?? "").trim());
+  if (!created_at) return null;
 
   const resolvedRaw = pick(row, "resolved_at", "Resolved time");
   const resolved_at = normalizeResolvedAt(resolvedRaw);
@@ -79,7 +102,7 @@ function transformRow(row) {
     status,
     agent_name,
     queendom_name,
-    created_at: created.toISOString(),
+    created_at,
     resolved_at,
     is_escalated,
   };

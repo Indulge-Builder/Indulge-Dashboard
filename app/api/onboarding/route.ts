@@ -195,11 +195,11 @@ export async function GET() {
 
     let closuresFromLedger: number[] | null = null;
     try {
-      // Like /api/tickets: no PostgREST date filter (avoids timestamptz/format quirks);
-      // take recent rows and apply the 30-day window in JS with recordedAtToMillis.
       const conv = await db
         .from("onboarding_conversion_ledger")
         .select("agent_name, recorded_at")
+        .gte("recorded_at", closureWindowStart)
+        .lte("recorded_at", closureWindowEnd)
         .order("recorded_at", { ascending: false })
         .limit(5000);
 
@@ -208,30 +208,20 @@ export async function GET() {
         const raw =
           (conv.data as { agent_name: string; recorded_at: string }[] | null) ??
           [];
-        closureRows = raw.filter((row) =>
-          isRecordedAtInInclusiveRange(
-            row.recorded_at,
-            closureWindowStart,
-            closureWindowEnd,
-          ),
-        );
+        closureRows = raw;
       } else {
         const leg = await db
           .from("onboarding_ledger")
           .select("agent_name, recorded_at")
+          .gte("recorded_at", closureWindowStart)
+          .lte("recorded_at", closureWindowEnd)
           .order("recorded_at", { ascending: false })
           .limit(5000);
         if (!leg.error) {
           const raw =
             (leg.data as { agent_name: string; recorded_at: string }[] | null) ??
             [];
-          closureRows = raw.filter((row) =>
-            isRecordedAtInInclusiveRange(
-              row.recorded_at,
-              closureWindowStart,
-              closureWindowEnd,
-            ),
-          );
+          closureRows = raw;
         } else {
           throw conv.error;
         }

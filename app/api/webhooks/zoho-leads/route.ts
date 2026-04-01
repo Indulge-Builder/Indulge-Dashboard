@@ -8,8 +8,9 @@
  * JSON body (map Zoho merge fields):
  *   { "lead_id": "...", "agent_name": "...", "latest_status": "..." }
  *
- * `agent_name` should match onboarding sales agents: Amit, Samson, or Meghana
- * (see lib/onboardingAgents.ts — same as onboarding_sales_agents.display_name).
+ * `agent_name` from Zoho is full name (e.g. Amit Agarwal, Samson Fernandes,
+ * Meghana Singh); we normalize to Amit, Samson, or Meghana (see
+ * normalizeZohoAgentName in lib/onboardingAgents.ts).
  *
  * Table (see migration 20250401140000_create_onboarding_lead_touches.sql):
  *   onboarding_lead_touches (lead_id PK, agent_name, latest_status, first_touched_at, updated_at)
@@ -17,6 +18,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { normalizeZohoAgentName } from "@/lib/onboardingAgents";
 
 interface ZohoLeadsPayload {
   lead_id?: string | number;
@@ -54,7 +56,8 @@ function parsePayload(body: unknown): {
   const rawId = o.lead_id;
   const leadId =
     rawId != null && String(rawId).trim() !== "" ? String(rawId).trim() : "";
-  const agentName = typeof o.agent_name === "string" ? o.agent_name.trim() : "";
+  const agentName =
+    typeof o.agent_name === "string" ? normalizeZohoAgentName(o.agent_name) : "";
   const latestStatus =
     typeof o.latest_status === "string" ? o.latest_status.trim() : "";
   if (!leadId || !agentName || !latestStatus) return null;
