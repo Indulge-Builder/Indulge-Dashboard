@@ -13,10 +13,9 @@ const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
   onboarding: 20_000,
 };
 
-const slideTransition = {
-  type: "tween" as const,
+const fadeTransition = {
+  duration: 1.5,
   ease: "easeInOut" as const,
-  duration: 0.8,
 };
 
 interface RenewalsPanelData {
@@ -84,7 +83,8 @@ export default function DashboardController({
 
   return (
     <div
-      className={`relative flex min-h-0 w-full min-w-0 flex-1 flex-col ${className ?? ""}`}
+      className={`relative overflow-hidden ${className ?? ""}`}
+      style={{ width: "100vw", height: "100vh" }}
     >
       {/* Always clickable: TV remotes often fail to deliver Enter to window; use pointer + P key + OK */}
       <button
@@ -100,82 +100,83 @@ export default function DashboardController({
       >
         {isFrozen ? "RESUME" : "PAUSE"}
       </button>
-      {/* Viewport: overflow hidden + flex-1 fills space between TopBar and ticker (not literal 100vh, which would stack past the ticker) */}
-      <div className="flex min-h-0 min-w-0 h-full w-full flex-1 flex-col overflow-hidden">
-        <motion.div
-          className="flex h-full"
-          style={{
-            width: "200%",
-            height: "100%",
-            willChange: "transform",
-          }}
-          initial={false}
-          animate={{
-            x: activeScreen === "concierge" ? "0%" : "-50%",
-          }}
-          transition={slideTransition}
-        >
-          <div
-            className="flex min-h-0 h-full min-w-0 shrink-0 flex-col gap-8 md:flex-row md:items-stretch"
-            style={{ width: "50%", flexShrink: 0 }}
-          >
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-              <QueendomPanel
-                name="Ananyshree"
-                stats={ananyshreeStats}
-                side="left"
-                delay={0}
-                celebrationAgent={celebrationAgent}
-                renewalsData={renewalsAnanyshree}
-              />
-            </div>
 
-            {/* Center column — full-height gold separator between Queendoms (md+) */}
+      {/* Screens stay mounted; only opacity/z-index changes (cinematic crossfade, no translateX tearing). */}
+      <motion.div
+        className="absolute inset-0 h-full w-full"
+        style={{ pointerEvents: activeScreen === "concierge" ? "auto" : "none" }}
+        initial={false}
+        animate={{
+          opacity: activeScreen === "concierge" ? 1 : 0,
+          zIndex: activeScreen === "concierge" ? 10 : 0,
+        }}
+        transition={fadeTransition}
+      >
+        <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <QueendomPanel
+              name="Ananyshree"
+              stats={ananyshreeStats}
+              side="left"
+              delay={0}
+              celebrationAgent={celebrationAgent}
+              renewalsData={renewalsAnanyshree}
+            />
+          </div>
+
+          {/* Center column — full-height gold separator between Queendoms (md+) */}
+          <div
+            className="relative hidden shrink-0 self-stretch md:block"
+            style={{ width: "36px" }}
+            aria-hidden
+          >
             <div
-              className="relative hidden shrink-0 self-stretch md:block"
-              style={{ width: "36px" }}
-              aria-hidden
-            >
-              <div
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 160% 50% at 50% 50%, rgba(201,168,76,0.032), transparent)",
-                }}
-              />
-              <div className="absolute left-1/2 top-[2vh] bottom-[2vh] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-gold-500/35 to-transparent" />
-              <div
-                className="pointer-events-none absolute left-1/2 top-[2vh] bottom-[2vh] w-[4px] -translate-x-1/2"
-                style={{
-                  background:
-                    "linear-gradient(to bottom, transparent 8%, rgba(201,168,76,0.08) 30%, rgba(201,168,76,0.12) 50%, rgba(201,168,76,0.08) 70%, transparent 92%)",
-                  filter: "blur(2px)",
-                }}
-              />
-            </div>
-
-            <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-gold-500/25 to-transparent md:hidden" />
-
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-              <QueendomPanel
-                name="Anishqa"
-                stats={anishqaStats}
-                side="right"
-                delay={150}
-                celebrationAgent={celebrationAgent}
-                renewalsData={renewalsAnishqa}
-              />
-            </div>
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(ellipse 160% 50% at 50% 50%, rgba(201,168,76,0.032), transparent)",
+              }}
+            />
+            <div className="absolute left-1/2 top-[2vh] bottom-[2vh] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-gold-500/35 to-transparent" />
+            <div
+              className="pointer-events-none absolute left-1/2 top-[2vh] bottom-[2vh] w-[4px] -translate-x-1/2"
+              style={{
+                background:
+                  "linear-gradient(to bottom, transparent 8%, rgba(201,168,76,0.08) 30%, rgba(201,168,76,0.12) 50%, rgba(201,168,76,0.08) 70%, transparent 92%)",
+                filter: "blur(2px)",
+              }}
+            />
           </div>
 
-          <div
-            className="flex min-h-0 h-full min-w-0 shrink-0 flex-col"
-            style={{ width: "50%", flexShrink: 0 }}
-          >
-            <OnboardingPanel />
+          <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-gold-500/25 to-transparent md:hidden" />
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <QueendomPanel
+              name="Anishqa"
+              stats={anishqaStats}
+              side="right"
+              delay={150}
+              celebrationAgent={celebrationAgent}
+              renewalsData={renewalsAnishqa}
+            />
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="absolute inset-0 h-full w-full"
+        style={{ pointerEvents: activeScreen === "onboarding" ? "auto" : "none" }}
+        initial={false}
+        animate={{
+          opacity: activeScreen === "onboarding" ? 1 : 0,
+          zIndex: activeScreen === "onboarding" ? 10 : 0,
+        }}
+        transition={fadeTransition}
+      >
+        <div className="flex min-h-0 h-full w-full min-w-0 flex-col">
+          <OnboardingPanel />
+        </div>
+      </motion.div>
     </div>
   );
 }
