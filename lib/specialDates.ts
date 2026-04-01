@@ -145,8 +145,7 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
 ];
 
 // ─── Builder ─────────────────────────────────────────────────────────────────
-// Converts raw dates to SpecialDate[] using current year for proper filtering.
-// (Component filters by "this month" and requires year to match.)
+// Converts raw dates to SpecialDate[] using the current calendar year for each event.
 function toMonthDay(dateStr: string): string {
   const [, m, d] = dateStr.split("-");
   return `${m}-${d}`;

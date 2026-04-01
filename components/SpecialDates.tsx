@@ -29,6 +29,13 @@ function isDatePassed(dateStr: string): boolean {
   return dateObj.getTime() < today.getTime();
 }
 
+/** Event is in the viewer’s current calendar month (local time). */
+function isCurrentMonth(dateStr: string): boolean {
+  const today = new Date();
+  const [y, m] = dateStr.split("-").map(Number);
+  return today.getFullYear() === y && today.getMonth() === m - 1;
+}
+
 interface SpecialDatesProps {
   queendomId: "ananyshree" | "anishqa";
 }
@@ -57,6 +64,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
   const filteredDates = useMemo(() => {
     return getSpecialDates()
       .filter((d) => d.queendom === queendomId)
+      .filter((d) => isCurrentMonth(d.date))
       .filter((d) => !isDatePassed(d.date))
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [queendomId, dateKey]);
