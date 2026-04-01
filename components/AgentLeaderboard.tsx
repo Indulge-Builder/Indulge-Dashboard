@@ -12,10 +12,12 @@ const RING_R = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RING_R;
 
 // ── Grid: [Icon | Name | Today | Monthly | Pending this month / Overdue] ───────
+// Metric columns: minmax + 1fr so extra width in this panel flows into Today / Monthly / Pending.
 const GRID_COLS =
-  "grid-cols-[3rem_minmax(0,1fr)_7.5rem_8rem_6rem] " +
-  "sm:grid-cols-[3.5rem_minmax(0,1fr)_9rem_10rem_7.5rem] " +
-  "lg:grid-cols-[4.5rem_minmax(0,1fr)_12rem_12rem_12rem]";
+  "grid-cols-[3.5rem_minmax(0,2fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)] " +
+  "sm:grid-cols-[4.5rem_minmax(0,2fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)] " +
+  "lg:grid-cols-[5.5rem_minmax(0,2fr)_minmax(8.5rem,1fr)_minmax(8.5rem,1fr)_minmax(8.5rem,1fr)] " +
+  "xl:grid-cols-[5.5rem_minmax(0,2fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1fr)]";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(" ");
@@ -289,6 +291,7 @@ const AgentRow = memo(function AgentRow({
         className={`grid ${GRID_COLS} items-center gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 py-[1vh] sm:py-[1.2vh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
       >
         <motion.div
+          className="ml-2 sm:ml-3 lg:ml-4"
           style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
           animate={
             surgeKey > 0
@@ -306,7 +309,7 @@ const AgentRow = memo(function AgentRow({
         </motion.div>
 
         <motion.p
-          className="font-baskerville font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] tracking-wide text-champagne leading-none truncate pl-2"
+          className="min-w-0 font-baskerville font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
           style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
           animate={
             surgeKey > 0
@@ -396,7 +399,7 @@ export default function AgentLeaderboard({
           className={`grid ${GRID_COLS} gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 pb-[0.9vh]`}
         >
           <span />
-          <span className="font-inter text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold pl-2">
+          <span className="font-inter text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold text-center">
             Genies
           </span>
           <span className="font-inter text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-green-400 font-semibold text-center">

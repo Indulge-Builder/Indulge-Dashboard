@@ -120,14 +120,6 @@ export default function QueendomPanel({
     () => safeNum(stats.joker?.acceptedCount),
     [stats.joker?.acceptedCount],
   );
-  const jokerUniqueIdeas = useMemo(
-    () => safeNum(stats.joker?.uniqueSuggestionsCount),
-    [stats.joker?.uniqueSuggestionsCount],
-  );
-  const jokerTotalReach = useMemo(
-    () => safeNum(stats.joker?.totalSent ?? stats.joker?.totalSuggestions),
-    [stats.joker?.totalSent, stats.joker?.totalSuggestions],
-  );
 
   return (
     <motion.section
@@ -240,14 +232,12 @@ export default function QueendomPanel({
               valueColor="text-red-400"
             />
 
-            {/* 5. Spoiled — accepted wins; funnel = unique ideas × reach */}
+            {/* 5. Spoiled — accepted wins (Last 2 Weeks) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
-              <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.3em] uppercase text-champagne mb-[0.25vh]">
+              <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
                 Spoiled
-              </p>
-              <p className="font-inter mb-[0.45vh] text-xl tracking-widest opacity-70 text-champagne">
-                {jokerUniqueIdeas.toLocaleString("en-IN")} IDEAS •{" "}
-                {jokerTotalReach.toLocaleString("en-IN")} REACH
+                <br />
+                (Last 2 Weeks)
               </p>
               <AnimatedCounter
                 value={jokerAccepted}

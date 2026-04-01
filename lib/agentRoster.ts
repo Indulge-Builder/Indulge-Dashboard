@@ -10,7 +10,7 @@ export const ROSTER_ANISHQA: string[] = [
   "Dhanush K",
   "Charlotte Dias",
   "Aniruddha Morajkar",
-  "Laxmi Khaire",
+  "Rupali Chodankar",
   "Eeti Srinivsulu",
 ];
 
