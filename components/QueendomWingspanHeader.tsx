@@ -7,13 +7,6 @@ import AnimatedCounter from "./AnimatedCounter";
 const pillBase =
   "flex min-w-0 max-w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-full border border-gold-500/20 bg-black/40 px-5 py-3.5 min-[500px]:gap-x-5 min-[500px]:px-6 min-[500px]:py-4 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
 
-/** Matches legacy GoldPill — breathing golden outer aura */
-const GOLD_AURA = [
-  "0 0 12px rgba(212, 175, 55, 0.35), 0 0 24px rgba(212, 175, 55, 0.15)",
-  "0 0 28px rgba(212, 175, 55, 0.55), 0 0 48px rgba(212, 175, 55, 0.25)",
-  "0 0 12px rgba(212, 175, 55, 0.35), 0 0 24px rgba(212, 175, 55, 0.15)",
-] as const;
-
 function MetricPill({
   children,
   delaySec,
@@ -27,12 +20,8 @@ function MetricPill({
   return (
     <motion.div
       className={pillBase}
-      initial={{ opacity: 0, x: xInit, boxShadow: GOLD_AURA[0] }}
-      animate={{
-        opacity: 1,
-        x: 0,
-        boxShadow: [...GOLD_AURA],
-      }}
+      initial={{ opacity: 0, x: xInit }}
+      animate={{ opacity: 1, x: 0 }}
       transition={{
         opacity: {
           duration: 0.55,
@@ -40,12 +29,6 @@ function MetricPill({
           ease: [0.25, 0.46, 0.45, 0.94],
         },
         x: { duration: 0.55, delay: delaySec, ease: [0.25, 0.46, 0.45, 0.94] },
-        boxShadow: {
-          duration: 7,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: delaySec + 0.3,
-        },
       }}
     >
       {children}
@@ -55,7 +38,7 @@ function MetricPill({
 
 /** Matches `MetricBox` / 5-metric hero label typography in QueendomPanel */
 const metricLabelClass =
-  "font-inter shrink-0 font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase leading-none";
+  "font-inter shrink-0 font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase leading-none";
 
 /** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
 const pillNumberSizeClass =
