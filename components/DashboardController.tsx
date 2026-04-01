@@ -8,6 +8,11 @@ import type { QueenStats } from "@/lib/types";
 
 export type ActiveScreen = "concierge" | "onboarding";
 
+const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
+  concierge: 40_000,
+  onboarding: 20_000,
+};
+
 interface RenewalsPanelData {
   totalRenewalsThisMonth: number;
   renewals: string[];
@@ -51,6 +56,14 @@ export default function DashboardController({
   celebrationAgent,
 }: DashboardControllerProps) {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("concierge");
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
+    }, SCREEN_DURATIONS_MS[activeScreen]);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeScreen]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
