@@ -34,6 +34,16 @@ function safeJsonParse(text: string): { ok: true; value: unknown } | { ok: false
   }
 }
 
+function parseFormUrlEncoded(text: string): Record<string, string> {
+  const params = new URLSearchParams(text);
+  const out: Record<string, string> = {};
+  // If keys repeat, keep the last value (most typical for form posts).
+  params.forEach((v, k) => {
+    out[k] = v;
+  });
+  return out;
+}
+
 function parsePayload(body: unknown): {
   leadId: string;
   agentName: string;
@@ -87,19 +97,31 @@ export async function POST(req: NextRequest) {
     bodyPreview: rawText.slice(0, 2000),
   });
 
-  const parsedJson = safeJsonParse(rawText);
-  if (!parsedJson.ok) {
-    console.error("[zoho-leads webhook] invalid JSON", {
-      requestId,
-      parseError: parsedJson.error,
-      bodyPreview: rawText.slice(0, 2000),
-    });
-    return NextResponse.json(
-      { error: "Invalid JSON body", detail: parsedJson.error },
-      { status: 400 },
-    );
+  let body: unknown;
+  if (contentType.toLowerCase().includes("application/json")) {
+    const parsedJson = safeJsonParse(rawText);
+    if (!parsedJson.ok) {
+      console.error("[zoho-leads webhook] invalid JSON", {
+        requestId,
+        parseError: parsedJson.error,
+        bodyPreview: rawText.slice(0, 2000),
+      });
+      return NextResponse.json(
+        { error: "Invalid JSON body", detail: parsedJson.error },
+        { status: 400 },
+      );
+    }
+    body = parsedJson.value;
+  } else if (
+    contentType.toLowerCase().includes("application/x-www-form-urlencoded")
+  ) {
+    body = parseFormUrlEncoded(rawText);
+  } else {
+    // Be permissive: Zoho/other senders sometimes omit or mis-set content-type.
+    // Try JSON first, then fall back to form encoding.
+    const parsedJson = safeJsonParse(rawText);
+    body = parsedJson.ok ? parsedJson.value : parseFormUrlEncoded(rawText);
   }
-  const body: unknown = parsedJson.value;
 
   const parsed = parsePayload(body);
   if (!parsed) {

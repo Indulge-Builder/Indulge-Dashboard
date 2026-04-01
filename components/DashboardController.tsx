@@ -56,17 +56,25 @@ export default function DashboardController({
   celebrationAgent,
 }: DashboardControllerProps) {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("concierge");
+  const [isFrozen, setIsFrozen] = useState(false);
 
   useEffect(() => {
+    if (isFrozen) return;
     const timeoutId = window.setTimeout(() => {
       setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
     }, SCREEN_DURATIONS_MS[activeScreen]);
 
     return () => window.clearTimeout(timeoutId);
-  }, [activeScreen]);
+  }, [activeScreen, isFrozen]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // TV remotes commonly send Enter / OK. Space works on keyboards.
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setIsFrozen((v) => !v);
+        return;
+      }
       if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
       e.preventDefault();
       setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
@@ -79,6 +87,11 @@ export default function DashboardController({
     <div
       className={`relative flex min-h-0 w-full min-w-0 flex-1 ${className ?? ""}`}
     >
+      {isFrozen ? (
+        <div className="pointer-events-none absolute right-4 top-4 z-50 rounded-full border border-gold-500/30 bg-black/35 px-4 py-2 font-inter text-sm tracking-[0.35em] text-gold-300 backdrop-blur-md">
+          PAUSED
+        </div>
+      ) : null}
       <AnimatePresence mode="wait">
         {activeScreen === "concierge" ? (
           <motion.div
