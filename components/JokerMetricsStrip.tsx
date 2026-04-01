@@ -131,7 +131,7 @@ export default function JokerMetricsStrip({
 
   if (compact) {
     return (
-      <div className="flex-shrink-0 w-full mt-2 pt-3 border-t border-gold-500/15">
+      <div className="w-full flex-shrink-0">
         <p className={`text-center ${jokerTitleClass} mb-[1.2vh]`}>
           {jokerName}
         </p>

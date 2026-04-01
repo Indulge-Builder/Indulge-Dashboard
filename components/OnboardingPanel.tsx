@@ -78,7 +78,7 @@ function sortLedgerNewestFirst(
 }
 
 /** Max rows in the scrolling ledger (newest first; strict TV memory cap). */
-const LIVE_LEDGER_MAX = 6;
+const LIVE_LEDGER_MAX = 15;
 
 /**
  * Maps a Supabase INSERT row (snake_case) to OnboardingLedgerRow.

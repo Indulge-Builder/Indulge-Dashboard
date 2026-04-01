@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
 import QueendomWingspanHeader from "./QueendomWingspanHeader";
@@ -120,6 +120,36 @@ export default function QueendomPanel({
     () => safeNum(stats.joker?.acceptedCount),
     [stats.joker?.acceptedCount],
   );
+
+  const leaderboardMeasureRef = useRef<HTMLDivElement>(null);
+  const [leaderboardHeightPx, setLeaderboardHeightPx] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const el = leaderboardMeasureRef.current;
+    if (!el) return;
+
+    const mdQuery = window.matchMedia("(min-width: 768px)");
+
+    const apply = () => {
+      if (!mdQuery.matches) {
+        setLeaderboardHeightPx(null);
+        return;
+      }
+      setLeaderboardHeightPx(el.getBoundingClientRect().height);
+    };
+
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    mdQuery.addEventListener("change", apply);
+    apply();
+
+    return () => {
+      ro.disconnect();
+      mdQuery.removeEventListener("change", apply);
+    };
+  }, []);
 
   return (
     <motion.section
@@ -266,43 +296,65 @@ export default function QueendomPanel({
 
       {/* ── Agent Leaderboard (left) + Special Dates (right) ── */}
       <motion.div
-        className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl glass gold-border-glow md:flex-row md:items-stretch md:gap-8 lg:gap-10"
+        className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl glass gold-border-glow"
         style={{ padding: "1.6vh clamp(10px, 2vw, 28px)" }}
         variants={itemVariants}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0">
-          <AgentLeaderboard
-            agents={stats.agents}
-            queendomDelay={delay / 1000 + 0.3}
-            celebrationAgent={celebrationAgent}
-          />
-          {stats.joker != null && jokerDisplayName != null ? (
-            <JokerMetricsStrip
-              compact
-              jokerName={jokerDisplayName}
-              joker={stats.joker}
-              baseDelayMs={delay + 1450}
-            />
-          ) : null}
-          <ActiveOutlays
-            queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
-            delayMs={delay + 1580}
-            fillRemaining
-          />
-        </div>
-        {/* ── Special Dates (right of Team Leaderboard) ── */}
-        <div className="flex w-full flex-shrink-0 flex-col items-stretch border-t border-gold-500/20 pt-4 md:w-[clamp(360px,46vw,680px)] md:border-l md:border-t-0 md:pt-0 md:pl-8 lg:pl-10 md:pr-2 lg:pr-4">
-          <div className="mb-[2vh] flex w-full items-center gap-4 px-1 sm:px-2">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-            <p className="font-inter flex-shrink-0 text-[clamp(1.05rem,1.45vw,1.65rem)] font-semibold uppercase tracking-[0.42em] text-champagne px-2">
-              Special Dates
-            </p>
-            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-4">
+          {/* Row 1: Leaderboard | Special Dates (same width rhythm as before) */}
+          <div className="flex min-h-0 w-full flex-col md:flex-row md:items-start md:gap-8 lg:gap-10">
+            <div
+              ref={leaderboardMeasureRef}
+              className="min-h-0 min-w-0 w-full flex-shrink-0 md:flex-1"
+            >
+              <AgentLeaderboard
+                agents={stats.agents}
+                queendomDelay={delay / 1000 + 0.3}
+                celebrationAgent={celebrationAgent}
+              />
+            </div>
+            <div
+              className="flex w-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-t border-gold-500/20 pt-4 md:w-[clamp(360px,46vw,680px)] md:border-l md:border-t-0 md:pt-0 md:pl-8 lg:pl-10 md:pr-2 lg:pr-4 md:self-start"
+              style={
+                leaderboardHeightPx != null && leaderboardHeightPx > 0
+                  ? { height: leaderboardHeightPx }
+                  : undefined
+              }
+            >
+              <div className="mb-[2vh] flex w-full flex-shrink-0 items-center gap-4 px-1 sm:px-2">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
+                <p className="font-inter flex-shrink-0 text-[clamp(1.05rem,1.45vw,1.65rem)] font-semibold uppercase tracking-[0.42em] text-champagne px-2">
+                  Special Dates
+                </p>
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
+              </div>
+              <div className="flex min-h-0 flex-1 flex-col">
+                <SpecialDates
+                  queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
+                />
+              </div>
+            </div>
           </div>
-          <SpecialDates
-            queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
-          />
+
+          {/* Row 2–3: Joker + Finances — full width like scorecard & renewals */}
+          <div className="flex w-full min-h-0 flex-1 flex-col gap-4 border-t border-gold-500/20 pt-4">
+            {stats.joker != null && jokerDisplayName != null ? (
+              <JokerMetricsStrip
+                compact
+                jokerName={jokerDisplayName}
+                joker={stats.joker}
+                baseDelayMs={delay + 1450}
+              />
+            ) : null}
+            <div className="flex min-h-0 w-full flex-1 flex-col">
+              <ActiveOutlays
+                queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
+                delayMs={delay + 1580}
+                fillRemaining
+              />
+            </div>
+          </div>
         </div>
       </motion.div>
     </motion.section>

@@ -70,7 +70,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
   }, [queendomId, dateKey]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-4 overflow-y-auto pb-3 pt-0.5">
+    <div className="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto pb-3 pt-0.5">
       <AnimatePresence mode="popLayout">
         {filteredDates.map((item) => {
           const isTodayCard = isToday(item.date);
