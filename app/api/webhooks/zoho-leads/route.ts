@@ -24,6 +24,16 @@ interface ZohoLeadsPayload {
   latest_status?: string;
 }
 
+function safeJsonParse(text: string): { ok: true; value: unknown } | { ok: false; error: string } {
+  try {
+    return { ok: true, value: JSON.parse(text) as unknown };
+  } catch (e) {
+    const msg =
+      e instanceof Error ? e.message : typeof e === "string" ? e : "Unknown JSON parse error";
+    return { ok: false, error: msg };
+  }
+}
+
 function parsePayload(body: unknown): {
   leadId: string;
   agentName: string;
@@ -34,8 +44,7 @@ function parsePayload(body: unknown): {
   const rawId = o.lead_id;
   const leadId =
     rawId != null && String(rawId).trim() !== "" ? String(rawId).trim() : "";
-  const agentName =
-    typeof o.agent_name === "string" ? o.agent_name.trim() : "";
+  const agentName = typeof o.agent_name === "string" ? o.agent_name.trim() : "";
   const latestStatus =
     typeof o.latest_status === "string" ? o.latest_status.trim() : "";
   if (!leadId || !agentName || !latestStatus) return null;
@@ -54,15 +63,55 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: unknown;
+  const requestId =
+    req.headers.get("x-request-id") ??
+    req.headers.get("cf-ray") ??
+    `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  const contentType = req.headers.get("content-type") ?? "";
+  const userAgent = req.headers.get("user-agent") ?? "";
+
+  let rawText = "";
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    rawText = await req.text();
+  } catch (e) {
+    console.error("[zoho-leads webhook] failed reading body", { requestId, error: e });
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
+
+  console.log("[zoho-leads webhook] incoming", {
+    requestId,
+    contentType,
+    userAgent,
+    bodyLength: rawText.length,
+    bodyPreview: rawText.slice(0, 2000),
+  });
+
+  const parsedJson = safeJsonParse(rawText);
+  if (!parsedJson.ok) {
+    console.error("[zoho-leads webhook] invalid JSON", {
+      requestId,
+      parseError: parsedJson.error,
+      bodyPreview: rawText.slice(0, 2000),
+    });
+    return NextResponse.json(
+      { error: "Invalid JSON body", detail: parsedJson.error },
+      { status: 400 },
+    );
+  }
+  const body: unknown = parsedJson.value;
 
   const parsed = parsePayload(body);
   if (!parsed) {
+    const b = body as Record<string, unknown> | null;
+    console.error("[zoho-leads webhook] payload mapping failed", {
+      requestId,
+      topLevelKeys:
+        b && typeof b === "object" ? Object.keys(b).slice(0, 100) : null,
+      lead_id: b && typeof b === "object" ? b["lead_id"] : null,
+      agent_name: b && typeof b === "object" ? b["agent_name"] : null,
+      latest_status: b && typeof b === "object" ? b["latest_status"] : null,
+    });
     return NextResponse.json(
       {
         error:
@@ -74,6 +123,13 @@ export async function POST(req: NextRequest) {
 
   const { leadId, agentName, latestStatus } = parsed;
   const nowIso = new Date().toISOString();
+
+  console.log("[zoho-leads webhook] mapped fields", {
+    requestId,
+    leadId,
+    agentName,
+    latestStatus,
+  });
 
   try {
     const { data: existing, error: selErr } = await db
@@ -106,6 +162,11 @@ export async function POST(req: NextRequest) {
           { status: 500 },
         );
       }
+      console.log("[zoho-leads webhook] upsert result", {
+        requestId,
+        action: "updated",
+        leadId,
+      });
       return NextResponse.json({ ok: true, action: "updated" });
     }
 
@@ -134,6 +195,12 @@ export async function POST(req: NextRequest) {
             { status: 500 },
           );
         }
+        console.log("[zoho-leads webhook] upsert result", {
+          requestId,
+          action: "updated",
+          leadId,
+          note: "insert race (duplicate lead_id) recovered via update",
+        });
         return NextResponse.json({ ok: true, action: "updated" });
       }
       console.error("[zoho-leads webhook] insert", insErr);
@@ -143,6 +210,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log("[zoho-leads webhook] upsert result", {
+      requestId,
+      action: "inserted",
+      leadId,
+    });
     return NextResponse.json({ ok: true, action: "inserted" });
   } catch (e) {
     console.error("[zoho-leads webhook]", e);
