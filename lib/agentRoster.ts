@@ -55,6 +55,5 @@ export function buildRoster(
     tasksAssignedThisMonth: 0,
     pendingScore: 0,
     overdueCount: 0,
-    escalatedCount: 0,
   }));
 }

@@ -9,7 +9,7 @@ import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "./agentRoster";
 import { buildRoster } from "./agentRoster";
 
 const RESOLVED = "resolved";
-const TERMINAL = new Set(["resolved", "closed"]);
+const CLOSED = "closed";
 
 export interface TicketRowMinimal {
   id: string;
@@ -63,22 +63,26 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
     else if (queendom.includes("anishqa")) bucket = result.anishqa;
     if (!bucket) continue;
 
-    bucket.totalReceived++;
     const createdDay = toISTDay(row.created_at);
     const createdMonth = toISTMonth(row.created_at);
-    const resolvedMonth = toISTMonth(row.resolved_at);
 
-    if (
-      TERMINAL.has(status) &&
-      row.resolved_at &&
-      resolvedMonth === thisMonthIST
-    ) {
+    // Received (This Month) — same IST month gate as pendingToResolve / agents' assignedThisMonth
+    if (createdMonth === thisMonthIST) {
+      bucket.totalReceived++;
+    }
+
+    // Resolved (This Month) — created this IST month, status resolved only
+    if (createdMonth === thisMonthIST && status === RESOLVED) {
       bucket.resolvedThisMonth++;
     }
     if (status === RESOLVED && createdDay === todayIST) {
       bucket.solvedToday++;
     }
-    if (!TERMINAL.has(status) && createdMonth === thisMonthIST) {
+    if (
+      createdMonth === thisMonthIST &&
+      status !== RESOLVED &&
+      status !== CLOSED
+    ) {
       bucket.pendingToResolve++;
     }
     const jokerVal =
@@ -103,7 +107,6 @@ interface AgentLiveStats {
   tasksAssignedThisMonth: number;
   pendingScore: number;
   overdueCount: number;
-  escalatedCount: number;
 }
 
 function calcAgent(
@@ -133,7 +136,7 @@ function calcAgent(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
       isResolved(t.status) &&
-      toISTMonth(t.resolved_at) === THIS_MONTH,
+      toISTMonth(t.created_at) === THIS_MONTH,
   ).length;
   const assignedThisMonth = rows.filter(
     (t) =>
@@ -143,16 +146,11 @@ function calcAgent(
   const pendingTickets = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
+      toISTMonth(t.created_at) === THIS_MONTH &&
       !isResolved(t.status) &&
       !isClosed(t.status),
   );
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
   const overdueCount = pendingTickets.filter(
-    (t) => (t.created_at ?? "").slice(0, 10) < sevenDaysAgo,
-  ).length;
-  const escalatedCount = pendingTickets.filter(
     (t) => t.is_escalated === true,
   ).length;
 
@@ -163,7 +161,6 @@ function calcAgent(
     tasksAssignedThisMonth: assignedThisMonth,
     pendingScore: pendingTickets.length,
     overdueCount,
-    escalatedCount,
   };
 }
 

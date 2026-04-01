@@ -3,8 +3,10 @@
  *
  * Aggregates metrics per queendom from the `tickets` table:
  *
- *   resolvedThisMonth – tickets whose resolved_at falls within this IST
- *                       month AND status is "resolved" or "closed"
+ *   totalReceived     – tickets whose created_at falls within this IST calendar month
+ *
+ *   resolvedThisMonth – tickets created this IST month AND status is
+ *                       "resolved" only ("closed" is not scored as resolved)
  *
  *   solvedToday       – tickets CREATED today (IST) that are now resolved.
  *                       (status = "resolved" only; "closed" excluded)
@@ -12,6 +14,9 @@
  *
  *   pendingToResolve  – tickets created this IST month whose status is neither
  *                       "resolved" nor "closed"
+ *
+ *   "closed" is never scored as resolved and never counted as pending; it only
+ *   affects totalReceived if created this month (Received may exceed Pending+Resolved).
  *
  * ── TIMEZONE NOTE ────────────────────────────────────────────────────────────
  * Uses lib/istDate (Asia/Kolkata) — same as Dashboard client aggregation and
@@ -34,7 +39,7 @@ interface TicketRow {
 }
 
 interface TicketBucket {
-  totalReceived: number; // count of ALL rows where queendom_name matches
+  totalReceived: number; // created this IST month (matches QueendomPanel “Received This Month”)
   resolvedThisMonth: number;
   solvedToday: number;
   pendingToResolve: number;
@@ -48,11 +53,13 @@ interface AggregatedStats {
 
 // ─── Status sets ─────────────────────────────────────────────────────────────
 
-// Only "resolved" counts for solvedToday.
 const RESOLVED_STATUS = "resolved";
+const CLOSED_STATUS = "closed";
 
-// Both "resolved" and "closed" are terminal — excluded from pendingToResolve.
-const TERMINAL = new Set(["resolved", "closed"]);
+const isResolvedStatus = (s: string) => s === RESOLVED_STATUS;
+/** Pending = every status except resolved and closed (closed is not scored). */
+const isPendingStatus = (s: string) =>
+  !isResolvedStatus(s) && s !== CLOSED_STATUS;
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
 function aggregate(rows: TicketRow[]): AggregatedStats {
@@ -84,19 +91,16 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
     else if (queendom.includes("anishqa")) bucket = result.anishqa;
     if (!bucket) continue;
 
-    // ── 0. Total Received (all rows for this queendom) ─────────────────────────
-    bucket.totalReceived++;
-
     const createdDay = toISTDay(row.created_at);
     const createdMonth = toISTMonth(row.created_at);
-    const resolvedMonth = toISTMonth(row.resolved_at);
 
-    // ── 1. Resolved This Month ────────────────────────────────────────────────
-    if (
-      TERMINAL.has(status) &&
-      row.resolved_at &&
-      resolvedMonth === thisMonthIST
-    ) {
+    // ── 0. Received (This Month) — created_at in current IST calendar month ─────
+    if (createdMonth === thisMonthIST) {
+      bucket.totalReceived++;
+    }
+
+    // ── 1. Resolved (This Month) — created this IST month, status resolved only
+    if (createdMonth === thisMonthIST && isResolvedStatus(status)) {
       bucket.resolvedThisMonth++;
     }
 
@@ -110,11 +114,8 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
       bucket.solvedToday++;
     }
 
-    // ── 3. Pending to Resolve (this month only) ───────────────────────────────
-    if (
-      !TERMINAL.has(status) &&
-      createdMonth === thisMonthIST
-    ) {
+    // ── 3. Pending to Resolve (this month only) — not resolved, not closed ───
+    if (createdMonth === thisMonthIST && isPendingStatus(status)) {
       bucket.pendingToResolve++;
     }
 

@@ -44,8 +44,11 @@ const ZERO_TICKETS: TicketStats = {
 };
 
 const ZERO_JOKER: JokerStats = {
+  uniqueSuggestionsCount: 0,
+  totalSent: 0,
   totalSuggestions: 0,
   acceptedCount: 0,
+  rejectedCount: 0,
   pendingSuggestions: 0,
   acceptedToday: 0,
   totalThisMonth: 0,
@@ -427,8 +430,9 @@ export default function Dashboard() {
         onComplete={() => setCelebrationAgent(null)}
       />
 
-      {/* ── Concierge ↔ Onboarding (manual only; ArrowLeft/ArrowRight) ── */}
+      {/* ── Concierge ↔ Onboarding (manual only; ArrowLeft/ArrowRight) — flex-1 fills viewport under TopBar + ticker ── */}
       <DashboardController
+        className="min-h-0"
         ananyshreeStats={ananyshreeStats}
         anishqaStats={anishqaStats}
         renewalsAnanyshree={renewalsAnanyshree}

@@ -14,10 +14,6 @@ function formatDay(dateStr: string): string {
   return new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(parseYmd(dateStr));
 }
 
-function formatMonth(dateStr: string): string {
-  return new Intl.DateTimeFormat("en-GB", { month: "short" }).format(parseYmd(dateStr));
-}
-
 function isToday(dateStr: string): boolean {
   const today = new Date();
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -80,9 +76,9 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className={`
-                relative flex-shrink-0 flex flex-row items-center justify-between
-                w-full min-h-[clamp(70px,10vh,100px)]
-                rounded-xl overflow-hidden px-4 py-3 gap-4
+                relative flex-shrink-0 flex w-full min-h-[clamp(70px,10vh,100px)]
+                flex-row items-center justify-between gap-4
+                rounded-xl overflow-hidden px-4 py-3
                 ${isTodayCard ? "today-highlight" : ""}
                 ${isAnniversary ? "anniversary-highlight" : ""}
               `}
@@ -110,40 +106,35 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                       }
               }
             >
-              <div className="flex flex-col items-center justify-center leading-none flex-shrink-0">
-                <span className="font-edu font-bold text-[clamp(2rem,4vw,3rem)] tabular-nums text-champagne/95">
-                  {formatDay(item.date)}
-                </span>
-                <span className="text-[11px] font-inter uppercase tracking-[0.25em] text-champagne/70 mt-1">
-                  {formatMonth(item.date)}
-                </span>
-              </div>
-              <div className="flex items-center justify-center gap-2 flex-1 min-w-0">
-                {isTodayCard && (
-                  <Gift
-                    className="flex-shrink-0 w-5 h-5 text-[#D4AF37]"
-                    strokeWidth={2}
-                  />
-                )}
-                {isAnniversary && !isTodayCard && (
-                  <Heart
-                    className="flex-shrink-0 w-5 h-5 text-rose-400/90 fill-rose-400/30"
-                    strokeWidth={2}
-                  />
-                )}
-                <span className="font-baskerville font-semibold text-[clamp(1.25rem,2.2vw,1.75rem)] text-champagne/90 truncate text-center leading-tight">
-                  {item.clientName}
-                </span>
-              </div>
-
-              {isAnniversary && (
-                <div className="absolute top-1 right-1 flex items-center gap-1">
-                  <Heart className="w-3 h-3 text-rose-400/80 fill-rose-400/40" strokeWidth={2} />
-                  <span className="text-[10px] font-inter uppercase tracking-wider text-rose-300/90 font-semibold">
-                    Anniv
+              <>
+                <div className="flex items-center justify-center leading-none flex-shrink-0">
+                  <span className="font-edu font-bold text-[clamp(2rem,4vw,3rem)] tabular-nums text-champagne/95">
+                    {formatDay(item.date)}
                   </span>
                 </div>
-              )}
+                <div
+                  className={`flex flex-1 min-w-0 items-center justify-center ${
+                    isAnniversary && !isTodayCard ? "gap-4 sm:gap-6" : "gap-2"
+                  }`}
+                >
+                  {isTodayCard && (
+                    <Gift
+                      className="flex-shrink-0 w-5 h-5 text-[#D4AF37]"
+                      strokeWidth={2}
+                    />
+                  )}
+                  {isAnniversary && !isTodayCard && (
+                    <Heart
+                      className="flex-shrink-0 w-[clamp(2rem,3.5vw,2.75rem)] h-[clamp(2rem,3.5vw,2.75rem)] text-rose-400/90 fill-rose-400/30"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
+                  )}
+                  <span className="font-baskerville font-semibold text-[clamp(1.25rem,2.2vw,1.75rem)] text-champagne/90 truncate text-center leading-tight">
+                    {item.clientName}
+                  </span>
+                </div>
+              </>
             </motion.div>
           );
         })}

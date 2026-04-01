@@ -5,10 +5,13 @@
  * three explicit filters — exactly the same logic as the user described:
  *
  *   Assigned Today    = agent_name match  AND  created_at  is today (IST)
- *   Completed Today   = agent_name match  AND  status is Resolved/Closed
- *                       AND  resolved_at is today (IST)
- *   Completed Month   = agent_name match  AND  status is Resolved/Closed
- *                       AND  resolved_at is this month (IST)
+ *   Completed Today   = agent_name match  AND  status is Resolved
+ *                       AND  created_at is today (IST) — same spirit as /api/tickets solvedToday
+ *   Completed Month   = agent_name match  AND  status is Resolved
+ *                       AND  created_at is this IST month — matches Queendom “Resolved (This Month)”
+ *
+ * Pending (pendingScore) = agent match AND created this IST month AND not
+ * resolved/closed — same monthly cohort as Queendom “Pending (This Month)”.
  *
  * All name comparisons are case-insensitive so "pranav gadekar" in the DB
  * matches "Pranav Gadekar" in the roster and vice-versa.
@@ -96,7 +99,7 @@ export async function GET(): Promise<Response> {
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
         isResolved(t.status) &&
-        toISTMonth(t.resolved_at) === THIS_MONTH,
+        toISTMonth(t.created_at) === THIS_MONTH,
     ).length;
 
     const assignedThisMonth = tickets.filter(
@@ -105,26 +108,19 @@ export async function GET(): Promise<Response> {
         toISTMonth(t.created_at) === THIS_MONTH,
     ).length;
 
-    // All tickets assigned to this agent that are neither resolved nor closed —
-    // represents their current open workload regardless of when they were created.
+    // Open workload for tickets created this IST month only — aligns with Queendom
+    // “Pending (This Month)” (not resolved, not closed).
     const pendingTickets = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
+        toISTMonth(t.created_at) === THIS_MONTH &&
         !isResolved(t.status) &&
         !isClosed(t.status),
     );
     const pendingScore = pendingTickets.length;
 
-    // Overdue = pending tickets created more than 7 days ago (SLA heuristic).
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
+    // Overdue = pending tickets where is_escalated is true (Freshdesk SLA / webhook).
     const overdueCount = pendingTickets.filter(
-      (t) => (t.created_at ?? "").slice(0, 10) < sevenDaysAgo,
-    ).length;
-
-    // Escalated = pending tickets where is_escalated is true (SLA escalation from Freshdesk).
-    const escalatedCount = pendingTickets.filter(
       (t) => t.is_escalated === true,
     ).length;
 
@@ -135,7 +131,6 @@ export async function GET(): Promise<Response> {
       tasksAssignedThisMonth: assignedThisMonth,
       pendingScore,
       overdueCount,
-      escalatedCount,
     };
   }
 

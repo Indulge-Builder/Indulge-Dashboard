@@ -15,6 +15,7 @@ interface RenewalsPanelData {
 }
 
 interface DashboardControllerProps {
+  className?: string;
   ananyshreeStats: QueenStats;
   anishqaStats: QueenStats;
   renewalsAnanyshree: RenewalsPanelData;
@@ -42,6 +43,7 @@ const screenVariants = {
 };
 
 export default function DashboardController({
+  className,
   ananyshreeStats,
   anishqaStats,
   renewalsAnanyshree,
@@ -61,7 +63,9 @@ export default function DashboardController({
   }, []);
 
   return (
-    <div className="relative flex flex-1 min-h-0 w-full min-w-0">
+    <div
+      className={`relative flex min-h-0 w-full min-w-0 flex-1 ${className ?? ""}`}
+    >
       <AnimatePresence mode="wait">
         {activeScreen === "concierge" ? (
           <motion.div
@@ -123,7 +127,7 @@ export default function DashboardController({
         ) : (
           <motion.div
             key="onboarding"
-            className="flex flex-1 min-h-0 min-w-0"
+            className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col"
             variants={screenVariants}
             initial="initial"
             animate="animate"

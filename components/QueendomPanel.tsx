@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
 import QueendomWingspanHeader from "./QueendomWingspanHeader";
 import AgentLeaderboard from "./AgentLeaderboard";
+import JokerMetricsStrip from "./JokerMetricsStrip";
+import ActiveOutlays from "./ActiveOutlays";
 import RenewalsPanel from "./RenewalsPanel";
 import SpecialDates from "@/components/SpecialDates";
 import type { QueenStats } from "@/lib/types";
@@ -69,7 +71,7 @@ function MetricBox({
       </p>
       <AnimatedCounter
         value={value}
-        className={`font-edu text-7xl min-[900px]:text-8xl leading-none ${valueColor} tabular-nums`}
+        className={`font-cinzel font-bold text-7xl min-[900px]:text-8xl leading-none tracking-[0.06em] ${valueColor} tabular-nums`}
         delay={delay}
         slideOnChange={slideOnChange}
       />
@@ -91,6 +93,11 @@ export default function QueendomPanel({
   renewalsData,
 }: QueendomPanelProps) {
   const radialOrigin = side === "left" ? "25% 45%" : "75% 45%";
+  const jokerDisplayName = useMemo(
+    () =>
+      getJokerNameForQueendom(name.toLowerCase() as "ananyshree" | "anishqa"),
+    [name],
+  );
 
   // Memoized selector for total count — stable as new rows stream in from WebSocket
   const totalReceived = useMemo(
@@ -109,10 +116,18 @@ export default function QueendomPanel({
     () => safeNum(stats.tickets.pendingToResolve),
     [stats.tickets.pendingToResolve],
   );
-
   const jokerAccepted = useMemo(
     () => safeNum(stats.joker?.acceptedCount),
     [stats.joker?.acceptedCount],
+  );
+  const jokerUniqueIdeas = useMemo(
+    () => safeNum(stats.joker?.uniqueSuggestionsCount),
+    [stats.joker?.uniqueSuggestionsCount],
+  );
+  const jokerTotalReach = useMemo(
+    () =>
+      safeNum(stats.joker?.totalSent ?? stats.joker?.totalSuggestions),
+    [stats.joker?.totalSent, stats.joker?.totalSuggestions],
   );
 
   return (
@@ -158,7 +173,7 @@ export default function QueendomPanel({
         </div>
       </motion.div>
 
-      {/* ── 5-Metric Hero Row ── */}
+      {/* ── 5-Metric Hero Row (tickets + Spoiled for this Queendom’s Joker) ── */}
       <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={itemVariants}>
         <div
           className="glass gold-border-glow rounded-2xl relative overflow-hidden"
@@ -166,7 +181,7 @@ export default function QueendomPanel({
         >
           <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] to-transparent pointer-events-none rounded-2xl" />
 
-          <div className="grid grid-cols-5 gap-2 sm:gap-3 lg:gap-4 w-full">
+          <div className="grid grid-cols-2 min-[700px]:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 w-full">
             {/* 1. Total Solved Today — ANCHOR (Green Glow) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
               <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
@@ -174,13 +189,13 @@ export default function QueendomPanel({
               </p>
               <AnimatedCounter
                 value={solvedToday}
-                className="font-edu text-7xl min-[900px]:text-8xl leading-none text-emerald-400 emerald-glow-hero tabular-nums"
+                className="font-cinzel font-bold text-7xl min-[900px]:text-8xl leading-none tracking-[0.06em] text-emerald-400 emerald-glow-hero tabular-nums"
                 delay={delay + 800}
                 slideOnChange
               />
             </div>
 
-            {/* 2. Total Received — count of all tickets for this queendom */}
+            {/* 2. Received (This Month) — from aggregateTicketStats (IST created_at month) */}
             <MetricBox
               label={
                 <>
@@ -194,7 +209,7 @@ export default function QueendomPanel({
               slideOnChange
             />
 
-            {/* 3. Total Solved Month — resolve column for current month */}
+            {/* 3. Resolved (This Month) — created this IST month + status resolved only */}
             <MetricBox
               label={
                 <>
@@ -226,14 +241,18 @@ export default function QueendomPanel({
               valueColor="text-red-400"
             />
 
-            {/* 5. Spoiled — total accepted score for this Queendom's Joker */}
+            {/* 5. Spoiled — accepted wins; funnel = unique ideas × reach */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
-              <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
-                Spoiled <br /> (This Month)
+              <p className="font-inter font-semibold text-[clamp(16px,1.7vw,22px)] tracking-[0.3em] uppercase text-champagne mb-[0.25vh]">
+                Spoiled
+              </p>
+              <p className="font-inter mb-[0.45vh] text-lg tracking-widest opacity-70 text-champagne">
+                {jokerUniqueIdeas.toLocaleString("en-IN")} IDEAS •{" "}
+                {jokerTotalReach.toLocaleString("en-IN")} REACH
               </p>
               <AnimatedCounter
                 value={jokerAccepted}
-                className="font-edu text-7xl min-[900px]:text-8xl leading-none text-gold-300 tabular-nums"
+                className="font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums"
                 delay={delay + 1200}
                 slideOnChange
               />
@@ -263,15 +282,25 @@ export default function QueendomPanel({
         variants={itemVariants}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
-        <div className="flex-1 min-h-0 min-w-0">
-          <AgentLeaderboard
-            agents={stats.agents}
-            joker={stats.joker}
-            jokerName={getJokerNameForQueendom(
-              name.toLowerCase() as "ananyshree" | "anishqa",
-            )}
-            queendomDelay={delay / 1000 + 0.3}
-            celebrationAgent={celebrationAgent}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-0 overflow-hidden">
+          <div className="min-h-0 flex-1 overflow-hidden">
+            <AgentLeaderboard
+              agents={stats.agents}
+              queendomDelay={delay / 1000 + 0.3}
+              celebrationAgent={celebrationAgent}
+            />
+          </div>
+          {stats.joker != null && jokerDisplayName != null ? (
+            <JokerMetricsStrip
+              compact
+              jokerName={jokerDisplayName}
+              joker={stats.joker}
+              baseDelayMs={delay + 1450}
+            />
+          ) : null}
+          <ActiveOutlays
+            queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
+            delayMs={delay + 1580}
           />
         </div>
         {/* ── Special Dates (right of Team Leaderboard) ── */}

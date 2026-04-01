@@ -64,3 +64,31 @@ export function toISTDay(ts: string | null | undefined): string {
 export function toISTMonth(ts: string | null | undefined): string {
   return toISTDay(ts).slice(0, 7);
 }
+
+/**
+ * Parse a DB / API timestamp string to UTC epoch ms (same normalization as
+ * {@link toISTDay}). Use for range filters instead of raw `new Date(ts)`.
+ */
+export function utcMillisFromDbTimestamp(
+  ts: string | null | undefined,
+): number | null {
+  if (!ts) return null;
+  let s = ts.trim();
+  if (!s) return null;
+
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:/.test(s)) {
+    s = s.replace(" ", "T");
+  }
+  if (s.includes("T")) {
+    const rest = s.slice(s.indexOf("T") + 1);
+    if (rest && !/[zZ]|[+-]\d/.test(rest)) {
+      s = `${s}Z`;
+    }
+  }
+  if (s.includes("T")) {
+    s = s.replace(/([+-]\d{2})$/, "$1:00");
+  }
+
+  const t = new Date(s).getTime();
+  return Number.isNaN(t) ? null : t;
+}

@@ -1,39 +1,34 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import AnimatedCounter from "./AnimatedCounter";
 import { supabase } from "@/lib/supabase";
+import { ONBOARDING_AGENT_CARDS } from "@/lib/onboardingAgents";
 import type {
   OnboardingAgentRow,
   OnboardingApiPayload,
   OnboardingLedgerRow,
 } from "@/lib/onboardingTypes";
-
-/** Canonical left-to-right card order (matches dashboard layout). */
-const AGENT_CARD_ORDER: readonly { id: string; name: string }[] = [
-  { id: "amit", name: "Amit" },
-  { id: "samson", name: "Samson" },
-  { id: "meghana", name: "Meghana" },
-];
+import amitPortrait from "../onboarding-agents-images/amit-sir.png";
+import meghanaPortrait from "../onboarding-agents-images/meghana.png";
+import samsonPortrait from "../onboarding-agents-images/samson.png";
 
 /** Shown when /api/onboarding fails so the TV still lists the three sales seats. */
-const FALLBACK_AGENTS: OnboardingAgentRow[] = AGENT_CARD_ORDER.map((s) => ({
+const FALLBACK_AGENTS: OnboardingAgentRow[] = ONBOARDING_AGENT_CARDS.map((s) => ({
   id: s.id,
   name: s.name,
   photoUrl: null,
   totalAttempted: 0,
   totalConverted: 0,
+  leadsAttendToday: 0,
 }));
 
-function orderAgentsForDisplay(fromApi: OnboardingAgentRow[]): OnboardingAgentRow[] {
+function orderAgentsForDisplay(
+  fromApi: OnboardingAgentRow[],
+): OnboardingAgentRow[] {
   const pool = [...fromApi];
-  return AGENT_CARD_ORDER.map((spec) => {
+  return ONBOARDING_AGENT_CARDS.map((spec) => {
     const idxId = pool.findIndex((a) => a.id === spec.id);
     if (idxId >= 0) {
       const [a] = pool.splice(idxId, 1);
@@ -56,9 +51,7 @@ function formatAmountLakh(amount: number): string {
   if (!Number.isFinite(lakhs)) return "—";
   if (lakhs === 0) return "₹0 L";
   const str =
-    lakhs % 1 === 0
-      ? String(lakhs)
-      : lakhs.toFixed(2).replace(/\.?0+$/, "");
+    lakhs % 1 === 0 ? String(lakhs) : lakhs.toFixed(2).replace(/\.?0+$/, "");
   return `₹${str} L`;
 }
 
@@ -75,16 +68,90 @@ function formatLedgerDate(iso: string): string {
   }
 }
 
-function sortLedgerNewestFirst(rows: OnboardingLedgerRow[]): OnboardingLedgerRow[] {
+function sortLedgerNewestFirst(
+  rows: OnboardingLedgerRow[],
+): OnboardingLedgerRow[] {
   return [...rows].sort(
     (a, b) =>
       new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
   );
 }
 
-/** Same scale as Elite Agent card names (`agent.name`) — one size for all ledger cells */
-const LEDGER_ROW_TEXT =
-  "text-4xl min-[900px]:text-5xl xl:text-6xl leading-none";
+/** Max rows in the scrolling ledger (newest first; matches API limit). */
+const LIVE_LEDGER_MAX = 25;
+
+/**
+ * Maps a Supabase INSERT row (snake_case) to OnboardingLedgerRow.
+ * Works for `onboarding_conversion_ledger` (and legacy onboarding_ledger) rows.
+ */
+function ledgerRowFromInsertPayload(
+  raw: Record<string, unknown>,
+): OnboardingLedgerRow | null {
+  if (raw == null || typeof raw.id === "undefined") return null;
+  const amountRaw = raw.amount;
+  const amount =
+    typeof amountRaw === "number"
+      ? amountRaw
+      : typeof amountRaw === "string"
+        ? parseFloat(amountRaw)
+        : NaN;
+  if (!Number.isFinite(amount)) return null;
+  const recordedAt =
+    typeof raw.recorded_at === "string"
+      ? raw.recorded_at
+      : raw.recorded_at != null
+        ? String(raw.recorded_at)
+        : "";
+  if (!recordedAt) return null;
+  const q = raw.queendom_name;
+  const assignedTo =
+    q != null && String(q).trim() !== "" ? String(q).trim() : "";
+  return {
+    id: String(raw.id),
+    clientName:
+      typeof raw.client_name === "string" ? raw.client_name : String(raw.client_name ?? ""),
+    amount,
+    recordedAt,
+    assignedTo,
+    agentName:
+      typeof raw.agent_name === "string"
+        ? raw.agent_name
+        : String(raw.agent_name ?? ""),
+  };
+}
+
+/**
+ * Fluid typography — middle term uses min(vmin,vh) so zoom + TV + ultrawide scale smoothly
+ * (avoids vw-only or breakpoint jumps).
+ */
+const ONBOARDING_CARD_TITLE_FONT =
+  "clamp(1.05rem, min(2.6vmin, 3vh), 3.5rem)";
+
+const ONBOARDING_AGENT_NAME_FONT =
+  "clamp(1.35rem, min(3.5vmin, 4vh), 4.75rem)";
+
+const ONBOARDING_METRIC_VALUE_FONT =
+  "clamp(1.35rem, min(4vmin, 4.8vh), 5.25rem)";
+
+/** Attempted (This Month) / Closures (Last 30 Days) / Leads (Today) subtitles */
+const ONBOARDING_METRIC_SUBTITLE_FONT =
+  "clamp(1.15rem, min(3.2vmin, 3.6vh), 2.2rem)";
+
+const ONBOARDING_METRIC_SUBTITLE_CLASS =
+  "font-inter font-semibold uppercase leading-snug tracking-[0.22em]";
+
+/** Page + ledger headings */
+const ONBOARDING_PAGE_TITLE_FONT =
+  "clamp(1.85rem, min(4.2vmin, 5.5vh), 4rem)";
+
+const ONBOARDING_LEDGER_TITLE_FONT =
+  "clamp(1.5rem, min(3.5vmin, 4.5vh), 3.5rem)";
+
+const ONBOARDING_LEDGER_HEADER_FONT =
+  "clamp(0.95rem, min(2.1vmin, 2.6vh), 1.85rem)";
+
+const ONBOARDING_LEDGER_CELL_FONT =
+  "clamp(1.05rem, min(2.4vmin, 3vh), 3.25rem)";
 
 function ConversionLedgerRow({
   row,
@@ -93,28 +160,33 @@ function ConversionLedgerRow({
   row: OnboardingLedgerRow;
   ariaHidden?: boolean;
 }) {
+  const cell = { fontSize: ONBOARDING_LEDGER_CELL_FONT } as CSSProperties;
   return (
     <div
-      className="grid grid-cols-4 items-center gap-x-2 border-b border-gold-500/[0.07] py-[clamp(14px,1.7vh,22px)] sm:gap-x-4"
+      className="grid grid-cols-4 items-center gap-x-1 border-b border-gold-500/[0.07] py-[clamp(10px,min(1.6vmin,1.8vh),22px)] sm:gap-x-2 md:gap-x-4"
       aria-hidden={ariaHidden}
     >
       <span
-        className={`min-w-0 truncate px-1 text-center font-inter font-medium ${LEDGER_ROW_TEXT} text-champagne`}
+        className="min-w-0 truncate px-1 text-center font-inter font-medium leading-none text-champagne"
+        style={cell}
       >
         {row.clientName}
       </span>
       <span
-        className={`min-w-0 truncate px-1 text-center font-edu ${LEDGER_ROW_TEXT} tabular-nums text-emerald-400`}
+        className="min-w-0 truncate px-1 text-center font-edu tabular-nums leading-none text-emerald-400"
+        style={cell}
       >
         {formatAmountLakh(row.amount)}
       </span>
       <span
-        className={`min-w-0 truncate px-1 text-center font-inter font-medium ${LEDGER_ROW_TEXT} text-champagne/90`}
+        className="min-w-0 truncate px-1 text-center font-inter font-medium leading-none text-champagne/90"
+        style={cell}
       >
         {formatLedgerDate(row.recordedAt)}
       </span>
       <span
-        className={`min-w-0 truncate px-1 text-center font-inter font-semibold ${LEDGER_ROW_TEXT} text-champagne`}
+        className="min-w-0 truncate px-1 text-center font-inter font-semibold leading-none text-champagne"
+        style={cell}
       >
         {row.agentName}
       </span>
@@ -137,57 +209,26 @@ function agentPortraitPresetKey(
   return null;
 }
 
-/**
- * Fallback portraits: same Dicebear avataaars SVG style as before, with fixed traits
- * so each seat reads at the intended age (Amit ~50, Samson ~25, Meghana ~30).
- */
-const AVATAAARS_PRESETS: Record<
+function bundledImageSrc(
+  img: string | { src: string },
+): string {
+  return typeof img === "string" ? img : img.src;
+}
+
+const LOCAL_ONBOARDING_PORTRAITS: Record<
   "amit" | "samson" | "meghana",
-  Record<string, string>
+  string
 > = {
-  amit: {
-    seed: "IndulgeOnboardingAmit",
-    backgroundColor: "transparent",
-    facialHair: "beardMedium",
-    facialHairProbability: "100",
-    facialHairColor: "4a312c",
-    top: "theCaesarAndSidePart",
-    clothing: "blazerAndShirt",
-    skinColor: "d08b5b",
-    eyes: "default",
-    mouth: "default",
-    eyebrows: "defaultNatural",
-  },
-  samson: {
-    seed: "IndulgeOnboardingSamson",
-    backgroundColor: "transparent",
-    facialHairProbability: "0",
-    top: "shortWaved",
-    clothing: "hoodie",
-    skinColor: "ae5d29",
-    eyes: "happy",
-    mouth: "smile",
-    eyebrows: "defaultNatural",
-  },
-  meghana: {
-    seed: "IndulgeOnboardingMeghana",
-    backgroundColor: "transparent",
-    facialHairProbability: "0",
-    top: "longButNotTooLong",
-    clothing: "blazerAndShirt",
-    skinColor: "edb98a",
-    eyes: "default",
-    mouth: "smile",
-    eyebrows: "defaultNatural",
-  },
+  amit: bundledImageSrc(amitPortrait),
+  samson: bundledImageSrc(samsonPortrait),
+  meghana: bundledImageSrc(meghanaPortrait),
 };
 
 function agentPortraitSrc(agent: OnboardingAgentRow): string {
   if (agent.photoUrl) return agent.photoUrl;
   const presetKey = agentPortraitPresetKey(agent);
   if (presetKey) {
-    const q = new URLSearchParams(AVATAAARS_PRESETS[presetKey]);
-    return `https://api.dicebear.com/7.x/avataaars/svg?${q.toString()}`;
+    return LOCAL_ONBOARDING_PORTRAITS[presetKey];
   }
   const q = new URLSearchParams({
     seed: agent.name || agent.id,
@@ -199,14 +240,22 @@ function agentPortraitSrc(agent: OnboardingAgentRow): string {
 function EliteAgentCard({
   agent,
   shimmerStamp,
+  prefersReducedMotion,
+  metricStaggerBase,
 }: {
   agent: OnboardingAgentRow;
   shimmerStamp: number;
+  prefersReducedMotion: boolean;
+  metricStaggerBase: number;
 }) {
+  const slide = !prefersReducedMotion;
+  const d0 = metricStaggerBase;
+  const d1 = metricStaggerBase + 140;
+  const d2 = metricStaggerBase + 280;
   return (
-    <div className="relative flex h-full min-h-[min(44vh,360px)] min-w-0 w-full max-w-none flex-col">
-      <div className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-visible rounded-2xl border border-gold-500/20 bg-[#0a0a0a] shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_16px_48px_rgba(0,0,0,0.5)]">
-        {/* Foil: z-15 — above env + plate, below portrait (z-20) */}
+    <div className="relative flex h-full min-h-0 w-full min-w-0 max-w-none flex-col">
+      {/* Full-art TCG: height follows flex grid (TV / large screens); portrait fills cell */}
+      <div className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border-2 border-gold-500/35 bg-[#0a0a0a] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_22px_56px_rgba(0,0,0,0.55)]">
         {shimmerStamp > 0 ? (
           <div
             key={shimmerStamp}
@@ -215,127 +264,162 @@ function EliteAgentCard({
           />
         ) : null}
 
-        {/* Top ~45% — hero environment (flex 9/20) */}
-        <div className="pointer-events-none relative z-[1] min-h-0 flex-[9] overflow-hidden rounded-t-2xl">
+        {/* Portrait art — only this region; ends where the title strip begins */}
+        <div className="relative z-0 min-h-0 flex-1 overflow-hidden bg-[#0a0a0a]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={agentPortraitSrc(agent)}
+            alt=""
+            className="absolute inset-0 h-full w-full scale-[1.02] select-none object-cover object-[50%_22%]"
+            style={{
+              filter:
+                "brightness(1.1) saturate(1.22) contrast(1.1)",
+            }}
+          />
           <div
-            className="absolute inset-0 opacity-[0.35]"
+            className="pointer-events-none absolute inset-0 opacity-[0.06]"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
             }}
           />
           <div
-            className="absolute inset-0"
+            className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse 85% 75% at 50% 85%, rgba(212,175,55,0.22), rgba(212,175,55,0.05) 45%, transparent 70%)",
+                "radial-gradient(ellipse 85% 55% at 50% 28%, rgba(212,175,55,0.08), transparent 50%)",
             }}
           />
           <div
-            className="absolute inset-0 bg-gradient-to-b from-[#121212] via-[#0a0a0a] to-transparent"
-            style={{ opacity: 0.92 }}
+            className="pointer-events-none absolute rounded-lg ring-1 ring-gold-400/35 ring-inset sm:rounded-[0.85rem]"
+            style={{
+              inset: "clamp(4px, min(0.65vmin, 0.8vh), 12px)",
+            }}
           />
         </div>
 
-        {/* Data plate — ~55% (flex 11/20); Resolved-style green for Closures */}
+        {/* Title + stats — solid panel below the image (no photo behind the name) */}
         <div
-          className="relative z-[13] flex min-h-0 flex-[11] flex-col items-stretch text-center rounded-b-2xl border-t border-gold-400/45 glass gold-border-glow backdrop-blur-md"
+          className="relative z-10 shrink-0 border-t border-gold-500/25 bg-[#0a0a0a]"
           style={{
-            borderTopWidth: "1px",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
             padding:
-              "clamp(8px, 1.2vh, 14px) clamp(8px, 1.2vw, 16px) clamp(10px, 1.4vh, 18px)",
+              "clamp(0.45rem, min(1.1vmin, 1.4vh), 1.25rem) clamp(0.4rem, min(1vmin, 1.2vh), 1rem)",
           }}
         >
-          <div className="pointer-events-none absolute inset-0 rounded-b-2xl bg-gradient-to-br from-gold-500/[0.05] to-transparent" />
-
-          <div className="relative flex min-h-0 w-full flex-1 flex-col justify-between gap-5 sm:gap-6">
-            {/* Agent name — extra air + subtle luxe frame (hairline + soft bloom) */}
-            <div className="relative w-full shrink-0 px-1 sm:px-2">
-              <div className="pointer-events-none absolute left-1/2 top-1/2 h-[135%] w-[92%] max-w-[min(100%,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.11),transparent_68%)]" />
-              <div
-                className="relative mx-auto w-full rounded-lg px-4 py-5 sm:px-7 sm:py-7 md:px-8 md:py-8"
+          <div
+            className="flex w-full flex-col"
+            style={{ gap: "clamp(0.35rem, min(0.9vmin, 1.1vh), 0.9rem)" }}
+          >
+            <div className="rounded-lg border border-gold-500/35 bg-black/45 px-[clamp(0.35rem,1vmin,0.65rem)] py-[clamp(0.35rem,0.9vmin,0.65rem)] text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+              <h3
+                className="font-cinzel font-bold uppercase leading-none tracking-[0.24em] text-gold-300 queen-name-glow line-clamp-2"
                 style={{
-                  boxShadow:
-                    "inset 0 0 0 1px rgba(201,168,76,0.16), inset 0 1px 0 rgba(255,255,255,0.05)",
+                  fontSize: ONBOARDING_AGENT_NAME_FONT,
                 }}
               >
-                <div className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-b from-gold-500/[0.05] via-transparent to-gold-500/[0.03]" />
-                <div className="relative space-y-5 sm:space-y-6">
-                  <div className="flex w-full items-center gap-3 sm:gap-4">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/45" />
-                    <span
-                      className="shrink-0 font-cinzel text-[0.55rem] leading-none text-gold-500/50 sm:text-[0.65rem]"
-                      aria-hidden
-                    >
-                      ✦
-                    </span>
-                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/45" />
-                  </div>
-                  <h3 className="w-full px-0.5 font-cinzel text-4xl min-[900px]:text-5xl xl:text-6xl font-bold uppercase leading-none tracking-[0.32em] text-gold-400 queen-name-glow line-clamp-2">
-                    {agent.name}
-                  </h3>
-                  <div className="flex w-full items-center gap-3 sm:gap-4">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/22 to-gold-500/38" />
-                    <span
-                      className="shrink-0 font-cinzel text-[0.55rem] leading-none text-gold-500/40 sm:text-[0.65rem]"
-                      aria-hidden
-                    >
-                      ✦
-                    </span>
-                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/22 to-gold-500/38" />
-                  </div>
-                </div>
-              </div>
+                {agent.name}
+              </h3>
             </div>
 
-            {/* Metric wells — label size +25% vs Queendom MetricBox */}
-            <div className="grid min-h-0 w-full flex-1 grid-cols-2 items-stretch gap-2 sm:gap-3 lg:gap-4">
+            <div className="grid w-full grid-cols-3 items-stretch gap-[clamp(4px,0.85vmin,12px)]">
               <div
-                className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center rounded-xl border border-gold-500/20 bg-black/30 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
-                style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
+                className="flex min-h-0 min-w-0 flex-col items-center justify-center rounded-lg border border-gold-500/25 bg-black/50 py-[clamp(6px,1vmin,14px)] text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm"
+                style={{ paddingLeft: "clamp(6px, 0.8vw, 14px)", paddingRight: "clamp(6px, 0.8vw, 14px)" }}
               >
-                <p className="mb-[0.35vh] font-inter font-semibold text-[clamp(20px,2.125vw,28px)] uppercase tracking-[0.25em] text-champagne">
-                  Attempted
-                </p>
-                <span className="font-edu text-7xl min-[900px]:text-8xl leading-none text-champagne tabular-nums">
-                  {agent.totalAttempted}
+                <div className="mb-[clamp(4px,0.6vmin,10px)] flex min-w-0 flex-col items-center gap-[0.15em]">
+                  <p
+                    className="font-cinzel font-bold uppercase leading-none tracking-[0.22em] text-champagne"
+                    style={{
+                      fontSize: ONBOARDING_CARD_TITLE_FONT,
+                    }}
+                  >
+                    Attempted
+                  </p>
+                  <p
+                    className={`text-champagne/80 ${ONBOARDING_METRIC_SUBTITLE_CLASS}`}
+                    style={{ fontSize: ONBOARDING_METRIC_SUBTITLE_FONT }}
+                  >
+                    (This Month)
+                  </p>
+                </div>
+                <span
+                  className="inline-block leading-none"
+                  style={{ fontSize: ONBOARDING_METRIC_VALUE_FONT }}
+                >
+                  <AnimatedCounter
+                    value={agent.totalAttempted}
+                    delay={d0}
+                    slideOnChange={slide}
+                    className="font-edu leading-none text-champagne tabular-nums"
+                  />
                 </span>
               </div>
               <div
-                className="flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center rounded-xl border border-gold-500/20 bg-black/30 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]"
-                style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
+                className="flex min-h-0 min-w-0 flex-col items-center justify-center rounded-lg border border-gold-500/25 bg-black/50 py-[clamp(6px,1vmin,14px)] text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm"
+                style={{ paddingLeft: "clamp(6px, 0.8vw, 14px)", paddingRight: "clamp(6px, 0.8vw, 14px)" }}
               >
-                <p className="mb-[0.35vh] font-inter font-semibold text-[clamp(20px,2.125vw,28px)] uppercase tracking-[0.25em] text-green-400">
-                  Closures
-                </p>
-                <span className="font-edu text-7xl min-[900px]:text-8xl leading-none tabular-nums text-green-400">
-                  {agent.totalConverted}
+                <div className="mb-[clamp(4px,0.6vmin,10px)] flex min-w-0 flex-col items-center gap-[0.15em]">
+                  <p
+                    className="font-cinzel font-bold uppercase leading-none tracking-[0.22em] text-green-400"
+                    style={{
+                      fontSize: ONBOARDING_CARD_TITLE_FONT,
+                    }}
+                  >
+                    Closures
+                  </p>
+                  <p
+                    className={`text-green-400/90 ${ONBOARDING_METRIC_SUBTITLE_CLASS}`}
+                    style={{ fontSize: ONBOARDING_METRIC_SUBTITLE_FONT }}
+                  >
+                    (Last 30 Days)
+                  </p>
+                </div>
+                <span
+                  className="inline-block leading-none"
+                  style={{ fontSize: ONBOARDING_METRIC_VALUE_FONT }}
+                >
+                  <AnimatedCounter
+                    value={agent.totalConverted}
+                    delay={d1}
+                    slideOnChange={slide}
+                    className="font-edu leading-none tabular-nums text-green-400"
+                  />
+                </span>
+              </div>
+              <div
+                className="flex min-h-0 min-w-0 flex-col items-center justify-center rounded-lg border border-gold-500/25 bg-black/50 py-[clamp(6px,1vmin,14px)] text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm"
+                style={{ paddingLeft: "clamp(4px, 0.6vw, 10px)", paddingRight: "clamp(4px, 0.6vw, 10px)" }}
+              >
+                <div className="mb-[clamp(4px,0.6vmin,10px)] flex min-w-0 flex-col items-center gap-[0.15em]">
+                  <p
+                    className="font-cinzel font-bold uppercase leading-none tracking-[0.22em] text-sky-300"
+                    style={{
+                      fontSize: ONBOARDING_CARD_TITLE_FONT,
+                    }}
+                  >
+                    Leads
+                  </p>
+                  <p
+                    className={`text-sky-200 ${ONBOARDING_METRIC_SUBTITLE_CLASS}`}
+                    style={{ fontSize: ONBOARDING_METRIC_SUBTITLE_FONT }}
+                  >
+                    (Today)
+                  </p>
+                </div>
+                <span
+                  className="inline-block leading-none"
+                  style={{ fontSize: ONBOARDING_METRIC_VALUE_FONT }}
+                >
+                  <AnimatedCounter
+                    value={agent.leadsAttendToday}
+                    delay={d2}
+                    slideOnChange={slide}
+                    className="font-edu leading-none tabular-nums text-sky-200"
+                  />
                 </span>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Pop-out portrait — z-20; bottom anchored to card midline; extends above card */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={agentPortraitSrc(agent)}
-          alt=""
-          className="pointer-events-none absolute left-1/2 z-[20] w-[88%] max-w-[min(100%,300px)] select-none object-contain object-bottom"
-          style={{
-            bottom: "55%",
-            left: "50%",
-            maxHeight: "82%",
-            height: "auto",
-            width: "88%",
-            transform: "translate(-50%, -28px)",
-            filter: "drop-shadow(0px 15px 15px rgba(0,0,0,0.6))",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, black 0%, black 80%, transparent 100%)",
-            maskImage:
-              "linear-gradient(to bottom, black 0%, black 80%, transparent 100%)",
-          }}
-        />
       </div>
     </div>
   );
@@ -373,7 +457,8 @@ export default function OnboardingPanel() {
           ? data.agents.slice(0, 3)
           : FALLBACK_AGENTS,
       );
-      setLedger(Array.isArray(data.ledger) ? data.ledger : []);
+      const raw = Array.isArray(data.ledger) ? data.ledger : [];
+      setLedger(sortLedgerNewestFirst(raw).slice(0, LIVE_LEDGER_MAX));
     } catch {
       /* ignore */
     }
@@ -391,11 +476,53 @@ export default function OnboardingPanel() {
   useEffect(() => {
     const client = supabase;
     if (!client) return;
+
     const ch = client
-      .channel("onboarding-ledger-live")
+      .channel("onboarding-conversion-ledger-live")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "onboarding_ledger" },
+        {
+          event: "*",
+          schema: "public",
+          table: "onboarding_conversion_ledger",
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            const raw = payload.new as Record<string, unknown> | null;
+            if (!raw) return;
+            const row = ledgerRowFromInsertPayload(raw);
+            if (!row) return;
+
+            setLedger((prev) => {
+              const withoutDup = prev.filter((r) => r.id !== row.id);
+              const merged = sortLedgerNewestFirst([row, ...withoutDup]);
+              return merged.slice(0, LIVE_LEDGER_MAX);
+            });
+          }
+
+          void load();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(ch);
+    };
+  }, [load]);
+
+  useEffect(() => {
+    const client = supabase;
+    if (!client) return;
+
+    const ch = client
+      .channel("onboarding-lead-touches-live")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "onboarding_lead_touches",
+        },
         () => {
           void load();
         },
@@ -437,10 +564,7 @@ export default function OnboardingPanel() {
     }
   }, [agents]);
 
-  const sortedLedger = useMemo(
-    () => sortLedgerNewestFirst(ledger),
-    [ledger],
-  );
+  const sortedLedger = useMemo(() => sortLedgerNewestFirst(ledger), [ledger]);
 
   const ledgerScrollDuration = useMemo(() => {
     const n = sortedLedger.length;
@@ -455,8 +579,11 @@ export default function OnboardingPanel() {
 
   return (
     <section
-      className="relative flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden bg-obsidian min-h-[85svh] md:min-h-0"
-      style={{ padding: "2vh clamp(16px, 3.5vw, 48px)" }}
+      className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-obsidian md:overflow-y-hidden"
+      style={{
+        padding:
+          "clamp(0.75rem, min(2vh, 2.5vmin), 2rem) clamp(0.75rem, min(3vmin, 4vw), 3rem)",
+      }}
     >
       <div
         className="pointer-events-none absolute inset-0"
@@ -473,7 +600,10 @@ export default function OnboardingPanel() {
           <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
         </div>
 
-        <h2 className="mb-[1.1vh] font-cinzel text-5xl min-[900px]:text-6xl xl:text-7xl font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow">
+        <h2
+          className="mb-[1.1vh] font-cinzel font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
+          style={{ fontSize: ONBOARDING_PAGE_TITLE_FONT }}
+        >
           Onboarding
         </h2>
 
@@ -483,22 +613,24 @@ export default function OnboardingPanel() {
         </div>
       </div>
 
-      {/* Section A — three sales cards (full-width responsive row) */}
+      {/* Section A — cards share ~3/5 of main column height with ledger (flex-[2]) */}
       <div className="relative mb-[1.6vh] flex min-h-0 w-full min-w-0 flex-[3] flex-col">
         <div
-          className="glass gold-border-glow relative flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-visible rounded-3xl"
+          className="glass gold-border-glow relative flex h-full min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden rounded-3xl"
           style={{
             padding:
-              "clamp(1.5rem, 2.5vh, 2.25rem) clamp(18px, 3.5vw, 48px) clamp(1.25rem, 2vh, 2rem)",
+              "clamp(0.65rem, min(1.6vh, 1.8vmin), 1.75rem) clamp(0.65rem, min(2.8vmin, 3.8vw), 3rem) clamp(0.65rem, min(1.5vh, 1.7vmin), 1.75rem)",
           }}
         >
           <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-gold-500/[0.04] to-transparent" />
-          <div className="relative grid h-full min-h-0 w-full min-w-0 flex-1 grid-cols-1 auto-rows-fr items-stretch gap-6 overflow-visible pt-[clamp(4.5rem,10vh,6.5rem)] md:grid-cols-3 md:grid-rows-1 md:gap-6 lg:gap-8 xl:gap-10 2xl:gap-12">
-            {displayAgents.map((agent) => (
+          <div className="relative grid h-full min-h-0 min-w-0 flex-1 auto-rows-fr grid-cols-1 items-stretch justify-items-stretch gap-[clamp(0.65rem,min(1.4vmin,1.8vh),2rem)] overflow-hidden pt-0 max-md:min-h-[min(34vmin,46svh)] md:grid-cols-3">
+            {displayAgents.map((agent, cardIdx) => (
               <EliteAgentCard
                 key={agent.id}
                 agent={agent}
                 shimmerStamp={shimmerStampByAgentId[agent.id] ?? 0}
+                prefersReducedMotion={prefersReducedMotion}
+                metricStaggerBase={cardIdx * 180}
               />
             ))}
           </div>
@@ -509,34 +641,48 @@ export default function OnboardingPanel() {
       <div className="relative flex min-h-0 flex-[2] flex-col">
         <div
           className="glass gold-border-glow relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl"
-          style={{ padding: "2.2vh clamp(16px, 2.5vw, 40px)" }}
+          style={{
+            padding:
+              "clamp(0.85rem, min(2.1vh, 2.4vmin), 2rem) clamp(0.75rem, min(2.5vmin, 3.2vw), 2.5rem)",
+          }}
         >
           <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-gold-500/[0.03] to-transparent" />
 
           <div className="relative mb-[1.8vh] flex w-full flex-shrink-0 items-center justify-center text-center">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-            <p className="font-cinzel flex-shrink-0 px-4 text-4xl min-[900px]:text-5xl xl:text-6xl font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow">
+            <p
+              className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2vmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
+              style={{ fontSize: ONBOARDING_LEDGER_TITLE_FONT }}
+            >
               Live Conversion Ledger
             </p>
             <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
           </div>
 
           <div className="relative border-b border-gold-500/10 pb-3 text-center">
-            <div className="grid grid-cols-4 gap-x-2 sm:gap-x-4 font-inter font-semibold text-[clamp(22px,2.7vw,36px)] min-[900px]:text-[clamp(29px,3.5vw,48px)] uppercase tracking-[0.25em] text-champagne">
+            <div
+              className="grid grid-cols-4 gap-x-1 font-inter font-semibold uppercase tracking-[0.2em] text-champagne sm:gap-x-2 md:gap-x-4"
+              style={{ fontSize: ONBOARDING_LEDGER_HEADER_FONT }}
+            >
               <span className="min-w-0 truncate px-1 text-center">Client</span>
-              <span className="min-w-0 truncate px-1 text-center">Amount (₹ L)</span>
+              <span className="min-w-0 truncate px-1 text-center">
+                Amount
+              </span>
               <span className="min-w-0 truncate px-1 text-center">Date</span>
               <span className="min-w-0 truncate px-1 text-center">Agent</span>
             </div>
           </div>
 
-          <div className="relative min-h-0 flex-1 overflow-hidden pt-3">
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden pt-3">
             {sortedLedger.length === 0 ? (
-              <p className="py-10 text-center font-inter text-[clamp(20px,2.2vw,28px)] text-gold-500/50">
+              <p
+                className="py-10 text-center font-inter text-gold-500/50"
+                style={{ fontSize: ONBOARDING_LEDGER_CELL_FONT }}
+              >
                 Awaiting conversions…
               </p>
             ) : (
-              <div className="relative h-full min-h-[min(240px,34vh)] overflow-hidden">
+              <div className="relative min-h-0 flex-1 overflow-hidden">
                 <div
                   className={
                     prefersReducedMotion

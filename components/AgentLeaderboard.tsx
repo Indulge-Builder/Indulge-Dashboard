@@ -3,7 +3,7 @@
 import { memo, useRef, useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Crown } from "lucide-react";
-import type { AgentStats, JokerStats } from "@/lib/types";
+import type { AgentStats } from "@/lib/types";
 import { safeNum } from "@/components/QueendomPanel";
 
 // ── Ring constants ───────────────────────────────────────────────────────────
@@ -11,7 +11,7 @@ const RING_SIZE = 80;
 const RING_R = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RING_R;
 
-// ── Grid: [Icon | Name | Today Score | Monthly Score | Monthly Pending/Overdue] ───────
+// ── Grid: [Icon | Name | Today | Monthly | Pending this month / Overdue] ───────
 const GRID_COLS =
   "grid-cols-[3rem_minmax(0,1fr)_7.5rem_8rem_6rem] " +
   "sm:grid-cols-[3.5rem_minmax(0,1fr)_9rem_10rem_7.5rem] " +
@@ -31,9 +31,6 @@ function usePrevious<T>(value: T): T | undefined {
   }, [value]);
   return ref.current;
 }
-
-// ── Carbon Fiber / Silk SVG texture for Joker row ───────────────────────────
-const JOKER_TEXTURE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cdefs%3E%3Cpattern id='silk' width='8' height='8' patternUnits='userSpaceOnUse'%3E%3Cpath d='M0 0h1v8H0V0zm2 0h1v8H2V0zm4 0h1v8H4V0zm6 0h1v8H6V0z' fill='rgba(212,175,55,0.04)'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23silk)'/%3E%3C/svg%3E")`;
 
 // ── Animated value with flash on change ──────────────────────────────────────
 interface AnimatedValueProps {
@@ -200,9 +197,9 @@ const AgentRow = memo(function AgentRow({
   const { pending, overdue } = useMemo(
     () => ({
       pending: agent.pendingScore ?? 0,
-      overdue: agent.escalatedCount ?? 0, // tickets where is_escalated is true
+      overdue: agent.overdueCount ?? 0,
     }),
-    [agent.pendingScore, agent.escalatedCount],
+    [agent.pendingScore, agent.overdueCount],
   );
   const hasOverdue = overdue > 0;
 
@@ -360,7 +357,7 @@ const AgentRow = memo(function AgentRow({
           />
         </div>
 
-        {/* Column 5: Error — Pending / Overdue (Overdue = is_escalated count) */}
+        {/* Column 5 — Pending (created this IST month, open) / Overdue (escalated in that set) */}
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={pending}
@@ -384,120 +381,21 @@ const AgentRow = memo(function AgentRow({
   );
 });
 
-// ── Joker Row (Special row with Carbon Fiber / Glow) ──────────────────────────
-interface JokerRowProps {
-  jokerName: string;
-  joker: JokerStats;
-  baseDelay: number;
-}
-
-const JokerRow = memo(function JokerRow({
-  jokerName,
-  joker,
-  baseDelay,
-}: JokerRowProps) {
-  const totalSuggestions = useMemo(
-    () => safeNum(joker.totalSuggestions),
-    [joker.totalSuggestions],
-  );
-  const acceptedCount = useMemo(
-    () => safeNum(joker.acceptedCount),
-    [joker.acceptedCount],
-  );
-  const acceptanceRatePct =
-    totalSuggestions > 0
-      ? Math.round((acceptedCount / totalSuggestions) * 100)
-      : 0;
-  const restSuggestions = totalSuggestions - acceptedCount;
-
-  return (
-    <motion.div
-      layout
-      variants={rowVariants}
-      custom={baseDelay}
-      initial="hidden"
-      animate="visible"
-      className="relative overflow-hidden rounded-xl"
-    >
-      {/* Carbon Fiber / Glow texture */}
-      <div
-        className="absolute inset-0 pointer-events-none rounded-xl"
-        style={{
-          background: `linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(249,226,126,0.06) 50%, rgba(212,175,55,0.10) 100%), ${JOKER_TEXTURE}`,
-        }}
-      />
-      <div
-        className={`grid ${GRID_COLS} items-center gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 py-[1vh] sm:py-[1.2vh] rounded-xl relative bg-gradient-to-r from-gold-500/10 via-gold-400/5 to-gold-500/10 border border-gold-400/25`}
-      >
-        <AgentIcon
-          name={jokerName}
-          pct={totalSuggestions > 0 ? acceptedCount / totalSuggestions : 0}
-          animDelay={baseDelay + 0.25}
-        />
-        <p className="font-baskerville font-semibold text-[clamp(0.85rem,1.4vw,1.75rem)] tracking-wide text-gold-300 leading-none truncate pl-2">
-          {jokerName}
-        </p>
-        {/* Col 3: Total accepted suggestions */}
-        <div className="flex items-baseline justify-center">
-          <AnimatedValue
-            value={acceptedCount}
-            className="font-edu text-[clamp(1.4rem,2.2vw,2.8rem)] leading-none text-green-400 tabular-nums font-semibold"
-          />
-        </div>
-        {/* Col 4: Acceptance rate % */}
-        <div className="flex items-baseline justify-center">
-          <AnimatedValue
-            value={acceptanceRatePct}
-            className="font-edu tabular-nums font-semibold leading-none text-[clamp(1.4rem,2.2vw,2.8rem)] text-gold-400"
-          />
-          <span className="font-inter text-[clamp(0.75rem,0.9vw,1.2rem)] text-white/40 ml-0.5">
-            %
-          </span>
-        </div>
-        {/* Col 5: Rest suggestions (total - accepted) */}
-        <div className="flex items-baseline justify-center">
-          <AnimatedValue
-            value={restSuggestions}
-            className="font-edu text-[clamp(1.2rem,1.8vw,2.5rem)] leading-none tabular-nums font-semibold text-red-400"
-          />
-        </div>
-      </div>
-      <div className="mx-3 h-px bg-gradient-to-r from-transparent via-gold-500/[0.08] to-transparent" />
-    </motion.div>
-  );
-});
-
 // ── Leaderboard ──────────────────────────────────────────────────────────────
 interface AgentLeaderboardProps {
   agents: AgentStats[];
-  joker?: JokerStats | null;
-  jokerName?: string | null;
   queendomDelay?: number;
   celebrationAgent?: string | null;
 }
 
-// Approximate row height (header + each agent row) for dynamic min-height
-const ROW_HEIGHT_REM = 3.6;
-const HEADER_HEIGHT_REM = 2.8;
-
 export default function AgentLeaderboard({
   agents,
-  joker = null,
-  jokerName = null,
   queendomDelay = 0,
   celebrationAgent = null,
 }: AgentLeaderboardProps) {
-  const hasJoker = joker != null && jokerName != null && jokerName.length > 0;
-  const rowCount = agents.length + (hasJoker ? 1 : 0);
-  const minHeightRem =
-    HEADER_HEIGHT_REM + Math.max(rowCount, 1) * ROW_HEIGHT_REM;
-
   return (
-    <div
-      className="flex flex-col flex-6 min-h-0"
-      style={{ minHeight: `${minHeightRem}rem` }}
-    >
-      <div className="flex-1 min-h-0 overflow-y-auto">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         <div className="sticky top-0 z-10 bg-obsidian/98 border-b border-gold-500/20 flex-shrink-0 backdrop-blur-sm">
           <div
             className={`grid ${GRID_COLS} gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 pb-[0.9vh]`}
@@ -534,13 +432,6 @@ export default function AgentLeaderboard({
               />
             ))}
           </AnimatePresence>
-          {hasJoker && (
-            <JokerRow
-              jokerName={jokerName}
-              joker={joker}
-              baseDelay={queendomDelay + agents.length * 0.07}
-            />
-          )}
         </div>
       </div>
     </div>

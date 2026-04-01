@@ -6,18 +6,25 @@ export interface MemberStats {
 }
 
 export interface TicketStats {
-  totalReceived: number; // count of ALL rows in tickets where queendom_name matches
+  totalReceived: number; // tickets created in the current IST calendar month (label: Received This Month)
   totalThisMonth?: number; // deprecated: use totalReceived
-  resolvedThisMonth: number; // tickets with resolved_at within this calendar month (resolved or closed)
-  solvedToday: number; // status "resolved" AND created_at is today (IST); not "closed", not resolved_at-based
-  pendingToResolve: number; // any active / open status — no date gate
+  resolvedThisMonth: number; // created this IST month + status resolved only (closed not scored)
+  solvedToday: number; // status "resolved" AND created_at is today (IST)
+  pendingToResolve: number; // created this IST month; status neither resolved nor closed
   jokerSuggestion: number; // tickets with tags.joker_suggestion set (legacy)
 }
 
 /** Joker-specific metrics from the jokers table */
 export interface JokerStats {
+  /** Distinct suggestion text (lowercase + trim) — idea count without duplicate-blast inflation. */
+  uniqueSuggestionsCount: number;
+  /** Total rows / reach (same as `totalSuggestions`). */
+  totalSent: number;
+  /** Total rows — alias of `totalSent`. */
   totalSuggestions: number;
   acceptedCount: number;
+  /** Rows where response is explicitly "no" (paired with acceptedCount for acceptance rate). */
+  rejectedCount: number;
   pendingSuggestions: number;
   acceptedToday: number;
   totalThisMonth: number;
@@ -31,9 +38,10 @@ export interface AgentStats {
   tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
   tasksAssignedThisMonth: number;
+  /** Open tickets created this IST month (same cohort as Queendom pending). */
   pendingScore: number;
+  /** Among that monthly pending set: `is_escalated` (shown as Overdue in the leaderboard). */
   overdueCount: number;
-  escalatedCount: number;
 }
 
 export interface QueenStats {

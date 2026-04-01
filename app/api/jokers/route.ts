@@ -2,8 +2,10 @@
  * GET /api/jokers
  *
  * Fetches from the `jokers` table and returns per-queendom Joker metrics:
- *   totalSuggestions  – count of rows where joker_name matches the Queendom's Joker
+ *   uniqueSuggestionsCount – distinct normalized suggestion text (anti–campaign-spam)
+ *   totalSent / totalSuggestions – row count (reach)
  *   acceptedCount    – count where response.toLowerCase() === 'yes'
+ *   rejectedCount     – count where response.toLowerCase() === 'no'
  *   pendingSuggestions – count where response is neither 'yes' nor 'no'
  *
  * Returns: { ananyshree: JokerStats, anishqa: JokerStats }
@@ -16,21 +18,28 @@ import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
 
 interface JokerRow {
   joker_name: string | null;
+  suggestion: string | null;
   response: string | null;
   date: string | null;
 }
 
 interface JokerStats {
+  uniqueSuggestionsCount: number;
+  totalSent: number;
   totalSuggestions: number;
   acceptedCount: number;
+  rejectedCount: number;
   pendingSuggestions: number;
   acceptedToday: number;
   totalThisMonth: number;
 }
 
 const emptyStats: JokerStats = {
+  uniqueSuggestionsCount: 0,
+  totalSent: 0,
   totalSuggestions: 0,
   acceptedCount: 0,
+  rejectedCount: 0,
   pendingSuggestions: 0,
   acceptedToday: 0,
   totalThisMonth: 0,
@@ -57,7 +66,7 @@ export async function GET() {
 
     const { data: rows, error } = await db
       .from("jokers")
-      .select("joker_name, response, date");
+      .select("joker_name, suggestion, response, date");
 
     if (error) {
       console.error("[/api/jokers] Supabase error:", error.message);
@@ -73,8 +82,18 @@ export async function GET() {
         (r) => (r.joker_name ?? "").toLowerCase().trim() === nameLower,
       );
 
-      let totalSuggestions = matching.length;
+      const uniqueSuggestionKeys = new Set<string>();
+      for (const row of matching) {
+        const key = (row.suggestion ?? "").toLowerCase().trim();
+        uniqueSuggestionKeys.add(key);
+      }
+      const uniqueSuggestionsCount = uniqueSuggestionKeys.size;
+
+      const totalSent = matching.length;
+      const totalSuggestions = totalSent;
+
       let acceptedCount = 0;
+      let rejectedCount = 0;
       let pendingSuggestions = 0;
       let acceptedToday = 0;
       let totalThisMonth = 0;
@@ -87,7 +106,9 @@ export async function GET() {
         if (resp === "yes") {
           acceptedCount++;
           if (rowDay === TODAY) acceptedToday++;
-        } else if (resp !== "no") {
+        } else if (resp === "no") {
+          rejectedCount++;
+        } else {
           pendingSuggestions++;
         }
 
@@ -95,8 +116,11 @@ export async function GET() {
       }
 
       return {
+        uniqueSuggestionsCount,
+        totalSent,
         totalSuggestions,
         acceptedCount,
+        rejectedCount,
         pendingSuggestions,
         acceptedToday,
         totalThisMonth,

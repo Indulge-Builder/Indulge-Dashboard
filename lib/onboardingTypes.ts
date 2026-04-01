@@ -5,7 +5,10 @@ export interface OnboardingAgentRow {
   name: string;
   photoUrl: string | null;
   totalAttempted: number;
+  /** Closures in rolling last 30 days (conversion ledger by agent_name) */
   totalConverted: number;
+  /** Leads first touched today (IST), from onboarding_lead_touches */
+  leadsAttendToday: number;
 }
 
 export interface OnboardingLedgerRow {
@@ -13,6 +16,8 @@ export interface OnboardingLedgerRow {
   clientName: string;
   amount: number;
   recordedAt: string; // ISO
+  /** Queendom name (e.g. Ananyshree, Anishqa) */
+  assignedTo: string;
   agentName: string;
 }
 

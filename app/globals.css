@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Edu+AU+VIC+WA+NT+Hand+Arrows:wght@400..700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Edu+AU+VIC+WA+NT+Hand+Arrows:wght@400..700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,12 +6,12 @@
 
 /* ── Luxury Noir Design System ─────────────────────────────────────────────── */
 :root {
-  --font-edu: 'Edu AU VIC WA NT Hand Arrows', cursive;
-  --font-cinzel: 'Cinzel', serif;
+  --font-edu: "Edu AU VIC WA NT Hand Arrows", cursive;
+  --font-cinzel: "Cinzel", serif;
   --obsidian: #050505;
-  --liquid-gold-start: #D4AF37;
-  --liquid-gold-end: #F9E27E;
-  --gold-border: rgba(212, 175, 55, 0.20);
+  --liquid-gold-start: #d4af37;
+  --liquid-gold-end: #f9e27e;
+  --gold-border: rgba(212, 175, 55, 0.2);
 }
 
 html,
@@ -43,7 +43,9 @@ body::before {
   z-index: 0;
 }
 
-::-webkit-scrollbar { display: none; }
+::-webkit-scrollbar {
+  display: none;
+}
 
 /* ── Glassmorphism: 1px gold border (20%), backdrop blur ── */
 @layer utilities {
@@ -69,14 +71,14 @@ body::before {
   .queen-name-glow {
     text-shadow:
       0 0 20px rgba(212, 175, 55, 0.75),
-      0 0 50px rgba(212, 175, 55, 0.40),
+      0 0 50px rgba(212, 175, 55, 0.4),
       0 0 100px rgba(212, 175, 55, 0.18),
       0 2px 4px rgba(0, 0, 0, 0.6);
   }
 
   .gold-glow {
     text-shadow:
-      0 0 20px rgba(212, 175, 55, 0.70),
+      0 0 20px rgba(212, 175, 55, 0.7),
       0 0 50px rgba(212, 175, 55, 0.35),
       0 0 100px rgba(212, 175, 55, 0.15);
   }
@@ -91,7 +93,11 @@ body::before {
   /* Joker metric box — distinct gold border */
   .joker-box {
     border: 1px solid rgba(249, 226, 126, 0.35);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.06) 0%, rgba(249, 226, 126, 0.03) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(212, 175, 55, 0.06) 0%,
+      rgba(249, 226, 126, 0.03) 100%
+    );
   }
 
   /* Monthly Error — subtle red glow for overdue */
@@ -101,8 +107,10 @@ body::before {
 
   /* Error column Overdue — Neon Red (#FF0000) with subtle outer glow when is_escalated > 0 */
   .error-overdue-glow {
-    color: #FF0000;
-    text-shadow: 0 0 6px #FF0000, 0 0 12px rgba(255, 0, 0, 0.5);
+    color: #ff0000;
+    text-shadow:
+      0 0 6px #ff0000,
+      0 0 12px rgba(255, 0, 0, 0.5);
   }
 
   .tabular-nums {
@@ -116,8 +124,8 @@ body::before {
 
   .celebration-avatar-glow {
     box-shadow:
-      0 0 0 1px  rgba(212, 175, 55, 0.45),
-      0 0 45px 10px  rgba(212, 175, 55, 0.30),
+      0 0 0 1px rgba(212, 175, 55, 0.45),
+      0 0 45px 10px rgba(212, 175, 55, 0.3),
       0 0 100px 24px rgba(212, 175, 55, 0.16),
       0 0 180px 45px rgba(212, 175, 55, 0.08);
   }
@@ -131,11 +139,11 @@ body::before {
   .celebration-shimmer-text {
     background: linear-gradient(
       90deg,
-      #D4AF37 0%,
-      #F9E27E 35%,
-      #FDF9EF 55%,
-      #F9E27E 75%,
-      #D4AF37 100%
+      #d4af37 0%,
+      #f9e27e 35%,
+      #fdf9ef 55%,
+      #f9e27e 75%,
+      #d4af37 100%
     );
     background-size: 200% auto;
     -webkit-background-clip: text;
@@ -174,7 +182,6 @@ body::before {
       transform: translateX(150%) skewX(-25deg);
     }
   }
-
 
   /* Row win shimmer — travels across on celebration */
   .row-win-shimmer {
@@ -217,7 +224,7 @@ body::before {
     align-items: center;
     padding: 0 4rem; /* Wide spacing for luxury feel */
     font-size: 1.75rem; /* Large enough for TV / 15 feet */
-    color: #F9E27E; /* Soft Gold */
+    color: #f9e27e; /* Soft Gold */
   }
 
   /* Special Dates — "BIG DAY" breathing glow for Today cards */
@@ -239,7 +246,7 @@ body::before {
 
   /* RenewalsPanel — gold gradient text for names */
   .renewal-card-text {
-    background: linear-gradient(to bottom, #F9E27E 0%, #D4AF37 100%);
+    background: linear-gradient(to bottom, #f9e27e 0%, #d4af37 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -252,14 +259,19 @@ body::before {
   .vertical-separator {
     width: 1px;
     height: 80%;
-    background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.2), transparent);
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(212, 175, 55, 0.2),
+      transparent
+    );
   }
 
   /* Gold outer glow for renewal counter */
   .drop-shadow-gold {
     filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6))
-            drop-shadow(0 0 24px rgba(212, 175, 55, 0.35))
-            drop-shadow(0 0 40px rgba(212, 175, 55, 0.2));
+      drop-shadow(0 0 24px rgba(212, 175, 55, 0.35))
+      drop-shadow(0 0 40px rgba(212, 175, 55, 0.2));
   }
 }
 
@@ -284,7 +296,8 @@ body::before {
 }
 
 .onboarding-ledger-track {
-  animation: onboarding-ledger-scroll var(--onboarding-ledger-duration, 48s) linear infinite;
+  animation: onboarding-ledger-scroll var(--onboarding-ledger-duration, 48s)
+    linear infinite;
   will-change: transform;
 }
 
@@ -294,7 +307,7 @@ body::before {
   }
 }
 
-/* z-[15]: over env + data plate; portrait uses z-[20] so foil stays behind the cutout */
+/* z-[15]: foil sweep over full-art onboarding card */
 .card-win-shimmer {
   position: absolute;
   inset: 0;
