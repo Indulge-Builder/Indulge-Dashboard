@@ -306,7 +306,7 @@ const AgentRow = memo(function AgentRow({
         </motion.div>
 
         <motion.p
-          className="font-baskerville font-semibold text-[clamp(0.95rem,1.55vw,1.95rem)] tracking-wide text-champagne leading-none truncate pl-2"
+          className="font-baskerville font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] tracking-wide text-champagne leading-none truncate pl-2"
           style={{ willChange: "transform, opacity", transform: "translateZ(0)" }}
           animate={
             surgeKey > 0

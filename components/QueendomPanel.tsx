@@ -65,7 +65,7 @@ function MetricBox({
       style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
     >
       <p
-        className={`font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
+        className={`font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
       >
         {label}
       </p>
@@ -131,7 +131,7 @@ export default function QueendomPanel({
 
   return (
     <motion.section
-      className="relative flex min-h-[85svh] flex-1 flex-col overflow-y-auto overflow-x-hidden md:min-h-0 md:h-full"
+      className="relative flex min-h-[85svh] flex-1 flex-col overflow-y-auto overflow-x-hidden md:min-h-0"
       style={{ padding: "2vh clamp(12px, 3vw, 40px)" }}
       variants={containerVariants}
       initial="hidden"
@@ -183,7 +183,7 @@ export default function QueendomPanel({
           <div className="grid grid-cols-2 min-[700px]:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 w-full">
             {/* 1. Total Solved Today — ANCHOR (Green Glow) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
-              <p className="font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
+              <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
                 Resolved <br /> (Today)
               </p>
               <AnimatedCounter
@@ -242,7 +242,7 @@ export default function QueendomPanel({
 
             {/* 5. Spoiled — accepted wins; funnel = unique ideas × reach */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
-              <p className="font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.3em] uppercase text-champagne mb-[0.25vh]">
+              <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.3em] uppercase text-champagne mb-[0.25vh]">
                 Spoiled
               </p>
               <p className="font-inter mb-[0.45vh] text-xl tracking-widest opacity-70 text-champagne">
@@ -276,7 +276,7 @@ export default function QueendomPanel({
 
       {/* ── Agent Leaderboard (left) + Special Dates (right) ── */}
       <motion.div
-        className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl glass gold-border-glow md:flex-row md:items-stretch"
+        className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl glass gold-border-glow md:flex-row md:items-stretch md:gap-8 lg:gap-10"
         style={{ padding: "1.6vh clamp(10px, 2vw, 28px)" }}
         variants={itemVariants}
       >
@@ -302,10 +302,10 @@ export default function QueendomPanel({
           />
         </div>
         {/* ── Special Dates (right of Team Leaderboard) ── */}
-        <div className="flex-shrink-0 md:w-[clamp(320px,38vw,520px)] flex flex-col items-center md:border-l md:pl-4 pt-4 md:pt-0 md:border-t-0 border-t border-gold-500/20">
-          <div className="flex items-center gap-3 w-full mb-[1.8vh]">
+        <div className="flex w-full flex-shrink-0 flex-col items-stretch border-t border-gold-500/20 pt-4 md:w-[clamp(360px,46vw,680px)] md:border-l md:border-t-0 md:pt-0 md:pl-8 lg:pl-10 md:pr-2 lg:pr-4">
+          <div className="mb-[2vh] flex w-full items-center gap-4 px-1 sm:px-2">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-            <p className="font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne flex-shrink-0">
+            <p className="font-inter flex-shrink-0 text-[clamp(1.05rem,1.45vw,1.65rem)] font-semibold uppercase tracking-[0.42em] text-champagne px-2">
               Special Dates
             </p>
             <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />

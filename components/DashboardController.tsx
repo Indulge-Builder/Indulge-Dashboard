@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import QueendomPanel from "./QueendomPanel";
 import OnboardingPanel from "./OnboardingPanel";
 import type { QueenStats } from "@/lib/types";
@@ -11,6 +11,12 @@ export type ActiveScreen = "concierge" | "onboarding";
 const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
   concierge: 40_000,
   onboarding: 20_000,
+};
+
+const slideTransition = {
+  type: "tween" as const,
+  ease: "easeInOut" as const,
+  duration: 0.8,
 };
 
 interface RenewalsPanelData {
@@ -27,23 +33,6 @@ interface DashboardControllerProps {
   renewalsAnishqa: RenewalsPanelData;
   celebrationAgent: string | null;
 }
-
-const blurTransition = {
-  duration: 1.35,
-  ease: [0.25, 0.46, 0.45, 0.94] as const,
-};
-
-const screenVariants = {
-  initial: { opacity: 0 },
-  animate: {
-    opacity: 1,
-    transition: blurTransition,
-  },
-  exit: {
-    opacity: 0,
-    transition: blurTransition,
-  },
-};
 
 /** TV browsers / remotes often omit `key` or use legacy keyCode; fullscreen can eat events before bubble. */
 function isFreezeToggleKey(e: KeyboardEvent): boolean {
@@ -95,7 +84,7 @@ export default function DashboardController({
 
   return (
     <div
-      className={`relative flex h-full min-h-0 w-full min-w-0 flex-1 ${className ?? ""}`}
+      className={`relative flex min-h-0 w-full min-w-0 flex-1 flex-col ${className ?? ""}`}
     >
       {/* Always clickable: TV remotes often fail to deliver Enter to window; use pointer + P key + OK */}
       <button
@@ -111,17 +100,26 @@ export default function DashboardController({
       >
         {isFrozen ? "RESUME" : "PAUSE"}
       </button>
-      <AnimatePresence mode="wait">
-        {activeScreen === "concierge" ? (
-          <motion.div
-            key="concierge"
-            className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col gap-8 md:flex-row md:items-stretch"
-            variants={screenVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+      {/* Viewport: overflow hidden + flex-1 fills space between TopBar and ticker (not literal 100vh, which would stack past the ticker) */}
+      <div className="flex min-h-0 min-w-0 h-full w-full flex-1 flex-col overflow-hidden">
+        <motion.div
+          className="flex h-full"
+          style={{
+            width: "200%",
+            height: "100%",
+            willChange: "transform",
+          }}
+          initial={false}
+          animate={{
+            x: activeScreen === "concierge" ? "0%" : "-50%",
+          }}
+          transition={slideTransition}
+        >
+          <div
+            className="flex min-h-0 h-full min-w-0 shrink-0 flex-col gap-8 md:flex-row md:items-stretch"
+            style={{ width: "50%", flexShrink: 0 }}
           >
-            <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
               <QueendomPanel
                 name="Ananyshree"
                 stats={ananyshreeStats}
@@ -158,7 +156,7 @@ export default function DashboardController({
 
             <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-gold-500/25 to-transparent md:hidden" />
 
-            <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
               <QueendomPanel
                 name="Anishqa"
                 stats={anishqaStats}
@@ -168,20 +166,16 @@ export default function DashboardController({
                 renewalsData={renewalsAnishqa}
               />
             </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="onboarding"
-            className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col"
-            variants={screenVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+          </div>
+
+          <div
+            className="flex min-h-0 h-full min-w-0 shrink-0 flex-col"
+            style={{ width: "50%", flexShrink: 0 }}
           >
             <OnboardingPanel />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

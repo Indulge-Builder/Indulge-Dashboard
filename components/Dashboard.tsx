@@ -443,7 +443,7 @@ export default function Dashboard() {
         onComplete={() => setCelebrationAgent(null)}
       />
 
-      {/* ── Concierge ↔ Onboarding (manual only; ArrowLeft/ArrowRight) — flex-1 fills viewport under TopBar + ticker ── */}
+      {/* ── Concierge ↔ Onboarding — flex-1 fills only space between TopBar and ticker (not full h-screen) ── */}
       <DashboardController
         className="min-h-0"
         ananyshreeStats={ananyshreeStats}
@@ -453,8 +453,10 @@ export default function Dashboard() {
         celebrationAgent={celebrationAgent}
       />
 
-      {/* Ticker: Recommendation bar — data from Dashboard only */}
-      <RecommendationTicker recommendations={recommendations} />
+      {/* Ticker: pinned to bottom of the flex column; reserved so main view ends above it */}
+      <div className="relative z-10 w-full shrink-0">
+        <RecommendationTicker recommendations={recommendations} />
+      </div>
     </div>
   );
 }

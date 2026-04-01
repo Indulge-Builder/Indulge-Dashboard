@@ -62,7 +62,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
   }, [queendomId, dateKey]);
 
   return (
-    <div className="flex h-full flex-col gap-3 overflow-y-auto pb-2 w-full">
+    <div className="flex h-full w-full flex-col gap-4 overflow-y-auto pb-3 pt-0.5">
       <AnimatePresence mode="popLayout">
         {filteredDates.map((item) => {
           const isTodayCard = isToday(item.date);
@@ -76,8 +76,8 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className={`
                 relative flex-shrink-0 flex w-full min-h-[clamp(70px,10vh,100px)]
-                flex-row items-center justify-between gap-4
-                rounded-xl overflow-hidden px-4 py-3
+                flex-row items-center justify-between gap-5
+                rounded-xl overflow-hidden px-5 py-3.5 sm:px-6
                 ${isAnniversary ? "anniversary-highlight" : ""}
               `}
               style={

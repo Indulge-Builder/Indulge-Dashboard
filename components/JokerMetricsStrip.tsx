@@ -23,12 +23,12 @@ function JokerMetricBox({
   suffix?: ReactNode;
   suffixClassName?: string;
 }) {
-  // Labels match QueendomPanel `MetricBox`; values match hero `AnimatedCounter`.
+  // Labels match QueendomPanel `MetricBox` / RenewalsPanel RENEWALS; values match hero `AnimatedCounter`.
   const labelClass =
-    "font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase text-champagne mb-[0.2vh]";
+    "font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-champagne mb-[0.2vh]";
   const defaultValueClass = `font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums`;
   const defaultSuffixClass =
-    "font-inter text-[clamp(1.4rem,2.25vw,2.25rem)] text-white/45 font-semibold";
+    "font-inter text-[clamp(2.1rem,3.375vw,3.375rem)] text-white/45 font-semibold";
 
   return (
     <div
@@ -90,9 +90,9 @@ export default function JokerMetricsStrip({
   const accValueClass =
     "font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums";
 
-  /** Same section title as QueendomPanel “Special Dates”. */
+  /** Same section title as RenewalsPanel “Latest Renewals” / “Latest Members”. */
   const jokerTitleClass =
-    "font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne";
+    "font-inter font-semibold text-[clamp(1.575rem,2.1vw,2.4rem)] tracking-[0.4em] uppercase text-champagne";
 
   const innerGrid = (
     <div
@@ -117,7 +117,7 @@ export default function JokerMetricsStrip({
             / {totalRows}
           </>
         }
-        suffixClassName="font-inter text-[clamp(1.4rem,2.25vw,2.25rem)] text-champagne/45 font-semibold"
+        suffixClassName="font-inter text-[clamp(2.1rem,3.375vw,3.375rem)] text-champagne/45 font-semibold"
       />
       <JokerMetricBox
         label="Acceptance Rate"

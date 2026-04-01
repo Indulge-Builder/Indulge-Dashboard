@@ -31,9 +31,9 @@ export default function TopBar() {
 
   return (
     <motion.header
-      className="relative flex items-center justify-between px-4 sm:px-8 lg:px-12 border-b border-gold-500/15 z-10 flex-shrink-0"
-      style={{ height: "12vh", minHeight: "64px", maxHeight: "110px" }}
-      initial={{ opacity: 0, y: -28 }}
+      className="relative flex items-center justify-between px-6 sm:px-12 lg:px-[4.5rem] border-b border-gold-500/15 z-10 flex-shrink-0"
+      style={{ height: "18vh", minHeight: "96px", maxHeight: "165px" }}
+      initial={{ opacity: 0, y: -42 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
@@ -41,7 +41,7 @@ export default function TopBar() {
       <div className="absolute inset-0 bg-gradient-to-r from-gold-500/5 via-gold-500/[0.02] to-gold-500/5 pointer-events-none" />
 
       {/* ── Date (left) — hidden on small screens ── */}
-      <p className="hidden md:block font-inter text-[clamp(16px,2.05vw,30px)] tracking-[0.35em] uppercase text-gold-500 tabular-nums flex-shrink-0">
+      <p className="hidden md:block font-inter text-[clamp(24px,3.075vw,45px)] tracking-[0.35em] uppercase text-gold-500 tabular-nums flex-shrink-0">
         {dateStr}
       </p>
       {/* Spacer so branding stays centred when date is hidden */}
@@ -49,17 +49,17 @@ export default function TopBar() {
 
       {/* ── Central Branding ── */}
       <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center select-none">
-        <h1 className="font-cinzel text-[clamp(1.4rem,3.1vw,2.95rem)] tracking-[0.3em] sm:tracking-[0.38em] text-gold-400 gold-glow uppercase leading-none whitespace-nowrap">
+        <h1 className="font-cinzel text-[clamp(2.1rem,4.65vw,4.425rem)] tracking-[0.3em] sm:tracking-[0.38em] text-gold-400 gold-glow uppercase leading-none whitespace-nowrap">
           Indulge Global
         </h1>
       </div>
 
       {/* ── Clock + Live (right) ── */}
-      <div className="flex h-full items-center justify-end gap-4 sm:gap-6 flex-shrink-0">
-        <p className="font-inter text-[clamp(18px,2.25vw,32px)] tracking-[0.25em] sm:tracking-[0.35em] text-gold-400 tabular-nums">
+      <div className="flex h-full items-center justify-end gap-6 sm:gap-9 flex-shrink-0">
+        <p className="font-inter text-[clamp(27px,3.375vw,48px)] tracking-[0.25em] sm:tracking-[0.35em] text-gold-400 tabular-nums">
           {timeStr}
         </p>
-        <span className="inline-flex items-center rounded-full border border-gold-500/40 bg-gold-500/5 px-4 py-1.5 font-inter text-[clamp(16px,1.85vw,28px)] tracking-[0.3em] uppercase text-gold-400 shadow-[0_0_12px_rgba(201,168,76,0.15)]">
+        <span className="inline-flex items-center rounded-full border border-gold-500/40 bg-gold-500/5 px-6 py-[0.5625rem] font-inter text-[clamp(24px,2.775vw,42px)] tracking-[0.3em] uppercase text-gold-400 shadow-[0_0_18px_rgba(201,168,76,0.15)]">
           Live
         </span>
       </div>

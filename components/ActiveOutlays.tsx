@@ -64,13 +64,13 @@ const PAID_EXIT_MS = 2500;
 /** Bound in-memory list so long TV uptimes do not grow unbounded. */
 const MAX_OUTLAYS = 10;
 
-/** Match JokerMetricsStrip `JokerMetricBox` label — Ideas / Response / Acceptance */
+/** Match JokerMetricsStrip `JokerMetricBox` label */
 const FINANCES_LEDGER_HEADER_LABEL_CLASS =
-  "font-inter font-semibold text-[clamp(18px,2vw,26px)] tracking-[0.25em] uppercase text-champagne leading-none";
+  "font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-champagne leading-none";
 
-/** Match OnboardingPanel `ONBOARDING_LEDGER_CELL_FONT` — ledger rows */
+/** Ledger row cells — scaled with dashboard type ramp (≈1.5× prior) */
 const FINANCES_LEDGER_CELL_FONT =
-  "clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem)";
+  "clamp(1.725rem, min(3.975vmin, 4.875vh), 5.25rem)";
 
 function OutlayLedgerRow({
   o,
@@ -304,7 +304,7 @@ export default function ActiveOutlays({
     return (
       <div className="flex-shrink-0 mt-2 w-full border-t border-gold-500/15 pt-3">
         <div
-          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-inter text-[clamp(0.9rem,1.15vw,1.05rem)] text-white/40"
+          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-inter text-[clamp(1.35rem,1.725vw,1.575rem)] text-white/40"
           style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
         >
           Finances unavailable (configure Supabase env).
@@ -313,18 +313,18 @@ export default function ActiveOutlays({
     );
   }
 
-  /** Same section title as JokerMetricsStrip compact + QueendomPanel “Special Dates” */
-  const sectionTitleClass =
-    "font-inter font-semibold text-[clamp(1.05rem,1.4vw,1.6rem)] tracking-[0.4em] uppercase text-champagne";
+  /** Finances rail — slightly larger than ledger section titles; warm amber + glow */
+  const financesHeadingClass =
+    "font-inter font-semibold text-[clamp(1.65rem,2.25vw,2.55rem)] tracking-[0.46em] uppercase text-amber-100 gold-glow";
 
   const metricLabelClass =
-    "font-inter font-semibold text-[clamp(16px,1.75vw,23px)] tracking-[0.22em] uppercase text-amber-300 mb-[0.4vh]";
+    "font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-amber-300 mb-[0.4vh]";
 
   const floatingValueClass =
-    "font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-amber-400 tabular-nums";
+    "font-cinzel font-bold text-9xl min-[900px]:text-[9rem] leading-none tracking-[0.06em] text-amber-400 tabular-nums";
 
   const suffixClass =
-    "font-inter text-[clamp(1.5rem,2.45vw,2.5rem)] font-semibold text-amber-300/90";
+    "font-inter text-[clamp(2.25rem,3.675vw,3.75rem)] font-semibold text-amber-300/90";
 
   return (
     <motion.div
@@ -340,17 +340,43 @@ export default function ActiveOutlays({
       <div
         className={
           fillRemaining
-            ? "mt-2 flex min-h-0 w-full flex-1 flex-col border-t border-gold-500/15 pt-3"
-            : "mt-2 w-full border-t border-gold-500/15 pt-3"
+            ? "mt-3 flex min-h-0 w-full flex-1 flex-col border-t border-gold-500/25 pt-[clamp(18px,2.4vh,32px)] shadow-[0_-12px_32px_-8px_rgba(201,168,76,0.06)]"
+            : "mt-3 w-full border-t border-gold-500/25 pt-[clamp(18px,2.4vh,32px)] shadow-[0_-12px_32px_-8px_rgba(201,168,76,0.06)]"
         }
       >
-        {/* Luxury section rail — matches QueendomPanel “Special Dates” / wingspan dividers */}
-        <div className="relative mb-[1.4vh] flex w-full min-w-0 flex-shrink-0 items-center gap-3">
-          <div className="h-px min-w-0 flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/48" />
-          <p className={`${sectionTitleClass} flex-shrink-0 px-[clamp(6px,1.2vw,14px)] text-center`}>
-            Finances
-          </p>
-          <div className="h-px min-w-0 flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/48" />
+        {/* Finances — dedicated rail: horizontal gold lines + vertical stems (jewelry / broadcast) */}
+        <div className="relative mb-[clamp(16px,2vh,26px)] w-full min-w-0 flex-shrink-0 px-[clamp(4px,1vw,12px)]">
+          <div
+            className="pointer-events-none absolute left-[8%] right-[8%] top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-gold-500/12 to-transparent"
+            aria-hidden
+          />
+          <div className="relative flex min-w-0 items-stretch justify-center">
+            <div className="flex min-w-0 flex-1 items-center">
+              <div className="h-px min-w-[1rem] flex-1 bg-gradient-to-r from-transparent via-gold-500/28 to-gold-400/65" />
+              <div
+                className="mx-[clamp(4px,0.6vw,10px)] w-[2px] shrink-0 rounded-full bg-gradient-to-b from-gold-500/15 via-amber-400/90 to-gold-500/15 shadow-[0_0_14px_rgba(245,200,90,0.4)]"
+                style={{ height: "clamp(36px,5vh,56px)", alignSelf: "center" }}
+                aria-hidden
+              />
+            </div>
+
+            <div className="relative z-[1] flex shrink-0 flex-col items-center justify-center px-[clamp(12px,2vw,26px)] py-[clamp(8px,1vh,12px)]">
+              <div
+                className="absolute inset-0 -z-10 rounded-full border border-gold-500/35 bg-gradient-to-b from-gold-500/[0.14] via-black/45 to-black/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_0_28px_rgba(201,168,76,0.14)]"
+                aria-hidden
+              />
+              <p className={`${financesHeadingClass} text-center`}>Finances</p>
+            </div>
+
+            <div className="flex min-w-0 flex-1 items-center">
+              <div
+                className="mx-[clamp(4px,0.6vw,10px)] w-[2px] shrink-0 rounded-full bg-gradient-to-b from-gold-500/15 via-amber-400/90 to-gold-500/15 shadow-[0_0_14px_rgba(245,200,90,0.4)]"
+                style={{ height: "clamp(36px,5vh,56px)", alignSelf: "center" }}
+                aria-hidden
+              />
+              <div className="h-px min-w-[1rem] flex-1 bg-gradient-to-l from-transparent via-gold-500/28 to-gold-400/65" />
+            </div>
+          </div>
         </div>
 
         <div
@@ -362,7 +388,7 @@ export default function ActiveOutlays({
         >
           {/* Left on desktop — scorecard: capital pending (₹ in thousands + k) */}
           <div
-            className={`joker-box flex w-full shrink-0 flex-col items-center justify-center rounded-xl border border-liquid-gold-end/35 text-center md:w-[clamp(168px,26%,240px)] ${
+            className={`joker-box flex w-full shrink-0 flex-col items-center justify-center rounded-xl border border-liquid-gold-end/35 text-center md:w-[clamp(200px,30%,300px)] ${
               fillRemaining ? "md:self-start" : "self-stretch"
             }`}
             style={{ padding: "1.2vh clamp(8px, 1vw, 16px)" }}
@@ -373,7 +399,7 @@ export default function ActiveOutlays({
               pending
             </p>
             <div className="flex items-baseline justify-center gap-0.5">
-              <span className="font-inter text-[clamp(1.2rem,2vw,1.95rem)] font-semibold text-amber-200/80">
+              <span className="font-inter text-[clamp(2.1rem,3.375vw,3.375rem)] font-semibold text-amber-200/80">
                 ₹
               </span>
               <AnimatedCounter
@@ -413,7 +439,7 @@ export default function ActiveOutlays({
 
               <div className="relative min-h-0 flex-1 overflow-hidden">
                 {outlays.length === 0 ? (
-                  <p className="py-8 text-center font-inter text-[clamp(16px,1.6vw,19px)] text-champagne/40">
+                  <p className="py-8 text-center font-inter font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] text-champagne/40">
                     No pending items
                   </p>
                 ) : (
