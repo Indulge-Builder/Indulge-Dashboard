@@ -325,15 +325,15 @@ const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={today}
-            className="font-edu text-[clamp(1.55rem,2.45vw,3.1rem)] leading-none text-green-400 tabular-nums font-semibold"
+            className="font-edu text-[clamp(2.325rem,3.675vw,4.65rem)] leading-none text-green-400 tabular-nums font-semibold"
             highlightOnIncrease
           />
-          <span className="font-inter text-[clamp(0.85rem,1.05vw,1.35rem)] text-white/25 leading-none">
+          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">
             /
           </span>
           <AnimatedValue
             value={received}
-            className="font-inter text-[clamp(1.1rem,1.45vw,1.8rem)] text-white/40 leading-none tabular-nums"
+            className="font-inter text-[clamp(1.65rem,2.175vw,2.7rem)] text-white/40 leading-none tabular-nums"
           />
         </div>
 
@@ -341,18 +341,18 @@ const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={agent.tasksCompletedThisMonth ?? 0}
-            className="font-edu tabular-nums font-semibold leading-none text-[clamp(1.55rem,2.45vw,3.1rem)]"
+            className="font-edu tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675vw,4.65rem)]"
             style={{
               color:
                 rank === 1 ? "rgba(212,175,55,0.9)" : "rgba(190,190,190,0.75)",
             }}
           />
-          <span className="font-inter text-[clamp(0.85rem,1.05vw,1.35rem)] text-white/25 leading-none">
+          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">
             /
           </span>
           <AnimatedValue
             value={agent.tasksAssignedThisMonth ?? 0}
-            className="font-inter text-[clamp(1.1rem,1.45vw,1.8rem)] text-white/40 leading-none tabular-nums"
+            className="font-inter text-[clamp(1.65rem,2.175vw,2.7rem)] text-white/40 leading-none tabular-nums"
           />
         </div>
 
@@ -360,15 +360,15 @@ const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={pending}
-            className="font-edu text-[clamp(1.35rem,2.05vw,2.75rem)] leading-none tabular-nums font-semibold text-red-400"
+            className="font-edu text-[clamp(2.025rem,3.075vw,4.125rem)] leading-none tabular-nums font-semibold text-red-400"
             highlightOnIncrease
           />
-          <span className="font-edu text-[clamp(1.35rem,2.05vw,2.75rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-edu text-[clamp(2.025rem,3.075vw,4.125rem)] leading-none tabular-nums font-bold text-white/30">
             /
           </span>
           <AnimatedValue
             value={overdue}
-            className={`font-edu text-[clamp(1.35rem,2.05vw,2.75rem)] leading-none tabular-nums font-bold ${
+            className={`font-edu text-[clamp(2.025rem,3.075vw,4.125rem)] leading-none tabular-nums font-bold ${
               hasOverdue ? "error-overdue-glow" : "text-white/40"
             }`}
           />
