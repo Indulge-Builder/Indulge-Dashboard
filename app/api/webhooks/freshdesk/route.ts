@@ -4,25 +4,30 @@
  * Receives Freshdesk automation webhooks and updates the Supabase `tickets`
  * table. Supports two automations hitting the same route:
  *
- *   1. Status Change — full payload (status, queendom_name, etc.); full sync.
- *   2. SLA Breached — minimal payload (id + is_escalated); PATCH only.
+ *   1. Status / ticket update — full payload (status, queendom_name, agent, …);
+ *      full upsert. Do **not** send `is_escalated` here (omit the field). SLA
+ *      breach is the only source of `is_escalated: true` (automation #2).
+ *   2. SLA breached — minimal payload (`ticket_id` + `is_escalated: true`);
+ *      PATCH only.
  *
  * PATCH: Only fields sent in the payload are updated (e.g. is_escalated-only
  * does not overwrite status).
- * Sync: If status is Resolved, is_escalated is forced to false (safety check).
+ * Full sync: `is_escalated` is **never** read from the main payload for open
+ * work — existing value is preserved on upsert. When status is **Resolved** or
+ * **Closed**, `is_escalated` is always set to **false** so overdue score drops.
+ * Escalation-only: if DB status is already Resolved/Closed, patch forces false.
  * Real-time: Supabase broadcasts UPDATEs; Dashboard refetches on postgres_changes.
  *
  * Expected JSON body — map your Freshdesk automation variables like this:
  *
- *   Upsert/update:
+ *   Upsert/update (omit is_escalated):
  *   {
  *     "ticket_id":          "{{ticket.id}}",
  *     "status":             "{{ticket.status}}",
  *     "queendom_name":      "{{ticket.group.name}}",
  *     "agent_name":         "{{ticket.agent.name}}",
  *     "ticket_created_at":  "{{ticket.created_at}}",
- *     "resolved_date_time": "{{ticket.resolved_at}}",
- *     "is_escalated":       true   // optional; SLA escalation flag
+ *     "resolved_date_time": "{{ticket.resolved_at}}"
  *   }
  *
  *   Escalation-only (minimal payload):
@@ -70,6 +75,7 @@ interface FreshdeskPayload {
   agent_name?: string; // {{ticket.agent.name}}
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
+  /** Only used by SLA minimal webhook; full sync ignores this (except Resolved → false). */
   is_escalated?: boolean;
 }
 
@@ -250,9 +256,9 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Full sync branch (Status Change automation) ────────────────────────────
-  // Requires status + queendom_name. Sync state: if status is Resolved, force
-  // is_escalated=false regardless of payload (safety check).
-  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time, is_escalated } = payload;
+  // Requires status + queendom_name. Resolved/Closed always set is_escalated=false.
+  // Open/active/other: do not set is_escalated on upsert — preserves SLA webhook.
+  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time } = payload;
 
   if (!status || !queendom_name) {
     console.error("[freshdesk webhook] 400 Missing status or queendom_name", {
@@ -298,21 +304,15 @@ export async function POST(req: NextRequest) {
       ? timestampStringToIsoUtcForDb(resolved_date_time.trim()) ??
         resolved_date_time.trim()
       : now;
-    // Sync state: Resolved → force is_escalated=false (ignores payload)
+    // Leaderboard overdue uses is_escalated; clear when ticket is done.
     row.is_escalated = false;
   } else if (ACTIVE_STATUSES.has(statusLower)) {
     // Re-opened ticket — clear resolved_at so it no longer counts as solved.
     row.resolved_at = null;
-    // Only update is_escalated when explicitly provided in payload
-    if (typeof is_escalated === "boolean") {
-      row.is_escalated = is_escalated;
-    }
-  } else {
-    // Other statuses (e.g. "Did not solve") — update is_escalated if provided
-    if (typeof is_escalated === "boolean") {
-      row.is_escalated = is_escalated;
-    }
+    // is_escalated omitted — ON CONFLICT preserves SLA-set value (or default).
   }
+  // Other statuses (e.g. "Did not solve"): omit resolved_at / is_escalated so
+  // ON CONFLICT leaves existing columns unchanged where not set above.
 
   // ── Upsert ─────────────────────────────────────────────────────────────────
   // Columns intentionally omitted from `row` are excluded from the generated
