@@ -59,7 +59,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
-import { timestampStringToIsoUtcForDb } from "@/lib/istDate";
+import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
 
 type WebhookType = "upsert" | "update" | "deletion";
 
@@ -101,9 +101,16 @@ const ACTIVE_CLEAR_RESOLVED_AT = new Set([
 // Terminal completion — stamp resolved_at and clear escalation (also in SLA_SAFE).
 const RESOLVED_STATUSES = new Set(["resolved", "closed"]);
 
-// Freshdesk sends "" or "null" for unset timestamp fields — treat those as null.
-const isValidDate = (v: string | undefined): v is string =>
-  typeof v === "string" && v.trim().length >= 10 && !isNaN(Date.parse(v));
+/**
+ * Convert Freshdesk datetime strings to strict UTC ISO (`…Z`) for `timestamptz`.
+ * Never return a naive string — PostgREST/Postgres may otherwise interpret it as UTC wall time.
+ */
+function parseWebhookInstant(v: string | undefined): string | null {
+  if (v == null || typeof v !== "string") return null;
+  const t = v.trim();
+  if (t.length < 10) return null;
+  return freshdeskTimestampToIsoUtcForDb(t);
+}
 
 export async function POST(req: NextRequest) {
   const { db, response } = requireSupabaseAdminOr503();
@@ -280,16 +287,13 @@ export async function POST(req: NextRequest) {
     row.agent_name = agent_name;
   }
 
-  if (isValidDate(ticket_created_at)) {
-    const normalizedCreated = timestampStringToIsoUtcForDb(ticket_created_at.trim());
-    row.created_at = normalizedCreated ?? ticket_created_at.trim();
+  const createdIso = parseWebhookInstant(ticket_created_at);
+  if (createdIso) {
+    row.created_at = createdIso;
   }
 
   if (RESOLVED_STATUSES.has(statusLower)) {
-    row.resolved_at = isValidDate(resolved_date_time)
-      ? timestampStringToIsoUtcForDb(resolved_date_time.trim()) ??
-        resolved_date_time.trim()
-      : now;
+    row.resolved_at = parseWebhookInstant(resolved_date_time) ?? now;
     row.is_escalated = false;
   } else if (ACTIVE_CLEAR_RESOLVED_AT.has(statusLower)) {
     row.resolved_at = null;

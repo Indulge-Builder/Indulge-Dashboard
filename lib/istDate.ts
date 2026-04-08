@@ -45,18 +45,22 @@ export function utcMillisFromDbTimestamp(
   let s = String(ts).trim();
   if (!s) return null;
 
-  // "YYYY-MM-DD HH:..." → "YYYY-MM-DDTHH:..."
-  if (/^\d{4}-\d{2}-\d{2} \d{2}:/.test(s)) {
-    s = s.replace(" ", "T");
-  }
+  // Freshdesk / exports: collapse internal whitespace so parsing is stable.
+  s = s.replace(/\s+/g, " ");
 
-  // Calendar date only → IST midnight (matches onboarding ledger date-only handling).
+  // Calendar date only → IST midnight (before adding T from space-separated datetime).
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
     s = `${s}T00:00:00${IST_OFFSET}`;
-  } else if (s.includes("T")) {
+  } else if (/^\d{4}-\d{2}-\d{2} \d/.test(s)) {
+    // "YYYY-MM-DD HH:..." or "YYYY-MM-DD H:MM:SS.mmm" → ISO T separator
+    s = s.replace(/^(\d{4}-\d{2}-\d{2}) /, "$1T");
+  }
+
+  if (s.includes("T")) {
     const tIdx = s.indexOf("T");
     const rest = s.slice(tIdx + 1);
     if (rest && !timePartHasExplicitZone(rest)) {
+      // Naive wall time from Freshdesk = Asia/Kolkata, not UTC.
       s = `${s}${IST_OFFSET}`;
     }
   } else {
@@ -73,7 +77,10 @@ export function utcMillisFromDbTimestamp(
 }
 
 /**
- * Normalize a timestamp string to ISO 8601 UTC for Supabase `timestamptz` columns.
+ * Normalize a timestamp string to ISO 8601 UTC (`…Z`) for Supabase `timestamptz`.
+ * Always pass this output to the client — never send naive strings, or Postgres may
+ * treat them as UTC wall time and shift IST-origin instants by +5:30.
+ *
  * Use in CSV import and Freshdesk webhook so stored instants match dashboard parsing.
  */
 export function timestampStringToIsoUtcForDb(
@@ -83,6 +90,9 @@ export function timestampStringToIsoUtcForDb(
   if (ms == null) return null;
   return new Date(ms).toISOString();
 }
+
+/** Alias for webhook code paths — same as {@link timestampStringToIsoUtcForDb}. */
+export const freshdeskTimestampToIsoUtcForDb = timestampStringToIsoUtcForDb;
 
 /**
  * Convert a timestamp string to the IST calendar date "YYYY-MM-DD".
