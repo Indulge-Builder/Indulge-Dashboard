@@ -9,7 +9,7 @@
 import { NextResponse } from "next/server";
 import type { TicketRowMinimal } from "@/lib/ticketAggregation";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
-import { getCurrentIstMonthUtcBounds } from "@/lib/istMonthBounds";
+import { getCurrentIstMonthUtcBounds } from "@/lib/istDate";
 
 const SELECT_COLS =
   "id:ticket_id, status, queendom_name, agent_name, created_at, resolved_at, is_escalated, tags";

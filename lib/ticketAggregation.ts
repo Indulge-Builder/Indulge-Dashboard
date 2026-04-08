@@ -117,10 +117,11 @@ interface AgentLiveStats {
 function calcAgent(
   rows: TicketRowMinimal[],
   agentName: string,
+  istRef: { day: string; month: string },
 ): AgentLiveStats {
   const nameLower = agentName.toLowerCase();
-  const TODAY = istToday().day;
-  const THIS_MONTH = istToday().month;
+  const TODAY = istRef.day;
+  const THIS_MONTH = istRef.month;
   const isResolved = (s: string | null) =>
     (s ?? "").toLowerCase().trim() === "resolved";
   const isClosed = (s: string | null) =>
@@ -173,13 +174,14 @@ export function aggregateAgentStats(rows: TicketRowMinimal[]): {
   ananyshree: Record<string, AgentLiveStats>;
   anishqa: Record<string, AgentLiveStats>;
 } {
+  const istRef = istToday();
   const ananyshree: Record<string, AgentLiveStats> = {};
   const anishqa: Record<string, AgentLiveStats> = {};
   for (const name of ROSTER_ANANYSHREE) {
-    ananyshree[name] = calcAgent(rows, name);
+    ananyshree[name] = calcAgent(rows, name, istRef);
   }
   for (const name of ROSTER_ANISHQA) {
-    anishqa[name] = calcAgent(rows, name);
+    anishqa[name] = calcAgent(rows, name, istRef);
   }
   return { ananyshree, anishqa };
 }

@@ -97,3 +97,98 @@ export function toISTDay(ts: string | null | undefined): string {
 export function toISTMonth(ts: string | null | undefined): string {
   return toISTDay(ts).slice(0, 7);
 }
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Next calendar month as `YYYY-MM` (IST labels; used for exclusive end bounds). */
+function addOneCalendarMonth(ym: string): string {
+  const parts = ym.split("-");
+  if (parts.length !== 2) return ym;
+  const y = Number(parts[0]);
+  const m = Number(parts[1]);
+  if (!Number.isFinite(y) || !Number.isFinite(m)) return ym;
+  if (m === 12) return `${y + 1}-01`;
+  return `${y}-${String(m + 1).padStart(2, "0")}`;
+}
+
+/**
+ * First instant of the current IST calendar month and first instant of the next
+ * month (UTC ISO), for PostgREST `created_at.gte` filters. Uses the same
+ * `istToday` / `utcMillisFromDbTimestamp` rules as scorecard aggregation — not
+ * a separate locale path.
+ */
+export function getCurrentIstMonthUtcBounds(): {
+  startUtcIso: string;
+  endExclusiveUtcIso: string;
+} {
+  const { month } = istToday();
+  const startMs = utcMillisFromDbTimestamp(`${month}-01`);
+  const endMs = utcMillisFromDbTimestamp(`${addOneCalendarMonth(month)}-01`);
+  if (startMs != null && endMs != null) {
+    return {
+      startUtcIso: new Date(startMs).toISOString(),
+      endExclusiveUtcIso: new Date(endMs).toISOString(),
+    };
+  }
+  const day = IST_FORMATTER.format(new Date());
+  const ym = day.slice(0, 7);
+  const s = utcMillisFromDbTimestamp(`${ym}-01`);
+  const e = utcMillisFromDbTimestamp(`${addOneCalendarMonth(ym)}-01`);
+  if (s != null && e != null) {
+    return {
+      startUtcIso: new Date(s).toISOString(),
+      endExclusiveUtcIso: new Date(e).toISOString(),
+    };
+  }
+  const now = new Date();
+  return {
+    startUtcIso: new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0),
+    ).toISOString(),
+    endExclusiveUtcIso: new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0),
+    ).toISOString(),
+  };
+}
+
+/**
+ * Current IST calendar day [start, endExclusive) as UTC ISO strings.
+ * Aligns with `toISTDay` / `istToday().day`.
+ */
+export function getCurrentIstDayUtcBounds(): {
+  startUtcIso: string;
+  endExclusiveUtcIso: string;
+} {
+  const { day } = istToday();
+  const startMs = utcMillisFromDbTimestamp(day);
+  if (startMs != null) {
+    return {
+      startUtcIso: new Date(startMs).toISOString(),
+      endExclusiveUtcIso: new Date(startMs + MS_PER_DAY).toISOString(),
+    };
+  }
+  const d = IST_FORMATTER.format(new Date());
+  const s = utcMillisFromDbTimestamp(d);
+  if (s != null) {
+    return {
+      startUtcIso: new Date(s).toISOString(),
+      endExclusiveUtcIso: new Date(s + MS_PER_DAY).toISOString(),
+    };
+  }
+  const now = new Date();
+  const start = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      0,
+      0,
+      0,
+      0,
+    ),
+  );
+  return {
+    startUtcIso: start.toISOString(),
+    endExclusiveUtcIso: new Date(start.getTime() + MS_PER_DAY).toISOString(),
+  };
+}

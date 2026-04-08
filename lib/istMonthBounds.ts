@@ -1,100 +1,10 @@
-import { utcMillisFromDbTimestamp } from "./istDate";
+import {
+  utcMillisFromDbTimestamp,
+  getCurrentIstMonthUtcBounds,
+  getCurrentIstDayUtcBounds,
+} from "./istDate";
 
-/**
- * Current calendar month bounds in Asia/Kolkata (IST), expressed as UTC instants
- * for comparing timestamptz columns in Postgres.
- */
-export function getCurrentIstMonthUtcBounds(): {
-  startUtcIso: string;
-  endExclusiveUtcIso: string;
-} {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-  const y = Number(parts.find((p) => p.type === "year")?.value);
-  const m = Number(parts.find((p) => p.type === "month")?.value);
-  if (!Number.isFinite(y) || !Number.isFinite(m)) {
-    const d = new Date(now);
-    return {
-      startUtcIso: new Date(
-        Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0),
-      ).toISOString(),
-      endExclusiveUtcIso: new Date(
-        Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1, 0, 0, 0, 0),
-      ).toISOString(),
-    };
-  }
-  const nextM = m === 12 ? 1 : m + 1;
-  const nextY = m === 12 ? y + 1 : y;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const startUtcIso = new Date(
-    `${y}-${pad(m)}-01T00:00:00+05:30`,
-  ).toISOString();
-  const endExclusiveUtcIso = new Date(
-    `${nextY}-${pad(nextM)}-01T00:00:00+05:30`,
-  ).toISOString();
-  return { startUtcIso, endExclusiveUtcIso };
-}
-
-/**
- * Current calendar day in Asia/Kolkata (IST), as UTC instants [start, endExclusive)
- * for comparing timestamptz columns (e.g. “leads created today”).
- */
-export function getCurrentIstDayUtcBounds(): {
-  startUtcIso: string;
-  endExclusiveUtcIso: string;
-} {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-  const y = Number(parts.find((p) => p.type === "year")?.value);
-  const m = Number(parts.find((p) => p.type === "month")?.value);
-  const d = Number(parts.find((p) => p.type === "day")?.value);
-  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
-    const dt = new Date(now);
-    const start = new Date(
-      Date.UTC(
-        dt.getUTCFullYear(),
-        dt.getUTCMonth(),
-        dt.getUTCDate(),
-        0,
-        0,
-        0,
-        0,
-      ),
-    );
-    const end = new Date(
-      Date.UTC(
-        dt.getUTCFullYear(),
-        dt.getUTCMonth(),
-        dt.getUTCDate() + 1,
-        0,
-        0,
-        0,
-        0,
-      ),
-    );
-    return {
-      startUtcIso: start.toISOString(),
-      endExclusiveUtcIso: end.toISOString(),
-    };
-  }
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const startUtc = new Date(`${y}-${pad(m)}-${pad(d)}T00:00:00+05:30`);
-  const endExclusiveUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000);
-  return {
-    startUtcIso: startUtc.toISOString(),
-    endExclusiveUtcIso: endExclusiveUtc.toISOString(),
-  };
-}
+export { getCurrentIstMonthUtcBounds, getCurrentIstDayUtcBounds };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
