@@ -5,35 +5,34 @@
  * table. Supports two automations hitting the same route:
  *
  *   1. Status / ticket update — full payload (status, queendom_name, agent, …);
- *      may include `is_escalated` (e.g. {{ticket.is_overdue}}); full upsert.
- *   2. SLA breached — minimal payload (`ticket_id` + `is_escalated: true`);
- *      PATCH only (same score signal if big payload is delayed).
+ *      partial upsert: **omit** `is_escalated` for active/red-list statuses so the
+ *      DB value is preserved; **set** `is_escalated: false` only for SLA-safe
+ *      statuses (see SLA_SAFE_STATUSES). Do **not** send `is_escalated` from
+ *      Freshdesk placeholders (they often stringify to "" and corrupt booleans).
+ *   2. SLA breached — minimal payload (`ticket_id` + `is_escalated: true` boolean);
+ *      PATCH `is_escalated` only. This branch is the **only** code path that can
+ *      set `is_escalated` to **true** (when existing status is not SLA-safe).
  *
  * PATCH: Only fields sent in the payload are updated (e.g. is_escalated-only
  * does not overwrite status).
- * Full sync: `is_escalated` may be boolean, `""`, or `"true"`/`"false"` strings.
- * Empty string → **false** (Freshdesk often sends this when overdue is unset).
- * When status is **Resolved** or **Closed**, `is_escalated` is always **false**.
- * Escalation-only: if DB status is already Resolved/Closed, patch forces false.
  * Real-time: Supabase broadcasts UPDATEs; Dashboard refetches on postgres_changes.
  *
  * Expected JSON body — map your Freshdesk automation variables like this:
  *
- *   Upsert/update:
+ *   Upsert/update (**omit** is_escalated):
  *   {
  *     "ticket_id":          "{{ticket.id}}",
  *     "status":             "{{ticket.status}}",
  *     "queendom_name":      "{{ticket.group.name}}",
  *     "agent_name":         "{{ticket.agent.name}}",
  *     "ticket_created_at":  "{{ticket.created_at}}",
- *     "resolved_date_time": "{{ticket.resolved_at}}",
- *     "is_escalated":       {{ticket.is_overdue}}
+ *     "resolved_date_time": "{{ticket.resolved_at}}"
  *   }
  *
  *   Escalation-only (minimal payload):
  *   {
  *     "id":            "{{ticket.id}}",
- *     "is_escalated":   true
+ *     "is_escalated":  true
  *   }
  *
  *   Deletion (ticket deleted in Freshdesk):
@@ -74,16 +73,23 @@ interface FreshdeskPayload {
   queendom_name?: string;
   agent_name?: string; // {{ticket.agent.name}}
   ticket_created_at?: string; // {{ticket.created_at}}
-  resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
-  /** Freshdesk may send boolean, "", or "true"/"false" strings. */
-  is_escalated?: boolean | string | null;
+  resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet
+  /** SLA breach automation only — must be a JSON boolean. */
+  is_escalated?: boolean;
 }
 
-// Completed statuses — resolved_at is stamped
-const RESOLVED_STATUSES = new Set(["resolved", "closed"]);
+// Statuses where SLA/overdue score must be cleared (explicit false on upsert).
+const SLA_SAFE_STATUSES = new Set([
+  "resolved",
+  "closed",
+  "nudge client",
+  "ongoing delivery",
+  "invoice due",
+]);
 
-// Active statuses — resolved_at is cleared so re-opened tickets stop counting as solved
-const ACTIVE_STATUSES = new Set([
+// Red list (Open, Pending, Nudge Vendor): do not send is_escalated on upsert —
+// preserves DB (e.g. stays true after SLA breach). Same for resolved_at: clear.
+const ACTIVE_CLEAR_RESOLVED_AT = new Set([
   "open",
   "pending",
   "nudge client",
@@ -92,23 +98,12 @@ const ACTIVE_STATUSES = new Set([
   "invoice due",
 ]);
 
+// Terminal completion — stamp resolved_at and clear escalation (also in SLA_SAFE).
+const RESOLVED_STATUSES = new Set(["resolved", "closed"]);
+
 // Freshdesk sends "" or "null" for unset timestamp fields — treat those as null.
 const isValidDate = (v: string | undefined): v is string =>
   typeof v === "string" && v.trim().length >= 10 && !isNaN(Date.parse(v));
-
-/** When Freshdesk sends empty string for {{ticket.is_overdue}}, treat as false. */
-function coerceIsEscalated(value: unknown): boolean | undefined {
-  if (typeof value === "boolean") return value;
-  if (value === null) return false;
-  if (typeof value === "string") {
-    const s = value.trim().toLowerCase();
-    if (s === "" || s === "null") return false;
-    if (s === "true" || s === "1") return true;
-    if (s === "false" || s === "0") return false;
-    return undefined;
-  }
-  return undefined;
-}
 
 export async function POST(req: NextRequest) {
   const { db, response } = requireSupabaseAdminOr503();
@@ -143,10 +138,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  // Log full payload for debugging 400s — visible in Vercel Function Logs
   console.log("[freshdesk webhook] received payload:", JSON.stringify(payload));
 
-  // Resolve ticket_id — support ticket_id, id, or nested payload.ticket.id
   const ticketIdRaw =
     payload.ticket_id ??
     payload.id ??
@@ -165,7 +158,6 @@ export async function POST(req: NextRequest) {
 
   const ticketIdStr = String(ticketIdRaw);
 
-  // Detect deletion — Freshdesk may send webhook_type, event, or type
   const webhookType = (
     payload.webhook_type ??
     (payload as { event?: string }).event ??
@@ -178,7 +170,6 @@ export async function POST(req: NextRequest) {
     webhookType === "delete" ||
     webhookType === "ticket_deleted";
 
-  // ── Deletion branch ────────────────────────────────────────────────────────
   if (isDeletion) {
     console.info(
       `[freshdesk webhook] handling deletion for ticket ${ticketIdStr}`,
@@ -215,30 +206,23 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // ── Escalation-only branch (PATCH: only is_escalated; SLA Breached automation) ─
-  // When only is_escalated is sent, we PATCH that field only — never overwrite
-  // status, queendom_name, agent_name, etc. Sync state: if ticket is Resolved,
-  // force is_escalated=false regardless of payload (safety check).
-  const escalatedCoerced = coerceIsEscalated(payload.is_escalated);
+  // ── Escalation-only (SLA breach): only path that may set is_escalated = true ─
   const isEscalatedPayload =
-    escalatedCoerced !== undefined &&
+    typeof payload.is_escalated === "boolean" &&
     (!payload.status || !payload.queendom_name);
 
   if (isEscalatedPayload) {
-    const client = db;
-
-    // Safety: fetch current status — if Resolved/Closed, force is_escalated=false
-    const { data: existing } = await client
+    const { data: existing } = await db
       .from("tickets")
       .select("status")
       .eq("ticket_id", ticketIdStr)
       .maybeSingle();
 
     const statusLower = (existing?.status ?? "").toLowerCase().trim();
-    const isResolved = RESOLVED_STATUSES.has(statusLower);
-    const effectiveEscalated = isResolved ? false : escalatedCoerced;
+    const inSafe = SLA_SAFE_STATUSES.has(statusLower);
+    const effectiveEscalated = inSafe ? false : payload.is_escalated;
 
-    const { error } = await client
+    const { error } = await db
       .from("tickets")
       .update({ is_escalated: effectiveEscalated })
       .eq("ticket_id", ticketIdStr);
@@ -251,9 +235,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    if (isResolved && escalatedCoerced) {
+    if (inSafe && payload.is_escalated) {
       console.info(
-        `[freshdesk webhook] ticket ${ticketIdStr} is Resolved — forced is_escalated=false (ignored payload true)`,
+        `[freshdesk webhook] ticket ${ticketIdStr} has SLA-safe status — forced is_escalated=false (ignored payload true)`,
       );
     } else {
       console.info(
@@ -261,8 +245,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Supabase Realtime broadcasts this UPDATE; Dashboard tickets-channel will
-    // receive postgres_changes and refetch agents, updating the Leaderboard.
     return NextResponse.json({
       ok: true,
       ticket_id: ticketIdStr,
@@ -270,9 +252,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // ── Full sync branch (Status Change automation) ────────────────────────────
-  // Requires status + queendom_name. If status is Resolved, is_escalated=false.
-  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time } = payload;
+  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time } =
+    payload;
 
   if (!status || !queendom_name) {
     console.error("[freshdesk webhook] 400 Missing status or queendom_name", {
@@ -287,7 +268,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Build upsert row (only fields sent in payload) ──────────────────────────
   const statusLower = status.toLowerCase().trim();
   const now = new Date().toISOString();
 
@@ -296,53 +276,29 @@ export async function POST(req: NextRequest) {
     status,
     queendom_name,
   };
-  // Patch: only include agent_name if explicitly sent (avoid overwriting with null)
   if (payload.agent_name !== undefined) {
     row.agent_name = agent_name;
   }
 
-  // Include created_at only when Freshdesk sends a valid timestamp.
-  // On INSERT without it, the DB DEFAULT NOW() applies automatically.
-  // On conflict UPDATE, omitting it preserves the original creation time.
   if (isValidDate(ticket_created_at)) {
     const normalizedCreated = timestampStringToIsoUtcForDb(ticket_created_at.trim());
     row.created_at = normalizedCreated ?? ticket_created_at.trim();
   }
 
-  // resolved_at is determined by status category, not passed through blindly.
-  // Freshdesk can send an empty string for unresolved tickets.
-  // For terminal statuses (e.g. "Did not solve"), the key is omitted entirely
-  // so the ON CONFLICT UPDATE leaves the existing DB value untouched.
   if (RESOLVED_STATUSES.has(statusLower)) {
     row.resolved_at = isValidDate(resolved_date_time)
       ? timestampStringToIsoUtcForDb(resolved_date_time.trim()) ??
         resolved_date_time.trim()
       : now;
-    // Sync state: Resolved → force is_escalated=false (ignores payload)
     row.is_escalated = false;
-  } else if (ACTIVE_STATUSES.has(statusLower)) {
-    // Re-opened ticket — clear resolved_at so it no longer counts as solved.
+  } else if (ACTIVE_CLEAR_RESOLVED_AT.has(statusLower)) {
     row.resolved_at = null;
-    if (escalatedCoerced !== undefined) {
-      row.is_escalated = escalatedCoerced;
+    if (SLA_SAFE_STATUSES.has(statusLower)) {
+      row.is_escalated = false;
     }
-  } else if (escalatedCoerced !== undefined) {
-    row.is_escalated = escalatedCoerced;
   }
 
-  // ── Upsert ─────────────────────────────────────────────────────────────────
-  // Columns intentionally omitted from `row` are excluded from the generated
-  // ON CONFLICT DO UPDATE SET clause, so their existing DB values are preserved:
-  //
-  //   created_at  — only included when Freshdesk sends a valid timestamp;
-  //                 omitting it on conflict preserves the original creation time,
-  //                 and the DB DEFAULT NOW() covers brand-new tickets.
-  //
-  //   resolved_at — omitted for terminal statuses (e.g. "Did not solve") so the
-  //                 existing value is left untouched on conflict.
-  const { error } = await db
-    .from("tickets")
-    .upsert(row, { onConflict: "ticket_id" });
+  const { error } = await db.from("tickets").upsert(row, { onConflict: "ticket_id" });
 
   if (error) {
     console.error(
