@@ -5,29 +5,29 @@
  * table. Supports two automations hitting the same route:
  *
  *   1. Status / ticket update — full payload (status, queendom_name, agent, …);
- *      full upsert. Do **not** send `is_escalated` here (omit the field). SLA
- *      breach is the only source of `is_escalated: true` (automation #2).
+ *      may include `is_escalated` (e.g. {{ticket.is_overdue}}); full upsert.
  *   2. SLA breached — minimal payload (`ticket_id` + `is_escalated: true`);
- *      PATCH only.
+ *      PATCH only (same score signal if big payload is delayed).
  *
  * PATCH: Only fields sent in the payload are updated (e.g. is_escalated-only
  * does not overwrite status).
- * Full sync: `is_escalated` is **never** read from the main payload for open
- * work — existing value is preserved on upsert. When status is **Resolved** or
- * **Closed**, `is_escalated` is always set to **false** so overdue score drops.
+ * Full sync: when `is_escalated` is a JSON boolean, it updates the column for
+ * open/active/other statuses. When status is **Resolved** or **Closed**,
+ * `is_escalated` is always set to **false** (ignores payload).
  * Escalation-only: if DB status is already Resolved/Closed, patch forces false.
  * Real-time: Supabase broadcasts UPDATEs; Dashboard refetches on postgres_changes.
  *
  * Expected JSON body — map your Freshdesk automation variables like this:
  *
- *   Upsert/update (omit is_escalated):
+ *   Upsert/update:
  *   {
  *     "ticket_id":          "{{ticket.id}}",
  *     "status":             "{{ticket.status}}",
  *     "queendom_name":      "{{ticket.group.name}}",
  *     "agent_name":         "{{ticket.agent.name}}",
  *     "ticket_created_at":  "{{ticket.created_at}}",
- *     "resolved_date_time": "{{ticket.resolved_at}}"
+ *     "resolved_date_time": "{{ticket.resolved_at}}",
+ *     "is_escalated":       {{ticket.is_overdue}}
  *   }
  *
  *   Escalation-only (minimal payload):
@@ -75,7 +75,6 @@ interface FreshdeskPayload {
   agent_name?: string; // {{ticket.agent.name}}
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
-  /** Only used by SLA minimal webhook; full sync ignores this (except Resolved → false). */
   is_escalated?: boolean;
 }
 
@@ -256,9 +255,8 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Full sync branch (Status Change automation) ────────────────────────────
-  // Requires status + queendom_name. Resolved/Closed always set is_escalated=false.
-  // Open/active/other: do not set is_escalated on upsert — preserves SLA webhook.
-  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time } = payload;
+  // Requires status + queendom_name. If status is Resolved, is_escalated=false.
+  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time, is_escalated } = payload;
 
   if (!status || !queendom_name) {
     console.error("[freshdesk webhook] 400 Missing status or queendom_name", {
@@ -304,15 +302,19 @@ export async function POST(req: NextRequest) {
       ? timestampStringToIsoUtcForDb(resolved_date_time.trim()) ??
         resolved_date_time.trim()
       : now;
-    // Leaderboard overdue uses is_escalated; clear when ticket is done.
+    // Sync state: Resolved → force is_escalated=false (ignores payload)
     row.is_escalated = false;
   } else if (ACTIVE_STATUSES.has(statusLower)) {
     // Re-opened ticket — clear resolved_at so it no longer counts as solved.
     row.resolved_at = null;
-    // is_escalated omitted — ON CONFLICT preserves SLA-set value (or default).
+    if (typeof is_escalated === "boolean") {
+      row.is_escalated = is_escalated;
+    }
+  } else {
+    if (typeof is_escalated === "boolean") {
+      row.is_escalated = is_escalated;
+    }
   }
-  // Other statuses (e.g. "Did not solve"): omit resolved_at / is_escalated so
-  // ON CONFLICT leaves existing columns unchanged where not set above.
 
   // ── Upsert ─────────────────────────────────────────────────────────────────
   // Columns intentionally omitted from `row` are excluded from the generated
