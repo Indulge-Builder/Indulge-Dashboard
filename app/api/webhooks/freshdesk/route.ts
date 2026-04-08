@@ -11,9 +11,9 @@
  *
  * PATCH: Only fields sent in the payload are updated (e.g. is_escalated-only
  * does not overwrite status).
- * Full sync: when `is_escalated` is a JSON boolean, it updates the column for
- * open/active/other statuses. When status is **Resolved** or **Closed**,
- * `is_escalated` is always set to **false** (ignores payload).
+ * Full sync: `is_escalated` may be boolean, `""`, or `"true"`/`"false"` strings.
+ * Empty string → **false** (Freshdesk often sends this when overdue is unset).
+ * When status is **Resolved** or **Closed**, `is_escalated` is always **false**.
  * Escalation-only: if DB status is already Resolved/Closed, patch forces false.
  * Real-time: Supabase broadcasts UPDATEs; Dashboard refetches on postgres_changes.
  *
@@ -75,7 +75,8 @@ interface FreshdeskPayload {
   agent_name?: string; // {{ticket.agent.name}}
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet resolved
-  is_escalated?: boolean;
+  /** Freshdesk may send boolean, "", or "true"/"false" strings. */
+  is_escalated?: boolean | string | null;
 }
 
 // Completed statuses — resolved_at is stamped
@@ -94,6 +95,20 @@ const ACTIVE_STATUSES = new Set([
 // Freshdesk sends "" or "null" for unset timestamp fields — treat those as null.
 const isValidDate = (v: string | undefined): v is string =>
   typeof v === "string" && v.trim().length >= 10 && !isNaN(Date.parse(v));
+
+/** When Freshdesk sends empty string for {{ticket.is_overdue}}, treat as false. */
+function coerceIsEscalated(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  if (value === null) return false;
+  if (typeof value === "string") {
+    const s = value.trim().toLowerCase();
+    if (s === "" || s === "null") return false;
+    if (s === "true" || s === "1") return true;
+    if (s === "false" || s === "0") return false;
+    return undefined;
+  }
+  return undefined;
+}
 
 export async function POST(req: NextRequest) {
   const { db, response } = requireSupabaseAdminOr503();
@@ -204,8 +219,9 @@ export async function POST(req: NextRequest) {
   // When only is_escalated is sent, we PATCH that field only — never overwrite
   // status, queendom_name, agent_name, etc. Sync state: if ticket is Resolved,
   // force is_escalated=false regardless of payload (safety check).
+  const escalatedCoerced = coerceIsEscalated(payload.is_escalated);
   const isEscalatedPayload =
-    typeof payload.is_escalated === "boolean" &&
+    escalatedCoerced !== undefined &&
     (!payload.status || !payload.queendom_name);
 
   if (isEscalatedPayload) {
@@ -220,7 +236,7 @@ export async function POST(req: NextRequest) {
 
     const statusLower = (existing?.status ?? "").toLowerCase().trim();
     const isResolved = RESOLVED_STATUSES.has(statusLower);
-    const effectiveEscalated = isResolved ? false : payload.is_escalated;
+    const effectiveEscalated = isResolved ? false : escalatedCoerced;
 
     const { error } = await client
       .from("tickets")
@@ -235,7 +251,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    if (isResolved && payload.is_escalated) {
+    if (isResolved && escalatedCoerced) {
       console.info(
         `[freshdesk webhook] ticket ${ticketIdStr} is Resolved — forced is_escalated=false (ignored payload true)`,
       );
@@ -256,7 +272,7 @@ export async function POST(req: NextRequest) {
 
   // ── Full sync branch (Status Change automation) ────────────────────────────
   // Requires status + queendom_name. If status is Resolved, is_escalated=false.
-  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time, is_escalated } = payload;
+  const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time } = payload;
 
   if (!status || !queendom_name) {
     console.error("[freshdesk webhook] 400 Missing status or queendom_name", {
@@ -307,13 +323,11 @@ export async function POST(req: NextRequest) {
   } else if (ACTIVE_STATUSES.has(statusLower)) {
     // Re-opened ticket — clear resolved_at so it no longer counts as solved.
     row.resolved_at = null;
-    if (typeof is_escalated === "boolean") {
-      row.is_escalated = is_escalated;
+    if (escalatedCoerced !== undefined) {
+      row.is_escalated = escalatedCoerced;
     }
-  } else {
-    if (typeof is_escalated === "boolean") {
-      row.is_escalated = is_escalated;
-    }
+  } else if (escalatedCoerced !== undefined) {
+    row.is_escalated = escalatedCoerced;
   }
 
   // ── Upsert ─────────────────────────────────────────────────────────────────
