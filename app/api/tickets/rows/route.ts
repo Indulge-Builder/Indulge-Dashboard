@@ -12,7 +12,7 @@ import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { getCurrentIstMonthUtcBounds } from "@/lib/istDate";
 
 const SELECT_COLS =
-  "id:ticket_id, status, queendom_name, agent_name, created_at, resolved_at, is_escalated, tags";
+  "id:ticket_id, status, queendom_name, agent_name, created_at, is_escalated, tags";
 const PAGE = 1000;
 
 export async function GET() {
@@ -67,7 +67,7 @@ export async function GET() {
           const { data: fbData, error: fbErr } = await db
             .from("tickets")
             .select(
-              "id:ticket_id, status, queendom_name, agent_name, created_at, resolved_at, is_escalated",
+              "id:ticket_id, status, queendom_name, agent_name, created_at, is_escalated",
             )
             .or(orFilter)
             .range(fbFrom, fbFrom + PAGE - 1);

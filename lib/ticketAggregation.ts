@@ -13,8 +13,10 @@ import type { TicketStats, AgentStats } from "./types";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "./agentRoster";
 import { buildRoster } from "./agentRoster";
 
-const RESOLVED = "resolved";
-const CLOSED = "closed";
+/** All statuses that mean a ticket is done — no further action needed. */
+const TERMINAL_STATUSES = new Set(["resolved", "closed", "spam", "deleted"]);
+const isTerminal = (s: string | null): boolean =>
+  TERMINAL_STATUSES.has((s ?? "").toLowerCase().trim());
 
 export interface TicketRowMinimal {
   id: string;
@@ -22,7 +24,6 @@ export interface TicketRowMinimal {
   queendom_name: string | null;
   agent_name: string | null;
   created_at: string | null;
-  resolved_at: string | null;
   is_escalated: boolean | null;
   tags?: Record<string, unknown> | null;
 }
@@ -60,9 +61,17 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
     },
   };
 
+  // Deduplicate by ticket id before aggregating.
+  const seen = new Set<string>();
+  const uniqueRows: TicketRowMinimal[] = [];
   for (const row of rows) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+    uniqueRows.push(row);
+  }
+
+  for (const row of uniqueRows) {
     const queendom = (row.queendom_name ?? "").toLowerCase().trim();
-    const status = (row.status ?? "").toLowerCase().trim();
     let bucket: TicketBucket | null = null;
     if (queendom.includes("ananyshree")) bucket = result.ananyshree;
     else if (queendom.includes("anishqa")) bucket = result.anishqa;
@@ -70,26 +79,28 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
 
     const createdDay = toISTDay(row.created_at);
     const createdMonth = toISTMonth(row.created_at);
+    const terminal = isTerminal(row.status);
 
-    // Received (This Month) — same IST month gate as pendingToResolve / agents' assignedThisMonth
+    // Received (This Month) — created_at in current IST calendar month
     if (createdMonth === thisMonthIST) {
       bucket.totalReceived++;
     }
 
-    // Resolved (This Month) — created this IST month, status resolved only
-    if (createdMonth === thisMonthIST && status === RESOLVED) {
+    // Resolved (This Month) — cohort math: created this month AND status is terminal
+    if (createdMonth === thisMonthIST && terminal) {
       bucket.resolvedThisMonth++;
     }
-    if (status === RESOLVED && createdDay === todayIST) {
+
+    // Solved Today — created today AND status is terminal
+    if (createdDay === todayIST && terminal) {
       bucket.solvedToday++;
     }
-    if (
-      createdMonth === thisMonthIST &&
-      status !== RESOLVED &&
-      status !== CLOSED
-    ) {
+
+    // Pending — status is NOT terminal (no date gate: includes old open tickets)
+    if (!terminal) {
       bucket.pendingToResolve++;
     }
+
     const jokerVal =
       row.tags && typeof row.tags === "object" && "joker_suggestion" in row.tags
         ? (row.tags as { joker_suggestion?: unknown }).joker_suggestion
@@ -122,26 +133,24 @@ function calcAgent(
   const nameLower = agentName.toLowerCase();
   const TODAY = istRef.day;
   const THIS_MONTH = istRef.month;
-  const isResolved = (s: string | null) =>
-    (s ?? "").toLowerCase().trim() === "resolved";
-  const isClosed = (s: string | null) =>
-    (s ?? "").toLowerCase().trim() === "closed";
 
   const assignedToday = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
       toISTDay(t.created_at) === TODAY,
   ).length;
+  // Cohort math: completed today = created today AND terminal status
   const completedToday = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
-      isResolved(t.status) &&
+      isTerminal(t.status) &&
       toISTDay(t.created_at) === TODAY,
   ).length;
+  // Cohort math: completed this month = created this month AND terminal status
   const completedThisMonth = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
-      isResolved(t.status) &&
+      isTerminal(t.status) &&
       toISTMonth(t.created_at) === THIS_MONTH,
   ).length;
   const assignedThisMonth = rows.filter(
@@ -149,12 +158,11 @@ function calcAgent(
       t.agent_name?.toLowerCase() === nameLower &&
       toISTMonth(t.created_at) === THIS_MONTH,
   ).length;
+  // Pending = assigned to this agent AND status NOT terminal (no date gate)
   const pendingTickets = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
-      toISTMonth(t.created_at) === THIS_MONTH &&
-      !isResolved(t.status) &&
-      !isClosed(t.status),
+      !isTerminal(t.status),
   );
   const overdueCount = pendingTickets.filter(
     (t) => t.is_escalated === true,

@@ -8,9 +8,9 @@ export interface MemberStats {
 export interface TicketStats {
   totalReceived: number; // tickets created in the current IST calendar month (label: Received This Month)
   totalThisMonth?: number; // deprecated: use totalReceived
-  resolvedThisMonth: number; // created this IST month + status resolved only (closed not scored)
-  solvedToday: number; // status "resolved" AND created_at is today (IST)
-  pendingToResolve: number; // created this IST month; status neither resolved nor closed
+  resolvedThisMonth: number; // cohort math: created this IST month AND status is terminal (resolved/closed/spam/deleted)
+  solvedToday: number; // cohort math: created today (IST) AND status is terminal
+  pendingToResolve: number; // status NOT terminal — no date gate; includes old open tickets
   jokerSuggestion: number; // tickets with tags.joker_suggestion set (legacy)
 }
 

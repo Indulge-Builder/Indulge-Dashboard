@@ -27,15 +27,12 @@ interface TicketRow {
   agent_name: string | null;
   status: string | null;
   created_at: string | null;
-  resolved_at: string | null;
   is_escalated: boolean | null;
 }
 
-const isResolved = (status: string | null) =>
-  (status ?? "").toLowerCase().trim() === "resolved";
-
-const isClosed = (status: string | null) =>
-  (status ?? "").toLowerCase().trim() === "closed";
+const TERMINAL_STATUSES = new Set(["resolved", "closed", "spam", "deleted"]);
+const isTerminal = (status: string | null): boolean =>
+  TERMINAL_STATUSES.has((status ?? "").toLowerCase().trim());
 
 // ─── GET handler ──────────────────────────────────────────────────────────────
 export async function GET(): Promise<Response> {
@@ -59,7 +56,7 @@ export async function GET(): Promise<Response> {
   while (true) {
     const { data, error } = await db
       .from("tickets")
-      .select("agent_name, status, created_at, resolved_at, is_escalated")
+      .select("agent_name, status, created_at, is_escalated")
       .range(from, from + PAGE - 1);
 
     if (error) {
@@ -88,17 +85,19 @@ export async function GET(): Promise<Response> {
     // Only count tickets CREATED today that are now resolved.
     // This keeps completed ≤ assigned so the fraction "done / got today" is ≤ 1.
     // (Backlog tickets resolved today are excluded — they belong to a past day's tally.)
+    // Cohort math: completed today = created today AND terminal status
     const completedToday = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
-        isResolved(t.status) &&
+        isTerminal(t.status) &&
         toISTDay(t.created_at) === TODAY,
     ).length;
 
+    // Cohort math: completed this month = created this month AND terminal status
     const completedThisMonth = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
-        isResolved(t.status) &&
+        isTerminal(t.status) &&
         toISTMonth(t.created_at) === THIS_MONTH,
     ).length;
 
@@ -108,14 +107,11 @@ export async function GET(): Promise<Response> {
         toISTMonth(t.created_at) === THIS_MONTH,
     ).length;
 
-    // Open workload for tickets created this IST month only — aligns with Queendom
-    // “Pending (This Month)” (not resolved, not closed).
+    // Pending = assigned to this agent AND status NOT terminal (no date gate)
     const pendingTickets = tickets.filter(
       (t) =>
         t.agent_name?.toLowerCase() === nameLower &&
-        toISTMonth(t.created_at) === THIS_MONTH &&
-        !isResolved(t.status) &&
-        !isClosed(t.status),
+        !isTerminal(t.status),
     );
     const pendingScore = pendingTickets.length;
 

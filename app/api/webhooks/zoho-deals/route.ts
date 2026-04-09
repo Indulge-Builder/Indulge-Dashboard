@@ -1,17 +1,14 @@
 /**
- * POST /api/webhooks/zoho-leads
+ * POST /api/webhooks/zoho-deals
  *
- * Zoho CRM → Lead status updates. When `status` is **Attempted** (case-insensitive),
- * registers the **first** touch per `lead_id` in `onboarding_lead_touches` for dialer /
- * attempted scorecards. Later statuses or duplicate lead_ids are acknowledged without
- * changing the first-touch row.
+ * Zoho CRM → Deal won / closure. Appends one row to `onboarding_conversion_ledger`
+ * per unique `deal_id` so repeat webhooks do not inflate closure scores.
  *
- * JSON body (map Zoho merge fields):
- *   { "lead_id": "...", "agent_name": "...", "status": "..." }
+ * JSON body:
+ *   { "deal_id": "...", "agent_name": "...", "deal_name": "...", "amount": ... }
  *
- * `agent_name` is normalized via {@link normalizeZohoAgentName} in lib/onboardingAgents.ts.
- *
- * Table: onboarding_lead_touches (lead_id PK, agent_name, latest_status, first_touched_at, updated_at)
+ * `deal_name` maps to `client_name`. `amount` is INR (number or numeric string).
+ * `recorded_at` is the webhook instant, normalized via istDate (same rules as Freshdesk).
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -19,13 +16,11 @@ import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
 import { normalizeZohoAgentName } from "@/lib/onboardingAgents";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
-interface ZohoLeadsPayload {
-  lead_id?: string | number;
+interface ZohoDealsPayload {
+  deal_id?: string | number;
   agent_name?: string;
-  /** Primary field from Zoho */
-  status?: string;
-  /** Legacy alias (same meaning as status) */
-  latest_status?: string;
+  deal_name?: string;
+  amount?: string | number;
 }
 
 function safeJsonParse(text: string): { ok: true; value: unknown } | { ok: false; error: string } {
@@ -47,34 +42,39 @@ function parseFormUrlEncoded(text: string): Record<string, string> {
   return out;
 }
 
-/** Zoho picklist value for “first dial / attempt” — match case-insensitively. */
-function isAttemptedStatus(raw: string): boolean {
-  return raw.trim().toLowerCase() === "attempted";
+function parseAmount(raw: string | number | undefined): number | null {
+  if (raw == null) return null;
+  if (typeof raw === "number") {
+    return Number.isFinite(raw) ? raw : null;
+  }
+  const s = String(raw).trim().replace(/,/g, "");
+  if (!s) return null;
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
 }
 
 function parsePayload(body: unknown): {
-  leadId: string;
+  dealId: string;
   agentName: string;
-  status: string;
+  dealName: string;
+  amount: number;
 } | null {
   if (body == null || typeof body !== "object") return null;
-  const o = body as ZohoLeadsPayload;
-  const rawId = o.lead_id;
-  const leadId =
-    rawId != null && String(rawId).trim() !== "" ? String(rawId).trim() : "";
+  const o = body as ZohoDealsPayload;
+  const rawDealId = o.deal_id;
+  const dealId =
+    rawDealId != null && String(rawDealId).trim() !== ""
+      ? String(rawDealId).trim()
+      : "";
   const agentName =
     typeof o.agent_name === "string" ? normalizeZohoAgentName(o.agent_name) : "";
-  const statusRaw =
-    typeof o.status === "string"
-      ? o.status.trim()
-      : typeof o.latest_status === "string"
-        ? o.latest_status.trim()
-        : "";
-  if (!leadId || !agentName || !statusRaw) return null;
-  return { leadId, agentName, status: statusRaw };
+  const dealName = typeof o.deal_name === "string" ? o.deal_name.trim() : "";
+  const amount = parseAmount(o.amount);
+  if (!dealId || !agentName || !dealName || amount == null) return null;
+  return { dealId, agentName, dealName, amount };
 }
 
-function nowUtcIsoForDb(): string {
+function recordedAtUtcForDb(): string {
   return (
     freshdeskTimestampToIsoUtcForDb(new Date().toISOString()) ?? new Date().toISOString()
   );
@@ -104,11 +104,11 @@ export async function POST(req: NextRequest) {
   try {
     rawText = await req.text();
   } catch (e) {
-    console.error("[zoho-leads webhook] failed reading body", { requestId, error: e });
+    console.error("[zoho-deals webhook] failed reading body", { requestId, error: e });
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  console.log("[zoho-leads webhook] incoming", {
+  console.log("[zoho-deals webhook] incoming", {
     requestId,
     contentType,
     userAgent,
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
   if (contentType.toLowerCase().includes("application/json")) {
     const parsedJson = safeJsonParse(rawText);
     if (!parsedJson.ok) {
-      console.error("[zoho-leads webhook] invalid JSON", {
+      console.error("[zoho-deals webhook] invalid JSON", {
         requestId,
         parseError: parsedJson.error,
         bodyPreview: rawText.slice(0, 2000),
@@ -143,80 +143,68 @@ export async function POST(req: NextRequest) {
   const parsed = parsePayload(body);
   if (!parsed) {
     const b = body as Record<string, unknown> | null;
-    console.error("[zoho-leads webhook] payload mapping failed", {
+    console.error("[zoho-deals webhook] payload mapping failed", {
       requestId,
       topLevelKeys:
         b && typeof b === "object" ? Object.keys(b).slice(0, 100) : null,
-      lead_id: b && typeof b === "object" ? b["lead_id"] : null,
+      deal_id: b && typeof b === "object" ? b["deal_id"] : null,
       agent_name: b && typeof b === "object" ? b["agent_name"] : null,
-      status: b && typeof b === "object" ? b["status"] : null,
-      latest_status: b && typeof b === "object" ? b["latest_status"] : null,
+      deal_name: b && typeof b === "object" ? b["deal_name"] : null,
+      amount: b && typeof b === "object" ? b["amount"] : null,
     });
     return NextResponse.json(
       {
         error:
-          "Missing or invalid fields: lead_id, agent_name, and status are required",
+          "Missing or invalid fields: deal_id, agent_name, deal_name, and amount are required",
       },
       { status: 400 },
     );
   }
 
-  const { leadId, agentName, status } = parsed;
+  const { dealId, agentName, dealName, amount } = parsed;
+  const recordedAt = recordedAtUtcForDb();
 
-  if (!isAttemptedStatus(status)) {
-    console.log("[zoho-leads webhook] skipped (not Attempted)", {
-      requestId,
-      leadId,
-      status,
-    });
-    return NextResponse.json({
-      ok: true,
-      action: "ignored",
-      reason: "not_attempted",
-    });
-  }
-
-  const touchedAt = nowUtcIsoForDb();
-
-  console.log("[zoho-leads webhook] register first touch", {
+  console.log("[zoho-deals webhook] insert conversion", {
     requestId,
-    leadId,
+    dealId,
     agentName,
-    status,
+    dealName,
+    amount,
   });
 
   try {
-    const { error: insErr } = await db.from("onboarding_lead_touches").insert({
-      lead_id: leadId,
+    const { error: insErr } = await db.from("onboarding_conversion_ledger").insert({
+      deal_id: dealId,
+      client_name: dealName,
+      amount,
       agent_name: agentName,
-      latest_status: status,
-      first_touched_at: touchedAt,
-      updated_at: touchedAt,
+      queendom_name: "",
+      recorded_at: recordedAt,
     });
 
     if (insErr) {
       if (insErr.code === "23505") {
-        console.log("[zoho-leads webhook] ignored (lead already registered)", {
+        console.log("[zoho-deals webhook] ignored (deal already logged)", {
           requestId,
-          leadId,
+          dealId,
         });
         return NextResponse.json({
           ok: true,
           action: "ignored",
-          reason: "duplicate_lead",
+          reason: "duplicate_deal",
         });
       }
-      console.error("[zoho-leads webhook] insert", insErr);
+      console.error("[zoho-deals webhook] insert", insErr);
       return NextResponse.json(
         { error: "Database error", detail: insErr.message },
         { status: 500 },
       );
     }
 
-    console.log("[zoho-leads webhook] registered", { requestId, leadId });
-    return NextResponse.json({ ok: true, action: "registered" });
+    console.log("[zoho-deals webhook] recorded", { requestId, dealId });
+    return NextResponse.json({ ok: true, action: "recorded" });
   } catch (e) {
-    console.error("[zoho-leads webhook]", e);
+    console.error("[zoho-deals webhook]", e);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

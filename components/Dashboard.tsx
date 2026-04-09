@@ -101,7 +101,6 @@ function toTicketRow(
     queendom_name: (raw.queendom_name as string | null) ?? null,
     agent_name: (raw.agent_name as string | null) ?? null,
     created_at: (raw.created_at as string | null) ?? null,
-    resolved_at: (raw.resolved_at as string | null) ?? null,
     is_escalated: (raw.is_escalated as boolean | null) ?? null,
     tags: (raw.tags as Record<string, unknown> | null) ?? null,
   };

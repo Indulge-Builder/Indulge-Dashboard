@@ -5,18 +5,12 @@
  *
  *   totalReceived     – tickets whose created_at falls within this IST calendar month
  *
- *   resolvedThisMonth – tickets created this IST month AND status is
- *                       "resolved" only ("closed" is not scored as resolved)
+ *   resolvedThisMonth – cohort math: created this IST month AND status is terminal
+ *                       (resolved / closed / spam / deleted)
  *
- *   solvedToday       – tickets CREATED today (IST) that are now resolved.
- *                       (status = "resolved" only; "closed" excluded)
- *                       Uses same date logic as /api/agents for consistency.
+ *   solvedToday       – cohort math: created today (IST) AND status is terminal
  *
- *   pendingToResolve  – tickets created this IST month whose status is neither
- *                       "resolved" nor "closed"
- *
- *   "closed" is never scored as resolved and never counted as pending; it only
- *   affects totalReceived if created this month (Received may exceed Pending+Resolved).
+ *   pendingToResolve  – status NOT terminal; no date gate — includes old open tickets
  *
  * ── TIMEZONE NOTE ────────────────────────────────────────────────────────────
  * Uses lib/istDate (Asia/Kolkata) — same as Dashboard client aggregation and
@@ -34,7 +28,6 @@ interface TicketRow {
   status: string | null;
   queendom_name: string | null;
   created_at: string | null;
-  resolved_at: string | null;
   tags: Record<string, unknown> | null;
 }
 
@@ -53,13 +46,8 @@ interface AggregatedStats {
 
 // ─── Status sets ─────────────────────────────────────────────────────────────
 
-const RESOLVED_STATUS = "resolved";
-const CLOSED_STATUS = "closed";
-
-const isResolvedStatus = (s: string) => s === RESOLVED_STATUS;
-/** Pending = every status except resolved and closed (closed is not scored). */
-const isPendingStatus = (s: string) =>
-  !isResolvedStatus(s) && s !== CLOSED_STATUS;
+const TERMINAL_STATUSES = new Set(["resolved", "closed", "spam", "deleted"]);
+const isTerminal = (s: string) => TERMINAL_STATUSES.has(s);
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
 function aggregate(rows: TicketRow[]): AggregatedStats {
@@ -93,26 +81,25 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
 
     const createdDay = toISTDay(row.created_at);
     const createdMonth = toISTMonth(row.created_at);
+    const terminal = isTerminal(status);
 
     // ── 0. Received (This Month) — created_at in current IST calendar month ─────
     if (createdMonth === thisMonthIST) {
       bucket.totalReceived++;
     }
 
-    // ── 1. Resolved (This Month) — created this IST month, status resolved only
-    if (createdMonth === thisMonthIST && isResolvedStatus(status)) {
+    // ── 1. Resolved (This Month) — cohort math: created this month AND terminal
+    if (createdMonth === thisMonthIST && terminal) {
       bucket.resolvedThisMonth++;
     }
 
-    // ── 2. Solved Today ───────────────────────────────────────────────────────
-    // Tickets CREATED today that are now resolved. Same logic as agents'
-    // tasksCompletedToday: created_at day === TODAY, status = "resolved".
-    if (status === RESOLVED_STATUS && createdDay === todayIST) {
+    // ── 2. Solved Today — created today AND terminal
+    if (createdDay === todayIST && terminal) {
       bucket.solvedToday++;
     }
 
-    // ── 3. Pending to Resolve (this month only) — not resolved, not closed ───
-    if (createdMonth === thisMonthIST && isPendingStatus(status)) {
+    // ── 3. Pending — status NOT terminal (no date gate; includes old open tickets)
+    if (!terminal) {
       bucket.pendingToResolve++;
     }
 
@@ -147,7 +134,7 @@ export async function GET() {
   const PAGE = 1000;
   let allRows: TicketRow[] = [];
   let from = 0;
-  const selectCols = "status, queendom_name, created_at, resolved_at, tags";
+  const selectCols = "status, queendom_name, created_at, tags";
 
   while (true) {
     const { data, error } = await db
@@ -167,7 +154,7 @@ export async function GET() {
         while (true) {
           const fb = await db
             .from("tickets")
-            .select("status, queendom_name, created_at, resolved_at")
+            .select("status, queendom_name, created_at")
             .range(fallbackFrom, fallbackFrom + PAGE - 1);
           if (fb.error) {
             console.error("[/api/tickets] Supabase error:", fb.error.message);
