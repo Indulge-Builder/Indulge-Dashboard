@@ -79,12 +79,15 @@ interface FreshdeskPayload {
 }
 
 // Statuses where SLA/overdue score must be cleared (explicit false on upsert).
+// "spam" and "deleted" are included so void tickets can never be escalated.
 const SLA_SAFE_STATUSES = new Set([
   "resolved",
   "closed",
   "nudge client",
   "ongoing delivery",
   "invoice due",
+  "spam",
+  "deleted",
 ]);
 
 // Red list (Open, Pending, Nudge Vendor): do not send is_escalated on upsert —
@@ -100,6 +103,9 @@ const ACTIVE_CLEAR_RESOLVED_AT = new Set([
 
 // Terminal completion — stamp resolved_at and clear escalation (also in SLA_SAFE).
 const RESOLVED_STATUSES = new Set(["resolved", "closed"]);
+
+// Void statuses: ticket is spam or deleted — keep in DB but clear escalation.
+const VOID_STATUSES = new Set(["spam", "deleted"]);
 
 /**
  * Convert Freshdesk datetime strings to strict UTC ISO (`…Z`) for `timestamptz`.
@@ -178,39 +184,29 @@ export async function POST(req: NextRequest) {
     webhookType === "ticket_deleted";
 
   if (isDeletion) {
+    // Soft-delete: keep the row in Supabase for audit but mark it "deleted" so
+    // the math engine's VOID_STATUSES filter hides it from all dashboard metrics.
     console.info(
-      `[freshdesk webhook] handling deletion for ticket ${ticketIdStr}`,
+      `[freshdesk webhook] soft-deleting ticket ${ticketIdStr} (status → "deleted")`,
     );
-    const { data: deleted, error } = await db
+    const { error } = await db
       .from("tickets")
-      .delete()
-      .eq("ticket_id", ticketIdStr)
-      .select("ticket_id");
+      .update({ status: "deleted", is_escalated: false })
+      .eq("ticket_id", ticketIdStr);
 
     if (error) {
       console.error(
-        `[freshdesk webhook] deletion error for ticket ${ticketIdStr}:`,
+        `[freshdesk webhook] soft-deletion error for ticket ${ticketIdStr}:`,
         error.message,
       );
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const rowCount = Array.isArray(deleted) ? deleted.length : 0;
-    if (rowCount === 0) {
-      console.warn(
-        `[freshdesk webhook] deletion: ticket ${ticketIdStr} not found in DB (already gone or never synced)`,
-      );
-    } else {
-      console.info(
-        `[freshdesk webhook] deleted ticket ${ticketIdStr} from dashboard`,
-      );
-    }
+    console.info(
+      `[freshdesk webhook] ticket ${ticketIdStr} marked deleted (invisible to TV dashboard)`,
+    );
 
-    return NextResponse.json({
-      ok: true,
-      deleted: ticketIdStr,
-      rows_removed: rowCount,
-    });
+    return NextResponse.json({ ok: true, voided: ticketIdStr, status: "deleted" });
   }
 
   // ── Escalation-only (SLA breach): only path that may set is_escalated = true ─
@@ -294,6 +290,9 @@ export async function POST(req: NextRequest) {
 
   if (RESOLVED_STATUSES.has(statusLower)) {
     row.resolved_at = parseWebhookInstant(resolved_date_time) ?? now;
+    row.is_escalated = false;
+  } else if (VOID_STATUSES.has(statusLower)) {
+    // Spam / deleted arriving via a normal status-update webhook — clear escalation.
     row.is_escalated = false;
   } else if (ACTIVE_CLEAR_RESOLVED_AT.has(statusLower)) {
     row.resolved_at = null;

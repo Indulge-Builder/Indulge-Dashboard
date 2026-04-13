@@ -13,8 +13,16 @@ import type { TicketStats, AgentStats } from "./types";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "./agentRoster";
 import { buildRoster } from "./agentRoster";
 
-/** All statuses that mean a ticket is done — no further action needed. */
-const TERMINAL_STATUSES = new Set(["resolved", "closed", "spam", "deleted"]);
+/**
+ * Void statuses: spam / deleted tickets stay in Supabase for audit but are
+ * completely invisible to the TV dashboard — filtered out before any math.
+ */
+export const VOID_STATUSES = new Set(["spam", "deleted"]);
+const isVoid = (s: string | null): boolean =>
+  VOID_STATUSES.has((s ?? "").toLowerCase().trim());
+
+/** Statuses that mean a ticket is legitimately done (actual successes only). */
+const TERMINAL_STATUSES = new Set(["resolved", "closed"]);
 const isTerminal = (s: string | null): boolean =>
   TERMINAL_STATUSES.has((s ?? "").toLowerCase().trim());
 
@@ -61,13 +69,13 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
     },
   };
 
-  // Deduplicate by ticket id before aggregating.
+  // Deduplicate by ticket id, then strip void (spam / deleted) rows entirely.
   const seen = new Set<string>();
   const uniqueRows: TicketRowMinimal[] = [];
   for (const row of rows) {
     if (seen.has(row.id)) continue;
     seen.add(row.id);
-    uniqueRows.push(row);
+    if (!isVoid(row.status)) uniqueRows.push(row);
   }
 
   for (const row of uniqueRows) {
@@ -183,13 +191,23 @@ export function aggregateAgentStats(rows: TicketRowMinimal[]): {
   anishqa: Record<string, AgentLiveStats>;
 } {
   const istRef = istToday();
+
+  // Strip void (spam / deleted) tickets before any per-agent math.
+  const seen = new Set<string>();
+  const visibleRows: TicketRowMinimal[] = [];
+  for (const row of rows) {
+    if (seen.has(row.id)) continue;
+    seen.add(row.id);
+    if (!isVoid(row.status)) visibleRows.push(row);
+  }
+
   const ananyshree: Record<string, AgentLiveStats> = {};
   const anishqa: Record<string, AgentLiveStats> = {};
   for (const name of ROSTER_ANANYSHREE) {
-    ananyshree[name] = calcAgent(rows, name, istRef);
+    ananyshree[name] = calcAgent(visibleRows, name, istRef);
   }
   for (const name of ROSTER_ANISHQA) {
-    anishqa[name] = calcAgent(rows, name, istRef);
+    anishqa[name] = calcAgent(visibleRows, name, istRef);
   }
   return { ananyshree, anishqa };
 }

@@ -6,7 +6,7 @@
  *   totalReceived     – tickets whose created_at falls within this IST calendar month
  *
  *   resolvedThisMonth – cohort math: created this IST month AND status is terminal
- *                       (resolved / closed / spam / deleted)
+ *                       (resolved / closed — spam / deleted are void and excluded)
  *
  *   solvedToday       – cohort math: created today (IST) AND status is terminal
  *
@@ -46,7 +46,11 @@ interface AggregatedStats {
 
 // ─── Status sets ─────────────────────────────────────────────────────────────
 
-const TERMINAL_STATUSES = new Set(["resolved", "closed", "spam", "deleted"]);
+// Void tickets (spam / deleted) are invisible to all dashboard metrics.
+const VOID_STATUSES = new Set(["spam", "deleted"]);
+
+// Terminal = legitimate resolutions only (spam / deleted excluded).
+const TERMINAL_STATUSES = new Set(["resolved", "closed"]);
 const isTerminal = (s: string) => TERMINAL_STATUSES.has(s);
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
@@ -71,6 +75,8 @@ function aggregate(rows: TicketRow[]): AggregatedStats {
   };
 
   for (const row of rows) {
+    // Skip void (spam / deleted) tickets — they must not appear in any metric.
+    if (VOID_STATUSES.has((row.status ?? "").toLowerCase().trim())) continue;
     const queendom = (row.queendom_name ?? "").toLowerCase().trim();
     const status = (row.status ?? "").toLowerCase().trim();
 

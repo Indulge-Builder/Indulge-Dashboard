@@ -30,7 +30,11 @@ interface TicketRow {
   is_escalated: boolean | null;
 }
 
-const TERMINAL_STATUSES = new Set(["resolved", "closed", "spam", "deleted"]);
+// Void tickets (spam / deleted) are invisible to all dashboard metrics.
+const VOID_STATUSES = new Set(["spam", "deleted"]);
+
+// Terminal = legitimate resolutions only (spam / deleted excluded).
+const TERMINAL_STATUSES = new Set(["resolved", "closed"]);
 const isTerminal = (status: string | null): boolean =>
   TERMINAL_STATUSES.has((status ?? "").toLowerCase().trim());
 
@@ -69,7 +73,10 @@ export async function GET(): Promise<Response> {
     from += PAGE;
   }
 
-  const tickets = allRows;
+  // Strip void (spam / deleted) tickets — they must not appear in any metric.
+  const tickets = allRows.filter(
+    (t) => !VOID_STATUSES.has((t.status ?? "").toLowerCase().trim()),
+  );
   const { day: TODAY, month: THIS_MONTH } = istToday();
 
   // ── Three filters per agent ───────────────────────────────────────────────
