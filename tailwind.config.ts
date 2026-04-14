@@ -9,6 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        /* ── Existing palette (unchanged — all Tailwind classes still work) ── */
         obsidian: "#050505",
         rosegold: "#C47451",
         gold: {
@@ -50,6 +51,17 @@ const config: Config = {
           500: "#6B7A45",
           600: "#5C6344",
         },
+        /* ── Design system tokens (CSS variable-backed, new) ──────────────── */
+        /* Surfaces — use as bg-surface-card, bg-surface-glass, etc.         */
+        "surface-card":     "var(--surface-card)",
+        "surface-glass":    "var(--surface-glass)",
+        "surface-elevated": "var(--surface-elevated)",
+        "surface-inset":    "var(--surface-inset)",
+        /* Status semantic colors */
+        "status-emerald":   "var(--color-emerald)",
+        "status-red":       "var(--color-red)",
+        "status-amber":     "var(--color-amber)",
+        "status-sky":       "var(--color-sky)",
       },
       fontFamily: {
         cinzel: ["var(--font-cinzel)", "Cinzel", "serif"],
@@ -113,6 +125,17 @@ const config: Config = {
         "7xl": "4.5rem",
         "8xl": "6rem",
         "9xl": "8rem",
+      },
+      boxShadow: {
+        /* Design-system gold glows — use as shadow-gold-sm, shadow-gold-md, shadow-gold-lg */
+        "gold-sm": "var(--shadow-gold-sm)",
+        "gold-md": "var(--shadow-gold-md)",
+        "gold-lg": "var(--shadow-gold-lg)",
+      },
+      borderRadius: {
+        /* Design-system radii */
+        card:  "var(--radius-card)",
+        panel: "var(--radius-panel)",
       },
     },
   },

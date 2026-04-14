@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import QueendomPanel from "./QueendomPanel";
-import OnboardingPanel from "./OnboardingPanel";
+import OnboardingPanel from "./onboarding/OnboardingPanel";
+import QueendomSkeleton from "./skeletons/QueendomSkeleton";
+import OnboardingSkeleton from "./skeletons/OnboardingSkeleton";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import type { QueenStats } from "@/lib/types";
 
 export type ActiveScreen = "concierge" | "onboarding";
@@ -31,6 +34,13 @@ interface DashboardControllerProps {
   renewalsAnanyshree: RenewalsPanelData;
   renewalsAnishqa: RenewalsPanelData;
   celebrationAgent: string | null;
+  /**
+   * When true, a skeleton overlay is rendered on top of each panel.
+   * Fades out (AnimatePresence exit) once the first fetchAll() resolves.
+   * The real panels are always mounted behind the overlay so their counters
+   * animate from 0 quietly — no jarring re-render when the skeleton lifts.
+   */
+  isInitialLoading: boolean;
 }
 
 /** TV browsers / remotes often omit `key` or use legacy keyCode; fullscreen can eat events before bubble. */
@@ -44,6 +54,10 @@ function isFreezeToggleKey(e: KeyboardEvent): boolean {
   return false;
 }
 
+// Shared exit transition for skeleton overlays — matches the cinematic 1.5s
+// fade used between screens, but slightly snappier for the initial data reveal.
+const skeletonExitTransition = { duration: 0.9, ease: "easeInOut" as const };
+
 export default function DashboardController({
   className,
   ananyshreeStats,
@@ -51,6 +65,7 @@ export default function DashboardController({
   renewalsAnanyshree,
   renewalsAnishqa,
   celebrationAgent,
+  isInitialLoading,
 }: DashboardControllerProps) {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("concierge");
   const [isFrozen, setIsFrozen] = useState(false);
@@ -113,15 +128,31 @@ export default function DashboardController({
         transition={fadeTransition}
       >
         <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch">
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-            <QueendomPanel
-              name="Ananyshree"
-              stats={ananyshreeStats}
-              side="left"
-              delay={0}
-              celebrationAgent={celebrationAgent}
-              renewalsData={renewalsAnanyshree}
-            />
+          {/* Ananyshree panel — isolated so its crash cannot affect Anishqa */}
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <ErrorBoundary label="Ananyshree" fillParent>
+              <QueendomPanel
+                name="Ananyshree"
+                stats={ananyshreeStats}
+                side="left"
+                delay={0}
+                celebrationAgent={celebrationAgent}
+                renewalsData={renewalsAnanyshree}
+              />
+            </ErrorBoundary>
+            {/* Skeleton overlay — sits above the real panel until data is ready */}
+            <AnimatePresence>
+              {isInitialLoading && (
+                <motion.div
+                  className="absolute inset-0 z-20"
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={skeletonExitTransition}
+                >
+                  <QueendomSkeleton side="left" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Center column — full-height gold separator between Queendoms (md+) */}
@@ -150,15 +181,31 @@ export default function DashboardController({
 
           <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-gold-500/25 to-transparent md:hidden" />
 
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-            <QueendomPanel
-              name="Anishqa"
-              stats={anishqaStats}
-              side="right"
-              delay={150}
-              celebrationAgent={celebrationAgent}
-              renewalsData={renewalsAnishqa}
-            />
+          {/* Anishqa panel — isolated so its crash cannot affect Ananyshree */}
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
+            <ErrorBoundary label="Anishqa" fillParent>
+              <QueendomPanel
+                name="Anishqa"
+                stats={anishqaStats}
+                side="right"
+                delay={150}
+                celebrationAgent={celebrationAgent}
+                renewalsData={renewalsAnishqa}
+              />
+            </ErrorBoundary>
+            {/* Skeleton overlay — staggered 0.15s after left panel for a cascade reveal */}
+            <AnimatePresence>
+              {isInitialLoading && (
+                <motion.div
+                  className="absolute inset-0 z-20"
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ ...skeletonExitTransition, delay: 0.15 }}
+                >
+                  <QueendomSkeleton side="right" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </motion.div>
@@ -173,8 +220,24 @@ export default function DashboardController({
         }}
         transition={fadeTransition}
       >
-        <div className="flex min-h-0 h-full w-full min-w-0 flex-col">
-          <OnboardingPanel />
+        {/* Onboarding screen — isolated from the concierge screens */}
+        <div className="relative flex min-h-0 h-full w-full min-w-0 flex-col">
+          <ErrorBoundary label="Onboarding" fillParent>
+            <OnboardingPanel />
+          </ErrorBoundary>
+          {/* Skeleton overlay — staggered 0.3s so the left→right→onboarding cascade feels intentional */}
+          <AnimatePresence>
+            {isInitialLoading && (
+              <motion.div
+                className="absolute inset-0 z-20"
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ ...skeletonExitTransition, delay: 0.3 }}
+              >
+                <OnboardingSkeleton />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </div>
