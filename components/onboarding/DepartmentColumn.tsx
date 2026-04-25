@@ -26,12 +26,13 @@ interface DeptAccent {
   chipBgToday: string;
 }
 
+// font sizes intentionally omitted — applied via cqh inline styles inside the card
 const METRIC_BOX_BASE =
-  "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-xl border bg-black/30 px-1 py-[0.8vh] min-[900px]:py-[1.3vh]";
+  "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-xl border bg-black/30";
 const METRIC_LABEL_CLASS =
-  "font-inter shrink-0 font-semibold text-[clamp(30px,3vw,46px)] uppercase leading-none tracking-[0.25em] mb-[0.15vh]";
+  "font-inter shrink-0 font-semibold uppercase leading-none tracking-[0.25em]";
 const METRIC_VALUE_CLASS =
-  "font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] tabular-nums";
+  "font-cinzel font-bold leading-none tracking-[0.06em] tabular-nums";
 
 const ACCENTS: Record<Department, DeptAccent> = {
   concierge: {
@@ -147,6 +148,7 @@ const CompactAgentCard = memo(function CompactAgentCard({
         borderRight: isConcierge ? "1px solid rgba(255,255,255,0.07)" : undefined,
         borderBottom: "1px solid rgba(255,255,255,0.07)",
         borderRadius: "clamp(6px, 0.7vmin, 10px)",
+        containerType: "size",
         ...gpuStyle,
       }}
     >
@@ -177,32 +179,34 @@ const CompactAgentCard = memo(function CompactAgentCard({
         />
       </div>
 
-      {/* Right 60% — flat single column, all elements together, centered */}
+      {/* Right 60% — scales with card height via cqh units */}
       <div
         style={{
           flex: 1,
           minWidth: 0,
           minHeight: 0,
+          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "stretch",
-          padding: "clamp(0.6rem, 1.2vmin, 1.2rem) clamp(0.6rem, 1vmin, 1rem) clamp(0.6rem, 1.2vmin, 1.2rem) clamp(0.5rem, 0.8vmin, 0.8rem)",
-          gap: "clamp(0.4rem, 0.75vmin, 0.8rem)",
+          padding: "4cqh 3cqw 4cqh 2.5cqw",
+          gap: "2cqh",
         }}
       >
         {/* Name */}
         <div
-          className={`w-full min-w-0 truncate text-center font-cinzel font-bold uppercase leading-none tracking-[0.28em] text-6xl min-[900px]:text-7xl xl:text-8xl ${
+          className={`w-full min-w-0 truncate text-center font-cinzel font-bold uppercase leading-none tracking-[0.28em] ${
             isConcierge
               ? "text-gold-400 queen-name-glow"
               : "text-sky-200 sky-name-glow"
           }`}
           style={{
+            fontSize:     "clamp(0.6rem, 9cqh, 3.5rem)",
             background:   accent.glassBg,
             border:       `1px solid ${accent.glassBorder}`,
             borderRadius: "clamp(5px, 0.6vmin, 8px)",
-            padding:      "clamp(0.25rem, 0.5vmin, 0.6rem) clamp(0.4rem, 0.8vmin, 1rem)",
+            padding:      "1.5cqh 3cqw",
             boxShadow:    "inset 0 1px 0 rgba(255,255,255,0.05)",
           }}
         >
@@ -214,19 +218,25 @@ const CompactAgentCard = memo(function CompactAgentCard({
           style={{
             height: "1px",
             flexShrink: 0,
-            margin: "clamp(0.1rem, 0.25vmin, 0.3rem) 0",
             background: `linear-gradient(to right, ${accent.color}70, transparent 75%)`,
           }}
         />
 
-        {/* 3 metric tiles */}
-        <div className="flex w-full min-w-0 flex-none flex-row items-stretch gap-1.5 min-[900px]:gap-2">
+        {/* 3 metric tiles — flex-1 so they fill remaining space */}
+        <div
+          className="flex w-full min-w-0 flex-row items-stretch"
+          style={{ flex: "1 1 0", minHeight: 0, gap: "1.5cqw" }}
+        >
           {/* Leads (This Month) */}
-          <div className={`${METRIC_BOX_BASE} ${metricTileBorder}`}>
+          <div
+            className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
+            style={{ padding: "2cqh 1cqw" }}
+          >
             <span
               className={`${METRIC_LABEL_CLASS} ${
                 isConcierge ? "text-champagne" : "text-sky-200"
               }`}
+              style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: "0.8cqh" }}
             >
               Leads <br /> (This Month)
             </span>
@@ -234,7 +244,10 @@ const CompactAgentCard = memo(function CompactAgentCard({
               className={`${METRIC_VALUE_CLASS} ${
                 isConcierge ? "text-champagne" : "text-sky-200"
               } ${monthPulse ? "ob-metric-flash" : ""}`}
-              style={{ ["--ob-pulse-color" as string]: accent.color } as CSSProperties}
+              style={{
+                fontSize: "clamp(1rem, 14cqh, 5.5rem)",
+                ["--ob-pulse-color" as string]: accent.color,
+              } as CSSProperties}
             >
               <AnimatedCounter
                 value={leadsMonth}
@@ -246,15 +259,24 @@ const CompactAgentCard = memo(function CompactAgentCard({
           </div>
 
           {/* Leads (Today) */}
-          <div className={`${METRIC_BOX_BASE} ${metricTileBorder}`}>
-            <span className={`${METRIC_LABEL_CLASS} tracking-[0.22em] text-emerald-300`}>
+          <div
+            className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
+            style={{ padding: "2cqh 1cqw" }}
+          >
+            <span
+              className={`${METRIC_LABEL_CLASS} tracking-[0.22em] text-emerald-300`}
+              style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: "0.8cqh" }}
+            >
               Leads <br /> (Today)
             </span>
             <span
               className={`${METRIC_VALUE_CLASS} text-emerald-400 emerald-glow-hero ${
                 todayPulse ? "ob-metric-flash" : ""
               }`}
-              style={{ ["--ob-pulse-color" as string]: accent.color } as CSSProperties}
+              style={{
+                fontSize: "clamp(1rem, 14cqh, 5.5rem)",
+                ["--ob-pulse-color" as string]: accent.color,
+              } as CSSProperties}
             >
               <AnimatedCounter
                 value={agent.leadsAttendToday}
@@ -266,11 +288,15 @@ const CompactAgentCard = memo(function CompactAgentCard({
           </div>
 
           {/* Closures (This Month) */}
-          <div className={`${METRIC_BOX_BASE} ${metricTileBorder}`}>
+          <div
+            className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
+            style={{ padding: "2cqh 1cqw" }}
+          >
             <span
               className={`${METRIC_LABEL_CLASS} ${
                 isConcierge ? "text-champagne" : "text-sky-200"
               }`}
+              style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: "0.8cqh" }}
             >
               Closures <br /> (This Month)
             </span>
@@ -280,7 +306,10 @@ const CompactAgentCard = memo(function CompactAgentCard({
                   ? "text-gold-300 gold-glow"
                   : "text-sky-100 sky-name-glow"
               } ${closedPulse ? "ob-metric-flash" : ""}`}
-              style={{ ["--ob-pulse-color" as string]: accent.color } as CSSProperties}
+              style={{
+                fontSize: "clamp(1rem, 14cqh, 5.5rem)",
+                ["--ob-pulse-color" as string]: accent.color,
+              } as CSSProperties}
             >
               <AnimatedCounter
                 value={closedCount}
@@ -297,7 +326,6 @@ const CompactAgentCard = memo(function CompactAgentCard({
           style={{
             height: "1px",
             flexShrink: 0,
-            margin: "clamp(0.15rem, 0.3vmin, 0.4rem) 0 clamp(0.1rem, 0.2vmin, 0.25rem)",
             background: `linear-gradient(to right, ${accent.color}30, transparent 80%)`,
           }}
         />
