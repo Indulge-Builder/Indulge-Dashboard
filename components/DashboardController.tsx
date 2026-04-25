@@ -12,8 +12,8 @@ import type { QueenStats } from "@/lib/types";
 export type ActiveScreen = "concierge" | "onboarding";
 
 const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
-  concierge: 40_000,
-  onboarding: 20_000,
+  concierge: 30_000,
+  onboarding: 30_000,
 };
 
 const fadeTransition = {

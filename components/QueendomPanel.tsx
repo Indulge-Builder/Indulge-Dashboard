@@ -6,10 +6,8 @@ import AnimatedCounter from "./AnimatedCounter";
 import QueendomWingspanHeader from "./QueendomWingspanHeader";
 import AgentLeaderboard from "./leaderboard/AgentLeaderboard";
 import JokerMetricsStrip from "./JokerMetricsStrip";
-import ActiveOutlays from "./finance/ActiveOutlays";
 import RenewalsPanel from "./RenewalsPanel";
 import SpecialDates from "@/components/SpecialDates";
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import type { QueenStats } from "@/lib/types";
 import { getJokerNameForQueendom } from "@/lib/agentRoster";
 
@@ -338,27 +336,17 @@ export default function QueendomPanel({
             </div>
           </div>
 
-          {/* Row 2–3: Joker + Finances — full width like scorecard & renewals */}
-          <div className="flex w-full min-h-0 flex-1 flex-col gap-4 border-t border-gold-500/20 pt-4">
-            {stats.joker != null && jokerDisplayName != null ? (
+          {/* Row 2–3: Joker — full width like scorecard & renewals */}
+          {stats.joker != null && jokerDisplayName != null ? (
+            <div className="flex w-full min-h-0 flex-1 flex-col gap-4 border-t border-gold-500/20 pt-4">
               <JokerMetricsStrip
                 compact
                 jokerName={jokerDisplayName}
                 joker={stats.joker}
                 baseDelayMs={delay + 1450}
               />
-            ) : null}
-            {/* Finances — isolated so a Supabase query crash never kills the leaderboard */}
-            <div className="flex min-h-0 w-full flex-1 flex-col">
-              <ErrorBoundary label="Finances" fillParent>
-                <ActiveOutlays
-                  queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}
-                  delayMs={delay + 1580}
-                  fillRemaining
-                />
-              </ErrorBoundary>
             </div>
-          </div>
+          ) : null}
         </div>
       </motion.div>
     </motion.section>
