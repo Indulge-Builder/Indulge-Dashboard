@@ -9,9 +9,10 @@ export const ROSTER_ANISHQA: string[] = [
   "Pranav Gadekar",
   "Dhanush K",
   "Charlotte Dias",
-  "Aniruddha Morajkar",
+  "Ria Pujhari",
   "Rupali Chodankar",
   "Eeti Srinivsulu",
+  "Ekta Nihalani",
 ];
 
 export const ROSTER_ANANYSHREE: string[] = [
@@ -23,12 +24,13 @@ export const ROSTER_ANANYSHREE: string[] = [
   "Anshika Eark",
   "Ajith Sajan",
   "Khushi Shah",
+  "Palak Kataria",
 ];
 
 /** Joker names mapped to their Queendom. Used for specialized Joker metrics. */
 export const JOKER_ROSTER: Record<string, "ananyshree" | "anishqa"> = {
   "Lilian Albrecht": "ananyshree",
-  "Anil Talluri": "anishqa",
+  "Shruti Sharma": "anishqa",
 };
 
 export function getJokerNameForQueendom(

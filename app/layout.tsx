@@ -40,7 +40,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cinzel.variable} ${inter.variable} ${libreBaskerville.variable} ${montserrat.variable}`}>
+    <html
+      lang="en"
+      className={`${cinzel.variable} ${inter.variable} ${libreBaskerville.variable} ${montserrat.variable}`}
+    >
       <body
         className="bg-obsidian text-champagne overflow-hidden antialiased"
         suppressHydrationWarning

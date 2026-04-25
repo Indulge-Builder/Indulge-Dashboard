@@ -1,17 +1,24 @@
 /**
  * POST /api/webhooks/zoho-leads
  *
- * Zoho CRM → Lead status updates. When `status` is **Attempted** (case-insensitive),
- * registers the **first** touch per `lead_id` in `onboarding_lead_touches` for dialer /
- * attempted scorecards. Later statuses or duplicate lead_ids are acknowledged without
- * changing the first-touch row.
+ * Zoho CRM → Lead create / update. Upserts one row per `lead_id` in
+ * `leads` with columns:
+ *   lead_id, agent_name, latest_status, lead_name, business_vertical,
+ *   created_at, modified_at
  *
  * JSON body (map Zoho merge fields):
- *   { "lead_id": "...", "agent_name": "...", "status": "..." }
+ *   {
+ *     "lead_id":           "...",
+ *     "agent_name":        "...",
+ *     "status":            "...",        // or "latest_status"
+ *     "lead_name":         "...",        // optional — first_name / full name
+ *     "business_vertical": "Indulge Global", // one of the 4 verticals; default Global
+ *     "created_at":        "ISO-8601",   // optional — Zoho create time; else server now on insert
+ *     "modified_at":       "ISO-8601"    // optional — else server now on every write
+ *   }
  *
- * `agent_name` is normalized via {@link normalizeZohoAgentName} in lib/onboardingAgents.ts.
- *
- * Table: onboarding_lead_touches (lead_id PK, agent_name, latest_status, first_touched_at, updated_at)
+ * `agent_name` is normalised for storage (trim/collapse spaces) via
+ * {@link normalizeZohoAgentName} while preserving full Zoho owner name.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -19,16 +26,40 @@ import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
 import { normalizeZohoAgentName } from "@/lib/onboardingAgents";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 
+const VALID_VERTICALS = [
+  "Indulge Global",
+  "Indulge Shop",
+  "Indulge House",
+  "Indulge Legacy",
+] as const;
+
+type BusinessVertical = (typeof VALID_VERTICALS)[number];
+
+function parseBusinessVertical(raw: unknown): BusinessVertical {
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    if ((VALID_VERTICALS as readonly string[]).includes(trimmed)) {
+      return trimmed as BusinessVertical;
+    }
+  }
+  return "Indulge Global";
+}
+
 interface ZohoLeadsPayload {
   lead_id?: string | number;
   agent_name?: string;
-  /** Primary field from Zoho */
   status?: string;
-  /** Legacy alias (same meaning as status) */
   latest_status?: string;
+  lead_name?: string;
+  first_name?: string;
+  business_vertical?: string;
+  created_at?: string;
+  modified_at?: string;
 }
 
-function safeJsonParse(text: string): { ok: true; value: unknown } | { ok: false; error: string } {
+function safeJsonParse(
+  text: string,
+): { ok: true; value: unknown } | { ok: false; error: string } {
   try {
     return { ok: true, value: JSON.parse(text) as unknown };
   } catch (e) {
@@ -47,18 +78,32 @@ function parseFormUrlEncoded(text: string): Record<string, string> {
   return out;
 }
 
-/** Zoho picklist value for “first dial / attempt” — match case-insensitively. */
-function isAttemptedStatus(raw: string): boolean {
-  return raw.trim().toLowerCase() === "attempted";
+function toDbTimestamp(isoOrEmpty: string | null): string | null {
+  if (!isoOrEmpty || !isoOrEmpty.trim()) return null;
+  const normalized =
+    freshdeskTimestampToIsoUtcForDb(isoOrEmpty.trim()) ?? isoOrEmpty.trim();
+  const t = Date.parse(normalized);
+  return Number.isFinite(t) ? normalized : null;
+}
+
+function nowUtcIsoForDb(): string {
+  return (
+    freshdeskTimestampToIsoUtcForDb(new Date().toISOString()) ?? new Date().toISOString()
+  );
 }
 
 function parsePayload(body: unknown): {
   leadId: string;
   agentName: string;
   status: string;
+  leadName: string;
+  businessVertical: BusinessVertical;
+  createdAtClient: string | null;
+  modifiedAtClient: string | null;
 } | null {
   if (body == null || typeof body !== "object") return null;
   const o = body as ZohoLeadsPayload;
+
   const rawId = o.lead_id;
   const leadId =
     rawId != null && String(rawId).trim() !== "" ? String(rawId).trim() : "";
@@ -70,14 +115,25 @@ function parsePayload(body: unknown): {
       : typeof o.latest_status === "string"
         ? o.latest_status.trim()
         : "";
-  if (!leadId || !agentName || !statusRaw) return null;
-  return { leadId, agentName, status: statusRaw };
-}
 
-function nowUtcIsoForDb(): string {
-  return (
-    freshdeskTimestampToIsoUtcForDb(new Date().toISOString()) ?? new Date().toISOString()
-  );
+  const leadNameRaw =
+    typeof o.lead_name === "string" && o.lead_name.trim()
+      ? o.lead_name.trim()
+      : typeof o.first_name === "string" && o.first_name.trim()
+        ? o.first_name.trim()
+        : "";
+
+  if (!leadId || !agentName || !statusRaw) return null;
+
+  return {
+    leadId,
+    agentName,
+    status: statusRaw,
+    leadName: leadNameRaw,
+    businessVertical: parseBusinessVertical(o.business_vertical),
+    createdAtClient: typeof o.created_at === "string" ? toDbTimestamp(o.created_at) : null,
+    modifiedAtClient: typeof o.modified_at === "string" ? toDbTimestamp(o.modified_at) : null,
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -131,9 +187,7 @@ export async function POST(req: NextRequest) {
       );
     }
     body = parsedJson.value;
-  } else if (
-    contentType.toLowerCase().includes("application/x-www-form-urlencoded")
-  ) {
+  } else if (contentType.toLowerCase().includes("application/x-www-form-urlencoded")) {
     body = parseFormUrlEncoded(rawText);
   } else {
     const parsedJson = safeJsonParse(rawText);
@@ -155,66 +209,96 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Missing or invalid fields: lead_id, agent_name, and status are required",
+          "Missing or invalid fields: lead_id, agent_name, and status (or latest_status) are required",
       },
       { status: 400 },
     );
   }
 
-  const { leadId, agentName, status } = parsed;
-
-  if (!isAttemptedStatus(status)) {
-    console.log("[zoho-leads webhook] skipped (not Attempted)", {
-      requestId,
-      leadId,
-      status,
-    });
-    return NextResponse.json({
-      ok: true,
-      action: "ignored",
-      reason: "not_attempted",
-    });
-  }
-
-  const touchedAt = nowUtcIsoForDb();
-
-  console.log("[zoho-leads webhook] register first touch", {
-    requestId,
-    leadId,
-    agentName,
-    status,
-  });
+  const { leadId, agentName, status, leadName, businessVertical, createdAtClient, modifiedAtClient } = parsed;
+  const touchedNow = nowUtcIsoForDb();
+  const modifiedAt = modifiedAtClient ?? touchedNow;
 
   try {
-    const { error: insErr } = await db.from("onboarding_lead_touches").insert({
+    const { data: existing, error: selErr } = await db
+      .from("leads")
+      .select("lead_id, created_at")
+      .eq("lead_id", leadId)
+      .maybeSingle();
+
+    if (selErr) {
+      console.error("[zoho-leads webhook] select error", selErr);
+      return NextResponse.json(
+        { error: "Database error", detail: selErr.message },
+        { status: 500 },
+      );
+    }
+
+    if (existing?.lead_id) {
+      const { error: updErr } = await db
+        .from("leads")
+        .update({
+          agent_name: agentName,
+          latest_status: status,
+          lead_name: leadName,
+          business_vertical: businessVertical,
+          modified_at: modifiedAt,
+        })
+        .eq("lead_id", leadId);
+
+      if (updErr) {
+        console.error("[zoho-leads webhook] update error", updErr);
+        return NextResponse.json(
+          { error: "Database error", detail: updErr.message },
+          { status: 500 },
+        );
+      }
+      console.log("[zoho-leads webhook] updated", { requestId, leadId });
+      return NextResponse.json({ ok: true, action: "updated" });
+    }
+
+    const createdAt = createdAtClient ?? touchedNow;
+    const { error: insErr } = await db.from("leads").insert({
       lead_id: leadId,
       agent_name: agentName,
       latest_status: status,
-      first_touched_at: touchedAt,
-      updated_at: touchedAt,
+      lead_name: leadName,
+      business_vertical: businessVertical,
+      created_at: createdAt,
+      modified_at: modifiedAt,
     });
 
     if (insErr) {
       if (insErr.code === "23505") {
-        console.log("[zoho-leads webhook] ignored (lead already registered)", {
-          requestId,
-          leadId,
-        });
-        return NextResponse.json({
-          ok: true,
-          action: "ignored",
-          reason: "duplicate_lead",
-        });
+        console.log("[zoho-leads webhook] race — retry as update", { requestId, leadId });
+        const { error: updErr2 } = await db
+          .from("leads")
+          .update({
+            agent_name: agentName,
+            latest_status: status,
+            lead_name: leadName,
+            business_vertical: businessVertical,
+            modified_at: modifiedAt,
+          })
+          .eq("lead_id", leadId);
+        if (updErr2) {
+          console.error("[zoho-leads webhook] update after race failed", updErr2);
+          return NextResponse.json(
+            { error: "Database error", detail: updErr2.message },
+            { status: 500 },
+          );
+        }
+        return NextResponse.json({ ok: true, action: "updated" });
       }
-      console.error("[zoho-leads webhook] insert", insErr);
+      console.error("[zoho-leads webhook] insert error", insErr);
       return NextResponse.json(
         { error: "Database error", detail: insErr.message },
         { status: 500 },
       );
     }
 
-    console.log("[zoho-leads webhook] registered", { requestId, leadId });
-    return NextResponse.json({ ok: true, action: "registered" });
+    console.log("[zoho-leads webhook] inserted", { requestId, leadId });
+    return NextResponse.json({ ok: true, action: "inserted" });
   } catch (e) {
     console.error("[zoho-leads webhook]", e);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });

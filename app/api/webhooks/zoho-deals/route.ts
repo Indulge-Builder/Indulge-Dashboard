@@ -1,14 +1,19 @@
 /**
  * POST /api/webhooks/zoho-deals
  *
- * Zoho CRM → Deal won / closure. Appends one row to `onboarding_conversion_ledger`
- * per unique `deal_id` so repeat webhooks do not inflate closure scores.
+ * Zoho CRM → New deal created. Inserts one row into `deals` per unique
+ * `deal_id` so repeat webhooks do not duplicate rows.
  *
  * JSON body:
- *   { "deal_id": "...", "agent_name": "...", "deal_name": "...", "amount": ... }
+ *   {
+ *     "deal_id":    "...",
+ *     "deal_name":  "...",
+ *     "agent_name": "...",
+ *     "created_at": "ISO-8601"   // optional — defaults to webhook receive time
+ *   }
  *
- * `deal_name` maps to `client_name`. `amount` is INR (number or numeric string).
- * `recorded_at` is the webhook instant, normalized via istDate (same rules as Freshdesk).
+ * `agent_name` is normalised for storage (trim/collapse spaces) via
+ * {@link normalizeZohoAgentName} while preserving full Zoho owner name.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -20,7 +25,7 @@ interface ZohoDealsPayload {
   deal_id?: string | number;
   agent_name?: string;
   deal_name?: string;
-  amount?: string | number;
+  created_at?: string;
 }
 
 function safeJsonParse(text: string): { ok: true; value: unknown } | { ok: false; error: string } {
@@ -42,22 +47,19 @@ function parseFormUrlEncoded(text: string): Record<string, string> {
   return out;
 }
 
-function parseAmount(raw: string | number | undefined): number | null {
-  if (raw == null) return null;
-  if (typeof raw === "number") {
-    return Number.isFinite(raw) ? raw : null;
-  }
-  const s = String(raw).trim().replace(/,/g, "");
-  if (!s) return null;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : null;
+function toDbTimestamp(isoOrEmpty: string | null): string | null {
+  if (!isoOrEmpty || !isoOrEmpty.trim()) return null;
+  const normalized =
+    freshdeskTimestampToIsoUtcForDb(isoOrEmpty.trim()) ?? isoOrEmpty.trim();
+  const t = Date.parse(normalized);
+  return Number.isFinite(t) ? normalized : null;
 }
 
 function parsePayload(body: unknown): {
   dealId: string;
   agentName: string;
   dealName: string;
-  amount: number;
+  createdAt: string | null;
 } | null {
   if (body == null || typeof body !== "object") return null;
   const o = body as ZohoDealsPayload;
@@ -69,9 +71,9 @@ function parsePayload(body: unknown): {
   const agentName =
     typeof o.agent_name === "string" ? normalizeZohoAgentName(o.agent_name) : "";
   const dealName = typeof o.deal_name === "string" ? o.deal_name.trim() : "";
-  const amount = parseAmount(o.amount);
-  if (!dealId || !agentName || !dealName || amount == null) return null;
-  return { dealId, agentName, dealName, amount };
+  if (!dealId || !agentName || !dealName) return null;
+  const createdAt = typeof o.created_at === "string" ? toDbTimestamp(o.created_at) : null;
+  return { dealId, agentName, dealName, createdAt };
 }
 
 function recordedAtUtcForDb(): string {
@@ -150,36 +152,32 @@ export async function POST(req: NextRequest) {
       deal_id: b && typeof b === "object" ? b["deal_id"] : null,
       agent_name: b && typeof b === "object" ? b["agent_name"] : null,
       deal_name: b && typeof b === "object" ? b["deal_name"] : null,
-      amount: b && typeof b === "object" ? b["amount"] : null,
     });
     return NextResponse.json(
       {
         error:
-          "Missing or invalid fields: deal_id, agent_name, deal_name, and amount are required",
+          "Missing or invalid fields: deal_id, agent_name, and deal_name are required",
       },
       { status: 400 },
     );
   }
 
-  const { dealId, agentName, dealName, amount } = parsed;
-  const recordedAt = recordedAtUtcForDb();
+  const { dealId, agentName, dealName, createdAt } = parsed;
+  const createdAtFinal = createdAt ?? recordedAtUtcForDb();
 
-  console.log("[zoho-deals webhook] insert conversion", {
+  console.log("[zoho-deals webhook] insert deal", {
     requestId,
     dealId,
     agentName,
     dealName,
-    amount,
   });
 
   try {
-    const { error: insErr } = await db.from("onboarding_conversion_ledger").insert({
+    const { error: insErr } = await db.from("deals").insert({
       deal_id: dealId,
-      client_name: dealName,
-      amount,
+      deal_name: dealName,
       agent_name: agentName,
-      queendom_name: "",
-      recorded_at: recordedAt,
+      created_at: createdAtFinal,
     });
 
     if (insErr) {

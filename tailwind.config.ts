@@ -67,7 +67,7 @@ const config: Config = {
         cinzel: ["var(--font-cinzel)", "Cinzel", "serif"],
         playfair: ["var(--font-playfair)", "serif"],
         inter: ["var(--font-inter)", "sans-serif"],
-        edu: ["var(--font-edu)", "'Edu AU VIC WA NT Hand Arrows'", "cursive"],
+        edu: ["var(--font-edu)", "Oswald", "sans-serif"],
         baskerville: ["var(--font-libre-baskerville)", "serif"],
         montserrat: ["var(--font-montserrat)", "Montserrat", "sans-serif"],
       },

@@ -11,90 +11,94 @@
   --font-cinzel: "Cinzel", serif;
 
   /* ── Surfaces ──────────────────────────────────────────────────────────── */
-  --bg-obsidian:          #050507;
-  --obsidian:             #050505; /* legacy alias */
-  --surface-glass:        rgba(10, 10, 10, 0.85);
-  --surface-card:         rgba(10, 10, 10, 0.92);
-  --surface-elevated:     rgba(15, 15, 20, 0.85);
-  --surface-inset:        rgba(0, 0, 0, 0.50);
-  --surface-joker:        linear-gradient(135deg, rgba(212,175,55,0.06) 0%, rgba(249,226,126,0.03) 100%);
+  --bg-obsidian: #050507;
+  --obsidian: #050505; /* legacy alias */
+  --surface-glass: rgba(10, 10, 10, 0.85);
+  --surface-card: rgba(10, 10, 10, 0.92);
+  --surface-elevated: rgba(15, 15, 20, 0.85);
+  --surface-inset: rgba(0, 0, 0, 0.5);
+  --surface-joker: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.06) 0%,
+    rgba(249, 226, 126, 0.03) 100%
+  );
 
   /* ── Gold spectrum ─────────────────────────────────────────────────────── */
-  --gold-primary:         #d4af37; /* = gold-400 in Tailwind */
-  --gold-bright:          #f9e27e; /* = liquid-gold-end */
-  --gold-accent:          #c9a84c; /* SVG strokes, inline rgba(201,168,76) */
-  --liquid-gold-start:    #d4af37; /* legacy */
-  --liquid-gold-end:      #f9e27e; /* legacy */
-  --gold-border:          rgba(212, 175, 55, 0.20); /* legacy */
+  --gold-primary: #d4af37; /* = gold-400 in Tailwind */
+  --gold-bright: #f9e27e; /* = liquid-gold-end */
+  --gold-accent: #c9a84c; /* SVG strokes, inline rgba(201,168,76) */
+  --liquid-gold-start: #d4af37; /* legacy */
+  --liquid-gold-end: #f9e27e; /* legacy */
+  --gold-border: rgba(212, 175, 55, 0.2); /* legacy */
 
   /* ── Border opacities (ready-to-use rgba values) ───────────────────────── */
-  --border-gold-dim:      rgba(212, 175, 55, 0.08);
-  --border-gold-subtle:   rgba(212, 175, 55, 0.15);
-  --border-gold-mid:      rgba(212, 175, 55, 0.25);
-  --border-gold-bright:   rgba(212, 175, 55, 0.55);
-  --border-subtle:        rgba(255, 255, 255, 0.06);
+  --border-gold-dim: rgba(212, 175, 55, 0.08);
+  --border-gold-subtle: rgba(212, 175, 55, 0.15);
+  --border-gold-mid: rgba(212, 175, 55, 0.25);
+  --border-gold-bright: rgba(212, 175, 55, 0.55);
+  --border-subtle: rgba(255, 255, 255, 0.06);
 
   /* ── Gold glow shadows ─────────────────────────────────────────────────── */
-  --shadow-gold-sm:       0 0 12px rgba(212, 175, 55, 0.35);
-  --shadow-gold-md:       0 0 28px rgba(212, 175, 55, 0.22);
-  --shadow-gold-lg:       0 0 48px rgba(212, 175, 55, 0.16);
+  --shadow-gold-sm: 0 0 12px rgba(212, 175, 55, 0.35);
+  --shadow-gold-md: 0 0 28px rgba(212, 175, 55, 0.22);
+  --shadow-gold-lg: 0 0 48px rgba(212, 175, 55, 0.16);
 
   /* ── Status accent colors ──────────────────────────────────────────────── */
-  --color-emerald:        #34d399;
-  --color-emerald-dim:    rgba(52, 211, 153, 0.20);
-  --color-emerald-glow:   rgba(52, 211, 153, 0.28);
-  --color-red:            #f87171;
-  --color-red-overdue:    #ff0000;
-  --color-amber:          #fcd34d;
-  --color-sky:            #7dd3fc;
-  --color-champagne:      #f5e6c8;
+  --color-emerald: #34d399;
+  --color-emerald-dim: rgba(52, 211, 153, 0.2);
+  --color-emerald-glow: rgba(52, 211, 153, 0.28);
+  --color-red: #f87171;
+  --color-red-overdue: #ff0000;
+  --color-amber: #fcd34d;
+  --color-sky: #7dd3fc;
+  --color-champagne: #f5e6c8;
 
   /* ── Typography scale ──────────────────────────────────────────────────── */
   /* Counter hero (giant scoreboard numbers) */
-  --text-counter-hero:    clamp(4.5rem, 9vw, 9rem);
-  --text-counter-xl:      clamp(2.3rem, 3.7vw, 4.7rem);
-  --text-counter-lg:      clamp(2rem, 3.1vw, 4.1rem);
-  --text-counter-md:      clamp(1.65rem, 2.175vw, 2.7rem);
+  --text-counter-hero: clamp(4.5rem, 9vw, 9rem);
+  --text-counter-xl: clamp(2.3rem, 3.7vw, 4.7rem);
+  --text-counter-lg: clamp(2rem, 3.1vw, 4.1rem);
+  --text-counter-md: clamp(1.65rem, 2.175vw, 2.7rem);
 
   /* Headings / names */
-  --text-heading-xl:      clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem);
-  --text-heading-lg:      clamp(1.65rem, min(3.85vmin, 4.9vh), 3.85rem);
-  --text-heading-md:      clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem);
+  --text-heading-xl: clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem);
+  --text-heading-lg: clamp(1.65rem, min(3.85vmin, 4.9vh), 3.85rem);
+  --text-heading-md: clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem);
 
   /* Labels */
-  --text-label-xl:        clamp(1.35rem, 2.7vw, 3.9rem);   /* metric box labels */
-  --text-label-lg:        clamp(1.05rem, 1.4vw, 1.6rem);   /* column headers */
-  --text-label-md:        clamp(0.875rem, 1.2vw, 1.25rem);
+  --text-label-xl: clamp(1.35rem, 2.7vw, 3.9rem); /* metric box labels */
+  --text-label-lg: clamp(1.05rem, 1.4vw, 1.6rem); /* column headers */
+  --text-label-md: clamp(0.875rem, 1.2vw, 1.25rem);
 
   /* Onboarding-specific scale (vmin/vh compound) */
-  --text-ob-page-title:   clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem);
+  --text-ob-page-title: clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem);
   --text-ob-ledger-title: clamp(1.65rem, min(3.85vmin, 4.9vh), 3.85rem);
-  --text-ob-agent-name:   clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem);
-  --text-ob-card-title:   clamp(1.15rem, min(2.85vmin, 3.3vh), 3.85rem);
+  --text-ob-agent-name: clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem);
+  --text-ob-card-title: clamp(1.15rem, min(2.85vmin, 3.3vh), 3.85rem);
   --text-ob-metric-value: clamp(1.5rem, min(4.4vmin, 5.2vh), 5.75rem);
-  --text-ob-metric-sub:   clamp(1.25rem, min(3.5vmin, 3.95vh), 2.45rem);
-  --text-ob-ledger-hdr:   clamp(1.05rem, min(2.35vmin, 2.85vh), 2.05rem);
-  --text-ob-ledger-cell:  clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem);
+  --text-ob-metric-sub: clamp(1.25rem, min(3.5vmin, 3.95vh), 2.45rem);
+  --text-ob-ledger-hdr: clamp(1.05rem, min(2.35vmin, 2.85vh), 2.05rem);
+  --text-ob-ledger-cell: clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem);
 
   /* Finance widget */
-  --text-fin-cell:        clamp(1.725rem, min(3.975vmin, 4.875vh), 5.25rem);
+  --text-fin-cell: clamp(1.725rem, min(3.975vmin, 4.875vh), 5.25rem);
 
   /* ── Spacing scale ─────────────────────────────────────────────────────── */
-  --pad-panel:            clamp(12px, 3vw, 40px);
-  --pad-card:             clamp(10px, 2vw, 28px);
-  --pad-cell:             clamp(6px, 0.8vw, 14px);
-  --gap-card:             clamp(0.65rem, min(1.4vmin, 1.8vh), 2rem);
+  --pad-panel: clamp(12px, 3vw, 40px);
+  --pad-card: clamp(10px, 2vw, 28px);
+  --pad-cell: clamp(6px, 0.8vw, 14px);
+  --gap-card: clamp(0.65rem, min(1.4vmin, 1.8vh), 2rem);
 
   /* ── Radii ─────────────────────────────────────────────────────────────── */
-  --radius-card:          1rem;    /* 16px */
-  --radius-panel:         1.5rem;  /* 24px */
-  --radius-pill:          9999px;
+  --radius-card: 1rem; /* 16px */
+  --radius-panel: 1.5rem; /* 24px */
+  --radius-pill: 9999px;
 
   /* ── Animation timing ──────────────────────────────────────────────────── */
-  --duration-crossfade:   1.5s;
-  --duration-counter:     0.7s;
-  --duration-row:         0.55s;
-  --ease-luxury:          cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duration-crossfade: 1.5s;
+  --duration-counter: 0.7s;
+  --duration-row: 0.55s;
+  --ease-luxury: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 html,
@@ -156,6 +160,15 @@ body::before {
       0 0 20px rgba(212, 175, 55, 0.75),
       0 0 50px rgba(212, 175, 55, 0.4),
       0 0 100px rgba(212, 175, 55, 0.18),
+      0 2px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Shop department heading — mirrors queen-name-glow in sky / --color-sky tone */
+  .sky-name-glow {
+    text-shadow:
+      0 0 20px rgba(125, 211, 252, 0.75),
+      0 0 50px rgba(125, 211, 252, 0.4),
+      0 0 100px rgba(125, 211, 252, 0.18),
       0 2px 4px rgba(0, 0, 0, 0.6);
   }
 
@@ -439,11 +452,11 @@ body::before {
   .skeleton-block {
     background: linear-gradient(
       90deg,
-      var(--surface-card)         0%,
-      var(--surface-elevated)     35%,
-      rgba(212, 175, 55, 0.06)   50%,
-      var(--surface-elevated)     65%,
-      var(--surface-card)         100%
+      var(--surface-card) 0%,
+      var(--surface-elevated) 35%,
+      rgba(212, 175, 55, 0.06) 50%,
+      var(--surface-elevated) 65%,
+      var(--surface-card) 100%
     );
     background-size: 400% 100%;
     animation: foil-shimmer 2.4s ease-in-out infinite;
@@ -461,25 +474,84 @@ body::before {
   }
 }
 
-/* OnboardingPanel — ledger vertical marquee (duplicate rows + translate -50%) */
-@keyframes onboarding-ledger-scroll {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
+/*
+ * OnboardingPanel — ledger scroll is now driven by a requestAnimationFrame
+ * loop in ConversionLedger.tsx (pixel-based translateY, not CSS @keyframes).
+ * The CSS class and keyframe below are intentionally removed to avoid
+ * animation conflicts. The track element uses will-change:transform inline.
+ */
+
+/* ── Hot Leads Radar — pulsing glow on the freshest card ────────────────────── */
+/*
+ * GPU-composited: animates opacity only (no box-shadow, no paint per frame).
+ * The visible glow comes from static border + box-shadow on the element itself;
+ * we fade the entire overlay in/out, keeping compositor off the repaint path.
+ */
+@keyframes hot-pulse {
+  0%,
   100% {
-    transform: translate3d(0, -50%, 0);
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
-.onboarding-ledger-track {
-  animation: onboarding-ledger-scroll var(--onboarding-ledger-duration, 48s)
-    linear infinite;
-  will-change: transform;
+.hot-lead-card-pulse {
+  animation: hot-pulse 2.2s ease-in-out infinite;
+  will-change: opacity;
+  pointer-events: none;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: inherit;
+  box-shadow:
+    0 0 22px rgba(212, 175, 55, 0.4) inset,
+    0 0 40px rgba(212, 175, 55, 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .onboarding-ledger-track {
+  .hot-lead-card-pulse {
     animation: none;
+    opacity: 0.4;
+  }
+}
+
+/* Lead status health bar — empty-state pulse */
+@keyframes healthbar-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Health-bar gloss sweep — diagonal highlight stripe crossing the bar every cycle */
+@keyframes bar-gloss-sweep {
+  0% {
+    transform: translateX(-180%) skewX(-18deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(350%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+/* Health-bar outer glow breathe */
+@keyframes bar-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
@@ -500,4 +572,21 @@ body::before {
   animation: foil-shimmer 2s cubic-bezier(0.4, 0, 0.2, 1) 1;
   pointer-events: none;
   z-index: 15;
+}
+
+/* Onboarding agent card — live metric pulse */
+@keyframes ob-metric-pulse {
+  0% {
+    color: var(--ob-pulse-color, #d4af37);
+  }
+  60% {
+    color: var(--ob-pulse-color, #d4af37);
+  }
+  100% {
+    color: rgba(255, 255, 255, 0.92);
+  }
+}
+
+.ob-metric-flash {
+  animation: ob-metric-pulse 0.55s ease-out forwards;
 }
