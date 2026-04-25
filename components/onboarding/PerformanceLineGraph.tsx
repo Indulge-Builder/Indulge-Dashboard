@@ -119,7 +119,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
     const n = data.length; // total days in month (28-31)
     if (n === 0) {
       return {
-        verticals: {} as Record<VerticalKey, { d: string; area: string; term: Pt | null; topY: number }>,
+        verticals: {} as Record<VerticalKey, { d: string; area: string; term: Pt | null; topY: number; pts: Array<{ x: number; y: number; val: number }> }>,
         xLabels: [] as { x: number; label: string }[],
         isEmpty: true,
         maxVal: 0,
