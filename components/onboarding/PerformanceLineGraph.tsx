@@ -169,7 +169,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
     // X-axis: 5 evenly-spaced ticks (first, 3 midpoints, last)
     // Format: "M-D" e.g. "4-1", "4-15"
     const tickIndices = [0, Math.round(n / 4), Math.round(n / 2), Math.round((3 * n) / 4), n - 1];
-    const xLabels = [...new Set(tickIndices)].map((i) => {
+    const xLabels = Array.from(new Set(tickIndices)).map((i) => {
       const d = data[i]!;
       const parts = d.date.split("-");
       const month = parseInt(parts[1] ?? "1", 10);
