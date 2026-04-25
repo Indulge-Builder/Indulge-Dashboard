@@ -138,11 +138,13 @@ const CompactAgentCard = memo(function CompactAgentCard({
   return (
     <motion.div
       {...motionProps}
-      className="relative flex h-full min-h-0 w-full flex-row items-stretch overflow-hidden"
+      className="relative flex h-full min-h-0 w-full items-stretch overflow-hidden"
       style={{
+        flexDirection: isConcierge ? "row" : "row-reverse",
         background: "rgba(255,255,255,0.03)",
         borderTop: "1px solid rgba(255,255,255,0.07)",
-        borderRight: "1px solid rgba(255,255,255,0.07)",
+        borderLeft: isConcierge ? undefined : "1px solid rgba(255,255,255,0.07)",
+        borderRight: isConcierge ? "1px solid rgba(255,255,255,0.07)" : undefined,
         borderBottom: "1px solid rgba(255,255,255,0.07)",
         borderRadius: "clamp(6px, 0.7vmin, 10px)",
         ...gpuStyle,

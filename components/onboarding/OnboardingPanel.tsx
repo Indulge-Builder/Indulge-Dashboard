@@ -467,17 +467,7 @@ export default function OnboardingPanel() {
           leadStatusByAgent={leadStatusByAgent}
         />
 
-        {/* ── Column 2: Shop ── */}
-        <DepartmentColumn
-          department="shop"
-          label="Shop"
-          agents={shopAgents}
-          shimmerStampByAgentId={shimmerStampByAgentId}
-          prefersReducedMotion={prefersReducedMotion}
-          leadStatusByAgent={leadStatusByAgent}
-        />
-
-        {/* ── Column 3: Lead Velocity + Conversion Ledger ── */}
+        {/* ── Column 2: Performance Line Graph + Conversion Ledger ── */}
         <div
           className="flex min-h-0 flex-col"
           style={{ gap: "clamp(0.55rem,1.2vh,1.25rem)" }}
@@ -638,6 +628,16 @@ export default function OnboardingPanel() {
             />
           </div>
         </div>
+
+        {/* ── Column 3: Shop ── */}
+        <DepartmentColumn
+          department="shop"
+          label="Shop"
+          agents={shopAgents}
+          shimmerStampByAgentId={shimmerStampByAgentId}
+          prefersReducedMotion={prefersReducedMotion}
+          leadStatusByAgent={leadStatusByAgent}
+        />
       </div>
     </section>
   );
