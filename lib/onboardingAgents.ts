@@ -21,8 +21,8 @@ import type { Department } from "./onboardingTypes";
 
 export const CONCIERGE_AGENT_DISPLAY_NAMES = [
   "Amit",
-  "Samson",
   "Meghana",
+  "Samson",
   "Kaniisha",
 ] as const;
 
@@ -34,9 +34,9 @@ export const CONCIERGE_AGENT_CARDS: readonly {
   id: string;
   name: ConciergeAgentDisplayName;
 }[] = [
-  { id: "amit",    name: "Amit"    },
-  { id: "samson",  name: "Samson"  },
-  { id: "meghana", name: "Meghana" },
+  { id: "amit",     name: "Amit"     },
+  { id: "meghana",  name: "Meghana"  },
+  { id: "samson",   name: "Samson"   },
   { id: "kaniisha", name: "Kaniisha" },
 ] as const;
 
@@ -109,6 +109,7 @@ export const DEPARTMENT_BY_AGENT_KEY: Readonly<Record<string, Department>> = {
   amit:    "concierge",
   samson:  "concierge",
   meghana: "concierge",
+  aniisha: "concierge",
   kaniisha: "concierge",
   // Shop
   vikram:  "shop",

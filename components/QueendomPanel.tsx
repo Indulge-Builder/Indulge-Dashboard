@@ -22,18 +22,17 @@ interface QueendomPanelProps {
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 28 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
   },
 };
 
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.14, delayChildren: 0.2 },
+    transition: { staggerChildren: 0.09, delayChildren: 0.08 },
   },
 };
 

@@ -94,49 +94,13 @@ const BAR_H   = "clamp(44px, 5.2vh, 78px)";
 const RADIUS  = "clamp(7px, 0.85vh, 13px)";
 
 /* ── Gloss sweep — one animated white stripe per ~4 s ─────────────────────── */
-function GlossSweep({ reduced }: { reduced: boolean }) {
-  if (reduced) return null;
-  return (
-    <div
-      aria-hidden
-      style={{
-        position:  "absolute",
-        top:       0,
-        bottom:    0,
-        width:     "22%",
-        background:
-          "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%)",
-        animation: "bar-gloss-sweep 4s cubic-bezier(0.4,0,0.2,1) infinite 0.6s",
-        pointerEvents: "none",
-        zIndex:    4,
-      }}
-    />
-  );
+function GlossSweep(_props: { reduced: boolean }) {
+  return null;
 }
 
 /* ── Outer breathing glow ───────────────────────────────────────────────────── */
-function BreathingGlow({
-  reduced,
-  dominantGlow,
-}: {
-  reduced: boolean;
-  dominantGlow: string;
-}) {
-  if (reduced) return null;
-  return (
-    <div
-      aria-hidden
-      style={{
-        position:    "absolute",
-        inset:       0,
-        borderRadius: RADIUS,
-        boxShadow:   `0 0 18px 2px ${dominantGlow}`,
-        animation:   "bar-glow-breathe 2.8s ease-in-out infinite",
-        pointerEvents: "none",
-        zIndex:      0,
-      }}
-    />
-  );
+function BreathingGlow(_props: { reduced: boolean; dominantGlow: string }) {
+  return null;
 }
 
 function LeadStatusHealthBar_({
@@ -342,7 +306,7 @@ function LeadStatusHealthBar_({
                 padding:
                   "clamp(8px, 1vh, 14px) clamp(6px, 0.75vmin, 12px)",
                 borderRadius: "clamp(6px, 0.75vmin, 11px)",
-                background:   `color-mix(in srgb, ${cfg.flat} 8%, transparent)`,
+                background:   "#101722",
                 border:       `1px solid color-mix(in srgb, ${cfg.flat} 28%, transparent)`,
                 gap:          "clamp(5px, 0.45vmin, 8px)",
               }}

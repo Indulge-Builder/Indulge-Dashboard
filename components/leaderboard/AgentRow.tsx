@@ -130,8 +130,13 @@ export const AgentRow = memo(function AgentRow({
   );
   const hasOverdue = overdue > 0;
 
+  // Suppress surges during the first 1.5 s after mount so the initial WebSocket
+  // data population (0 → N) never triggers the flash on the opening animation.
+  const mountTimeRef = useRef(Date.now());
+
   // Trigger surge flash when today-score or pending count increases
   useEffect(() => {
+    if (Date.now() - mountTimeRef.current < 1500) return;
     const todayIncreased   = prevToday   !== undefined && today   > prevToday;
     const pendingIncreased = prevPending !== undefined && pending > prevPending;
     if (todayIncreased || pendingIncreased) setSurgeKey((n) => n + 1);
@@ -210,12 +215,12 @@ export const AgentRow = memo(function AgentRow({
       <div
         className={`grid ${GRID_COLS} items-center gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 py-[1vh] sm:py-[1.2vh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
       >
-        {/* Col 1: Icon — animates scale pulse on surge */}
+        {/* Col 1: Icon — subtle scale pulse on surge, never distorting */}
         <motion.div
           className="ml-2 sm:ml-3 lg:ml-4"
           style={gpuStyle}
-          animate={surgeKey > 0 ? { scale: [1, 4, 1], opacity: [1, 1, 1] } : { scale: 1, opacity: 1 }}
-          transition={{ duration: 0.75, ease: "easeOut" }}
+          animate={surgeKey > 0 ? { scale: [1, 1.14, 1], opacity: [1, 0.88, 1] } : { scale: 1, opacity: 1 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
         >
           <AgentIcon
             name={agent.name}
@@ -225,12 +230,12 @@ export const AgentRow = memo(function AgentRow({
           />
         </motion.div>
 
-        {/* Col 2: Agent name — same pulse as icon */}
+        {/* Col 2: Agent name — opacity dip on surge; row-level gold burst carries the drama */}
         <motion.p
           className="min-w-0 font-baskerville font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
           style={gpuStyle}
-          animate={surgeKey > 0 ? { scale: [1, 4, 1], opacity: [1, 1, 1] } : { scale: 1, opacity: 1 }}
-          transition={{ duration: 0.75, ease: "easeOut" }}
+          animate={surgeKey > 0 ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
+          transition={{ duration: 0.55, ease: "easeOut" }}
         >
           {agent.name}
         </motion.p>

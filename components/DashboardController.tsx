@@ -50,8 +50,8 @@ function isFreezeToggleKey(e: KeyboardEvent): boolean {
 }
 
 // Shared exit transition for skeleton overlays — matches the cinematic 1.5s
-// fade used between screens, but slightly snappier for the initial data reveal.
-const skeletonExitTransition = { duration: 0.9, ease: "easeInOut" as const };
+// Corporate fade — skeleton dissolves smoothly without fighting the content entrance.
+const skeletonExitTransition = { duration: 0.7, ease: [0.4, 0, 0.2, 1] as const };
 
 export default function DashboardController({
   className,

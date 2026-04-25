@@ -43,22 +43,21 @@ export default function AnimatedCounter({
   // Rolling digit / vertical slide: AnimatePresence wrapper when slideOnChange
   if (slideOnChange) {
     const slideDir = value > prevValueRef.current ? "up" : "down"
+    // On first render keep it a pure opacity fade — no y movement avoids
+    // the jarring "all numbers slide in simultaneously" effect on TV screens.
+    const isFirst = isFirstRender.current
+    const yIn  = isFirst ? 0 : (slideDir === "up" ? 10 : -10)
+    const yOut = isFirst ? 0 : (slideDir === "up" ? -10 : 10)
     return (
       <span className="relative inline-block overflow-hidden tabular-nums align-baseline">
         <AnimatePresence mode="wait">
           <motion.span
             key={value}
             className={className}
-            initial={{
-              y: slideDir === "up" ? 28 : -28,
-              opacity: 0,
-            }}
+            initial={{ y: yIn, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{
-              y: slideDir === "up" ? -28 : 28,
-              opacity: 0,
-            }}
-            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            exit={{ y: yOut, opacity: 0 }}
+            transition={{ duration: isFirst ? 0.5 : 0.35, ease: [0.4, 0, 0.2, 1] }}
           >
             {value.toLocaleString("en-IN")}
           </motion.span>

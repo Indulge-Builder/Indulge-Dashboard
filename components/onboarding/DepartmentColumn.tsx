@@ -28,7 +28,7 @@ interface DeptAccent {
 
 // font sizes intentionally omitted — applied via cqh inline styles inside the card
 const METRIC_BOX_BASE =
-  "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-xl border bg-black/30";
+  "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-xl border bg-[#101722]";
 const METRIC_LABEL_CLASS =
   "font-inter shrink-0 font-semibold uppercase leading-none tracking-[0.25em]";
 const METRIC_VALUE_CLASS =
@@ -70,6 +70,201 @@ const ACCENTS: Record<Department, DeptAccent> = {
     chipBgToday: "rgba(125,211,252,0.06)",
   },
 };
+
+// -- AgentCardContent ---------------------------------------------------------
+
+interface AgentCardContentProps {
+  agent: OnboardingAgentRow;
+  isConcierge: boolean;
+  accent: DeptAccent;
+  metricTileBorder: string;
+  leadsMonth: number;
+  closedCount: number;
+  staggerDelay: number;
+  slide: boolean;
+  monthPulse: boolean;
+  todayPulse: boolean;
+  closedPulse: boolean;
+  leadStatus: AgentLeadStatusBreakdown;
+}
+
+function AgentCardContent({
+  agent,
+  isConcierge,
+  accent,
+  metricTileBorder,
+  leadsMonth,
+  closedCount,
+  staggerDelay,
+  slide,
+  monthPulse,
+  todayPulse,
+  closedPulse,
+  leadStatus,
+}: AgentCardContentProps) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        minWidth: 0,
+        minHeight: 0,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "stretch",
+        padding: "2.5cqh 2cqw",
+        gap: "0.6cqh",
+        border: "1px solid rgba(255,255,255,0.14)",
+      }}
+    >
+      {/* Top zone: name */}
+      <div style={{ flexShrink: 0 }}>
+        <div
+          className={`w-full min-w-0 truncate text-center font-cinzel font-bold uppercase leading-none tracking-[0.28em] ${
+            isConcierge
+              ? "text-gold-400 queen-name-glow"
+              : "text-sky-200 sky-name-glow"
+          }`}
+          style={{
+            fontSize:     "clamp(0.6rem, 8cqh, 3.2rem)",
+            background:   "#0f1520",
+            border:       "1px solid rgba(255,255,255,0.14)",
+            borderRadius: "clamp(5px, 0.6vmin, 8px)",
+            padding:      "1cqh 2cqw",
+            boxShadow:    "none",
+          }}
+        >
+          {agent.name.trim()}
+        </div>
+
+        <div
+          style={{
+            height: "1px",
+            marginTop: "0.6cqh",
+            flexShrink: 0,
+            background: `linear-gradient(to right, ${accent.color}70, transparent 75%)`,
+          }}
+        />
+      </div>
+
+      {/* Middle zone: score cards */}
+      <div style={{ flex: "0 0 auto", minHeight: 0, display: "flex", alignItems: "stretch" }}>
+        <div
+          className="flex w-full min-w-0 flex-row items-stretch"
+          style={{ minHeight: 0 }}
+        >
+        {/* Leads (This Month) */}
+        <div
+          className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
+          style={{ padding: "2cqh 1cqw" }}
+        >
+          <span
+            className={`${METRIC_LABEL_CLASS} ${
+              isConcierge ? "text-champagne" : "text-sky-200"
+            }`}
+            style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+          >
+            Leads <br /> (This Month)
+          </span>
+          <span
+            className={`${METRIC_VALUE_CLASS} ${
+              isConcierge ? "text-champagne" : "text-sky-200"
+            } ${monthPulse ? "ob-metric-flash" : ""}`}
+            style={{
+              fontSize: "clamp(1rem, 14cqh, 5.5rem)",
+              ["--ob-pulse-color" as string]: accent.color,
+            } as CSSProperties}
+          >
+            <AnimatedCounter
+              value={leadsMonth}
+              delay={staggerDelay}
+              slideOnChange={slide}
+              className="text-current"
+            />
+          </span>
+        </div>
+
+        {/* Leads (Today) */}
+        <div
+          className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
+          style={{ padding: "2cqh 1cqw" }}
+        >
+          <span
+            className={`${METRIC_LABEL_CLASS} tracking-[0.22em] text-emerald-300`}
+            style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+          >
+            Leads <br /> (Today)
+          </span>
+          <span
+            className={`${METRIC_VALUE_CLASS} text-emerald-400 emerald-glow-hero ${
+              todayPulse ? "ob-metric-flash" : ""
+            }`}
+            style={{
+              fontSize: "clamp(1rem, 14cqh, 5.5rem)",
+              ["--ob-pulse-color" as string]: accent.color,
+            } as CSSProperties}
+          >
+            <AnimatedCounter
+              value={agent.leadsAttendToday}
+              delay={staggerDelay + 110}
+              slideOnChange={slide}
+              className="text-current"
+            />
+          </span>
+        </div>
+
+        {/* Closures (This Month) */}
+        <div
+          className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
+          style={{ padding: "2cqh 1cqw" }}
+        >
+          <span
+            className={`${METRIC_LABEL_CLASS} ${
+              isConcierge ? "text-champagne" : "text-sky-200"
+            }`}
+            style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+          >
+            Closures <br /> (This Month)
+          </span>
+          <span
+            className={`${METRIC_VALUE_CLASS} ${
+              isConcierge
+                ? "text-gold-300 gold-glow"
+                : "text-sky-100 sky-name-glow"
+            } ${closedPulse ? "ob-metric-flash" : ""}`}
+            style={{
+              fontSize: "clamp(1rem, 14cqh, 5.5rem)",
+              ["--ob-pulse-color" as string]: accent.color,
+            } as CSSProperties}
+          >
+            <AnimatedCounter
+              value={closedCount}
+              delay={staggerDelay + 220}
+              slideOnChange={slide}
+              className="text-current"
+            />
+          </span>
+        </div>
+      </div>
+      </div>
+
+      {/* Bottom zone: pipeline */}
+      <div style={{ flexShrink: 0 }}>
+        <div
+          style={{
+            height: "1px",
+            marginBottom: "0.25cqh",
+            background: `linear-gradient(to right, ${accent.color}30, transparent 80%)`,
+          }}
+        />
+        <LeadStatusHealthBar breakdown={leadStatus} />
+      </div>
+    </div>
+  );
+}
+
+// -- CompactAgentCard ---------------------------------------------------------
 
 interface CompactAgentCardProps {
   agent: OnboardingAgentRow;
@@ -127,35 +322,33 @@ const CompactAgentCard = memo(function CompactAgentCard({
   const motionProps = prefersReducedMotion
     ? { initial: {}, animate: {}, transition: { duration: 0 } }
     : {
-        initial: { opacity: 0, y: 8 },
-        animate: { opacity: 1, y: 0 },
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
         transition: {
-          duration: 0.5,
-          ease: [0.16, 1, 0.32, 1] as const,
-          delay: index * 0.06,
+          duration: 0.55,
+          ease: [0.4, 0, 0.2, 1] as const,
+          delay: index * 0.07,
+          layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
         },
       };
 
   return (
     <motion.div
       {...motionProps}
+      layout={!prefersReducedMotion}
       className="relative flex h-full min-h-0 w-full items-stretch overflow-hidden"
       style={{
         flexDirection: isConcierge ? "row" : "row-reverse",
-        background: "rgba(255,255,255,0.03)",
-        borderTop: "1px solid rgba(255,255,255,0.07)",
-        borderLeft: isConcierge ? undefined : "1px solid rgba(255,255,255,0.07)",
-        borderRight: isConcierge ? "1px solid rgba(255,255,255,0.07)" : undefined,
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        background: "#0b0f17",
+        borderTop: "1px solid rgba(255,255,255,0.14)",
+        borderLeft: isConcierge ? undefined : "1px solid rgba(255,255,255,0.14)",
+        borderRight: isConcierge ? "1px solid rgba(255,255,255,0.14)" : undefined,
+        borderBottom: "1px solid rgba(255,255,255,0.14)",
         borderRadius: "clamp(6px, 0.7vmin, 10px)",
         containerType: "size",
         ...gpuStyle,
       }}
     >
-      {shimmerStamp > 0 && (
-        <div key={shimmerStamp} className="card-win-shimmer" aria-hidden />
-      )}
-
       {/* Portrait (40%) */}
       <div
         style={{
@@ -179,160 +372,21 @@ const CompactAgentCard = memo(function CompactAgentCard({
         />
       </div>
 
-      {/* Right 60% — scales with card height via cqh units */}
-      <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          minHeight: 0,
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "stretch",
-          padding: "4cqh 3cqw 4cqh 2.5cqw",
-          gap: "2cqh",
-        }}
-      >
-        {/* Name */}
-        <div
-          className={`w-full min-w-0 truncate text-center font-cinzel font-bold uppercase leading-none tracking-[0.28em] ${
-            isConcierge
-              ? "text-gold-400 queen-name-glow"
-              : "text-sky-200 sky-name-glow"
-          }`}
-          style={{
-            fontSize:     "clamp(0.6rem, 9cqh, 3.5rem)",
-            background:   accent.glassBg,
-            border:       `1px solid ${accent.glassBorder}`,
-            borderRadius: "clamp(5px, 0.6vmin, 8px)",
-            padding:      "1.5cqh 3cqw",
-            boxShadow:    "inset 0 1px 0 rgba(255,255,255,0.05)",
-          }}
-        >
-          {agent.name.trim()}
-        </div>
-
-        {/* Rule under name */}
-        <div
-          style={{
-            height: "1px",
-            flexShrink: 0,
-            background: `linear-gradient(to right, ${accent.color}70, transparent 75%)`,
-          }}
-        />
-
-        {/* 3 metric tiles — flex-1 so they fill remaining space */}
-        <div
-          className="flex w-full min-w-0 flex-row items-stretch"
-          style={{ flex: "1 1 0", minHeight: 0, gap: "1.5cqw" }}
-        >
-          {/* Leads (This Month) */}
-          <div
-            className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
-            style={{ padding: "2cqh 1cqw" }}
-          >
-            <span
-              className={`${METRIC_LABEL_CLASS} ${
-                isConcierge ? "text-champagne" : "text-sky-200"
-              }`}
-              style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: "0.8cqh" }}
-            >
-              Leads <br /> (This Month)
-            </span>
-            <span
-              className={`${METRIC_VALUE_CLASS} ${
-                isConcierge ? "text-champagne" : "text-sky-200"
-              } ${monthPulse ? "ob-metric-flash" : ""}`}
-              style={{
-                fontSize: "clamp(1rem, 14cqh, 5.5rem)",
-                ["--ob-pulse-color" as string]: accent.color,
-              } as CSSProperties}
-            >
-              <AnimatedCounter
-                value={leadsMonth}
-                delay={staggerDelay}
-                slideOnChange={slide}
-                className="text-current"
-              />
-            </span>
-          </div>
-
-          {/* Leads (Today) */}
-          <div
-            className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
-            style={{ padding: "2cqh 1cqw" }}
-          >
-            <span
-              className={`${METRIC_LABEL_CLASS} tracking-[0.22em] text-emerald-300`}
-              style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: "0.8cqh" }}
-            >
-              Leads <br /> (Today)
-            </span>
-            <span
-              className={`${METRIC_VALUE_CLASS} text-emerald-400 emerald-glow-hero ${
-                todayPulse ? "ob-metric-flash" : ""
-              }`}
-              style={{
-                fontSize: "clamp(1rem, 14cqh, 5.5rem)",
-                ["--ob-pulse-color" as string]: accent.color,
-              } as CSSProperties}
-            >
-              <AnimatedCounter
-                value={agent.leadsAttendToday}
-                delay={staggerDelay + 110}
-                slideOnChange={slide}
-                className="text-current"
-              />
-            </span>
-          </div>
-
-          {/* Closures (This Month) */}
-          <div
-            className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
-            style={{ padding: "2cqh 1cqw" }}
-          >
-            <span
-              className={`${METRIC_LABEL_CLASS} ${
-                isConcierge ? "text-champagne" : "text-sky-200"
-              }`}
-              style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: "0.8cqh" }}
-            >
-              Closures <br /> (This Month)
-            </span>
-            <span
-              className={`${METRIC_VALUE_CLASS} ${
-                isConcierge
-                  ? "text-gold-300 gold-glow"
-                  : "text-sky-100 sky-name-glow"
-              } ${closedPulse ? "ob-metric-flash" : ""}`}
-              style={{
-                fontSize: "clamp(1rem, 14cqh, 5.5rem)",
-                ["--ob-pulse-color" as string]: accent.color,
-              } as CSSProperties}
-            >
-              <AnimatedCounter
-                value={closedCount}
-                delay={staggerDelay + 220}
-                slideOnChange={slide}
-                className="text-current"
-              />
-            </span>
-          </div>
-        </div>
-
-        {/* Rule above pipeline */}
-        <div
-          style={{
-            height: "1px",
-            flexShrink: 0,
-            background: `linear-gradient(to right, ${accent.color}30, transparent 80%)`,
-          }}
-        />
-
-        {/* Pipeline health bar */}
-        <LeadStatusHealthBar breakdown={leadStatus} />
-      </div>
+      {/* Data panel (60%) */}
+      <AgentCardContent
+        agent={agent}
+        isConcierge={isConcierge}
+        accent={accent}
+        metricTileBorder={metricTileBorder}
+        leadsMonth={leadsMonth}
+        closedCount={closedCount}
+        staggerDelay={staggerDelay}
+        slide={slide}
+        monthPulse={monthPulse}
+        todayPulse={todayPulse}
+        closedPulse={closedPulse}
+        leadStatus={leadStatus}
+      />
     </motion.div>
   );
 });
@@ -362,24 +416,15 @@ export function DepartmentColumn({
     <div className="flex h-full min-h-0 flex-col">
       {/* Glass card */}
       <div
-        className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl"
+        className="relative flex min-h-0 flex-1 flex-col rounded-2xl"
         style={{
-          border: `1px solid ${accent.glassBorder}`,
-          background: "rgba(10,10,10,0.88)",
-          boxShadow:
-            "0 0 0 1px rgba(255,255,255,0.03) inset, 0 20px 48px rgba(0,0,0,0.5)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          background: "#0a0f18",
+          boxShadow: "none",
           padding: "clamp(0.45rem,0.9vmin,1rem)",
           gap: "clamp(0.2rem,0.4vmin,0.5rem)",
         }}
       >
-        {/* Gradient sheen */}
-        <div
-          className="pointer-events-none absolute inset-0 rounded-2xl"
-          style={{
-            background: `linear-gradient(135deg, ${accent.glassBg} 0%, transparent 55%)`,
-          }}
-        />
-
         {/* Department header — inside the card */}
         <div
           className="relative flex flex-shrink-0 flex-col"

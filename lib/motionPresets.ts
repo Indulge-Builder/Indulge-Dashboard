@@ -101,23 +101,28 @@ export function widgetFadeIn(delayMs = 0) {
  * Row entrance variant for AgentLeaderboard.
  * Uses `custom` prop for per-row delay (seconds).
  *
+ * TV-grade: only animates `opacity` and `y` (compositor-only, no layout/paint).
+ * Each row fades up 18 px with 50 ms stagger — data arriving with confidence,
+ * never a stretch or clip.
+ *
  * @example
  *   <motion.div variants={rowVariants} custom={rowDelay} initial="hidden" animate="visible" exit="exit" />
  */
 export const rowVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
+  hidden: { opacity: 0, y: 18 },
   visible: (delay: number) => ({
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.55,
+      duration: 0.6,
       ease: EASE_LUXURY,
       delay,
     },
   }),
   exit: {
     opacity: 0,
-    transition: { duration: 0.25 },
+    y: -6,
+    transition: { duration: 0.3, ease: [0.4, 0, 1, 1] },
   },
 };
 
