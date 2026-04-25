@@ -482,19 +482,19 @@ export default function OnboardingPanel() {
             className="relative flex min-h-0 flex-[2] flex-col overflow-hidden rounded-2xl"
             style={{
               background: "rgba(10,10,10,0.88)",
-              border:     "1px solid rgba(107,143,255,0.18)",
+              border:     "1px solid rgba(255,255,255,0.14)",
               boxShadow:
                 "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
               padding: "clamp(0.45rem,0.9vmin,1rem)",
               gap:     "clamp(0.2rem,0.4vmin,0.5rem)",
             }}
           >
-            {/* Ambient bi-tonal sheen — faint blue left, faint gold right */}
+            {/* Ambient gold sheen */}
             <div
               className="pointer-events-none absolute inset-0 rounded-2xl"
               style={{
                 background:
-                  "linear-gradient(135deg, rgba(107,143,255,0.022) 0%, transparent 45%, rgba(255,176,32,0.018) 100%)",
+                  "linear-gradient(135deg, transparent 45%, rgba(255,176,32,0.018) 100%)",
               }}
             />
 

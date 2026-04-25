@@ -128,7 +128,7 @@ function AgentCardContent({
           }`}
           style={{
             fontSize:     "clamp(0.6rem, 8cqh, 3.2rem)",
-            background:   "#0f1520",
+            background:   "#0f0f0f",
             border:       "1px solid rgba(255,255,255,0.14)",
             borderRadius: "clamp(5px, 0.6vmin, 8px)",
             padding:      "1cqh 2cqw",
@@ -339,7 +339,7 @@ const CompactAgentCard = memo(function CompactAgentCard({
       className="relative flex h-full min-h-0 w-full items-stretch overflow-hidden"
       style={{
         flexDirection: isConcierge ? "row" : "row-reverse",
-        background: "#0b0f17",
+        background: "#0b0b0b",
         borderTop: "1px solid rgba(255,255,255,0.14)",
         borderLeft: isConcierge ? undefined : "1px solid rgba(255,255,255,0.14)",
         borderRight: isConcierge ? "1px solid rgba(255,255,255,0.14)" : undefined,
@@ -419,7 +419,7 @@ export function DepartmentColumn({
         className="relative flex min-h-0 flex-1 flex-col rounded-2xl"
         style={{
           border: "1px solid rgba(255,255,255,0.14)",
-          background: "#0a0f18",
+          background: "#0a0a0a",
           boxShadow: "none",
           padding: "clamp(0.45rem,0.9vmin,1rem)",
           gap: "clamp(0.2rem,0.4vmin,0.5rem)",
