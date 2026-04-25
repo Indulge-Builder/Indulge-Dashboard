@@ -134,7 +134,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                       aria-hidden
                     />
                   )}
-                  <span className="font-baskerville font-semibold text-[clamp(1.4rem,2.45vw,1.95rem)] text-champagne/90 truncate text-center leading-tight">
+                  <span className="font-baskerville font-semibold text-[clamp(1.4rem,2.45vw,2.4rem)] text-champagne/90 truncate text-center leading-tight">
                     {item.clientName}
                   </span>
                 </div>

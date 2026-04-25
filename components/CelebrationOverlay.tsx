@@ -277,4 +277,5 @@ function CelebrationOverlayInner({
 }
 
 const CelebrationOverlay = memo(CelebrationOverlayInner);
+CelebrationOverlay.displayName = "CelebrationOverlay";
 export default CelebrationOverlay;

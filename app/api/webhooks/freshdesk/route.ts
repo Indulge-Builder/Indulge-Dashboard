@@ -60,6 +60,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
+import { assertWebhookSecret } from "@/lib/webhookAuth";
 
 type WebhookType = "upsert" | "update" | "deletion";
 
@@ -119,6 +120,9 @@ function parseWebhookInstant(v: string | undefined): string | null {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = assertWebhookSecret(req);
+  if (unauthorized) return unauthorized;
+
   const { db, response } = requireSupabaseAdminOr503();
   if (!db) {
     return (
@@ -151,15 +155,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  console.log("[freshdesk webhook] received payload:", JSON.stringify(payload));
-
   const ticketIdRaw =
     payload.ticket_id ??
     payload.id ??
     (payload as { ticket?: { id?: string | number } }).ticket?.id;
   if (!ticketIdRaw) {
     console.error("[freshdesk webhook] 400 Missing ticket_id or id", {
-      payload,
       hasTicketId: !!payload.ticket_id,
       hasId: !!payload.id,
     });
@@ -177,6 +178,11 @@ export async function POST(req: NextRequest) {
     (payload as { type?: string }).type ??
     ""
   ).toLowerCase();
+
+  console.info("[freshdesk webhook] accepted", {
+    ticketId: ticketIdStr,
+    webhookType: webhookType || "upsert",
+  });
 
   const isDeletion =
     webhookType === "deletion" ||

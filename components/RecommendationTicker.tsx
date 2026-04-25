@@ -9,28 +9,24 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
-import type { JokerRecommendationItem } from "@/app/api/jokers/recommendations/route";
+import type { JokerRecommendationItem } from "@/types";
 
 // ── Map jokers.type (string) to Lucide icon ─────────────────────────────────
+// Keys are normalized at lookup time (lowercase, spaces stripped).
 const TYPE_ICON_MAP: Record<string, LucideIcon> = {
   restaurant: Utensils,
-  restaurants: Utensils,
   hotel: Bed,
-  hotels: Bed,
   travel: MapPin,
   spa: Leaf,
   experience: Star,
-  experiences: Star,
   default: Star,
 };
 
 // ── Type-based color coding (icon, border) — bright for 15ft visibility ───────
+// Keys are normalized at lookup time (lowercase, spaces stripped) so singular
+// and plural forms both resolve correctly via getColorsForType / getIconForType.
 const TYPE_COLORS: Record<string, { icon: string; border: string }> = {
   restaurant: {
-    icon: "#F5D76E",
-    border: "rgba(245, 215, 110, 0.6)",
-  },
-  restaurants: {
     icon: "#F5D76E",
     border: "rgba(245, 215, 110, 0.6)",
   },
@@ -42,19 +38,11 @@ const TYPE_COLORS: Record<string, { icon: string; border: string }> = {
     icon: "#BB8FCE",
     border: "rgba(187, 143, 206, 0.6)",
   },
-  hotels: {
-    icon: "#BB8FCE",
-    border: "rgba(187, 143, 206, 0.6)",
-  },
   spa: {
     icon: "#58D68D",
     border: "rgba(88, 214, 141, 0.6)",
   },
   experience: {
-    icon: "#F1948A",
-    border: "rgba(241, 148, 138, 0.6)",
-  },
-  experiences: {
     icon: "#F1948A",
     border: "rgba(241, 148, 138, 0.6)",
   },
@@ -112,26 +100,26 @@ const TickerItem = memo(function TickerItem({
     <>
       <div className="ticker-item flex items-center gap-4 sm:gap-6 flex-shrink-0">
         <div
-          className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center"
+          className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
           style={{
             border: `2px solid ${colors.border}`,
             background: "rgba(5, 5, 5, 0.85)",
           }}
         >
           <Icon
-            className="w-7 h-7 sm:w-8 sm:h-8"
+            className="w-8 h-8 sm:w-10 sm:h-10"
             style={{ color: colors.icon }}
             strokeWidth={2.5}
           />
         </div>
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <span className="font-cinzel font-semibold text-[clamp(1.35rem,2.05vw,2.15rem)] text-white/95 tracking-wide whitespace-nowrap">
+          <span className="font-cinzel font-semibold text-[clamp(1.7rem,2.8vw,3.3rem)] text-white/95 tracking-wide whitespace-nowrap">
             {item.city}
           </span>
-          <span className="text-gold-400/60 font-cinzel text-[clamp(1.15rem,1.6vw,1.7rem)]">
+          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1vw,2.5rem)]">
             |
           </span>
-          <span className="font-baskerville font-semibold text-[clamp(1.35rem,2.05vw,2.15rem)] tracking-wide text-champagne truncate max-w-[20ch] sm:max-w-[28ch]">
+          <span className="font-baskerville font-semibold text-[clamp(1.7rem,2.8vw,3.3rem)] tracking-wide text-champagne truncate max-w-[20ch] sm:max-w-[28ch]">
             {item.suggestion}
           </span>
         </div>
@@ -172,7 +160,7 @@ function RecommendationTickerInner({
           background: "rgba(5, 5, 5, 0.92)",
         }}
       >
-        <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1.15rem,1.7vw,1.7rem)] tracking-widest uppercase">
+        <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1.4rem,2vw,2.2rem)] tracking-widest uppercase">
           Loading recommendations…
         </p>
       </div>
@@ -181,6 +169,9 @@ function RecommendationTickerInner({
 
   return (
     <div
+      role="region"
+      aria-label="Joker recommendations"
+      aria-live="polite"
       className="relative w-full flex-shrink-0 overflow-hidden"
       style={{
         borderTop: "1px solid rgba(212, 175, 55, 0.2)",
@@ -223,5 +214,6 @@ function RecommendationTickerInner({
 }
 
 const RecommendationTicker = memo(RecommendationTickerInner);
+RecommendationTicker.displayName = "RecommendationTicker";
 
 export default RecommendationTicker;

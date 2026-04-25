@@ -473,3 +473,4 @@ function SegmentGaps({
 }
 
 export const LeadStatusHealthBar = memo(LeadStatusHealthBar_);
+LeadStatusHealthBar.displayName = "LeadStatusHealthBar";

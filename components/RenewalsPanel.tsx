@@ -2,14 +2,11 @@
 
 import { Check } from "lucide-react";
 import AnimatedCounter from "./AnimatedCounter";
+import type { RenewalsPanelData } from "@/types";
 
 interface RenewalsPanelProps {
   /** Data from parent (Dashboard); no internal fetch or Supabase. */
-  data: {
-    totalRenewalsThisMonth: number;
-    renewals: string[];
-    assignments: string[];
-  };
+  data: RenewalsPanelData;
   delay?: number;
 }
 
@@ -17,7 +14,7 @@ function NameRow({ name, isNew }: { name: string; isNew: boolean }) {
   return (
     <div className="flex items-center justify-center gap-3 min-w-0 w-full">
       <Check
-        className="flex-shrink-0 w-9 h-9 text-[#D4AF37]"
+        className="flex-shrink-0 w-9 h-9 text-gold-400"
         strokeWidth={2.5}
       />
       <span
@@ -44,7 +41,7 @@ export default function RenewalsPanel({
       <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] to-transparent pointer-events-none rounded-2xl" />
       {/* ── Counter (Left) — same as Spoiled card (joker-box, text-gold-300) ──── */}
       <div className="flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[clamp(140px,18vw,200px)] joker-box rounded-xl border border-liquid-gold-end/35 px-4 py-3">
-        <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
+        <p className="font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
           RENEWALS
         </p>
         <AnimatedCounter

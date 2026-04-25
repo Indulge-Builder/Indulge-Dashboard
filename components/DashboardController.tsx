@@ -8,8 +8,9 @@ import QueendomSkeleton from "./skeletons/QueendomSkeleton";
 import OnboardingSkeleton from "./skeletons/OnboardingSkeleton";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import type { QueenStats } from "@/lib/types";
+import type { ActiveScreen, RenewalsPanelData } from "@/types";
 
-export type ActiveScreen = "concierge" | "onboarding";
+export type { ActiveScreen };
 
 const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
   concierge: 30_000,
@@ -20,12 +21,6 @@ const fadeTransition = {
   duration: 1.5,
   ease: "easeInOut" as const,
 };
-
-interface RenewalsPanelData {
-  totalRenewalsThisMonth: number;
-  renewals: string[];
-  assignments: string[];
-}
 
 interface DashboardControllerProps {
   className?: string;

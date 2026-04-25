@@ -32,8 +32,7 @@ import {
   mergeAndRankAgents,
   pruneTicketRowsForDashboardState,
 } from "@/lib/ticketAggregation";
-import type { JokerRecommendationItem } from "@/app/api/jokers/recommendations/route";
-import type { RenewalsPanelData, MemberApiResponse } from "@/types";
+import type { JokerRecommendationItem, RenewalsPanelData, MemberApiResponse } from "@/types";
 
 // ─── Zero initial state ───────────────────────────────────────────────────────
 // All counters animate up from 0 on first load — this is intentional UX.
@@ -138,7 +137,6 @@ export function useDashboardData(): DashboardData {
   // Aggregation is pure and runs only when ticketRows reference changes.
   // All math is delegated to lib/ticketAggregation — NOT modified here.
   useEffect(() => {
-    if (ticketRows.length === 0) return;
     const ticketStats = aggregateTicketStats(ticketRows);
     const { ananyshree: agentsA, anishqa: agentsB } = mergeAndRankAgents(ticketRows);
     setAnanyshreeStats((prev) => ({
@@ -277,7 +275,7 @@ export function useDashboardData(): DashboardData {
         () => { fetchMembers(); },
       )
       .subscribe((status) => {
-        if (status === "SUBSCRIBED")
+        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
           console.info("[Realtime] dashboard-clients active");
       });
 
@@ -327,7 +325,7 @@ export function useDashboardData(): DashboardData {
         },
       )
       .subscribe((status) => {
-        if (status === "SUBSCRIBED")
+        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
           console.info("[Realtime] dashboard-jokers active");
       });
 
@@ -370,7 +368,7 @@ export function useDashboardData(): DashboardData {
         },
       )
       .subscribe((status) => {
-        if (status === "SUBSCRIBED")
+        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
           console.info("[Realtime] dashboard-tickets active");
       });
 
@@ -394,7 +392,7 @@ export function useDashboardData(): DashboardData {
         },
       )
       .subscribe((status) => {
-        if (status === "SUBSCRIBED")
+        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
           console.info("[Realtime] dashboard-renewals active");
       });
 

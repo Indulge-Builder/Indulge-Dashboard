@@ -25,7 +25,7 @@ function JokerMetricBox({
 }) {
   // Labels match QueendomPanel `MetricBox` / RenewalsPanel RENEWALS; values match hero `AnimatedCounter`.
   const labelClass =
-    "font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-champagne mb-[0.2vh]";
+    "font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.25em] uppercase text-champagne mb-[0.2vh]";
   const defaultValueClass = `font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums`;
   const defaultSuffixClass =
     "font-inter text-[clamp(2.1rem,3.375vw,3.375rem)] text-white/45 font-semibold";

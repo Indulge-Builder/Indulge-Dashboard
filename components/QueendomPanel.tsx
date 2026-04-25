@@ -10,12 +10,7 @@ import RenewalsPanel from "./RenewalsPanel";
 import SpecialDates from "@/components/SpecialDates";
 import type { QueenStats } from "@/lib/types";
 import { getJokerNameForQueendom } from "@/lib/agentRoster";
-
-interface RenewalsPanelData {
-  totalRenewalsThisMonth: number;
-  renewals: string[];
-  assignments: string[];
-}
+import type { RenewalsPanelData } from "@/types";
 
 interface QueendomPanelProps {
   name: string;
@@ -64,7 +59,7 @@ function MetricBox({
       style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
     >
       <p
-        className={`font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
+        className={`font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
       >
         {label}
       </p>
@@ -183,7 +178,7 @@ export default function QueendomPanel({
           delayMs={delay}
         />
 
-        <p className="font-inter mb-[0.9vh] mt-[0.35vh] text-[clamp(22px,2.35vw,38px)] font-semibold uppercase tracking-[0.42em] text-gold-300 gold-glow">
+        <p className="font-inter mb-[0.9vh] mt-[0.35vh] text-[clamp(28px,2.5vw,52px)] font-semibold uppercase tracking-[0.42em] text-gold-300 gold-glow">
           Queendom
         </p>
 
@@ -204,7 +199,7 @@ export default function QueendomPanel({
           <div className="grid grid-cols-2 min-[700px]:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 w-full">
             {/* 1. Total Solved Today — ANCHOR (Green Glow) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
-              <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
+              <p className="font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
                 Resolved <br /> (Today)
               </p>
               <AnimatedCounter
@@ -263,7 +258,7 @@ export default function QueendomPanel({
 
             {/* 5. Spoiled — accepted wins (Last 2 Weeks) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
-              <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
+              <p className="font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
                 Spoiled
                 <br />
                 (Last 2 Weeks)
@@ -323,7 +318,7 @@ export default function QueendomPanel({
             >
               <div className="mb-[2vh] flex w-full flex-shrink-0 items-center gap-4 px-1 sm:px-2">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-                <p className="font-inter flex-shrink-0 text-[clamp(1.05rem,1.45vw,1.65rem)] font-semibold uppercase tracking-[0.42em] text-champagne px-2">
+                <p className="font-inter flex-shrink-0 text-[clamp(1.5rem,2.2vw,2.6rem)] font-semibold uppercase tracking-[0.42em] text-champagne px-2">
                   Special Dates
                 </p>
                 <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />

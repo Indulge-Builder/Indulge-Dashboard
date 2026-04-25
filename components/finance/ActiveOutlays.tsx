@@ -273,7 +273,7 @@ export default function ActiveOutlays({
     return (
       <div className="flex-shrink-0 mt-2 w-full border-t border-gold-500/15 pt-3">
         <div
-          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-inter text-[clamp(1.35rem,1.725vw,1.575rem)] text-white/40"
+          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-inter text-[clamp(1.4rem,1.9vw,2.2rem)] text-white/40"
           style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
         >
           Finances unavailable (configure Supabase env).

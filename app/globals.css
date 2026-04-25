@@ -66,19 +66,19 @@
   --text-heading-md: clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem);
 
   /* Labels */
-  --text-label-xl: clamp(1.35rem, 2.7vw, 3.9rem); /* metric box labels */
-  --text-label-lg: clamp(1.05rem, 1.4vw, 1.6rem); /* column headers */
-  --text-label-md: clamp(0.875rem, 1.2vw, 1.25rem);
+  --text-label-xl: clamp(1.5rem, 3vw, 4rem);      /* metric box labels — was 3.9rem max */
+  --text-label-lg: clamp(1.5rem, 2.5vw, 3rem);    /* column headers — was capped at 1.6rem */
+  --text-label-md: clamp(1.2rem, 1.9vw, 2.2rem);  /* small labels — was capped at 1.25rem */
 
   /* Onboarding-specific scale (vmin/vh compound) */
-  --text-ob-page-title: clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem);
-  --text-ob-ledger-title: clamp(1.65rem, min(3.85vmin, 4.9vh), 3.85rem);
-  --text-ob-agent-name: clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem);
-  --text-ob-card-title: clamp(1.15rem, min(2.85vmin, 3.3vh), 3.85rem);
-  --text-ob-metric-value: clamp(1.5rem, min(4.4vmin, 5.2vh), 5.75rem);
-  --text-ob-metric-sub: clamp(1.25rem, min(3.5vmin, 3.95vh), 2.45rem);
-  --text-ob-ledger-hdr: clamp(1.05rem, min(2.35vmin, 2.85vh), 2.05rem);
-  --text-ob-ledger-cell: clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem);
+  --text-ob-page-title: clamp(2.2rem, min(5vmin, 6.2vh), 4.6rem);
+  --text-ob-ledger-title: clamp(1.8rem, min(4.2vmin, 5.1vh), 4rem);
+  --text-ob-agent-name: clamp(1.6rem, min(4vmin, 4.6vh), 5.5rem);
+  --text-ob-card-title: clamp(1.35rem, min(3.2vmin, 3.6vh), 3.85rem);
+  --text-ob-metric-value: clamp(1.6rem, min(4.6vmin, 5.4vh), 6rem);
+  --text-ob-metric-sub: clamp(1.35rem, min(3.6vmin, 4.1vh), 2.55rem);
+  --text-ob-ledger-hdr: clamp(1.25rem, min(2.85vmin, 3.3vh), 2.4rem);
+  --text-ob-ledger-cell: clamp(1.3rem, min(2.8vmin, 3.4vh), 3.6rem);
 
   /* Finance widget */
   --text-fin-cell: clamp(1.725rem, min(3.975vmin, 4.875vh), 5.25rem);
@@ -109,10 +109,10 @@ body {
   background: var(--obsidian);
 }
 
-/* Lock to viewport on tablets and up; larger root type for TV / distance viewing */
+/* Lock to viewport on tablets and up; TV / 3m-distance viewing — 1rem = 20px */
 @media (min-width: 768px) {
   html {
-    font-size: 112.5%;
+    font-size: 125%;
   }
 
   html,
@@ -318,8 +318,8 @@ body::before {
   .ticker-item {
     display: inline-flex;
     align-items: center;
-    padding: 0 4rem; /* Wide spacing for luxury feel */
-    font-size: 2rem; /* TV / distance — matches scaled dashboard type */
+    padding: 0 5rem; /* Wide spacing for luxury feel */
+    font-size: 2.5rem; /* TV / 3m distance — up from 2rem */
     color: #f9e27e; /* Soft Gold */
   }
 

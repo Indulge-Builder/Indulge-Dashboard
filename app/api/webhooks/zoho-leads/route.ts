@@ -25,6 +25,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
 import { normalizeZohoAgentName } from "@/lib/onboardingAgents";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { assertWebhookSecret } from "@/lib/webhookAuth";
 
 const VALID_VERTICALS = [
   "Indulge Global",
@@ -137,6 +138,9 @@ function parsePayload(body: unknown): {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = assertWebhookSecret(req);
+  if (unauthorized) return unauthorized;
+
   const { db, response } = requireSupabaseAdminOr503();
   if (!db) {
     return (
@@ -154,7 +158,6 @@ export async function POST(req: NextRequest) {
     `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   const contentType = req.headers.get("content-type") ?? "";
-  const userAgent = req.headers.get("user-agent") ?? "";
 
   let rawText = "";
   try {
@@ -164,12 +167,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  console.log("[zoho-leads webhook] incoming", {
+  console.info("[zoho-leads webhook] accepted", {
     requestId,
     contentType,
-    userAgent,
     bodyLength: rawText.length,
-    bodyPreview: rawText.slice(0, 2000),
   });
 
   let body: unknown;

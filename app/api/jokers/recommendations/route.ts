@@ -8,6 +8,9 @@
 
 import { NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import type { JokerRecommendationItem } from "@/types";
+
+export type { JokerRecommendationItem };
 
 interface JokerRecommendationRow {
   id: string;
@@ -15,13 +18,6 @@ interface JokerRecommendationRow {
   type: string | null;
   suggestion: string | null;
   created_at: string | null;
-}
-
-export interface JokerRecommendationItem {
-  id: string;
-  city: string;
-  type: string;
-  suggestion: string;
 }
 
 export async function GET() {

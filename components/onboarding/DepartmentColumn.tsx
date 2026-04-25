@@ -29,7 +29,7 @@ interface DeptAccent {
 const METRIC_BOX_BASE =
   "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-xl border bg-black/30 px-1 py-[0.8vh] min-[900px]:py-[1.3vh]";
 const METRIC_LABEL_CLASS =
-  "font-inter shrink-0 font-semibold text-[clamp(27px,3vw,39px)] uppercase leading-none tracking-[0.25em] mb-[0.15vh]";
+  "font-inter shrink-0 font-semibold text-[clamp(30px,3vw,46px)] uppercase leading-none tracking-[0.25em] mb-[0.15vh]";
 const METRIC_VALUE_CLASS =
   "font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] tabular-nums";
 

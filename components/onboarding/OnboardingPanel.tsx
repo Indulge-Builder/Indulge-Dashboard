@@ -128,8 +128,12 @@ export default function OnboardingPanel() {
 
   // ── Initial load ─────────────────────────────────────────────────────────
   const load = useCallback(async () => {
+    const ac = new AbortController();
     try {
-      const res = await fetch("/api/onboarding", { cache: "no-store" });
+      const res = await fetch("/api/onboarding", {
+        cache: "no-store",
+        signal: ac.signal,
+      });
       if (!res.ok) return;
       const data = (await res.json()) as OnboardingApiPayload;
 
@@ -159,8 +163,9 @@ export default function OnboardingPanel() {
       if (data.leadMonthStats) {
         setLeadMonthStats(data.leadMonthStats);
       }
-    } catch {
-      /* silently ignore — fallback state already set */
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      console.error("[OnboardingPanel] load failed:", err);
     }
   }, []);
 

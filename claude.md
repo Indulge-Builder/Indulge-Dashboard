@@ -20,7 +20,7 @@
 
 ### What is this project?
 
-**Indulge Live Dashboard** is a real-time TV/big-screen dashboard for an Indian luxury concierge agency called Indulge. It displays live metrics for two operational "Queendoms" (named **Ananyshree** and **Anishqa**), plus an **Onboarding** sales team panel. The dashboard runs 24/7 on a screen in the office, auto-rotating between the Concierge view (40 seconds) and the Onboarding view (20 seconds).
+**Indulge Live Dashboard** is a real-time TV/big-screen dashboard for an Indian luxury concierge agency called Indulge. It displays live metrics for two operational "Queendoms" (named **Ananyshree** and **Anishqa**), plus an **Onboarding** sales team panel. The dashboard runs 24/7 on a screen in the office, auto-rotating between the Concierge view (30 seconds) and the Onboarding view (30 seconds).
 
 ### Tech Stack
 
@@ -750,8 +750,8 @@ The controller manages the auto-rotating TV view. Both screens (`concierge` and 
 
 ```typescript
 const SCREEN_DURATIONS_MS = {
-  concierge: 40_000,   // 40 seconds
-  onboarding: 20_000,  // 20 seconds
+  concierge: 30_000,   // 30 seconds
+  onboarding: 30_000,  // 30 seconds
 };
 ```
 
@@ -781,7 +781,7 @@ The panel renders a full half of the concierge screen for one queendom. Layout (
 3. **RenewalsPanel** — Renewal count + latest 2 renewals + latest 2 assignments
 4. **AgentLeaderboard** (left) + **SpecialDates** (right, same height as leaderboard)
 5. **JokerMetricsStrip** — compact Joker stats bar
-6. **ActiveOutlays** — Finance outlays widget (fills remaining vertical space)
+6. **ActiveOutlays** — Finance outlays widget (optional; **not currently mounted** in the live render tree — the component exists in `components/finance/ActiveOutlays.tsx` but is not imported into `QueendomPanel.tsx`. Mount it wrapped in an `ErrorBoundary` when product requires it.)
 
 All sections use Framer Motion `containerVariants` / `itemVariants` with stagger animations on mount.
 

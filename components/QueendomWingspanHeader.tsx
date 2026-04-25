@@ -38,7 +38,7 @@ function MetricPill({
 
 /** Matches `MetricBox` / 5-metric hero label typography in QueendomPanel */
 const metricLabelClass =
-  "font-inter shrink-0 font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase leading-none";
+  "font-inter shrink-0 font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.25em] uppercase leading-none";
 
 /** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
 const pillNumberSizeClass =

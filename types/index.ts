@@ -46,6 +46,18 @@ export type { TicketRowMinimal } from "@/lib/ticketAggregation";
 // ─── 4. Shared UI types (previously inline in multiple components) ─────────────
 
 /**
+ * Joker recommendation item shape returned by GET /api/jokers/recommendations
+ * and used by RecommendationTicker + useDashboardData.
+ * Canonical home is here; the route re-exports it for backwards compat.
+ */
+export interface JokerRecommendationItem {
+  id: string;
+  city: string;
+  type: string;
+  suggestion: string;
+}
+
+/**
  * The two queendom identifiers used throughout the app.
  * Previously a locally-typed literal union in ActiveOutlays, QueendomPanel, etc.
  */
