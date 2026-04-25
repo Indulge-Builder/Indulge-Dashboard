@@ -164,7 +164,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
           },
         ];
       }),
-    ) as Record<VerticalKey, { d: string; area: string; term: Pt | null; topY: number; pts: Array<{ x: number; y: number; val: number }> }>;
+    ) as unknown as Record<VerticalKey, { d: string; area: string; term: Pt | null; topY: number; pts: Array<{ x: number; y: number; val: number }> }>;
 
     // X-axis: 5 evenly-spaced ticks (first, 3 midpoints, last)
     // Format: "M-D" e.g. "4-1", "4-15"
