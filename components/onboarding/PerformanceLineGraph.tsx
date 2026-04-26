@@ -21,14 +21,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { istToday } from "@/lib/istDate";
 import type { VerticalTrendPoint } from "@/lib/onboardingTypes";
 
 // ── SVG coordinate system ─────────────────────────────────────────────────────
 
 const VB_W    = 460;
-const VB_H    = 240;
+const VB_H    = 248;
 const ML      = 36;
-const MT      = 18;
+const MT      = 26;
 const MR      = 12;
 const MB      = 26;
 const CHART_W = VB_W - ML - MR;
@@ -127,12 +128,8 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
       };
     }
 
-    // Determine today's index — last day that is not in the future
-    const istToday = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric", month: "2-digit", day: "2-digit",
-    }).format(new Date());
-    const effectiveToday = todayDate ?? istToday;
+    // Determine today's index — last day that is not in the future (IST calendar day)
+    const effectiveToday = todayDate ?? istToday().day;
     const todayIdx = data.reduce((last, d, i) => d.date <= effectiveToday ? i : last, -1);
 
     // Only the populated slice (days 0..todayIdx) drives the y-scale

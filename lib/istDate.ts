@@ -10,6 +10,9 @@
  * - Date-only `YYYY-MM-DD` → start of that calendar day in Asia/Kolkata.
  *
  * Naive-as-UTC (`…Z`) was wrong for CSV like `2026-03-31 22:00:00` that means IST, not UTC.
+ *
+ * Zoho CRM (`leads` / `deals`): merge fields often append `Z` or `+00` to **IST** wall-clock
+ * digits — use {@link normalizeZohoCrmTimestampForIstDigits} / {@link utcMillisFromZohoCrmDbTimestamp}.
  */
 
 const IST_OFFSET = "+05:30";
@@ -74,6 +77,43 @@ export function utcMillisFromDbTimestamp(
 
   const ms = new Date(s).getTime();
   return Number.isNaN(ms) ? null : ms;
+}
+
+/**
+ * Zoho CRM automations usually send **India wall-clock** digits but suffix them
+ * with `Z` or `+00` / `+00:00` / `+0000`. Postgres then stores that instant as if
+ * those digits were UTC (5½ hours ahead of the intended IST instant).
+ *
+ * Strip only a **pure-UTC-zero** trailing zone — never `+05:30` or other offsets.
+ * The remainder is parsed with {@link utcMillisFromDbTimestamp} (naive → IST).
+ *
+ * Use for `leads` / `deals` from Zoho only — not Freshdesk `tickets`.
+ */
+export function normalizeZohoCrmTimestampForIstDigits(s: string): string {
+  let t = String(s).trim().replace(/\s+/g, " ");
+  if (!t) return t;
+  if (/Z$/i.test(t)) return t.replace(/Z$/i, "").trim();
+  if (/[+-]00(:00|00)?$/i.test(t)) {
+    return t.replace(/[+-]00(:00|00)?$/i, "").trim();
+  }
+  return t;
+}
+
+/** Epoch ms for Zoho-sourced `timestamptz` rows (IST digits, bogus UTC tag). */
+export function utcMillisFromZohoCrmDbTimestamp(
+  ts: string | null | undefined,
+): number | null {
+  if (ts == null) return null;
+  const normalized = normalizeZohoCrmTimestampForIstDigits(String(ts).trim());
+  if (!normalized) return null;
+  return utcMillisFromDbTimestamp(normalized);
+}
+
+/** IST calendar date for Zoho `leads` / `deals` timestamps. */
+export function toISTDayFromZohoCrm(ts: string | null | undefined): string {
+  const ms = utcMillisFromZohoCrmDbTimestamp(ts);
+  if (ms == null) return "";
+  return IST_FORMATTER.format(new Date(ms));
 }
 
 /**

@@ -9,7 +9,8 @@
  * Rolling 30-day windows have been removed from this endpoint.
  *
  * ── Data sources ─────────────────────────────────────────────────────────────
- *   Leads this month / today:  onboarding_lead_touches.created_at (IST bounds)
+ *   Leads this month / today:  leads.created_at — Zoho sends IST wall clock but
+ *                              often stores with `Z`/`+00`; use utcMillisFromZohoCrmDbTimestamp.
  *   Closures count + ₹ sum:    onboarding_conversion_ledger.{recorded_at, amount}
  *   Ledger feed (UI table):    deals.{deal_name, agent_name, created_at}
  *   Pipeline Won count:        closure rows this month per department
@@ -27,8 +28,10 @@ import { NextResponse } from "next/server";
 import {
   getCurrentIstDayUtcBounds,
   getCurrentIstMonthUtcBounds,
-} from "@/lib/istMonthBounds";
-import { istToday } from "@/lib/istDate";
+  istToday,
+  toISTDayFromZohoCrm,
+  utcMillisFromZohoCrmDbTimestamp,
+} from "@/lib/istDate";
 import {
   CONCIERGE_AGENT_CARDS,
   SHOP_AGENT_CARDS,
@@ -123,14 +126,30 @@ export async function GET() {
   }
 
   try {
-    // ── IST month + day bounds ─────────────────────────────────────────────
+    // ── IST month bounds (PostgREST filter) + same calendar logic as /api/tickets ──
+    const { day: todayIST, month: thisMonthIST } = istToday();
     const { startUtcIso: monthStart, endExclusiveUtcIso: monthEndEx } =
       getCurrentIstMonthUtcBounds();
-    const { startUtcIso: dayStart, endExclusiveUtcIso: dayEndEx } =
+    const { startUtcIso: todayStartUtc, endExclusiveUtcIso: todayEndExclusiveUtc } =
       getCurrentIstDayUtcBounds();
 
-    const tsInRange = (iso: string, start: string, endEx: string): boolean =>
-      iso >= start && iso < endEx;
+    const monthStartMs = new Date(monthStart).getTime();
+    const monthEndExMs = new Date(monthEndEx).getTime();
+    const todayStartMs = new Date(todayStartUtc).getTime();
+    const todayEndExMs = new Date(todayEndExclusiveUtc).getTime();
+
+    /** Same half-open IST month window as the PostgREST `.gte` / `.lt` filters. */
+    const touchInThisMonth = (createdAt: string | null | undefined): boolean => {
+      const ms = utcMillisFromZohoCrmDbTimestamp(createdAt);
+      if (ms == null) return false;
+      return ms >= monthStartMs && ms < monthEndExMs;
+    };
+    /** Current IST calendar day (Zoho timestamps may be IST digits tagged as UTC). */
+    const touchInToday = (createdAt: string | null | undefined): boolean => {
+      const ms = utcMillisFromZohoCrmDbTimestamp(createdAt);
+      if (ms == null) return false;
+      return ms >= todayStartMs && ms < todayEndExMs;
+    };
 
   // ── 1. Agent rows from DB (limit 7; fall back per canonical seat) ──────
     const agentsDbQ = await db
@@ -218,7 +237,7 @@ export async function GET() {
         return rows.filter(
           (row) =>
             onboardingAgentNameMatches(displayName, String(row.agent_name)) &&
-            tsInRange(String(row.created_at), monthStart, monthEndEx),
+            touchInThisMonth(String(row.created_at)),
         ).length;
       });
 
@@ -226,12 +245,12 @@ export async function GET() {
         return rows.filter(
           (row) =>
             onboardingAgentNameMatches(displayName, String(row.agent_name)) &&
-            tsInRange(String(row.created_at), dayStart, dayEndEx),
+            touchInToday(String(row.created_at)),
         ).length;
       });
 
       allTouchRowsThisMonth = rows.filter((row) =>
-        tsInRange(String(row.created_at), monthStart, monthEndEx),
+        touchInThisMonth(String(row.created_at)),
       );
     } catch (e) {
       console.warn(
@@ -446,9 +465,7 @@ export async function GET() {
     let verticalTrendline: VerticalTrendPoint[] = [];
 
     try {
-      const todayIst   = istToday();
-      const todayDate  = new Date(`${todayIst.day}T00:00:00+05:30`);
-      const todayMs    = todayDate.getTime();
+      const todayDate  = new Date(`${todayIST}T00:00:00+05:30`);
 
       const istFmt = new Intl.DateTimeFormat("en-CA", {
         timeZone: "Asia/Kolkata",
@@ -458,7 +475,7 @@ export async function GET() {
       });
 
       // Full current month: day 1 → last day of month
-      const [istY, istM] = todayIst.day.split("-") as [string, string];
+      const [istY, istM] = thisMonthIST.split("-") as [string, string];
       const monthStartMs  = new Date(`${istY}-${istM}-01T00:00:00+05:30`).getTime();
       const nextMonthMs   = new Date(
         Number(istM) === 12
@@ -497,15 +514,8 @@ export async function GET() {
           business_vertical: string | null;
           created_at: string;
         }[]) {
-          const ms = new Date(
-            row.created_at.endsWith("Z") || row.created_at.includes("+") || row.created_at.includes("-", 10)
-              ? row.created_at
-              : `${row.created_at}Z`,
-          ).getTime();
-          if (!Number.isFinite(ms)) continue;
-
-          const key = istFmt.format(new Date(ms));
-          if (!(key in counts)) continue;
+          const key = toISTDayFromZohoCrm(String(row.created_at ?? ""));
+          if (!key || !(key in counts)) continue;
 
           const vertical = row.business_vertical ?? "Indulge Global";
           const bucket = counts[key];
@@ -557,28 +567,15 @@ export async function GET() {
           shopAttendedByDate[key] = 0;
         }
 
-        const parseUtcMs = (raw: string): number | null => {
-          if (!raw) return null;
-          try {
-            const utcMs = new Date(
-              raw.endsWith("Z") || raw.includes("+") || raw.includes("-", 10)
-                ? raw
-                : `${raw}Z`,
-            ).getTime();
-            return Number.isFinite(utcMs) ? utcMs : null;
-          } catch { return null; }
-        };
-
         for (const row of (trendQ.data ?? []) as {
           agent_name: string;
           created_at: string;
           modified_at: string;
           latest_status: string | null;
         }[]) {
-          const createdMs = parseUtcMs(String(row.created_at ?? ""));
-          if (createdMs == null) continue;
+          const createdKey = toISTDayFromZohoCrm(String(row.created_at ?? ""));
+          if (!createdKey) continue;
 
-          const createdKey = istFmt.format(new Date(createdMs));
           if (createdKey in conciergeByDate) {
             const dept = getAgentDepartment(String(row.agent_name ?? ""));
             if (dept === "concierge") conciergeByDate[createdKey]++;
@@ -587,10 +584,10 @@ export async function GET() {
 
           const rowStatus = String(row.latest_status ?? "New").trim();
           if (rowStatus !== "New") {
-            const modMs = parseUtcMs(String(row.modified_at ?? row.created_at ?? ""));
-            if (modMs == null) continue;
-            const modKey = istFmt.format(new Date(modMs));
-            if (!(modKey in conciergeByDate)) continue;
+            const modKey = toISTDayFromZohoCrm(
+              String(row.modified_at ?? row.created_at ?? ""),
+            );
+            if (!modKey || !(modKey in conciergeByDate)) continue;
             const dept = getAgentDepartment(String(row.agent_name ?? ""));
             if (dept === "concierge")
               onboardingAttendedByDate[modKey] = (onboardingAttendedByDate[modKey] ?? 0) + 1;

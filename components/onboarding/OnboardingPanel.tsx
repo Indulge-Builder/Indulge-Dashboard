@@ -34,6 +34,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { istToday, toISTDayFromZohoCrm } from "@/lib/istDate";
 import {
   getAgentDepartment,
   CONCIERGE_AGENT_DISPLAY_NAMES,
@@ -328,7 +329,9 @@ export default function OnboardingPanel() {
     // Build per-day conversion count from the ledger
     const convMap: Record<string, { onboarding: number; shop: number }> = {};
     for (const row of ledger) {
-      const date = row.recordedAt.slice(0, 10); // "YYYY-MM-DD"
+      // Zoho deals: IST wall clock often stored with bogus Z/+00 — same parser as API.
+      const date = toISTDayFromZohoCrm(row.recordedAt);
+      if (!date) continue;
       if (!convMap[date]) convMap[date] = { onboarding: 0, shop: 0 };
       const dept = row.department ?? getAgentDepartment(row.agentName);
       if (dept === "concierge") convMap[date].onboarding++;
@@ -620,6 +623,7 @@ export default function OnboardingPanel() {
               <PerformanceLineGraph
                 data={verticalTrendline}
                 pulseEvents={pulseEvents}
+                todayDate={istToday().day}
               />
             </div>
           </div>

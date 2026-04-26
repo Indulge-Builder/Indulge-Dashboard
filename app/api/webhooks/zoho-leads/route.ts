@@ -22,7 +22,10 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
+import {
+  freshdeskTimestampToIsoUtcForDb,
+  normalizeZohoCrmTimestampForIstDigits,
+} from "@/lib/istDate";
 import { normalizeZohoAgentName } from "@/lib/onboardingAgents";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { assertWebhookSecret } from "@/lib/webhookAuth";
@@ -81,8 +84,11 @@ function parseFormUrlEncoded(text: string): Record<string, string> {
 
 function toDbTimestamp(isoOrEmpty: string | null): string | null {
   if (!isoOrEmpty || !isoOrEmpty.trim()) return null;
+  // Zoho sends India wall clock but merge fields often append Z / +00 — strip so we
+  // store the true UTC instant (see normalizeZohoCrmTimestampForIstDigits).
+  const zohoNormalized = normalizeZohoCrmTimestampForIstDigits(isoOrEmpty.trim());
   const normalized =
-    freshdeskTimestampToIsoUtcForDb(isoOrEmpty.trim()) ?? isoOrEmpty.trim();
+    freshdeskTimestampToIsoUtcForDb(zohoNormalized) ?? zohoNormalized;
   const t = Date.parse(normalized);
   return Number.isFinite(t) ? normalized : null;
 }

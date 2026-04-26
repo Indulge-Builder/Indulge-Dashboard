@@ -20,6 +20,7 @@ import {
   SHOP_FALLBACK_AGENTS,
   getAgentDepartment,
 } from "@/lib/onboardingAgents";
+import { utcMillisFromZohoCrmDbTimestamp } from "@/lib/istDate";
 import type {
   OnboardingAgentRow,
   OnboardingLedgerRow,
@@ -31,6 +32,18 @@ import katyaPortrait from "../../onboarding-agents-images/katya.webp";
 import meghanaPortrait from "../../onboarding-agents-images/meghana.webp";
 import samsonPortrait from "../../onboarding-agents-images/samson.webp";
 import vikramPortrait from "../../onboarding-agents-images/vikram.webp";
+
+// ── IST display formatters (module-level singletons — never re-created per call) ──
+
+/**
+ * Formats a UTC timestamp to "22 March" (day + long month) in IST (Asia/Kolkata).
+ * Mirrors the UTC→IST conversion used in lib/istDate and /api/tickets.
+ */
+const IST_LEDGER_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Kolkata",
+  day: "numeric",
+  month: "long",
+});
 
 // ── 1. Typography scale ───────────────────────────────────────────────────────
 
@@ -170,16 +183,15 @@ export function formatLakhsDisplay(lakhs: number): string {
 }
 
 /**
- * Returns "22 March" (day + long month, no time, no year) from any ISO string.
+ * Returns "22 March" (day + long month, no time, no year) from any timestamp string.
+ * Always displays in IST (Asia/Kolkata) — matches the UTC→IST conversion used
+ * throughout the project (lib/istDate, /api/tickets, /api/onboarding).
  * Returns "—" on parse failure.
  */
 export function formatLedgerDate(iso: string): string {
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
-  } catch {
-    return "—";
-  }
+  const ms = utcMillisFromZohoCrmDbTimestamp(iso);
+  if (ms == null) return "—";
+  return IST_LEDGER_DATE_FORMATTER.format(new Date(ms));
 }
 
 // ── 5. Ledger helpers ─────────────────────────────────────────────────────────
@@ -188,10 +200,11 @@ export function formatLedgerDate(iso: string): string {
 export function sortLedgerNewestFirst(
   rows: OnboardingLedgerRow[],
 ): OnboardingLedgerRow[] {
-  return [...rows].sort(
-    (a, b) =>
-      new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
-  );
+  return [...rows].sort((a, b) => {
+    const tb = utcMillisFromZohoCrmDbTimestamp(b.recordedAt) ?? 0;
+    const ta = utcMillisFromZohoCrmDbTimestamp(a.recordedAt) ?? 0;
+    return tb - ta;
+  });
 }
 
 /**
