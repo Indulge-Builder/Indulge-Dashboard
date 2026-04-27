@@ -9,8 +9,9 @@
  * Rolling 30-day windows have been removed from this endpoint.
  *
  * ── Data sources ─────────────────────────────────────────────────────────────
- *   Leads this month / today:  leads.created_at — Zoho sends IST wall clock but
- *                              often stores with `Z`/`+00`; use utcMillisFromZohoCrmDbTimestamp.
+ *   Leads this month / today:  leads.created_at — webhook stores canonical UTC
+ *                              (`freshdeskTimestampToIsoUtcForDb`); classify with
+ *                              utcMillisFromDbTimestamp (same as PostgREST reads).
  *   Closures count + ₹ sum:    onboarding_conversion_ledger.{recorded_at, amount}
  *   Ledger feed (UI table):    deals.{deal_name, agent_name, created_at}
  *   Pipeline Won count:        closure rows this month per department
@@ -29,8 +30,8 @@ import {
   getCurrentIstDayUtcBounds,
   getCurrentIstMonthUtcBounds,
   istToday,
-  toISTDayFromZohoCrm,
-  utcMillisFromZohoCrmDbTimestamp,
+  toISTDay,
+  utcMillisFromDbTimestamp,
 } from "@/lib/istDate";
 import {
   CONCIERGE_AGENT_CARDS,
@@ -138,17 +139,44 @@ export async function GET() {
     const todayStartMs = new Date(todayStartUtc).getTime();
     const todayEndExMs = new Date(todayEndExclusiveUtc).getTime();
 
-    /** Same half-open IST month window as the PostgREST `.gte` / `.lt` filters. */
+    /** IST month membership for a `leads.created_at` value read from TIMESTAMPTZ. */
     const touchInThisMonth = (createdAt: string | null | undefined): boolean => {
-      const ms = utcMillisFromZohoCrmDbTimestamp(createdAt);
+      const ms = utcMillisFromDbTimestamp(createdAt);
       if (ms == null) return false;
       return ms >= monthStartMs && ms < monthEndExMs;
     };
-    /** Current IST calendar day (Zoho timestamps may be IST digits tagged as UTC). */
+    /** Current IST calendar day for DB-stored instants (respects `…Z` from Postgres). */
     const touchInToday = (createdAt: string | null | undefined): boolean => {
-      const ms = utcMillisFromZohoCrmDbTimestamp(createdAt);
+      const ms = utcMillisFromDbTimestamp(createdAt);
       if (ms == null) return false;
       return ms >= todayStartMs && ms < todayEndExMs;
+    };
+
+    const LEADS_PAGE = 1000;
+    const LEADS_MAX_PAGES = 250;
+
+    /** Paginate half-open [start, end) so we never silently drop rows past a single limit. */
+    const fetchLeadsCreatedInWindow = async (
+      selectCols: string,
+      windowStart: string,
+      windowEndExclusive: string,
+    ): Promise<{ rows: Record<string, unknown>[]; error: Error | null }> => {
+      const rows: Record<string, unknown>[] = [];
+      for (let p = 0; p < LEADS_MAX_PAGES; p++) {
+        const from = p * LEADS_PAGE;
+        const { data, error } = await db
+          .from("leads")
+          .select(selectCols)
+          .gte("created_at", windowStart)
+          .lt("created_at", windowEndExclusive)
+          .order("created_at", { ascending: true })
+          .range(from, from + LEADS_PAGE - 1);
+        if (error) return { rows: [], error: new Error(error.message) };
+        const batch = (data ?? []) as unknown as Record<string, unknown>[];
+        rows.push(...batch);
+        if (batch.length < LEADS_PAGE) break;
+      }
+      return { rows, error: null };
     };
 
   // ── 1. Agent rows from DB (limit 7; fall back per canonical seat) ──────
@@ -212,19 +240,18 @@ export async function GET() {
     try {
       // No SQL .in(agent_name) — DB often stores Zoho full names ("Samson Fernandes")
       // while cards use display names ("Samson"). Exact .in would drop those rows.
-      const { data: touchRows, error: touchErr } = await db
-        .from("leads")
-        .select("agent_name, created_at, latest_status")
-        .gte("created_at", monthStart)
-        .lt("created_at", monthEndEx)
-        .limit(5000);
+      const { rows: touchRows, error: touchErr } = await fetchLeadsCreatedInWindow(
+        "agent_name, created_at, latest_status",
+        monthStart,
+        monthEndEx,
+      );
 
       if (touchErr) throw touchErr;
 
       // Capture ALL rows this month (unfiltered) for the metric tiles
-      allRawLeadsThisMonth = (touchRows ?? []) as { latest_status: string | null }[];
+      allRawLeadsThisMonth = touchRows as { latest_status: string | null }[];
 
-      const rows = (touchRows ?? []).filter((row) =>
+      const rows = touchRows.filter((row) =>
         names.some((displayName) =>
           onboardingAgentNameMatches(
             displayName,
@@ -251,7 +278,7 @@ export async function GET() {
 
       allTouchRowsThisMonth = rows.filter((row) =>
         touchInThisMonth(String(row.created_at)),
-      );
+      ) as { agent_name: string; latest_status: string | null }[];
     } catch (e) {
       console.warn(
         "[/api/onboarding] onboarding_lead_touches unreadable — attempted/leads zeroed",
@@ -491,14 +518,13 @@ export async function GET() {
         dateKeys.push(istFmt.format(new Date(monthStartMs + d * 86_400_000)));
       }
 
-      // Query only the columns we need — no 5k cap issue for 7 days of data
-      const verticalQ = await db
-        .from("leads")
-        .select("business_vertical, created_at")
-        .gte("created_at", windowStartUtc)
-        .order("created_at", { ascending: true });
+      const verticalFetch = await fetchLeadsCreatedInWindow(
+        "business_vertical, created_at",
+        windowStartUtc,
+        monthEndEx,
+      );
 
-      if (!verticalQ.error) {
+      if (!verticalFetch.error) {
         // Seed zero-filled maps for all 4 verticals × 7 days
         const counts: Record<string, Record<string, number>> = {};
         for (const key of dateKeys) {
@@ -510,11 +536,11 @@ export async function GET() {
           };
         }
 
-        for (const row of (verticalQ.data ?? []) as {
+        for (const row of verticalFetch.rows as {
           business_vertical: string | null;
           created_at: string;
         }[]) {
-          const key = toISTDayFromZohoCrm(String(row.created_at ?? ""));
+          const key = toISTDay(String(row.created_at ?? ""));
           if (!key || !(key in counts)) continue;
 
           const vertical = row.business_vertical ?? "Indulge Global";
@@ -543,14 +569,13 @@ export async function GET() {
         (todayDate.getTime() - monthStartDate.getTime()) / 86_400_000,
       ) + 1;
 
-      const trendQ = await db
-        .from("leads")
-        .select("agent_name, created_at, modified_at, latest_status")
-        .gte("created_at", monthWindowStartUtc)
-        .order("created_at", { ascending: true })
-        .limit(5000);
+      const trendFetch = await fetchLeadsCreatedInWindow(
+        "agent_name, created_at, modified_at, latest_status",
+        monthWindowStartUtc,
+        monthEndEx,
+      );
 
-      if (!trendQ.error) {
+      if (!trendFetch.error) {
         const monthDateKeys: string[] = [];
         for (let d = 0; d < daysSoFar; d++) {
           monthDateKeys.push(istFmt.format(new Date(monthWindowStartMs + d * 86_400_000)));
@@ -567,13 +592,13 @@ export async function GET() {
           shopAttendedByDate[key] = 0;
         }
 
-        for (const row of (trendQ.data ?? []) as {
+        for (const row of trendFetch.rows as {
           agent_name: string;
           created_at: string;
           modified_at: string;
           latest_status: string | null;
         }[]) {
-          const createdKey = toISTDayFromZohoCrm(String(row.created_at ?? ""));
+          const createdKey = toISTDay(String(row.created_at ?? ""));
           if (!createdKey) continue;
 
           if (createdKey in conciergeByDate) {
@@ -584,7 +609,7 @@ export async function GET() {
 
           const rowStatus = String(row.latest_status ?? "New").trim();
           if (rowStatus !== "New") {
-            const modKey = toISTDayFromZohoCrm(
+            const modKey = toISTDay(
               String(row.modified_at ?? row.created_at ?? ""),
             );
             if (!modKey || !(modKey in conciergeByDate)) continue;
