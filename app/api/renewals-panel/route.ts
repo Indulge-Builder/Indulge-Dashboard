@@ -2,6 +2,8 @@
  * GET /api/renewals-panel?queendom=ananyshree|anishqa
  *
  * Fetches renewal and assignment data for the RenewalsPanel.
+ * Count + “latest” lists use the **current IST calendar month** on `created_at`
+ * (same timezone rule as tickets / jokers).
  *
  * Expected Supabase schema:
  * - renewals: { client_name, group (or queendom), created_at }
@@ -13,6 +15,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { getCurrentIstMonthUtcBounds } from "@/lib/istMonthBounds";
 
 type QueendomId = "ananyshree" | "anishqa";
 
@@ -23,12 +26,7 @@ function normalizeQueendom(q: string | null): QueendomId | null {
   return null;
 }
 
-function getThisMonthFilter() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
-}
+const MONTH_ROW_CAP = 2000;
 
 export async function GET(req: NextRequest) {
   const queendom = req.nextUrl.searchParams.get("queendom") as QueendomId | null;
@@ -50,15 +48,17 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const monthPrefix = getThisMonthFilter();
-
   try {
+    const { startUtcIso, endExclusiveUtcIso } = getCurrentIstMonthUtcBounds();
+
     // ── Renewals: only columns needed for count + latest names ─────────────────
     const { data: renewalsRows, error: renewalsErr } = await db
       .from("renewals")
       .select("group, client_name, created_at")
+      .gte("created_at", startUtcIso)
+      .lt("created_at", endExclusiveUtcIso)
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(MONTH_ROW_CAP);
 
     let totalRenewalsThisMonth = 0;
     let latestRenewals: string[] = [];
@@ -69,10 +69,7 @@ export async function GET(req: NextRequest) {
         const grp = (r.group ?? r.queendom ?? "") as string;
         return normalizeQueendom(grp) === queendom;
       });
-      totalRenewalsThisMonth = filtered.filter((r) => {
-        const created = String(r.created_at ?? "");
-        return created.startsWith(monthPrefix);
-      }).length;
+      totalRenewalsThisMonth = filtered.length;
       latestRenewals = filtered
         .slice(0, 2)
         .map((r) => (r.client_name ?? r.name ?? "Unknown") as string)
@@ -86,8 +83,10 @@ export async function GET(req: NextRequest) {
     const { data: membersRows, error: membersErr } = await db
       .from("members")
       .select("group, client_name, created_at")
+      .gte("created_at", startUtcIso)
+      .lt("created_at", endExclusiveUtcIso)
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(MONTH_ROW_CAP);
 
     if (!membersErr && membersRows?.length) {
       const rows = membersRows as Array<Record<string, unknown>>;
