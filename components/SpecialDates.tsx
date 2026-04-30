@@ -118,13 +118,16 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                 </div>
                 <div
                   className={`flex flex-1 min-w-0 items-center justify-center ${
-                    isAnniversary && !isTodayCard ? "gap-4 sm:gap-6" : "gap-2"
+                    (isAnniversary && !isTodayCard) || isTodayCard
+                      ? "gap-4 sm:gap-6"
+                      : "gap-2"
                   }`}
                 >
                   {isTodayCard && (
                     <Gift
-                      className="flex-shrink-0 w-5 h-5 text-[#D4AF37]"
-                      strokeWidth={2}
+                      className="flex-shrink-0 w-[clamp(2rem,3.5vw,2.75rem)] h-[clamp(2rem,3.5vw,2.75rem)] text-[#D4AF37]"
+                      strokeWidth={1.75}
+                      aria-hidden
                     />
                   )}
                   {isAnniversary && !isTodayCard && (

@@ -14,19 +14,21 @@ export interface TicketStats {
   jokerSuggestion: number; // tickets with tags.joker_suggestion set (legacy)
 }
 
-/** Joker-specific metrics from the jokers table */
+/** Joker-specific metrics from the `jokers` table (current IST calendar month; see GET /api/jokers). */
 export interface JokerStats {
-  /** Distinct suggestion text (lowercase + trim) — idea count without duplicate-blast inflation. */
+  /** Distinct suggestion text (lowercase + trim) — this month’s idea count. */
   uniqueSuggestionsCount: number;
-  /** Total rows / reach (same as `totalSuggestions`). */
+  /** Total rows this month (same as `totalSuggestions`). */
   totalSent: number;
   /** Total rows — alias of `totalSent`. */
   totalSuggestions: number;
+  /** "yes" responses this month. */
   acceptedCount: number;
   /** Rows where response is explicitly "no" (paired with acceptedCount for acceptance rate). */
   rejectedCount: number;
   pendingSuggestions: number;
   acceptedToday: number;
+  /** Same as totalSent for this month’s cohort. */
   totalThisMonth: number;
 }
 

@@ -67,7 +67,6 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
   {
     fullName: "Aman Kedia",
     dateOfBirth: "1992-05-03",
-    anniversary: "2017-12-10",
     queendom: "ananyshree",
   },
   {
@@ -125,7 +124,6 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
     queendom: "anishqa",
   },
   { fullName: "Abhishek Dutta", anniversary: "2007-04-28", queendom: "anishqa" },
-  { fullName: "Narendra Rao", dateOfBirth: "1975-04-11", queendom: "anishqa" },
   { fullName: "Vivek Lohia", anniversary: "2004-04-15", queendom: "anishqa" },
   { fullName: "Tushar Jani", dateOfBirth: "1953-04-29", queendom: "anishqa" },
   { fullName: "Kamal Agarwal", dateOfBirth: "2000-04-03", queendom: "ananyshree" },
@@ -142,6 +140,44 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
   { fullName: "Adarsh Narahari", dateOfBirth: "2000-04-30", queendom: "anishqa" },
   { fullName: "Shreya", dateOfBirth: "2000-04-30", queendom: "anishqa" },
   { fullName: "Sandeep Mehta", anniversary: "2000-04-30", queendom: "anishqa" },
+  // ─── May ──────────────────────────────────────────────────────────────────
+  { fullName: "TUSHAR", anniversary: "2002-05-28", queendom: "anishqa" },
+  {
+    fullName: "Ritu Arora",
+    dateOfBirth: "1958-05-29",
+    anniversary: "1981-05-11",
+    queendom: "anishqa",
+  },
+  { fullName: "Sourabh Chattopadhyay", dateOfBirth: "1968-05-30", queendom: "anishqa" },
+  {
+    fullName: "Narendra Rao",
+    dateOfBirth: "1975-04-11",
+    anniversary: "2003-05-25",
+    queendom: "anishqa",
+  },
+  { fullName: "Bhavadeep Reddy", anniversary: "1995-05-10", queendom: "anishqa" },
+  { fullName: "Daljit Singh", dateOfBirth: "1978-05-01", queendom: "anishqa" },
+  {
+    fullName: "Rahul",
+    dateOfBirth: "1978-05-27",
+    anniversary: "2006-05-08",
+    queendom: "anishqa",
+  },
+  { fullName: "Vijay Mallya", anniversary: "2025-05-09", queendom: "anishqa" },
+  { fullName: "Mihir Kaji", dateOfBirth: "1980-05-22", queendom: "anishqa" },
+  { fullName: "Gautam Desai", anniversary: "2023-05-11", queendom: "anishqa" },
+  { fullName: "Preethi", dateOfBirth: "1980-05-25", queendom: "anishqa" },
+  { fullName: "Ravi sonthalia", anniversary: "2013-05-12", queendom: "anishqa" },
+  { fullName: "Varun Bagla", anniversary: "2023-05-31", queendom: "anishqa" },
+  { fullName: "Ritesh", anniversary: "2014-05-10", queendom: "anishqa" },
+  { fullName: "Pankaj", anniversary: "1993-05-27", queendom: "ananyshree" },
+  { fullName: "Harsh Vardhan", dateOfBirth: "1978-05-11", queendom: "ananyshree" },
+  { fullName: "Aprameya Radhakrishna", dateOfBirth: "1981-05-01", queendom: "ananyshree" },
+  { fullName: "Harsha", dateOfBirth: "1986-05-09", queendom: "ananyshree" },
+  { fullName: "Aniket Bharadia", anniversary: "2017-05-06", queendom: "ananyshree" },
+  { fullName: "Shiva Shankar", dateOfBirth: "2001-05-17", queendom: "ananyshree" },
+  { fullName: "Aryaman Arya", dateOfBirth: "2003-05-02", queendom: "ananyshree" },
+  { fullName: "Ribhav Gupta", dateOfBirth: "1988-05-23", queendom: "ananyshree" },
 ];
 
 // ─── Builder ─────────────────────────────────────────────────────────────────

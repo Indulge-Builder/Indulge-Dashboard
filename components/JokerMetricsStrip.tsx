@@ -60,7 +60,7 @@ interface JokerMetricsStripProps {
 }
 
 /**
- * All-time Joker stats from the `jokers` table — separate from the ticket “today / this month” hero row.
+ * Joker stats for the current IST calendar month (`GET /api/jokers`) — same cohort as the Spoiled hero tile.
  * Acceptance score = Yes ÷ (Yes + No), excluding pending / blank responses.
  */
 export default function JokerMetricsStrip({

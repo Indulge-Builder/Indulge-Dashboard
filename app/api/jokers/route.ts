@@ -1,12 +1,17 @@
 /**
  * GET /api/jokers
  *
- * Fetches from the `jokers` table and returns per-queendom Joker metrics:
- *   uniqueSuggestionsCount – distinct normalized suggestion text (anti–campaign-spam)
- *   totalSent / totalSuggestions – row count (reach)
- *   acceptedCount    – count where response.toLowerCase() === 'yes'
- *   rejectedCount     – count where response.toLowerCase() === 'no'
- *   pendingSuggestions – count where response is neither 'yes' nor 'no'
+ * Fetches from the `jokers` table and returns per-queendom Joker metrics for the
+ * **current IST calendar month** only (monthly reset on the TV scorecard + strip).
+ * Row month = `date` if set, else `created_at` (IST calendar month).
+ *
+ *   uniqueSuggestionsCount – distinct normalized suggestion text (this month)
+ *   totalSent / totalSuggestions – row count this month
+ *   acceptedCount – "yes" responses this month
+ *   rejectedCount – "no" this month
+ *   pendingSuggestions – pending / blank this month
+ *   acceptedToday – "yes" where IST day is today (subset of this month)
+ *   totalThisMonth – same as totalSent (all rows in the cohort)
  *
  * Returns: { ananyshree: JokerStats, anishqa: JokerStats }
  */
@@ -21,6 +26,19 @@ interface JokerRow {
   suggestion: string | null;
   response: string | null;
   date: string | null;
+  created_at: string | null;
+}
+
+function rowIstMonth(row: JokerRow): string {
+  const fromDate = toISTMonth(row.date);
+  if (fromDate.length >= 7) return fromDate;
+  return toISTMonth(row.created_at);
+}
+
+function rowIstDay(row: JokerRow): string {
+  const fromDate = toISTDay(row.date);
+  if (fromDate.length >= 10) return fromDate;
+  return toISTDay(row.created_at);
 }
 
 interface JokerStats {
@@ -66,7 +84,7 @@ export async function GET() {
 
     const { data: rows, error } = await db
       .from("jokers")
-      .select("joker_name, suggestion, response, date");
+      .select("joker_name, suggestion, response, date, created_at");
 
     if (error) {
       console.error("[/api/jokers] Supabase error:", error.message);
@@ -81,27 +99,26 @@ export async function GET() {
       const matching = jokerRows.filter(
         (r) => (r.joker_name ?? "").toLowerCase().trim() === nameLower,
       );
+      const cohort = matching.filter((r) => rowIstMonth(r) === THIS_MONTH);
 
       const uniqueSuggestionKeys = new Set<string>();
-      for (const row of matching) {
+      for (const row of cohort) {
         const key = (row.suggestion ?? "").toLowerCase().trim();
         uniqueSuggestionKeys.add(key);
       }
       const uniqueSuggestionsCount = uniqueSuggestionKeys.size;
 
-      const totalSent = matching.length;
+      const totalSent = cohort.length;
       const totalSuggestions = totalSent;
 
       let acceptedCount = 0;
       let rejectedCount = 0;
       let pendingSuggestions = 0;
       let acceptedToday = 0;
-      let totalThisMonth = 0;
 
-      for (const row of matching) {
+      for (const row of cohort) {
         const resp = (row.response ?? "").toLowerCase().trim();
-        const rowDay = toISTDay(row.date);
-        const rowMonth = toISTMonth(row.date);
+        const rowDay = rowIstDay(row);
 
         if (resp === "yes") {
           acceptedCount++;
@@ -111,8 +128,6 @@ export async function GET() {
         } else {
           pendingSuggestions++;
         }
-
-        if (rowMonth === THIS_MONTH) totalThisMonth++;
       }
 
       return {
@@ -123,7 +138,7 @@ export async function GET() {
         rejectedCount,
         pendingSuggestions,
         acceptedToday,
-        totalThisMonth,
+        totalThisMonth: totalSent,
       };
     };
 

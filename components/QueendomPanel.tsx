@@ -255,12 +255,12 @@ export default function QueendomPanel({
               valueColor="text-red-400"
             />
 
-            {/* 5. Spoiled — accepted wins (Last 2 Weeks) */}
+            {/* 5. Spoiled — accepted wins (current IST month; see GET /api/jokers) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
               <p className="font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
                 Spoiled
                 <br />
-                (Last 2 Weeks)
+                (This Month)
               </p>
               <AnimatedCounter
                 value={jokerAccepted}
