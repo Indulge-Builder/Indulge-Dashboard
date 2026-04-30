@@ -58,10 +58,6 @@ export default function RenewalsPanel({
       <div className="flex-1 flex flex-col justify-center items-center gap-4 min-w-0">
         <p className="font-inter font-semibold text-[clamp(1.575rem,2.1vw,2.4rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
           Latest Renewals
-          <br />
-          <span className="text-[clamp(1.05rem,1.5vw,1.35rem)] tracking-[0.28em] text-champagne/75">
-            (This Month)
-          </span>
         </p>
         <div className="flex flex-col items-center gap-3 w-full">
           {data.renewals.length === 0 ? (
@@ -83,10 +79,6 @@ export default function RenewalsPanel({
       <div className="flex-1 flex flex-col justify-center items-center gap-4 min-w-0">
         <p className="font-inter font-semibold text-[clamp(1.575rem,2.1vw,2.4rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
           Latest Members
-          <br />
-          <span className="text-[clamp(1.05rem,1.5vw,1.35rem)] tracking-[0.28em] text-champagne/75">
-            (This Month)
-          </span>
         </p>
         <div className="flex flex-col items-center gap-3 w-full">
           {data.assignments.length === 0 ? (
