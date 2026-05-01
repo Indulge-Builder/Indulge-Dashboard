@@ -28,6 +28,7 @@ interface TicketRow {
   status: string | null;
   created_at: string | null;
   is_escalated: boolean | null;
+  is_incomplete: boolean | null;
 }
 
 // Void tickets (spam / deleted) are invisible to all dashboard metrics.
@@ -60,7 +61,7 @@ export async function GET(): Promise<Response> {
   while (true) {
     const { data, error } = await db
       .from("tickets")
-      .select("agent_name, status, created_at, is_escalated")
+      .select("agent_name, status, created_at, is_escalated, is_incomplete")
       .range(from, from + PAGE - 1);
 
     if (error) {
@@ -127,6 +128,11 @@ export async function GET(): Promise<Response> {
       (t) => t.is_escalated === true,
     ).length;
 
+    const incomplete = tickets.filter(
+      (t) =>
+        t.agent_name?.toLowerCase() === nameLower && t.is_incomplete === true,
+    ).length;
+
     return {
       tasksAssignedToday: assignedToday,
       tasksCompletedToday: completedToday,
@@ -134,6 +140,7 @@ export async function GET(): Promise<Response> {
       tasksAssignedThisMonth: assignedThisMonth,
       pendingScore,
       overdueCount,
+      incomplete,
     };
   }
 

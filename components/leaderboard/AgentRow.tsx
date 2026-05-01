@@ -21,10 +21,10 @@ import { AgentIcon } from "./AgentIcon";
 // ── Shared grid template (header + every row must match exactly) ──────────────
 // Exported so AgentLeaderboard.tsx uses the same string without duplication.
 export const GRID_COLS =
-  "grid-cols-[3.5rem_minmax(0,2fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)] " +
-  "sm:grid-cols-[4.5rem_minmax(0,2fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_minmax(7rem,1fr)] " +
-  "lg:grid-cols-[5.5rem_minmax(0,2fr)_minmax(8.5rem,1fr)_minmax(8.5rem,1fr)_minmax(8.5rem,1fr)] " +
-  "xl:grid-cols-[5.5rem_minmax(0,2fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1fr)]";
+  "grid-cols-[3.5rem_minmax(0,2fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_minmax(6.75rem,1.1fr)] " +
+  "sm:grid-cols-[4.5rem_minmax(0,2fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_minmax(8rem,1.1fr)] " +
+  "lg:grid-cols-[5.5rem_minmax(0,2fr)_minmax(8.5rem,1fr)_minmax(8.5rem,1fr)_minmax(9rem,1.1fr)] " +
+  "xl:grid-cols-[5.5rem_minmax(0,2fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1.1fr)]";
 
 // ── usePrevious ───────────────────────────────────────────────────────────────
 // Returns the value from the previous render. Used by AnimatedValue and AgentRow
@@ -41,9 +41,9 @@ function usePrevious<T>(value: T): T | undefined {
 // Numeric display that pops (scale + optional emerald ghost) when value increases.
 // Memoized — stable between renders where value doesn't change.
 interface AnimatedValueProps {
-  value:               number;
-  className?:          string;
-  style?:              React.CSSProperties;
+  value: number;
+  className?: string;
+  style?: React.CSSProperties;
   highlightOnIncrease?: boolean;
 }
 
@@ -53,9 +53,9 @@ const AnimatedValue = memo(function AnimatedValue({
   style,
   highlightOnIncrease = false,
 }: AnimatedValueProps) {
-  const prev        = usePrevious(value);
+  const prev = usePrevious(value);
   const [changePulse, setChangePulse] = useState(0);
-  const increased   = prev !== undefined && value > prev;
+  const increased = prev !== undefined && value > prev;
 
   useEffect(() => {
     if (prev !== undefined && prev !== value) {
@@ -64,12 +64,19 @@ const AnimatedValue = memo(function AnimatedValue({
   }, [prev, value]);
 
   return (
-    <span className={`relative inline-grid place-items-center ${className ?? ""}`} style={style}>
+    <span
+      className={`relative inline-grid place-items-center ${className ?? ""}`}
+      style={style}
+    >
       {/* Primary value — pops on increase */}
       <motion.span
         key={`base-${changePulse}-${value}`}
         style={gpuStyle}
-        animate={increased ? { scale: [1.3, 1], opacity: [0.85, 1] } : { scale: 1, opacity: 1 }}
+        animate={
+          increased
+            ? { scale: [1.3, 1], opacity: [0.85, 1] }
+            : { scale: 1, opacity: 1 }
+        }
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {value}
@@ -82,7 +89,7 @@ const AnimatedValue = memo(function AnimatedValue({
           className="absolute inset-0 grid place-items-center text-emerald-400"
           style={gpuStyle}
           initial={{ opacity: 0.95, scale: 1.3 }}
-          animate={{ opacity: 0,    scale: 1   }}
+          animate={{ opacity: 0, scale: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
           aria-hidden
         >
@@ -95,11 +102,11 @@ const AnimatedValue = memo(function AnimatedValue({
 
 // ── AgentRow ──────────────────────────────────────────────────────────────────
 export interface AgentRowProps {
-  agent:       AgentStats;
-  index:       number;
+  agent: AgentStats;
+  index: number;
   totalAgents: number;
-  baseDelay:   number;
-  isWinning:   boolean;
+  baseDelay: number;
+  isWinning: boolean;
 }
 
 export const AgentRow = memo(function AgentRow({
@@ -108,25 +115,26 @@ export const AgentRow = memo(function AgentRow({
   baseDelay,
   isWinning,
 }: AgentRowProps) {
-  const rowDelay  = baseDelay + index * 0.07;
+  const rowDelay = baseDelay + index * 0.07;
   const ringDelay = rowDelay + 0.25;
-  const rank      = index + 1;
+  const rank = index + 1;
 
-  const received = agent.tasksAssignedToday  ?? 0;
-  const today    = agent.tasksCompletedToday ?? 0;
+  const received = agent.tasksAssignedToday ?? 0;
+  const today = agent.tasksCompletedToday ?? 0;
   const todayPct = received > 0 ? today / received : 0;
 
-  const prevToday   = usePrevious(today);
+  const prevToday = usePrevious(today);
   const prevPending = usePrevious(agent.pendingScore ?? 0);
   const [surgeKey, setSurgeKey] = useState(0);
 
   // Memoised pending / overdue — stable across unrelated re-renders
-  const { pending, overdue } = useMemo(
+  const { pending, overdue, incomplete } = useMemo(
     () => ({
-      pending: agent.pendingScore  ?? 0,
+      pending: agent.pendingScore ?? 0,
       overdue: agent.overdueCount ?? 0,
+      incomplete: agent.incomplete ?? 0,
     }),
-    [agent.pendingScore, agent.overdueCount],
+    [agent.pendingScore, agent.overdueCount, agent.incomplete],
   );
   const hasOverdue = overdue > 0;
 
@@ -137,7 +145,7 @@ export const AgentRow = memo(function AgentRow({
   // Trigger surge flash when today-score or pending count increases
   useEffect(() => {
     if (Date.now() - mountTimeRef.current < 1500) return;
-    const todayIncreased   = prevToday   !== undefined && today   > prevToday;
+    const todayIncreased = prevToday !== undefined && today > prevToday;
     const pendingIncreased = prevPending !== undefined && pending > prevPending;
     if (todayIncreased || pendingIncreased) setSurgeKey((n) => n + 1);
   }, [today, pending, prevToday, prevPending]);
@@ -219,7 +227,11 @@ export const AgentRow = memo(function AgentRow({
         <motion.div
           className="ml-2 sm:ml-3 lg:ml-4"
           style={gpuStyle}
-          animate={surgeKey > 0 ? { scale: [1, 1.14, 1], opacity: [1, 0.88, 1] } : { scale: 1, opacity: 1 }}
+          animate={
+            surgeKey > 0
+              ? { scale: [1, 1.14, 1], opacity: [1, 0.88, 1] }
+              : { scale: 1, opacity: 1 }
+          }
           transition={{ duration: 0.55, ease: "easeOut" }}
         >
           <AgentIcon
@@ -247,7 +259,9 @@ export const AgentRow = memo(function AgentRow({
             className="font-edu text-[clamp(2.325rem,3.675vw,4.65rem)] leading-none text-green-400 tabular-nums font-semibold"
             highlightOnIncrease
           />
-          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">/</span>
+          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">
+            /
+          </span>
           <AnimatedValue
             value={received}
             className="font-inter text-[clamp(1.65rem,2.175vw,2.7rem)] text-white/40 leading-none tabular-nums"
@@ -259,28 +273,40 @@ export const AgentRow = memo(function AgentRow({
           <AnimatedValue
             value={agent.tasksCompletedThisMonth ?? 0}
             className="font-edu tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675vw,4.65rem)]"
-            style={{ color: rank === 1 ? "rgba(212,175,55,0.9)" : "rgba(190,190,190,0.75)" }}
+            style={{ color: "rgba(212,175,55,0.9)" }}
           />
-          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">/</span>
+          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">
+            /
+          </span>
           <AnimatedValue
             value={agent.tasksAssignedThisMonth ?? 0}
             className="font-inter text-[clamp(1.65rem,2.175vw,2.7rem)] text-white/40 leading-none tabular-nums"
           />
         </div>
 
-        {/* Col 5: Pending / Overdue — red glow when escalated */}
-        <div className="flex items-baseline justify-center gap-1 sm:gap-2">
+        {/* Col 5: Pending / Overdue / Incomplete */}
+        <div className="flex items-baseline justify-center gap-0.5 sm:gap-1">
           <AnimatedValue
             value={pending}
-            className="font-edu text-[clamp(2.025rem,3.075vw,4.125rem)] leading-none tabular-nums font-semibold text-red-400"
+            className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-semibold text-red-400"
             highlightOnIncrease
           />
-          <span className="font-edu text-[clamp(2.025rem,3.075vw,4.125rem)] leading-none tabular-nums font-bold text-white/30">/</span>
+          <span className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+            /
+          </span>
           <AnimatedValue
             value={overdue}
-            className={`font-edu text-[clamp(2.025rem,3.075vw,4.125rem)] leading-none tabular-nums font-bold ${
+            className={`font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-bold ${
               hasOverdue ? "error-overdue-glow" : "text-white/40"
             }`}
+          />
+          <span className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+            /
+          </span>
+          <AnimatedValue
+            value={incomplete}
+            className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-semibold text-slate-200/60"
+            highlightOnIncrease
           />
         </div>
       </div>

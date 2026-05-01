@@ -33,6 +33,7 @@ export interface TicketRowMinimal {
   agent_name: string | null;
   created_at: string | null;
   is_escalated: boolean | null;
+  is_incomplete?: boolean | null;
   tags?: Record<string, unknown> | null;
 }
 
@@ -131,6 +132,7 @@ interface AgentLiveStats {
   tasksAssignedThisMonth: number;
   pendingScore: number;
   overdueCount: number;
+  incomplete: number;
 }
 
 function calcAgent(
@@ -175,6 +177,10 @@ function calcAgent(
   const overdueCount = pendingTickets.filter(
     (t) => t.is_escalated === true,
   ).length;
+  const incomplete = rows.filter(
+    (t) =>
+      t.agent_name?.toLowerCase() === nameLower && t.is_incomplete === true,
+  ).length;
 
   return {
     tasksAssignedToday: assignedToday,
@@ -183,6 +189,7 @@ function calcAgent(
     tasksAssignedThisMonth: assignedThisMonth,
     pendingScore: pendingTickets.length,
     overdueCount,
+    incomplete,
   };
 }
 

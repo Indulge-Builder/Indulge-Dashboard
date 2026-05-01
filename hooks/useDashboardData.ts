@@ -95,6 +95,7 @@ function toTicketRow(raw: Record<string, unknown> | null): TicketRowMinimal | nu
     agent_name:    (raw.agent_name    as string | null)                 ?? null,
     created_at:    (raw.created_at    as string | null)                 ?? null,
     is_escalated:  (raw.is_escalated  as boolean | null)                ?? null,
+    is_incomplete: (raw.is_incomplete as boolean | null)                ?? null,
     tags:          (raw.tags          as Record<string, unknown> | null) ?? null,
   };
 }

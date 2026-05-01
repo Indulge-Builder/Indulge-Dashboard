@@ -44,6 +44,8 @@ export interface AgentStats {
   pendingScore: number;
   /** Among that monthly pending set: `is_escalated` (shown as Overdue in the leaderboard). */
   overdueCount: number;
+  /** Tickets flagged incomplete (`is_incomplete === true` only). */
+  incomplete: number;
 }
 
 export interface QueenStats {
