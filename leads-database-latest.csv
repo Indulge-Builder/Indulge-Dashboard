@@ -1,0 +1,1458 @@
+lead_id,agent_name,latest_status,created_at,modified_at,lead_name,business_vertical
+1211,Amit Agarwal,New,2026-04-25 13:29:28+00,2026-04-25 13:29:39.200514+00,Alim Khan,Indulge Global
+12112,Vikram,New,2026-04-25 13:26:39+00,2026-04-25 13:26:51.169275+00,Saheli Dutta,Indulge Shop
+480426000002028468,Samson Fernandes,New,2026-03-25 20:44:05+00,2026-05-01 10:52:24+00,Shishir Shishir kumar mishra,Indulge Global
+480426000002123068,Amit Agarwal,Lost,2026-03-25 20:44:06+00,2026-04-27 14:07:29+00,MWAB Dhanjay,Indulge Global
+480426000002336008,Amit Agarwal,Junk,2026-04-02 01:19:39+00,2026-04-28 12:51:49+00,Prashant Singh,Indulge Global
+480426000002343078,Amit Agarwal,Junk,2026-04-03 19:41:59+00,2026-04-28 14:01:38+00,Udit Arora,Indulge Global
+480426000002345066,Samson Fernandes,Junk,2026-04-03 16:13:32+00,2026-05-02 11:47:00+00,AK,Indulge Global
+480426000002362043,Amit Agarwal,Nurturing,2026-04-03 12:23:29+00,2026-04-28 13:55:59+00,Shresth Bajaj,Indulge Global
+480426000002377046,Amit Agarwal,In Discussion,2026-04-03 20:42:09+00,2026-04-28 13:38:32+00,Dhruv Talwar,Indulge Global
+480426000002381076,Amit Agarwal,In Discussion,2026-04-03 13:48:21+00,2026-04-29 16:40:42+00,Sonam Grover,Indulge Global
+480426000002384037,Amit Agarwal,Lost,2026-04-03 11:46:26+00,2026-04-28 13:29:05+00,Kanchan,Indulge Global
+480426000002389045,Meghana Singh,Nurturing,2026-04-02 11:22:40+00,2026-04-27 13:15:39+00,Champaka Bindiganavile,Indulge Global
+480426000002394045,Amit Agarwal,In Discussion,2026-04-02 00:38:17+00,2026-04-28 12:42:38+00,Dr. Gautam jani,Indulge Global
+480426000002394089,Amit Agarwal,Lost,2026-04-03 10:07:18+00,2026-04-28 13:25:57+00,Punita Khatter,Indulge Global
+480426000002400029,Amit Agarwal,Junk,2026-04-02 20:32:25+00,2026-04-28 12:38:39+00,Robin Gupta,Indulge Global
+480426000002402030,Amit Agarwal,Nurturing,2026-04-03 15:49:54+00,2026-04-28 13:23:57+00,Himanshu Thakkar Earth Acquirer,Indulge Global
+480426000002407002,Amit Agarwal,Lost,2026-04-02 08:46:10+00,2026-04-28 12:26:34+00,Sanjay Ajmera,Indulge Global
+480426000002411045,Amit Agarwal,Junk,2026-04-03 15:51:10+00,2026-04-28 13:17:39+00,Namita Dhawan,Indulge Global
+480426000002427001,Amit Agarwal,Nurturing,2026-04-03 20:59:47+00,2026-04-28 13:16:18+00,Zubair Mullaji(W.E.L.L),Indulge Global
+480426000002449031,Amit Agarwal,Junk,2026-04-04 01:03:33+00,2026-04-28 14:17:21+00,Khan Masood,Indulge Global
+480426000002461001,Amit Agarwal,Junk,2026-04-04 00:13:48+00,2026-04-28 14:15:16+00,Vikas Gupta,Indulge Global
+480426000002466002,Amit Agarwal,Junk,2026-04-04 02:55:50+00,2026-04-28 14:08:23+00,Suresh Bharwani,Indulge Global
+480426000002557001,Meghana Singh,Nurturing,2026-04-05 16:16:20+00,2026-04-27 17:24:54+00,Kabir,Indulge Global
+480426000002570031,Amit Agarwal,In Discussion,2026-04-05 20:56:42+00,2026-04-27 12:11:06+00,Jai Gandhi,Indulge Global
+480426000002570060,Meghana Singh,Lost,2026-04-05 21:26:29+00,2026-04-28 17:20:03+00,C Ratheesh,Indulge Global
+480426000002570149,Meghana Singh,Nurturing,2026-04-06 15:36:10+00,2026-04-26 18:26:43+00,Shobhit Chawla,Indulge Global
+480426000002570179,Meghana Singh,Junk,2026-04-07 12:12:18+00,2026-04-26 18:18:21+00,Pauliankhum Paite,Indulge Global
+480426000002582037,Meghana Singh,Junk,2026-04-06 08:49:20+00,2026-04-26 18:19:37+00,Umang,Indulge Global
+480426000002596015,Meghana Singh,Junk,2026-04-06 16:12:16+00,2026-04-26 18:20:50+00,Dual Chandra Ghosh,Indulge Global
+480426000002600014,Meghana Singh,Junk,2026-04-06 09:32:50+00,2026-04-26 18:21:42+00,Bhoopatkar,Indulge Global
+480426000002601030,Meghana Singh,Junk,2026-04-07 12:14:04+00,2026-04-26 18:22:27+00,Riyaz Patel,Indulge Global
+480426000002603017,Meghana Singh,Junk,2026-04-06 10:18:27+00,2026-04-28 17:30:14+00,Tharun Sholarajan,Indulge Global
+480426000002607009,Meghana Singh,Nurturing,2026-04-07 10:04:38+00,2026-04-27 18:46:45+00,Saurabh Legal,Indulge Global
+480426000002628001,Amit Agarwal,Lost,2026-04-06 01:58:35+00,2026-04-28 14:27:29+00,Ganesh Nanavare,Indulge Global
+480426000002628055,Meghana Singh,Lost,2026-04-07 12:14:27+00,2026-04-27 18:37:11+00,Anil Shah,Indulge Global
+480426000002670016,Meghana Singh,Junk,2026-04-07 13:29:07+00,2026-04-28 18:10:24+00,Aqeeb Khan,Indulge Global
+480426000002672016,Meghana Singh,Attempted,2026-04-07 13:27:36+00,2026-04-26 18:07:12+00,Mannan Shaikh,Indulge Global
+480426000002674001,Meghana Singh,In Discussion,2026-04-07 13:18:40+00,2026-04-26 18:05:19+00,Gurcharan Singh,Indulge Global
+480426000002674031,Samson Fernandes,Attempted,2026-04-07 13:29:19+00,2026-04-27 11:36:08+00,San Chawla,Indulge Global
+480426000002676041,Kaniisha Chamarria,In Discussion,2026-04-07 13:32:24+00,2026-04-27 11:24:34+00,Sarathi Ramadas,Indulge Global
+480426000002688067,Meghana Singh,Junk,2026-04-07 13:31:06+00,2026-04-27 18:15:12+00,Yuvraj Sandhu,Indulge Global
+480426000002690047,Meghana Singh,In Discussion,2026-04-07 13:39:15+00,2026-04-26 17:53:24+00,Shruti R Arhanth,Indulge Global
+480426000002696051,Meghana Singh,Junk,2026-04-07 13:29:48+00,2026-04-27 17:18:44+00,Devaki Trivedi,Indulge Global
+480426000002696076,Meghana Singh,Junk,2026-04-07 13:30:30+00,2026-04-27 16:26:11+00,Mansehaj Singh,Indulge Global
+480426000002699051,Meghana Singh,Junk,2026-04-07 13:31:40+00,2026-04-27 16:23:24+00,Aryan Singh,Indulge Global
+480426000002699139,Meghana Singh,Junk,2026-04-09 16:36:55+00,2026-04-27 18:48:34+00,Rammohan Gurjar,Indulge Global
+480426000002779027,Meghana Singh,Lost,2026-04-11 01:19:01+00,2026-04-28 18:21:06+00,Zen,Indulge Global
+480426000002787179,Meghana Singh,Nurturing,2026-04-10 23:33:00+00,2026-04-26 15:08:59+00,Girish Bindal,Indulge Global
+480426000002793090,Meghana Singh,Junk,2026-04-11 11:17:46+00,2026-04-26 14:42:42+00,प्रबंधक कृष्ण तिवारी,Indulge Global
+480426000002808180,Meghana Singh,Nurturing,2026-04-11 09:10:50+00,2026-04-28 18:21:33+00,Ajay Garg,Indulge Global
+480426000002828031,Kaniisha Chamarria,Lost,2026-04-10 14:04:53+00,2026-04-30 10:59:15+00,Ishan Shrinet,Indulge Global
+480426000002828120,Meghana Singh,Lost,2026-04-11 12:03:41+00,2026-04-28 18:24:06+00,Rajesh Bhasin,Indulge Global
+480426000002840030,Meghana Singh,Junk,2026-04-11 03:17:07+00,2026-04-28 18:26:37+00,Md Mohsin,Indulge Global
+480426000002856310,Meghana Singh,Junk,2026-04-14 22:27:22+00,2026-04-28 15:35:31+00,Sonu Gupta,Indulge Global
+480426000002861272,Samson Fernandes,Junk,2026-04-14 17:08:21+00,2026-05-02 11:57:00+00,Vivek Bhatia,Indulge Global
+480426000002872519,Harsh Gupta,Junk,2026-04-15 23:23:02+00,2026-04-27 10:45:42+00,Omkar Ekbote,Indulge Shop
+480426000002879268,Harsh Gupta,Attempted,2026-04-15 10:11:30+00,2026-04-27 10:47:28+00,Shivam Pujara,Indulge Shop
+480426000002879364,Harsh Gupta,Attempted,2026-04-15 18:13:07+00,2026-04-27 10:48:10+00,Devyesh Vats,Indulge Shop
+480426000002887001,Harsh Gupta,Attempted,2026-04-11 21:20:07+00,2026-04-27 10:49:02+00,Arvind Bajaj,Indulge Shop
+480426000002887310,Meghana Singh,Junk,2026-04-14 21:36:24+00,2026-04-28 15:12:13+00,Zar Kha,Indulge Global
+480426000002887400,Amit Agarwal,Junk,2026-04-15 14:52:34+00,2026-04-27 14:37:40+00,mithila murada,Indulge Global
+480426000002890071,Amit Agarwal,Junk,2026-04-13 21:30:55+00,2026-04-27 13:58:58+00,Ayat,Indulge Global
+480426000002894004,Harsh Gupta,Attempted,2026-04-12 10:44:41+00,2026-04-27 10:49:31+00,Shirish Shah,Indulge Shop
+480426000002894062,Harsh Gupta,Attempted,2026-04-13 00:14:08+00,2026-04-27 10:50:40+00,Harshal Thite,Indulge Shop
+480426000002898005,Meghana Singh,Junk,2026-04-11 23:47:43+00,2026-04-26 14:14:43+00,Deepanshi pant,Indulge Global
+480426000002903161,Amit Agarwal,Junk,2026-04-14 12:05:14+00,2026-04-27 10:08:53+00,Nishant Kumar,Indulge Global
+480426000002906182,Meghana Singh,Nurturing,2026-04-15 06:32:36+00,2026-04-28 15:44:41+00,Dipika Jhunjhunwala,Indulge Global
+480426000002911030,Meghana Singh,Lost,2026-04-12 00:05:55+00,2026-04-30 18:02:35+00,Pankaj Bansal,Indulge Global
+480426000002911211,Kaniisha Chamarria,Lost,2026-04-13 18:43:15+00,2026-04-29 15:52:45+00,Aditya Daftuar,Indulge Global
+480426000002931339,Meghana Singh,Nurturing,2026-04-15 00:45:48+00,2026-04-30 16:42:10+00,Serene Bamji,Indulge Global
+480426000002935097,Amit Agarwal,In Discussion,2026-04-14 10:04:35+00,2026-05-03 21:17:45+00,Deepak Setia,Indulge Global
+480426000002977006,Amit Agarwal,In Discussion,2026-04-17 20:02:02+00,2026-04-27 09:29:16+00,Aditya Jain,Indulge Global
+480426000002983065,Amit Agarwal,Lost,2026-04-17 23:56:12+00,2026-04-27 11:09:38+00,Vinay M N,Indulge Global
+480426000003004021,Amit Agarwal,Trash,2026-04-18 05:46:52+00,2026-04-27 09:58:50+00,Joshi HARISH CHANDRA,Indulge Global
+480426000003030033,Amit Agarwal,In Discussion,2026-04-18 00:43:21+00,2026-04-27 09:13:47+00,Anwesh Haudhari,Indulge Global
+480426000003066031,Meghana Singh,Junk,2026-04-19 23:30:57+00,2026-04-26 14:03:22+00,Sahil Rana,Indulge Global
+480426000003072030,Meghana Singh,Junk,2026-04-18 20:19:47+00,2026-04-28 16:53:53+00,Ashish Bhati,Indulge Global
+480426000003072176,Samson Fernandes,Junk,2026-04-24 17:21:03+00,2026-05-02 11:23:54+00,Naveen kumar nareti Nareti,Indulge Global
+480426000003074012,Kaniisha Chamarria,Junk,2026-04-19 20:28:57+00,2026-04-30 11:20:19+00,enamul7738,Indulge Global
+480426000003080050,Meghana Singh,Junk,2026-04-20 13:26:25+00,2026-04-26 14:01:17+00,gawadem259,Indulge Global
+480426000003081002,Meghana Singh,Junk,2026-04-18 19:42:54+00,2026-04-26 14:00:22+00,Mukund Mittal,Indulge Global
+480426000003081093,Amit Agarwal,Lost,2026-04-21 00:24:09+00,2026-05-01 11:41:24+00,Jignesh Jhaveri,Indulge Global
+480426000003086250,Meghana Singh,Junk,2026-04-23 18:22:44+00,2026-04-28 11:40:43+00,adiiiiiiiiiii,Indulge Global
+480426000003092006,Meghana Singh,Junk,2026-04-18 22:57:36+00,2026-04-26 13:57:31+00,Nidhi,Indulge Global
+480426000003093044,Amit Agarwal,Lost,2026-04-21 21:17:25+00,2026-05-01 11:27:01+00,Babaji Shinde,Indulge Global
+480426000003095190,Kaniisha Chamarria,Lost,2026-04-20 11:35:18+00,2026-04-30 11:18:45+00,Mohammed faisal vahedna,Indulge Global
+480426000003096018,Meghana Singh,Nurturing,2026-04-19 18:24:19+00,2026-04-26 14:07:48+00,Hemant Kumar,Indulge Global
+480426000003098248,Amit Agarwal,Lost,2026-04-24 18:39:34+00,2026-05-01 09:59:47+00,Vivek_ Gupta,Indulge Global
+480426000003103002,Meghana Singh,Lost,2026-04-18 21:38:39+00,2026-04-30 15:49:49+00,Shivam Goel,Indulge Global
+480426000003103061,Meghana Singh,In Discussion,2026-04-19 09:49:54+00,2026-04-28 11:07:59+00,Nitesh Luthra,Indulge Global
+480426000003103125,Meghana Singh,Junk,2026-04-20 00:25:02+00,2026-04-26 13:50:14+00,"I,am prabir",Indulge Global
+480426000003103303,Amit Agarwal,Junk,2026-04-24 19:28:00+00,2026-05-01 10:00:48+00,bibung narzary,Indulge Global
+480426000003115045,Meghana Singh,Lost,2026-04-19 21:37:05+00,2026-04-30 11:15:37+00,Rev.Dr.Leslie Pinto.,Indulge Global
+480426000003118001,Amit Agarwal,New,2026-04-18 22:11:56+00,2026-05-03 21:24:05+00,Tina tina garg,Indulge Global
+480426000003121122,Kaniisha Chamarria,Qualified,2026-04-23 08:11:45+00,2026-04-29 16:13:50+00,Raj Bhalla,Indulge Global
+480426000003122002,Meghana Singh,Junk,2026-04-19 07:35:08+00,2026-04-26 11:36:47+00,,Indulge Global
+480426000003128034,Meghana Singh,Junk,2026-04-19 23:33:31+00,2026-04-27 12:44:39+00,lina mahato,Indulge Global
+480426000003135006,Meghana Singh,Junk,2026-04-19 17:18:34+00,2026-04-26 11:33:18+00,,Indulge Global
+480426000003137155,Amit Agarwal,Lost,2026-04-24 18:21:59+00,2026-05-01 10:06:05+00,Sapna NarijNaiy,Indulge Global
+480426000003141282,Meghana Singh,Junk,2026-04-23 13:51:14+00,2026-04-29 17:07:55+00,Prateek Tangence Test,Indulge Global
+480426000003141314,Amit Agarwal,Lost,2026-04-23 19:11:11+00,2026-05-01 10:57:29+00,Bhavar Baval,Indulge Global
+480426000003141411,Amit Agarwal,Lost,2026-04-25 07:44:21+00,2026-05-01 08:56:39+00,Rajendra Vijan,Indulge Global
+480426000003164097,Meghana Singh,Lost,2026-04-23 18:33:29+00,2026-04-27 11:20:57+00,Parul Tibrewala,Indulge Global
+480426000003185034,Meghana Singh,Junk,2026-04-25 11:17:18+00,2026-04-26 10:45:33+00,,Indulge Global
+480426000003185070,Meghana Singh,Attempted,2026-04-25 11:30:17+00,2026-04-25 10:42:50+00,,Indulge Global
+480426000003194004,Meghana Singh,Attempted,2026-04-25 12:42:54+00,2026-04-26 10:40:25+00,,Indulge Global
+480426000003197015,Kaniisha Chamarria,Junk,2026-04-26 21:57:19+00,2026-04-27 16:04:56+00,A K- 47,Indulge Global
+480426000003199935,Samson Fernandes,Junk,2026-04-25 19:00:16+00,2026-04-27 09:59:07+00,testing,Indulge Global
+480426000003200034,Meghana Singh,Attempted,2026-04-26 06:51:05+00,2026-04-26 10:30:00+00,Kobir Ahmed,Indulge Global
+480426000003200069,Admin @ Indulge,New,2026-04-26 21:22:35+00,2026-04-27 09:22:35+00,Orvil Gonsalves,Indulge House
+480426000003206002,Harsh Gupta,In Discussion,2026-04-25 11:35:57+00,2026-04-27 10:43:20+00,Alpa Shah,Indulge Shop
+480426000003210031,Kaniisha Chamarria,Junk,2026-04-26 11:33:47+00,2026-04-29 16:10:06+00,PREMIREX REAL ESTATE,Indulge Global
+480426000003219006,Meghana Singh,Attempted,2026-04-25 10:21:07+00,2026-04-26 10:27:49+00,,Indulge Global
+480426000003220003,Kaniisha Chamarria,Junk,2026-04-26 07:52:13+00,2026-04-27 12:27:40+00,️️️️️️,Indulge Global
+480426000003232011,Meghana Singh,Attempted,2026-04-26 11:09:34+00,2026-04-26 11:12:06+00,Ashish Sharma,Indulge Global
+480426000003233001,Katya,Attempted,2026-04-25 13:32:58+00,2026-04-27 09:39:12+00,avinash sharma,Indulge Shop
+480426000003233033,Amit Agarwal,Junk,2026-04-25 18:10:02+00,2026-04-27 08:52:40+00,Alim Khan,Indulge Global
+480426000003233065,Vikram,In Discussion,2026-04-25 18:53:45+00,2026-04-27 11:22:20+00,Saheli Dutta,Indulge Shop
+480426000003246008,Amit Agarwal,Lost,2026-04-26 19:32:42+00,2026-04-30 14:24:42+00,Suresh Naik,Indulge Global
+480426000003250005,Amit Agarwal,In Discussion,2026-04-26 12:58:16+00,2026-04-28 15:39:55+00,Vibhas Sen,Indulge Global
+480426000003255002,Meghana Singh,Attempted,2026-04-26 00:04:56+00,2026-04-26 10:22:55+00,KUNAL AGGARWAL,Indulge Global
+480426000003256002,Kaniisha Chamarria,Attempted,2026-04-26 02:42:15+00,2026-04-26 10:20:01+00,Essam Hawash,Indulge Global
+480426000003259002,Meghana Singh,Junk,2026-04-26 06:18:06+00,2026-04-26 10:19:43+00,Ramkishor Prajapat,Indulge Global
+480426000003263001,Kaniisha Chamarria,Junk,2026-04-26 20:02:50+00,2026-04-29 16:14:11+00,Nandlal Sah,Indulge Global
+480426000003263036,Samson Fernandes,Attempted,2026-04-27 21:14:42+00,2026-04-27 10:15:07+00,Baito Bhumij,Indulge Global
+480426000003270001,Kaniisha Chamarria,Lost,2026-04-27 21:16:49+00,2026-04-29 12:58:18+00,Mallika Bajaj,Indulge Global
+480426000003271006,Meghana Singh,Junk,2026-04-27 12:53:35+00,2026-04-27 12:57:16+00,Naseemamastani,Indulge Global
+480426000003273151,Samson Fernandes,Junk,2026-04-27 13:38:25+00,2026-04-27 13:39:00+00,test,Indulge Global
+480426000003273245,Samson Fernandes,Lost,2026-04-27 13:39:22+00,2026-04-27 13:39:44+00,test,Indulge Global
+480426000003273345,Samson Fernandes,Junk,2026-04-27 13:40:57+00,2026-04-27 13:44:55+00,tesy,Indulge Global
+480426000003285015,Amit Agarwal,In Discussion,2026-04-28 07:44:57+00,2026-04-30 15:11:10+00,Sumit Agarwal,Indulge Global
+480426000003286012,Amit Agarwal,In Discussion,2026-04-28 01:11:41+00,2026-04-30 15:17:27+00,Dharan Premjee,Indulge Global
+480426000003290001,Meghana Singh,Junk,2026-04-27 12:04:02+00,2026-04-27 12:14:56+00,jayakumar,Indulge Global
+480426000003290039,Kaniisha Chamarria,Junk,2026-04-27 12:08:46+00,2026-04-27 13:02:55+00,Dilkhush Kumar,Indulge Global
+480426000003290077,Amit Agarwal,Junk,2026-04-28 02:16:07+00,2026-04-30 15:05:47+00,محمد زاهد الإسلام Jahid Khan,Indulge Global
+480426000003290113,Admin @ Indulge,New,2026-04-28 08:40:37+00,2026-04-28 08:40:37+00,Jude D'Souza,Indulge House
+480426000003290148,Admin @ Indulge,New,2026-04-28 10:17:28+00,2026-04-28 10:17:28+00,Dava Yadav,Indulge Legacy
+480426000003290183,Samson Fernandes,In Discussion,2026-04-28 13:04:52+00,2026-04-28 13:35:46+00,Yash Kavediya,Indulge Global
+480426000003290221,Meghana Singh,Junk,2026-04-28 16:18:18+00,2026-04-28 16:20:34+00,Vinayak Niak,Indulge Global
+480426000003290259,Meghana Singh,Junk,2026-04-28 16:28:32+00,2026-04-28 18:14:13+00,afam test,Indulge Global
+480426000003290297,Amit Agarwal,Junk,2026-04-28 16:29:48+00,2026-04-29 09:21:33+00,arfam test,Indulge Global
+480426000003296001,Harsh Gupta,Attempted,2026-04-27 12:08:05+00,2026-04-28 12:11:29+00,Anusari Anusheel Pathak,Indulge Shop
+480426000003296039,Amit Agarwal,Attempted,2026-04-27 12:08:25+00,2026-04-27 12:13:38+00,Rishi Shyam bhai,Indulge Global
+480426000003296077,Amit Agarwal,Attempted,2026-04-27 22:13:17+00,2026-04-28 08:31:00+00,Gorak Gavit,Indulge Global
+480426000003296140,Kaniisha Chamarria,Attempted,2026-04-28 17:32:16+00,2026-04-29 12:46:42+00,Nishan Gharti Chhetri,Indulge Global
+480426000003296178,Admin @ Indulge,New,2026-04-28 18:06:30+00,2026-04-28 18:06:30+00,Vandana B Chhabra,Indulge House
+480426000003299032,Amit Agarwal,In Discussion,2026-04-27 20:51:17+00,2026-04-28 08:34:42+00,Amrit Khandelwal,Indulge Global
+480426000003300032,Meghana Singh,Attempted,2026-04-28 18:44:41+00,2026-04-28 18:45:16+00,pirya,Indulge Global
+480426000003301083,Amit Agarwal,Attempted,2026-04-28 21:47:53+00,2026-04-29 08:28:00+00,Prathamesh Vidhate,Indulge Global
+480426000003304008,Amit Agarwal,In Discussion,2026-04-28 00:44:03+00,2026-05-01 16:01:01+00,A STAR INTERNATIONAL- Karan Singh Chadha,Indulge Global
+480426000003309024,Kaniisha Chamarria,Nurturing,2026-04-28 10:48:22+00,2026-04-29 16:09:04+00,Sudarshan jadhav,Indulge Global
+480426000003314011,Amit Agarwal,Attempted,2026-04-27 22:39:04+00,2026-04-28 08:24:19+00,Vikram Advani,Indulge Global
+480426000003316020,Amit Agarwal,Attempted,2026-04-27 21:37:50+00,2026-04-28 08:27:47+00,Dhwanij Shah,Indulge Global
+480426000003321035,Amit Agarwal,Lost,2026-04-28 08:42:27+00,2026-04-30 15:03:27+00,Sanjay Kadam,Indulge Global
+480426000003324001,Amit Agarwal,Junk,2026-04-27 13:08:09+00,2026-04-27 13:45:28+00,⚡⚡itz murmu Koda Rahul Murmu,Indulge Global
+480426000003324039,Amit Agarwal,Lost,2026-04-27 13:22:47+00,2026-04-30 14:32:22+00,",@jaga07✨?⚡(Jagaatheesh )",Indulge Global
+480426000003324077,Katya,In Discussion,2026-04-27 19:20:08+00,2026-04-28 10:07:07+00,Krishna Parulekar,Indulge Shop
+480426000003324115,Amit Agarwal,In Discussion,2026-04-28 01:55:00+00,2026-04-28 09:03:48+00,Sanam Pasricha,Indulge Global
+480426000003324150,Amit Agarwal,In Discussion,2026-04-28 04:14:32+00,2026-04-28 16:37:13+00,Aishwarya Shaha,Indulge Global
+480426000003324185,Samson Fernandes,Lost,2026-04-28 12:07:34+00,2026-04-28 12:44:24+00,Sonu kumar 50k,Indulge Global
+480426000003324223,Amit Agarwal,Attempted,2026-04-28 19:01:27+00,2026-04-29 08:29:40+00,Prakash Arora,Indulge Global
+480426000003324261,Amit Agarwal,Lost,2026-04-28 19:40:55+00,2026-04-29 13:46:50+00,Rajendra Tripathi,Indulge Global
+480426000003324299,Amit Agarwal,Junk,2026-04-28 20:22:15+00,2026-04-29 09:21:53+00,arfam test,Indulge Global
+480426000003324335,Amit Agarwal,In Discussion,2026-04-28 20:31:06+00,2026-04-29 10:08:21+00,Ganesh Kamath,Indulge Global
+480426000003325048,Amit Agarwal,In Discussion,2026-04-28 21:47:14+00,2026-04-30 13:40:27+00,Kushal Sai,Indulge Global
+480426000003326046,Meghana Singh,In Discussion,2026-04-28 18:47:48+00,2026-04-28 18:54:26+00,NK,Indulge Global
+480426000003327001,Kaniisha Chamarria,Junk,2026-04-27 13:11:55+00,2026-04-27 15:59:17+00,nobin_king-?,Indulge Global
+480426000003327039,Samson Fernandes,Junk,2026-04-28 12:44:21+00,2026-04-28 15:43:28+00,Atiukul SK,Indulge Global
+480426000003327077,Samson Fernandes,Lost,2026-04-28 15:57:24+00,2026-04-28 15:57:53+00,arfam test,Indulge Global
+480426000003327115,Meghana Singh,Junk,2026-04-28 15:58:09+00,2026-04-28 15:58:57+00,arfam test,Indulge Global
+480426000003330044,Amit Agarwal,Junk,2026-04-28 20:03:54+00,2026-04-29 09:23:53+00,Kaniisha Chamarria,Indulge Global
+480426000003331001,Meghana Singh,Junk,2026-04-27 13:12:43+00,2026-04-27 13:22:39+00,Nobin Sk,Indulge Global
+480426000003331039,Meghana Singh,Junk,2026-04-27 18:51:36+00,2026-04-27 18:53:54+00,yseh...sonwane...111...xx,Indulge Global
+480426000003331078,Amit Agarwal,Lost,2026-04-28 03:45:40+00,2026-04-30 14:21:30+00,Pankaj Kumar,Indulge Global
+480426000003331114,Amit Agarwal,Attempted,2026-04-28 05:10:19+00,2026-04-28 08:15:40+00,Santosh Kumar,Indulge Global
+480426000003332022,Amit Agarwal,Attempted,2026-04-27 22:08:00+00,2026-04-28 08:18:13+00,sumanarora4768,Indulge Global
+480426000003335001,Samson Fernandes,Junk,2026-04-27 13:25:52+00,2026-04-27 13:27:58+00,test test,Indulge Global
+480426000003335039,Meghana Singh,Junk,2026-04-27 14:16:19+00,2026-04-27 18:52:34+00,"arfa, testing",Indulge Global
+480426000003335077,Amit Agarwal,Attempted,2026-04-27 21:58:51+00,2026-04-28 08:07:12+00,Piyus Verma,Indulge Global
+480426000003335112,Amit Agarwal,Attempted,2026-04-27 21:59:08+00,2026-04-28 08:59:24+00,Shahnawaz Hussain,Indulge Global
+480426000003335148,Admin @ Indulge,New,2026-04-27 22:38:40+00,2026-04-27 22:38:40+00,rider.....,Indulge House
+480426000003335183,Kaniisha Chamarria,Junk,2026-04-28 14:39:06+00,2026-04-29 16:00:20+00,Vikas Rathore,Indulge Global
+480426000003335221,Vikram,Attempted,2026-04-28 15:07:58+00,2026-04-28 15:19:30+00,Aishwarya Girasey,Indulge Shop
+480426000003335265,Samson Fernandes,Lost,2026-04-28 17:20:35+00,2026-04-28 17:40:55+00,Bhavya Jain,Indulge Global
+480426000003338013,Amit Agarwal,Attempted,2026-04-28 01:44:35+00,2026-04-28 08:04:27+00,Sumit Jatav,Indulge Global
+480426000003340001,Amit Agarwal,In Discussion,2026-04-27 15:57:36+00,2026-04-27 16:23:27+00,Shya Exports Private Limited,Indulge Global
+480426000003343002,Admin @ Indulge,New,2026-04-27 17:17:06+00,2026-04-27 17:17:06+00,Kashif,Indulge House
+480426000003343037,Admin @ Indulge,New,2026-04-28 13:01:01+00,2026-04-28 13:01:01+00,Ashish Airen,Indulge House
+480426000003343072,Meghana Singh,Junk,2026-04-28 18:46:29+00,2026-04-28 18:53:15+00,Bhaktabachhala surendra pradhan,Indulge Global
+480426000003343110,Amit Agarwal,Junk,2026-04-28 20:22:24+00,2026-04-29 09:22:12+00,arfam test,Indulge Global
+480426000003346002,Meghana Singh,Junk,2026-04-27 18:38:51+00,2026-04-27 18:45:54+00,꧁༒???? ???? ➒➂༒꧂,Indulge Global
+480426000003346041,Meghana Singh,Attempted,2026-04-28 10:15:01+00,2026-04-28 10:23:01+00,Tapan kumar,Indulge Global
+480426000003346080,Meghana Singh,Junk,2026-04-28 11:32:48+00,2026-04-28 11:37:07+00,भोला कुमार,Indulge Global
+480426000003346118,Samson Fernandes,Junk,2026-04-28 16:04:32+00,2026-04-29 09:30:01+00,arfam test,Indulge Global
+480426000003346156,Amit Agarwal,In Discussion,2026-04-28 20:22:07+00,2026-04-29 13:53:57+00,Sumit Sahu,Indulge Global
+480426000003346191,Amit Agarwal,Junk,2026-04-28 20:22:09+00,2026-04-29 09:22:33+00,arfam test,Indulge Global
+480426000003347001,Meghana Singh,Junk,2026-04-27 18:39:27+00,2026-04-27 18:42:26+00,Subhash Padvi,Indulge Global
+480426000003347039,Admin @ Indulge,New,2026-04-28 12:23:44+00,2026-04-28 12:23:44+00,Anuj D Mehta,Indulge House
+480426000003348001,Samson Fernandes,Junk,2026-04-27 19:20:56+00,2026-04-28 15:45:06+00,arfam test,Indulge Global
+480426000003348039,Samson Fernandes,Attempted,2026-04-28 11:05:32+00,2026-04-28 11:22:20+00,Kruthik Gk,Indulge Global
+480426000003348077,Amit Agarwal,In Discussion,2026-04-28 15:59:03+00,2026-04-28 16:30:22+00,Sohini Sadhukhan,Indulge Global
+480426000003348115,Samson Fernandes,Junk,2026-04-28 16:01:37+00,2026-04-28 16:03:10+00,arfam test,Indulge Global
+480426000003348153,Amit Agarwal,Junk,2026-04-28 20:23:25+00,2026-04-29 09:23:35+00,arfam test,Indulge Global
+480426000003349002,Kaniisha Chamarria,Junk,2026-04-27 19:39:00+00,2026-04-29 16:06:15+00,8400959643,Indulge Global
+480426000003349041,Admin @ Indulge,New,2026-04-28 10:34:41+00,2026-04-28 10:34:41+00,Jen Flo,Indulge House
+480426000003352024,Meghana Singh,Junk,2026-04-28 16:06:04+00,2026-04-28 18:13:53+00,arfam test,Indulge Global
+480426000003352062,Admin @ Indulge,New,2026-04-28 16:20:48+00,2026-04-28 16:20:48+00,Dhaval Vora,Indulge House
+480426000003352097,Admin @ Indulge,New,2026-04-28 17:44:23+00,2026-04-28 17:44:23+00,mannu,Indulge Legacy
+480426000003352132,Kaniisha Chamarria,Junk,2026-04-28 18:08:34+00,2026-04-29 12:57:14+00,Yathin Reddy,Indulge Global
+480426000003352170,Admin @ Indulge,New,2026-04-28 18:23:18+00,2026-04-28 18:23:18+00,Tahur Bagwan,Indulge House
+480426000003352205,Amit Agarwal,In Discussion,2026-04-28 19:39:30+00,2026-04-29 08:54:04+00,Sandesh Kumar,Indulge Global
+480426000003353001,Amit Agarwal,Lost,2026-04-27 23:23:05+00,2026-04-30 14:50:42+00,Sachin Patil,Indulge Global
+480426000003353037,Amit Agarwal,Attempted,2026-04-28 00:14:17+00,2026-04-28 08:40:35+00,Mitsu Pakvasa,Indulge Global
+480426000003353072,Amit Agarwal,Lost,2026-04-28 07:47:29+00,2026-04-30 10:49:03+00,Kush Arya,Indulge Global
+480426000003353107,Meghana Singh,Junk,2026-04-28 12:42:58+00,2026-04-28 12:58:14+00,Atikul Kul SK,Indulge Global
+480426000003353145,Amit Agarwal,Junk,2026-04-28 16:05:33+00,2026-04-29 09:23:16+00,arfam test,Indulge Global
+480426000003354002,Amit Agarwal,Junk,2026-04-28 00:38:53+00,2026-04-28 09:14:11+00,Arshad Imam,Indulge Global
+480426000003354037,Kaniisha Chamarria,Junk,2026-04-28 11:33:21+00,2026-04-28 15:51:08+00,भोला कुमार भोला कुमार,Indulge Global
+480426000003354075,Admin @ Indulge,New,2026-04-28 14:48:42+00,2026-04-28 14:48:42+00,Kismat Ali,Indulge Legacy
+480426000003355001,Amit Agarwal,Junk,2026-04-28 02:16:46+00,2026-04-28 09:11:05+00,Jahid Khan,Indulge Global
+480426000003355036,Amit Agarwal,Junk,2026-04-28 20:22:20+00,2026-04-29 09:22:56+00,arfam test,Indulge Global
+480426000003358014,Meghana Singh,Junk,2026-04-28 14:33:43+00,2026-04-28 14:56:27+00,laddustm5348,Indulge Global
+480426000003365001,Amit Agarwal,Junk,2026-04-28 22:25:40+00,2026-04-30 08:45:59+00,Fayazahmed Majeed,Indulge Global
+480426000003365036,Admin @ Indulge,New,2026-04-29 00:29:46+00,2026-04-29 00:29:46+00,Marilyn Katherine Dyas,Indulge House
+480426000003373002,Harsh Gupta,Attempted,2026-04-28 22:39:29+00,2026-04-30 17:39:16+00,Hemalatha Deepak,Indulge Shop
+480426000003373037,Amit Agarwal,In Discussion,2026-04-29 00:46:30+00,2026-04-30 17:07:01+00,Vighnesh Setty,Indulge Global
+480426000003379001,Admin @ Indulge,New,2026-04-28 22:52:45+00,2026-04-28 22:52:45+00,Praveen Kumar,Indulge House
+480426000003379036,Admin @ Indulge,New,2026-04-29 00:48:04+00,2026-04-29 00:48:04+00,Sarah Sharma,Indulge House
+480426000003379071,Admin @ Indulge,New,2026-04-29 10:27:07+00,2026-04-29 10:27:07+00,Jasdeep Sandhu,Indulge Legacy
+480426000003379107,Admin @ Indulge,New,2026-04-29 11:37:10+00,2026-04-29 11:37:10+00,Anil Kumar,Indulge Legacy
+480426000003385001,Amit Agarwal,Attempted,2026-04-28 22:55:40+00,2026-04-29 08:59:46+00,Afzal Shaikh,Indulge Global
+480426000003392002,Admin @ Indulge,New,2026-04-28 23:34:31+00,2026-04-28 23:34:31+00,?????ℎ ????ℎ??,Indulge Legacy
+480426000003398001,Amit Agarwal,In Discussion,2026-04-29 00:12:33+00,2026-04-29 11:51:26+00,shailesh kumari,Indulge Global
+480426000003399014,Meghana Singh,Attempted,2026-04-29 10:48:36+00,2026-04-29 10:49:39+00,Sharan,Indulge Global
+480426000003405002,Amit Agarwal,Junk,2026-04-29 00:38:28+00,2026-04-29 11:28:55+00,Kaustubh Patil,Indulge Global
+480426000003405038,Amit Agarwal,In Discussion,2026-04-29 01:54:57+00,2026-04-30 11:37:40+00,Akshay Gupta,Indulge Global
+480426000003409001,Amit Agarwal,In Discussion,2026-04-29 00:43:49+00,2026-04-29 11:37:39+00,Sandeep Aurora,Indulge Global
+480426000003418001,Amit Agarwal,Attempted,2026-04-29 04:14:40+00,2026-04-29 09:24:14+00,.,Indulge Global
+480426000003424002,Amit Agarwal,Lost,2026-04-29 08:29:13+00,2026-04-30 11:27:06+00,Ravi K Singhvie,Indulge Global
+480426000003426002,Amit Agarwal,Attempted,2026-04-29 08:34:03+00,2026-04-29 08:41:47+00,Sachin Chandiwal,Indulge Global
+480426000003437002,Samson Fernandes,Attempted,2026-04-29 09:50:53+00,2026-04-29 10:00:35+00,Prashant Mehta,Indulge Global
+480426000003442001,Admin @ Indulge,New,2026-04-29 11:00:49+00,2026-04-29 11:00:49+00,Ronak Baghmar,Indulge House
+480426000003444001,Admin @ Indulge,New,2026-04-29 11:29:15+00,2026-04-29 11:29:15+00,Kratika Vaish,Indulge House
+480426000003449001,Admin @ Indulge,New,2026-04-29 12:28:22+00,2026-04-29 12:28:22+00,Arpit Shukla,Indulge House
+480426000003463001,Amit Agarwal,Lost,2026-04-29 12:47:58+00,2026-04-29 13:29:59+00,Deelip Khedkar,Indulge Global
+480426000003481023,Samson Fernandes,Junk,2026-04-30 12:10:23+00,2026-05-04 13:08:46+00,P V Ramesh Kumar,Indulge Global
+480426000003484002,Samson Fernandes,Attempted,2026-04-29 14:08:10+00,2026-04-29 14:12:21+00,Brijesh Singh,Indulge Global
+480426000003484041,Amit Agarwal,Lost,2026-04-29 14:45:32+00,2026-04-29 16:54:46+00,Subham Sarkar,Indulge Global
+480426000003484079,Admin @ Indulge,New,2026-04-29 12:16:52+00,2026-04-29 23:16:52+00,PRIYANSHU_1833,Indulge Legacy
+480426000003485010,Samson Fernandes,Junk,2026-04-29 15:03:22+00,2026-04-29 15:10:19+00,Badhon!,Indulge Global
+480426000003491001,Meghana Singh,Junk,2026-04-29 14:15:42+00,2026-04-29 14:18:51+00,Ashok Ashok Kumar,Indulge Global
+480426000003491039,Admin @ Indulge,New,2026-04-29 16:22:29+00,2026-04-29 16:22:29+00,Arundhathi,Indulge House
+480426000003491075,Admin @ Indulge,New,2026-04-29 17:39:57+00,2026-04-29 17:39:57+00,Chitra Periyasamy,Indulge House
+480426000003491111,Harsh Gupta,Attempted,2026-04-30 01:18:49+00,2026-04-30 17:38:57+00,Sandeep Pavuskar,Indulge Shop
+480426000003491147,Amit Agarwal,Attempted,2026-04-30 02:45:28+00,2026-04-30 08:03:24+00,Dinesh Patel,Indulge Global
+480426000003507002,Meghana Singh,Junk,2026-04-29 15:49:32+00,2026-04-29 15:52:56+00,Suresh Kispotta,Indulge Global
+480426000003507041,Amit Agarwal,Lost,2026-04-29 11:04:22+00,2026-05-01 13:26:08+00,Ayesha Dsouza,Indulge Global
+480426000003507076,Admin @ Indulge,New,2026-04-29 12:09:37+00,2026-04-29 23:09:37+00,Simone Simone,Indulge House
+480426000003509001,Admin @ Indulge,New,2026-04-29 15:51:01+00,2026-04-29 15:51:01+00,Farhan kai,Indulge House
+480426000003509036,Amit Agarwal,In Discussion,2026-04-29 15:52:15+00,2026-04-30 11:05:32+00,Deepak thakar,Indulge Global
+480426000003514001,Samson Fernandes,Attempted,2026-04-29 16:07:10+00,2026-04-29 16:15:46+00,Dr Hina Nanavati,Indulge Global
+480426000003514039,Vikram,Attempted,2026-04-29 11:51:53+00,2026-05-02 18:12:51+00,Nazneen Shaikh Abdul Khalick,Indulge Shop
+480426000003514078,Admin @ Indulge,New,2026-04-29 12:08:40+00,2026-04-29 22:08:40+00,madhvi kataria,Indulge Legacy
+480426000003514113,Meghana Singh,Junk,2026-04-30 12:21:27+00,2026-04-30 12:25:42+00,Kanish Agrawal,Indulge Global
+480426000003522001,Meghana Singh,Attempted,2026-04-29 11:12:17+00,2026-04-29 18:46:10+00,Pradip Churiwal,Indulge Global
+480426000003523001,Katya,Attempted,2026-04-29 11:47:38+00,2026-04-29 19:11:35+00,malvika jhaveri,Indulge Shop
+480426000003523040,Amit Agarwal,Junk,2026-04-29 12:59:03+00,2026-04-30 08:32:23+00,Golu Kumar,Indulge Global
+480426000003523075,Amit Agarwal,Attempted,2026-04-30 00:27:55+00,2026-04-30 08:27:00+00,Joy Paswan,Indulge Global
+480426000003527002,Amit Agarwal,Lost,2026-04-29 12:16:45+00,2026-04-30 10:56:23+00,Kailash Raj,Indulge Global
+480426000003527037,Admin @ Indulge,New,2026-04-29 12:20:15+00,2026-04-29 23:20:15+00,Fateh_airline,Indulge Legacy
+480426000003530001,Admin @ Indulge,New,2026-04-29 12:24:51+00,2026-04-29 20:24:51+00,a1 vai?,Indulge Legacy
+480426000003534002,Amit Agarwal,Lost,2026-04-29 12:51:27+00,2026-04-30 10:53:57+00,Vishal Pullarwar,Indulge Global
+480426000003546001,Amit Agarwal,Attempted,2026-04-30 13:33:28+00,2026-04-30 13:50:35+00,Atharva,Indulge Global
+480426000003557003,Kaniisha Chamarria,Attempted,2026-04-30 15:29:09+00,2026-05-02 16:59:43+00,BPOptima,Indulge Global
+480426000003563001,Kaniisha Chamarria,Attempted,2026-04-30 14:33:28+00,2026-04-30 17:18:35+00,V,Indulge Global
+480426000003570001,Meghana Singh,Attempted,2026-04-30 14:47:17+00,2026-04-30 14:48:17+00,KUNAL SHARMA,Indulge Global
+480426000003570018,Kaniisha Chamarria,Attempted,2026-04-30 15:01:23+00,2026-04-30 17:19:36+00,yakendra xettry official01,Indulge Global
+480426000003570036,Meghana Singh,In Discussion,2026-04-30 16:58:07+00,2026-04-30 17:08:54+00,Aditya Tekumalla,Indulge Global
+480426000003576010,Samson Fernandes,Attempted,2026-04-30 16:11:24+00,2026-04-30 16:16:24+00,Harshit Singhania,Indulge Global
+480426000003579001,Amit Agarwal,Attempted,2026-04-30 14:58:00+00,2026-04-30 16:32:24+00,Vandana Boggaram,Indulge Global
+480426000003589001,Meghana Singh,Junk,2026-04-30 15:16:01+00,2026-04-30 15:20:37+00,Aneel Madhavan Nair,Indulge Global
+480426000003593001,Amit Agarwal,Attempted,2026-04-30 15:19:27+00,2026-04-30 16:32:10+00,Ramesh Kakadiya,Indulge Global
+480426000003594001,Kaniisha Chamarria,In Discussion,2026-04-30 15:19:27+00,2026-04-30 17:17:59+00,Shriraam V S,Indulge Global
+480426000003600001,Meghana Singh,Attempted,2026-04-30 15:19:30+00,2026-04-30 15:20:05+00,Ruhi Agrawal,Indulge Global
+480426000003611001,Katya,Attempted,2026-04-30 17:11:50+00,2026-04-30 17:14:18+00,Mohit Pandey,Indulge Shop
+480426000003611018,Admin @ Indulge,New,2026-05-01 10:56:48+00,2026-05-01 10:56:48+00,Sheela Mittal,Indulge House
+480426000003611034,Amit Agarwal,In Discussion,2026-05-01 11:12:37+00,2026-05-01 11:59:27+00,Parth Dhamasana,Indulge Global
+480426000003611051,Harsh Gupta,New,2026-05-01 11:24:39+00,2026-05-01 11:24:39+00,Soi Elamami,Indulge Shop
+480426000003611068,Admin @ Indulge,New,2026-05-01 07:40:59+00,2026-05-01 17:40:59+00,pardeep,Indulge Legacy
+480426000003611085,Amit Agarwal,In Discussion,2026-05-01 08:41:08+00,2026-05-02 09:12:19+00,Girish Gohpal,Indulge Global
+480426000003611102,Samson Fernandes,Junk,2026-05-02 10:14:01+00,2026-05-02 15:56:43+00,Ajay Sood,Indulge Global
+480426000003611119,Admin @ Indulge,New,2026-05-02 10:52:03+00,2026-05-02 10:52:03+00,Bhagwan Shay,Indulge House
+480426000003611135,Meghana Singh,Attempted,2026-05-03 10:02:46+00,2026-05-03 16:33:18+00,Mayur Kamdar,Indulge Global
+480426000003611152,Admin @ Indulge,New,2026-05-03 15:56:50+00,2026-05-03 15:56:50+00,Kirit Patel,Indulge House
+480426000003611168,Amit Agarwal,Attempted,2026-05-03 22:51:46+00,2026-05-04 09:32:36+00,Shlok Ghuge,Indulge Global
+480426000003611184,Meghana Singh,Attempted,2026-05-04 00:14:44+00,2026-05-04 12:51:31+00,Pasupuleti Srinivas Naidu. V,Indulge Global
+480426000003611201,Amit Agarwal,Attempted,2026-05-04 02:00:06+00,2026-05-04 08:38:23+00,Mohit jain,Indulge Global
+480426000003611217,Meghana Singh,Junk,2026-05-04 11:21:31+00,2026-05-04 13:19:13+00,Ravi Dhawan,Indulge Global
+480426000003614028,Meghana Singh,Attempted,2026-05-03 10:50:34+00,2026-05-03 16:32:32+00,Vivek Aggarwal,Indulge Global
+480426000003616001,Samson Fernandes,Junk,2026-04-30 17:13:12+00,2026-04-30 17:44:25+00,arfam test,Indulge Global
+480426000003616020,Katya,Attempted,2026-05-01 12:43:56+00,2026-05-02 11:15:55+00,Sejal Sheth,Indulge Shop
+480426000003616036,Amit Agarwal,In Discussion,2026-05-02 01:05:14+00,2026-05-02 08:54:45+00,Akshat Giletwala,Indulge Global
+480426000003616053,Kaniisha Chamarria,Attempted,2026-05-02 08:34:10+00,2026-05-02 16:59:20+00,SHAIK ABDUL RAHMAN,Indulge Global
+480426000003616071,Admin @ Indulge,New,2026-05-02 13:30:08+00,2026-05-02 13:30:08+00,Shanthakumar Shanthakumar,Indulge House
+480426000003616087,Meghana Singh,Attempted,2026-05-03 10:37:40+00,2026-05-03 16:33:42+00,Anitha Rao,Indulge Global
+480426000003616104,Admin @ Indulge,New,2026-05-03 13:44:25+00,2026-05-03 13:44:25+00,Siddhanth Chandrashekar,Indulge House
+480426000003616120,Meghana Singh,In Discussion,2026-05-03 14:08:55+00,2026-05-04 10:54:19+00,Punya Seth,Indulge Global
+480426000003616137,Amit Agarwal,Attempted,2026-05-03 22:19:28+00,2026-05-04 10:01:03+00,Priyanka Verma,Indulge Global
+480426000003618015,Kaniisha Chamarria,Attempted,2026-05-02 14:08:43+00,2026-05-02 16:59:51+00,Yasmin,Indulge Global
+480426000003622045,Meghana Singh,Attempted,2026-05-03 11:20:49+00,2026-05-03 16:31:28+00,Soheil Sharad,Indulge Global
+480426000003625038,Amit Agarwal,Attempted,2026-05-03 09:54:31+00,2026-05-04 08:34:25+00,Ashish Garg,Indulge Global
+480426000003625074,Amit Agarwal,Attempted,2026-05-03 20:57:52+00,2026-05-04 09:38:45+00,M,Indulge Global
+480426000003626010,Amit Agarwal,Attempted,2026-04-30 11:49:01+00,2026-05-01 08:25:33+00,Adv Kalpesh Trived,Indulge Global
+480426000003627062,Amit Agarwal,Attempted,2026-05-03 13:49:16+00,2026-05-04 08:31:59+00,AMRIT PAL SINGH,Indulge Global
+480426000003627093,Meghana Singh,Attempted,2026-05-04 10:20:52+00,2026-05-04 10:34:47+00,Veneet Gandhi,Indulge Global
+480426000003629001,Meghana Singh,Junk,2026-04-30 17:19:44+00,2026-04-30 17:20:51+00,arfam test,Indulge Global
+480426000003629019,Admin @ Indulge,New,2026-05-01 10:26:22+00,2026-05-01 10:26:22+00,Araneta Correa,Indulge House
+480426000003629045,Admin @ Indulge,New,2026-05-01 15:37:27+00,2026-05-01 15:37:27+00,Seema Jain,Indulge Legacy
+480426000003629061,Samson Fernandes,Attempted,2026-05-01 07:41:52+00,2026-05-02 09:33:53+00,Sangamesh Bellubbi,Indulge Global
+480426000003629078,Amit Agarwal,Attempted,2026-05-02 02:15:27+00,2026-05-02 08:16:08+00,Aarushi Mahajan,Indulge Global
+480426000003629094,Amit Agarwal,Junk,2026-05-02 05:06:00+00,2026-05-02 08:22:01+00,Suraj Kumar,Indulge Global
+480426000003629111,Kaniisha Chamarria,Attempted,2026-05-02 05:31:57+00,2026-05-02 17:00:04+00,Dr. Mohammed Wali Khan,Indulge Global
+480426000003629127,Kaniisha Chamarria,Attempted,2026-05-02 14:50:12+00,2026-05-02 17:00:16+00,Ali Rahnavard,Indulge Global
+480426000003629144,Meghana Singh,Junk,2026-05-03 10:10:19+00,2026-05-03 16:36:00+00,sonu ingle ?,Indulge Global
+480426000003629161,Harsh Gupta,New,2026-05-03 13:36:43+00,2026-05-03 13:36:43+00,Aditya Gupta,Indulge Shop
+480426000003629178,Samson Fernandes,Attempted,2026-05-03 19:15:10+00,2026-05-04 09:54:41+00,Shibu Joseph Paulose,Indulge Global
+480426000003629195,Amit Agarwal,Attempted,2026-05-04 02:17:44+00,2026-05-04 08:29:25+00,Shubham Varshney,Indulge Global
+480426000003629211,Meghana Singh,Attempted,2026-05-04 03:03:54+00,2026-05-04 12:45:06+00,B Abhijeet,Indulge Global
+480426000003631004,Amit Agarwal,Attempted,2026-05-01 01:45:17+00,2026-05-01 08:03:13+00,Mohammed Faisal,Indulge Global
+480426000003633042,Amit Agarwal,Attempted,2026-05-03 21:02:56+00,2026-05-04 10:01:58+00,HSN,Indulge Global
+480426000003634001,Samson Fernandes,Junk,2026-04-30 07:27:09+00,2026-04-30 17:45:16+00,arfam test,Indulge Global
+480426000003634019,Amit Agarwal,In Discussion,2026-05-01 13:35:21+00,2026-05-01 14:50:03+00,Saket Rungta,Indulge Global
+480426000003634036,Amit Agarwal,In Discussion,2026-05-01 12:15:53+00,2026-05-02 12:19:53+00,Sridhar Reddy,Indulge Global
+480426000003634052,Amit Agarwal,Attempted,2026-05-01 12:23:49+00,2026-05-02 08:10:35+00,Sanjiv Agarwal,Indulge Global
+480426000003634069,Kaniisha Chamarria,Attempted,2026-05-02 04:49:20+00,2026-05-02 17:02:48+00,Sunny Ubhi,Indulge Global
+480426000003634085,Admin @ Indulge,New,2026-05-02 11:56:35+00,2026-05-02 11:56:35+00,Elvis Fernandes,Indulge House
+480426000003634102,Samson Fernandes,Attempted,2026-05-02 22:22:21+00,2026-05-04 09:46:21+00,MRs Rizwan,Indulge Global
+480426000003634119,Samson Fernandes,Attempted,2026-05-03 00:54:10+00,2026-05-04 09:51:30+00,SAUVIK SABUI,Indulge Global
+480426000003634135,Amit Agarwal,Attempted,2026-05-03 21:02:51+00,2026-05-04 10:04:29+00,Hasan Abdul Khader,Indulge Global
+480426000003634154,Amit Agarwal,Attempted,2026-05-03 22:31:58+00,2026-05-04 08:33:16+00,Shantanu Kumar,Indulge Global
+480426000003634170,Amit Agarwal,Attempted,2026-05-04 07:21:53+00,2026-05-04 08:26:34+00,Ankit Agarwal,Indulge Global
+480426000003634186,Meghana Singh,Attempted,2026-05-04 11:44:41+00,2026-05-04 11:47:09+00,prince king,Indulge Global
+480426000003634203,Admin @ Indulge,New,2026-05-04 12:18:21+00,2026-05-04 12:18:21+00,sanmeet,Indulge House
+480426000003634219,Samson Fernandes,Attempted,2026-05-04 14:21:50+00,2026-05-04 14:31:25+00,Rajat Jain,Indulge Global
+480426000003636014,Samson Fernandes,Junk,2026-05-01 15:00:09+00,2026-05-02 15:29:35+00,Krishna Gopal.,Indulge Global
+480426000003637094,Meghana Singh,Attempted,2026-05-04 14:13:55+00,2026-05-04 14:40:24+00,Akshat Jain,Indulge Global
+480426000003641001,Samson Fernandes,Qualified,2026-04-30 17:31:59+00,2026-04-30 10:35:13+00,Mahendra Yarlagadda,Indulge Global
+480426000003641017,Samson Fernandes,Qualified,2026-04-30 17:32:42+00,2026-04-30 10:45:11+00,Mahesh Deshpande,Indulge Global
+480426000003641100,Admin @ Indulge,In Discussion,2026-05-02 11:45:09+00,2026-05-02 11:45:15+00,test,Indulge Global
+480426000003644009,Samson Fernandes,Attempted,2026-05-01 11:51:05+00,2026-05-02 09:46:39+00,Rahul Jain,Indulge Global
+480426000003646006,Amit Agarwal,Lost,2026-05-01 00:58:58+00,2026-05-01 11:05:10+00,MC- Miss Kruthi,Indulge Global
+480426000003654002,Samson Fernandes,Attempted,2026-04-30 10:41:11+00,2026-05-04 09:22:52+00,Nafisa,Indulge Global
+480426000003656044,Meghana Singh,Attempted,2026-05-03 13:01:26+00,2026-05-03 16:30:48+00,Nkool,Indulge Global
+480426000003657040,Amit Agarwal,Attempted,2026-05-04 08:09:56+00,2026-05-04 08:28:26+00,Vishal Mittal,Indulge Global
+480426000003658021,Samson Fernandes,Attempted,2026-05-02 23:38:09+00,2026-05-04 09:48:55+00,Philip Joshua,Indulge Global
+480426000003659036,Meghana Singh,Attempted,2026-05-03 15:26:13+00,2026-05-03 16:36:10+00,Mustafa Saify,Indulge Global
+480426000003660001,Meghana Singh,Attempted,2026-04-30 10:46:29+00,2026-04-29 10:50:20+00,Kalpana Jaikumar,Indulge Global
+480426000003662008,Amit Agarwal,In Discussion,2026-04-30 11:04:18+00,2026-05-01 11:15:09+00,Bikash Agarwal,Indulge Global
+480426000003662041,Kaniisha Chamarria,Junk,2026-05-01 12:24:02+00,2026-05-02 17:02:43+00,jj300243,Indulge Global
+480426000003663019,Samson Fernandes,Attempted,2026-05-01 15:18:08+00,2026-05-02 09:39:14+00,Rajesh Sheth,Indulge Global
+480426000003664054,Amit Agarwal,Attempted,2026-05-03 20:48:56+00,2026-05-04 08:37:02+00,Bharat jain,Indulge Global
+480426000003665001,Amit Agarwal,Attempted,2026-04-30 10:16:01+00,2026-05-01 08:19:24+00,Prakash Bhatia,Indulge Global
+480426000003665018,Amit Agarwal,Attempted,2026-05-01 15:59:43+00,2026-05-01 16:25:00+00,veer georaikar,Indulge Global
+480426000003665035,Admin @ Indulge,New,2026-05-01 17:41:04+00,2026-05-01 17:41:04+00,Tushar Naik,Indulge House
+480426000003665051,Amit Agarwal,In Discussion,2026-05-01 08:42:23+00,2026-05-02 08:22:33+00,Devesh Jhaveri,Indulge Global
+480426000003665068,Amit Agarwal,Attempted,2026-05-01 09:09:33+00,2026-05-02 07:51:13+00,Neha P,Indulge Global
+480426000003665085,Kaniisha Chamarria,Attempted,2026-05-01 09:55:42+00,2026-05-02 17:01:58+00,Kanishk Hamirwasia,Indulge Global
+480426000003665103,Harsh Gupta,New,2026-05-01 10:57:16+00,2026-05-01 20:57:16+00,Padmini Manthena,Indulge Shop
+480426000003665119,Kaniisha Chamarria,Attempted,2026-05-01 13:44:05+00,2026-05-02 17:01:48+00,Narshimlu Mangalagiri,Indulge Global
+480426000003665135,Amit Agarwal,Attempted,2026-05-02 00:09:08+00,2026-05-02 07:32:15+00,Nitin Ahire,Indulge Global
+480426000003665151,Samson Fernandes,In Discussion,2026-05-02 13:21:02+00,2026-05-02 16:05:40+00,uday choudhary,Indulge Global
+480426000003665168,Meghana Singh,In Discussion,2026-05-03 17:46:45+00,2026-05-03 17:57:17+00,Rohan Kailasam,Indulge Global
+480426000003665185,Admin @ Indulge,New,2026-05-03 18:02:06+00,2026-05-03 18:02:06+00,??????? ????? ?????????,Indulge House
+480426000003665201,Amit Agarwal,Attempted,2026-05-03 20:18:00+00,2026-05-04 08:36:00+00,Abhishek Chauhan,Indulge Global
+480426000003665218,Amit Agarwal,Attempted,2026-05-03 21:41:26+00,2026-05-04 08:39:38+00,Ashish Agrawal,Indulge Global
+480426000003665234,Meghana Singh,Attempted,2026-05-04 09:43:06+00,2026-05-04 12:48:21+00,djay Varnekar,Indulge Global
+480426000003665252,Samson Fernandes,Attempted,2026-05-04 13:47:41+00,2026-05-04 14:51:54+00,adil Mirajkar,Indulge Global
+480426000003670009,Amit Agarwal,Attempted,2026-05-01 13:48:46+00,2026-05-01 14:53:28+00,Pushpa Devi,Indulge Global
+480426000003675002,Amit Agarwal,Lost,2026-04-30 13:49:30+00,2026-05-01 11:14:39+00,Akshay Thampi,Indulge Global
+480426000003675018,Amit Agarwal,Attempted,2026-05-01 10:06:27+00,2026-05-01 12:43:16+00,Shanker Pai,Indulge Global
+480426000003675036,Katya,Attempted,2026-05-01 14:50:39+00,2026-05-02 11:15:49+00,Savli Mangle,Indulge Shop
+480426000003675053,Amit Agarwal,In Discussion,2026-05-01 14:59:25+00,2026-05-01 15:03:08+00,Yash Agarwal,Indulge Global
+480426000003675070,Admin @ Indulge,New,2026-05-01 15:38:07+00,2026-05-01 15:38:07+00,Jigar Sanghavi,Indulge House
+480426000003675086,Samson Fernandes,Junk,2026-05-01 16:16:28+00,2026-05-02 09:38:02+00,Sudhanshu Sharma,Indulge Global
+480426000003675103,Kaniisha Chamarria,Attempted,2026-05-01 08:22:54+00,2026-05-02 17:01:38+00,Imran Syed,Indulge Global
+480426000003675120,Amit Agarwal,Attempted,2026-05-02 08:17:20+00,2026-05-02 08:31:32+00,Rajesh Kshetry,Indulge Global
+480426000003675137,Admin @ Indulge,New,2026-05-02 17:48:48+00,2026-05-02 17:48:48+00,Sheena Ahuja,Indulge House
+480426000003675153,Admin @ Indulge,New,2026-05-02 22:33:45+00,2026-05-02 22:33:45+00,Dr Sudhakar Almad,Indulge House
+480426000003675169,Meghana Singh,Attempted,2026-05-03 10:16:44+00,2026-05-03 16:27:47+00,D S Bhat,Indulge Global
+480426000003675186,Meghana Singh,Attempted,2026-05-04 00:10:46+00,2026-05-04 12:47:20+00,Tarun,Indulge Global
+480426000003675202,Meghana Singh,Attempted,2026-05-04 03:55:00+00,2026-05-04 12:46:20+00,Afrin Patel,Indulge Global
+480426000003678001,Amit Agarwal,Attempted,2026-05-01 01:26:51+00,2026-05-01 08:09:59+00,Pranjal Jaiswal,Indulge Global
+480426000003683002,Samson Fernandes,Junk,2026-05-01 09:18:17+00,2026-05-02 15:08:08+00,Suresh Kp,Indulge Global
+480426000003683019,Vikram,New,2026-05-01 15:37:27+00,2026-05-01 15:37:27+00,Akash Wadhawan,Indulge Shop
+480426000003683036,Amit Agarwal,Junk,2026-05-01 08:48:46+00,2026-05-02 15:08:24+00,Harpreet Singh,Indulge Global
+480426000003683054,Amit Agarwal,Attempted,2026-05-02 03:02:50+00,2026-05-02 07:39:49+00,Hanume Gowda,Indulge Global
+480426000003683070,Amit Agarwal,Attempted,2026-05-02 08:41:10+00,2026-05-02 08:46:08+00,Navin Birmiwal,Indulge Global
+480426000003683087,Kaniisha Chamarria,Attempted,2026-05-02 10:12:35+00,2026-05-02 17:01:26+00,Rajkiran Prabhakar,Indulge Global
+480426000003683104,Kaniisha Chamarria,Attempted,2026-05-02 14:14:26+00,2026-05-02 17:00:57+00,Medha Khandelwal,Indulge Global
+480426000003683121,Kaniisha Chamarria,Attempted,2026-05-02 14:55:38+00,2026-05-02 17:01:13+00,waseem ikrami,Indulge Global
+480426000003683139,Samson Fernandes,Attempted,2026-05-02 15:31:31+00,2026-05-02 16:17:11+00,Vani Rajkumar,Indulge Global
+480426000003683156,Admin @ Indulge,New,2026-05-02 21:08:13+00,2026-05-02 21:08:13+00,Inzamamul Shareef,Indulge House
+480426000003683173,Samson Fernandes,Attempted,2026-05-02 23:34:51+00,2026-05-04 09:48:28+00,Philip Joshua,Indulge Global
+480426000003683189,Meghana Singh,Attempted,2026-05-03 10:01:34+00,2026-05-03 17:00:31+00,Vishrit,Indulge Global
+480426000003683206,Samson Fernandes,Attempted,2026-05-03 13:49:12+00,2026-05-04 09:53:03+00,AP Singh,Indulge Global
+480426000003683223,Samson Fernandes,Attempted,2026-05-03 19:24:38+00,2026-05-04 09:56:33+00,AVIRUP MUKHOPADHYAY,Indulge Global
+480426000003683240,Meghana Singh,Attempted,2026-05-03 20:00:32+00,2026-05-04 12:43:56+00,Bhaskar Palit,Indulge Global
+480426000003683256,Kaniisha Chamarria,New,2026-05-03 20:21:37+00,2026-05-03 20:21:37+00,Nkosiphile Dube,Indulge Global
+480426000003683273,Amit Agarwal,Attempted,2026-05-03 20:48:40+00,2026-05-04 08:24:51+00,Bharat Jain,Indulge Global
+480426000003683289,Meghana Singh,Attempted,2026-05-03 21:49:07+00,2026-05-04 12:42:47+00,Manish kumar Barui,Indulge Global
+480426000003683305,Meghana Singh,Attempted,2026-05-04 01:17:29+00,2026-05-04 12:41:42+00,Sunjey,Indulge Global
+480426000003685001,Admin @ Indulge,New,2026-05-01 09:20:39+00,2026-05-01 09:20:39+00,Manoj Agrawal,Indulge House
+480426000003685017,Samson Fernandes,Junk,2026-05-01 13:09:05+00,2026-05-02 15:24:04+00,Mitul Palan,Indulge Global
+480426000003685034,Admin @ Indulge,New,2026-05-02 15:26:12+00,2026-05-02 15:26:12+00,Kapil Garg,Indulge House
+480426000003685051,Admin @ Indulge,New,2026-05-03 03:03:51+00,2026-05-03 03:03:51+00,kamya,Indulge House
+480426000003685067,Meghana Singh,Attempted,2026-05-03 10:10:35+00,2026-05-03 16:26:02+00,Raman Tiwari,Indulge Global
+480426000003685084,Meghana Singh,Attempted,2026-05-03 14:21:51+00,2026-05-03 16:28:13+00,somu prajapati,Indulge Global
+480426000003685101,Meghana Singh,Attempted,2026-05-03 16:04:04+00,2026-05-03 16:27:16+00,sujit damdnt,Indulge Global
+480426000003685118,Amit Agarwal,Attempted,2026-05-03 21:41:30+00,2026-05-04 08:46:35+00,Mayuresh Yerpude,Indulge Global
+480426000003688001,Vikram,Attempted,2026-05-01 10:38:45+00,2026-05-02 18:09:31+00,Ketki Patwardhan,Indulge Shop
+480426000003688018,Admin @ Indulge,New,2026-05-01 17:07:00+00,2026-05-01 17:07:00+00,Shyna,Indulge House
+480426000003688035,Samson Fernandes,Attempted,2026-05-01 07:32:43+00,2026-05-02 09:36:22+00,Manish Nagpal,Indulge Global
+480426000003688052,Amit Agarwal,Attempted,2026-05-01 08:16:20+00,2026-05-02 08:07:42+00,Anil Kumar,Indulge Global
+480426000003688069,Amit Agarwal,Attempted,2026-05-01 13:28:36+00,2026-05-02 08:04:17+00,Subash Balakrishnan,Indulge Global
+480426000003688086,Kaniisha Chamarria,Attempted,2026-05-02 11:35:01+00,2026-05-02 17:00:45+00,Poonam Giri,Indulge Global
+480426000003688104,Kaniisha Chamarria,Attempted,2026-05-02 14:37:02+00,2026-05-02 17:00:30+00,Nitish Kulkarni,Indulge Global
+480426000003688121,Kaniisha Chamarria,Attempted,2026-05-02 15:40:35+00,2026-05-02 16:59:10+00,Singh Ripudaman,Indulge Global
+480426000003688138,Samson Fernandes,Attempted,2026-05-02 16:19:20+00,2026-05-02 16:25:59+00,Sumukh Muniraj,Indulge Global
+480426000003688156,Amit Agarwal,Attempted,2026-05-02 22:30:33+00,2026-05-04 08:42:13+00,Satyendra Kumar Krishna,Indulge Global
+480426000003688172,Katya,Attempted,2026-05-03 17:46:32+00,2026-05-04 09:22:25+00,Hetal Lohia,Indulge Shop
+480426000003688190,Amit Agarwal,Attempted,2026-05-03 19:10:19+00,2026-05-04 08:20:49+00,Sangeeta Sharma,Indulge Global
+480426000003688207,Amit Agarwal,Attempted,2026-05-03 19:16:54+00,2026-05-04 08:19:39+00,Anil Bachani,Indulge Global
+480426000003688224,Harsh Gupta,New,2026-05-04 11:02:35+00,2026-05-04 11:02:35+00,Nalini Karchi,Indulge Shop
+480426000003691002,Amit Agarwal,Attempted,2026-05-01 12:58:11+00,2026-05-01 13:09:55+00,Venkatesh T,Indulge Global
+480426000003691019,Admin @ Indulge,New,2026-05-02 08:21:54+00,2026-05-02 08:21:54+00,indranil,Indulge House
+480426000003691035,Kaniisha Chamarria,Attempted,2026-05-02 08:51:45+00,2026-05-02 16:58:46+00,Aaloke Kumar,Indulge Global
+480426000003691053,Kaniisha Chamarria,Attempted,2026-05-02 16:37:23+00,2026-05-02 16:58:31+00,Harish Taneja,Indulge Global
+480426000003691070,Samson Fernandes,Junk,2026-05-02 17:06:31+00,2026-05-02 17:19:49+00,Sourav Mondal,Indulge Global
+480426000003691087,Amit Agarwal,Attempted,2026-05-02 23:42:24+00,2026-05-04 08:18:29+00,Rakesh Reddy,Indulge Global
+480426000003691104,Samson Fernandes,Attempted,2026-05-03 02:23:11+00,2026-05-04 09:51:47+00,Mir Ali (whatsapp only) its renovation.,Indulge Global
+480426000003691121,Amit Agarwal,Attempted,2026-05-03 09:45:05+00,2026-05-04 08:11:32+00,Deepak Chawla,Indulge Global
+480426000003691138,Meghana Singh,In Discussion,2026-05-03 10:13:46+00,2026-05-03 16:28:42+00,Babji Gadde,Indulge Global
+480426000003691157,Meghana Singh,Attempted,2026-05-03 12:28:19+00,2026-05-03 16:30:22+00,Jahanvi Vasava,Indulge Global
+480426000003691174,Amit Agarwal,In Discussion,2026-05-03 22:27:20+00,2026-05-04 09:30:40+00,Sharad Mundra,Indulge Global
+480426000003691191,Admin @ Indulge,New,2026-05-03 23:53:28+00,2026-05-03 23:53:28+00,Diwakar Kasrekar,Indulge House
+480426000003691207,Amit Agarwal,Attempted,2026-05-04 00:18:20+00,2026-05-04 08:09:26+00,Ravi malviya,Indulge Global
+480426000003691223,Meghana Singh,Attempted,2026-05-04 14:23:52+00,2026-05-04 14:40:36+00,Shubham Nanda,Indulge Global
+480426000003692001,Amit Agarwal,In Discussion,2026-05-01 13:19:51+00,2026-05-01 15:50:44+00,Insha Qazi,Indulge Global
+480426000003692019,Kaniisha Chamarria,Attempted,2026-05-01 13:43:44+00,2026-05-02 16:58:24+00,Varshitha Varshitha,Indulge Global
+480426000003692036,Vikram,Attempted,2026-05-02 01:04:24+00,2026-05-02 18:01:28+00,Sadhana Walia Bhasin,Indulge Shop
+480426000003692053,Kaniisha Chamarria,Attempted,2026-05-02 01:42:40+00,2026-05-02 16:58:02+00,Член,Indulge Global
+480426000003692070,Kaniisha Chamarria,In Discussion,2026-05-02 07:40:39+00,2026-05-02 16:57:17+00,irfan shaikh,Indulge Global
+480426000003692087,Kaniisha Chamarria,Attempted,2026-05-02 10:36:03+00,2026-05-02 16:56:42+00,Luminie Hauzaen K,Indulge Global
+480426000003692104,Samson Fernandes,Attempted,2026-05-02 14:38:02+00,2026-05-02 14:38:21+00,Prateek Sharma,Indulge Global
+480426000003692121,Samson Fernandes,Attempted,2026-05-02 17:01:47+00,2026-05-02 17:07:34+00,Abhinesh Akar,Indulge Global
+480426000003692138,Kaniisha Chamarria,New,2026-05-03 11:19:22+00,2026-05-03 11:19:22+00,osama,Indulge Global
+480426000003692155,Admin @ Indulge,New,2026-05-03 21:54:58+00,2026-05-03 21:54:58+00,GURCHARAN S. TAKULIA (CHANNI),Indulge Legacy
+480426000003692171,Meghana Singh,In Discussion,2026-05-04 00:23:50+00,2026-05-04 12:40:52+00,Bina Desai,Indulge Global
+480426000003692188,Meghana Singh,Attempted,2026-05-04 00:33:01+00,2026-05-04 12:27:35+00,kumar,Indulge Global
+480426000003695001,Amit Agarwal,Attempted,2026-05-01 13:52:30+00,2026-05-01 14:58:39+00,Nagesh_gowda$_1981,Indulge Global
+480426000003695019,Amit Agarwal,In Discussion,2026-05-01 16:40:36+00,2026-05-02 08:28:24+00,Dr Sithara Sivaji,Indulge Global
+480426000003695036,Amit Agarwal,In Discussion,2026-05-01 09:58:53+00,2026-05-02 08:51:16+00,Dr Karan Jariwala,Indulge Global
+480426000003695054,Amit Agarwal,Attempted,2026-05-01 12:06:16+00,2026-05-02 07:30:08+00,Dhanraj B Desai,Indulge Global
+480426000003695070,Amit Agarwal,Attempted,2026-05-01 13:23:24+00,2026-05-02 07:27:47+00,Devendra Bhayal Paliwal,Indulge Global
+480426000003695087,Amit Agarwal,Attempted,2026-05-02 06:58:48+00,2026-05-02 07:24:54+00,Ankur Bhandari,Indulge Global
+480426000003695103,Kaniisha Chamarria,Attempted,2026-05-02 10:46:57+00,2026-05-02 16:56:32+00,Mayuresh Darne,Indulge Global
+480426000003695120,Samson Fernandes,In Discussion,2026-05-02 15:03:53+00,2026-05-02 16:21:14+00,Shisham Jain,Indulge Global
+480426000003695137,Samson Fernandes,Attempted,2026-05-02 21:04:38+00,2026-05-04 09:46:02+00,सुजीत नायक,Indulge Global
+480426000003695153,Amit Agarwal,In Discussion,2026-05-02 22:48:41+00,2026-05-04 09:04:03+00,Aneel Madhavan,Indulge Global
+480426000003695182,Kaniisha Chamarria,New,2026-05-04 03:36:57+00,2026-05-04 03:36:57+00,Alexander,Indulge Global
+480426000003695198,Amit Agarwal,Attempted,2026-05-04 03:50:46+00,2026-05-04 08:07:44+00,Samyak Jain,Indulge Global
+480426000003695215,Meghana Singh,Attempted,2026-05-04 06:35:23+00,2026-05-04 12:23:51+00,Mehrosh Khan,Indulge Global
+480426000003695231,Meghana Singh,Junk,2026-05-04 10:59:46+00,2026-05-04 12:23:30+00,Satish bhaurao Sathe,Indulge Global
+480426000003697001,Samson Fernandes,Junk,2026-05-01 14:27:27+00,2026-05-02 15:26:44+00,Vallabhaneni Hanumanth Prasad,Indulge Global
+480426000003697018,Amit Agarwal,Attempted,2026-05-01 15:01:58+00,2026-05-01 15:24:54+00,Ajit Mukundan,Indulge Global
+480426000003697035,Samson Fernandes,Attempted,2026-05-02 09:29:33+00,2026-05-02 09:31:20+00,Sachin Shah,Indulge Global
+480426000003697052,Kaniisha Chamarria,Attempted,2026-05-02 15:10:19+00,2026-05-02 16:55:41+00,Sonica Kapur,Indulge Global
+480426000003697069,Samson Fernandes,Junk,2026-05-02 17:05:49+00,2026-05-02 17:08:34+00,Gazal Kapoor,Indulge Global
+480426000003697087,Kaniisha Chamarria,New,2026-05-02 18:47:07+00,2026-05-02 18:47:07+00,Rajiv Kumarr,Indulge Global
+480426000003697105,Admin @ Indulge,New,2026-05-02 20:56:51+00,2026-05-02 20:56:51+00,Karan Pal Singh,Indulge House
+480426000003697121,Amit Agarwal,Attempted,2026-05-02 21:05:18+00,2026-05-04 08:17:14+00,Sujeet Kumar Nayak,Indulge Global
+480426000003697137,Meghana Singh,Attempted,2026-05-03 11:53:39+00,2026-05-03 17:01:48+00,Aryan Rajbhar,Indulge Global
+480426000003697154,Admin @ Indulge,New,2026-05-03 14:04:50+00,2026-05-03 14:04:50+00,leo,Indulge House
+480426000003697170,Meghana Singh,Attempted,2026-05-03 16:14:43+00,2026-05-03 16:29:52+00,Mittal Patel,Indulge Global
+480426000003697187,Amit Agarwal,Attempted,2026-05-03 22:12:51+00,2026-05-04 08:43:26+00,Bharti Walia,Indulge Global
+480426000003697204,Meghana Singh,Attempted,2026-05-04 10:20:34+00,2026-05-04 10:38:35+00,Vinny,Indulge Global
+480426000003698001,Amit Agarwal,In Discussion,2026-05-02 01:08:59+00,2026-05-02 07:45:47+00,Disha Kamthan,Indulge Global
+480426000003698017,Amit Agarwal,Attempted,2026-05-02 06:14:39+00,2026-05-02 08:35:04+00,Sharan Hiremath,Indulge Global
+480426000003698033,Admin @ Indulge,New,2026-05-02 09:27:03+00,2026-05-02 09:27:03+00,Kundan Singh,Indulge House
+480426000003698049,Meghana Singh,Attempted,2026-05-03 11:13:57+00,2026-05-03 17:02:07+00,Akash Khemchandani,Indulge Global
+480426000003698066,Meghana Singh,Attempted,2026-05-03 18:09:10+00,2026-05-03 18:23:03+00,Dhruv Mahajan,Indulge Global
+480426000003698083,Meghana Singh,Attempted,2026-05-04 02:51:19+00,2026-05-04 11:22:44+00,Aaryan,Indulge Global
+480426000003698101,Meghana Singh,In Discussion,2026-05-04 11:07:29+00,2026-05-04 11:22:30+00,Parth Shah,Indulge Global
+480426000003700002,Admin @ Indulge,New,2026-05-02 12:46:50+00,2026-05-02 12:46:50+00,Wolfie,Indulge House
+480426000003700018,Meghana Singh,Attempted,2026-05-03 10:35:34+00,2026-05-03 17:02:41+00,Sagar Mehta,Indulge Global
+480426000003700036,Meghana Singh,Attempted,2026-05-03 15:41:32+00,2026-05-03 17:01:04+00,sejal parikh,Indulge Global
+480426000003700053,Amit Agarwal,Attempted,2026-05-03 22:00:05+00,2026-05-04 08:06:40+00,Aarti Khurana,Indulge Global
+480426000003700069,Vikram,Attempted,2026-05-03 22:05:39+00,2026-05-04 11:44:52+00,Satyam Raj,Indulge Shop
+480426000003700086,Amit Agarwal,Attempted,2026-05-04 02:50:49+00,2026-05-04 08:05:20+00,Tanveer Bhatt,Indulge Global
+zcrm_480426000002278002,Amit Agarwal,Attempted,2026-04-01 09:40:19+00,2026-04-25 10:51:17.783477+00,Abhishek Soni,Indulge Global
+zcrm_480426000002278042,Meghana Singh,In Discussion,2026-04-01 10:09:21+00,2026-04-25 10:51:17.783477+00,Dr Kalpana Bhatwadekar,Indulge Global
+zcrm_480426000002278083,Meghana Singh,Lost,2026-04-01 10:50:52+00,2026-04-25 10:51:17.783477+00,Ameya Davda,Indulge Global
+zcrm_480426000002283001,Admin @ Indulge,New,2026-04-01 09:51:38+00,2026-04-25 10:51:17.783477+00,Jordan Dias,Indulge House
+zcrm_480426000002283039,Meghana Singh,Lost,2026-04-01 10:13:46+00,2026-04-25 10:51:17.783477+00,Subrat Patra,Indulge Global
+zcrm_480426000002283079,Amit Agarwal,Lost,2026-04-01 14:00:07+00,2026-04-25 10:51:17.783477+00,Ronak Oswal,Indulge Global
+zcrm_480426000002290001,Katya,Lost,2026-04-01 10:13:31+00,2026-04-25 10:51:17.783477+00,Pratik Hora,Indulge Shop
+zcrm_480426000002317002,Kaniisha Chamarria,In Discussion,2026-04-01 11:38:51+00,2026-04-25 10:51:17.783477+00,Kala,Indulge Global
+zcrm_480426000002321001,Amit Agarwal,In Discussion,2026-04-01 12:11:38+00,2026-04-25 10:51:17.783477+00,Prateek R Agarwal,Indulge Global
+zcrm_480426000002321042,Amit Agarwal,Attempted,2026-04-01 13:52:27+00,2026-04-25 10:51:17.783477+00,varia Krish,Indulge Global
+zcrm_480426000002322002,Admin @ Indulge,New,2026-04-01 12:45:19+00,2026-04-25 10:51:17.783477+00,Babu Vijay,Indulge House
+zcrm_480426000002333012,Amit Agarwal,Junk,2026-04-02 06:58:48+00,2026-04-25 10:51:17.783477+00,tk2954986,Indulge Global
+zcrm_480426000002336008,Amit Agarwal,Attempted,2026-04-02 01:19:39+00,2026-04-25 10:51:17.783477+00,Prashant,Indulge Global
+zcrm_480426000002336065,Amit Agarwal,Junk,2026-04-03 07:55:10+00,2026-04-25 10:51:17.783477+00,Harsh Indulge Official,Indulge Global
+zcrm_480426000002340034,Amit Agarwal,Junk,2026-04-03 01:09:34+00,2026-04-25 10:51:17.783477+00,Guru Kapse,Indulge Global
+zcrm_480426000002343078,Amit Agarwal,Attempted,2026-04-03 19:41:59+00,2026-04-25 10:51:17.783477+00,Udit Arora,Indulge Global
+zcrm_480426000002345010,Meghana Singh,Junk,2026-04-01 22:14:23+00,2026-04-25 10:51:17.783477+00,sahooniranjansahoo9,Indulge Global
+zcrm_480426000002345066,Samson Fernandes,Attempted,2026-04-03 16:13:32+00,2026-04-25 10:51:17.783477+00,AK,Indulge Global
+zcrm_480426000002346003,Kaniisha Chamarria,Junk,2026-04-01 19:28:41+00,2026-04-25 10:51:17.783477+00,sagor Ali,Indulge Global
+zcrm_480426000002353007,Kaniisha Chamarria,Junk,2026-04-01 17:04:47+00,2026-04-25 10:51:17.783477+00,anandpanchikal,Indulge Global
+zcrm_480426000002354005,Kaniisha Chamarria,Junk,2026-04-01 19:23:53+00,2026-04-25 10:51:17.783477+00,Sahil,Indulge Global
+zcrm_480426000002359002,Meghana Singh,Nurturing,2026-04-01 15:32:27+00,2026-04-25 10:51:17.783477+00,ranjit Chhalani,Indulge Global
+zcrm_480426000002362043,Amit Agarwal,In Discussion,2026-04-03 12:23:29+00,2026-04-25 10:51:17.783477+00,Shresth Bajaj,Indulge Global
+zcrm_480426000002376025,Kaniisha Chamarria,Junk,2026-04-03 12:54:46+00,2026-04-25 10:51:17.783477+00,alamkhurshiddada,Indulge Global
+zcrm_480426000002377001,Admin @ Indulge,New,2026-04-01 17:52:13+00,2026-04-25 10:51:17.783477+00,Amara,Indulge House
+zcrm_480426000002377046,Amit Agarwal,Attempted,2026-04-03 20:42:09+00,2026-04-25 10:51:17.783477+00,Dhruv Talwar,Indulge Global
+zcrm_480426000002379011,Meghana Singh,Attempted,2026-04-01 22:50:28+00,2026-04-25 10:51:17.783477+00,Amit Sharma,Indulge Global
+zcrm_480426000002379052,Amit Agarwal,Junk,2026-04-02 08:17:42+00,2026-04-25 10:51:17.783477+00,amankumar9262875815,Indulge Global
+zcrm_480426000002381076,Amit Agarwal,Attempted,2026-04-03 13:48:21+00,2026-04-25 10:51:17.783477+00,Sonam Grover,Indulge Global
+zcrm_480426000002382011,Kaniisha Chamarria,Attempted,2026-04-02 15:19:55+00,2026-04-25 10:51:17.783477+00,Bindudania,Indulge Global
+zcrm_480426000002384037,Amit Agarwal,Attempted,2026-04-03 11:46:26+00,2026-04-25 10:51:17.783477+00,kkan,Indulge Global
+zcrm_480426000002385001,Kaniisha Chamarria,Junk,2026-04-01 18:20:44+00,2026-04-25 10:51:17.783477+00,Salma Parveen,Indulge Global
+zcrm_480426000002385043,Meghana Singh,Junk,2026-04-02 04:30:49+00,2026-04-25 10:51:17.783477+00,Shamendra Jarwal,Indulge Global
+zcrm_480426000002388002,Admin @ Indulge,New,2026-04-01 20:31:19+00,2026-04-25 10:51:17.783477+00,dr Sandhya goel,Indulge House
+zcrm_480426000002388047,Admin @ Indulge,New,2026-04-01 22:02:21+00,2026-04-25 10:51:17.783477+00,Kiran Gogte,Indulge House
+zcrm_480426000002389001,Amit Agarwal,Attempted,2026-04-01 20:51:48+00,2026-04-25 10:51:17.783477+00,Raj Som,Indulge Global
+zcrm_480426000002389045,Meghana Singh,In Discussion,2026-04-02 11:22:40+00,2026-04-25 10:51:17.783477+00,Champaka Bindiganavile,Indulge Global
+zcrm_480426000002389092,Admin @ Indulge,New,2026-04-02 19:34:52+00,2026-04-25 10:51:17.783477+00,Maninder Chawla,Indulge House
+zcrm_480426000002389122,Katya,Junk,2026-04-03 03:36:26+00,2026-04-25 10:51:17.783477+00,Faisal,Indulge Shop
+zcrm_480426000002391001,Katya,Nurturing,2026-04-01 20:57:23+00,2026-04-25 10:51:17.783477+00,Naimesh Rameshbhai Dhaduk,Indulge Shop
+zcrm_480426000002393065,Amit Agarwal,Junk,2026-04-02 23:21:36+00,2026-04-25 10:51:17.783477+00,JodAriyan,Indulge Global
+zcrm_480426000002394001,Amit Agarwal,Attempted,2026-04-01 21:15:52+00,2026-04-25 10:51:17.783477+00,deepak Chandra,Indulge Global
+zcrm_480426000002394045,Amit Agarwal,Attempted,2026-04-02 00:38:17+00,2026-04-25 10:51:17.783477+00,Dr. Gautam jani,Indulge Global
+zcrm_480426000002394089,Amit Agarwal,Nurturing,2026-04-03 10:07:18+00,2026-04-25 10:51:17.783477+00,Punita Khatter,Indulge Global
+zcrm_480426000002396001,Amit Agarwal,Attempted,2026-04-01 22:07:25+00,2026-04-25 10:51:17.783477+00,Sanjeeb Kumar,Indulge Global
+zcrm_480426000002396045,Kaniisha Chamarria,Attempted,2026-04-02 16:10:57+00,2026-04-25 10:51:17.783477+00,د. منصور السبيعي,Indulge Global
+zcrm_480426000002396075,Samson Fernandes,Junk,2026-04-03 07:38:38+00,2026-04-25 10:51:17.783477+00,Srinivas Kasabed,Indulge Global
+zcrm_480426000002396104,Samson Fernandes,In Discussion,2026-04-03 11:52:27+00,2026-04-25 10:51:17.783477+00,Sara Ahmed,Indulge Global
+zcrm_480426000002397002,Katya,Lost,2026-04-01 22:38:26+00,2026-04-25 10:51:17.783477+00,Akshay Mahajan,Indulge Shop
+zcrm_480426000002397047,Katya,Junk,2026-04-02 13:01:32+00,2026-04-25 10:51:17.783477+00,Prem Grover,Indulge Shop
+zcrm_480426000002397092,Admin @ Indulge,New,2026-04-02 14:14:32+00,2026-04-25 10:51:17.783477+00,Suresh Bajoria,Indulge House
+zcrm_480426000002397136,Kaniisha Chamarria,Attempted,2026-04-02 23:19:28+00,2026-04-25 10:51:17.783477+00,Komal Soni,Indulge Global
+zcrm_480426000002398002,Katya,Junk,2026-04-02 00:30:16+00,2026-04-25 10:51:17.783477+00,Preet Takkar,Indulge Shop
+zcrm_480426000002398046,Katya,Lost,2026-04-03 16:55:49+00,2026-04-25 10:51:17.783477+00,Abhijit Mondal,Indulge Shop
+zcrm_480426000002399060,Amit Agarwal,Junk,2026-04-02 19:05:37+00,2026-04-25 10:51:17.783477+00,Ishwar Dutt Saxena,Indulge Global
+zcrm_480426000002400029,Amit Agarwal,Attempted,2026-04-02 20:32:25+00,2026-04-25 10:51:17.783477+00,Robin Gupta,Indulge Global
+zcrm_480426000002401019,Amit Agarwal,Attempted,2026-04-02 23:02:25+00,2026-04-25 10:51:17.783477+00,Mahesh Mudda,Indulge Global
+zcrm_480426000002402030,Amit Agarwal,Attempted,2026-04-03 15:49:54+00,2026-04-25 10:51:17.783477+00,Himanshu Thakkar Earth Acquirer,Indulge Global
+zcrm_480426000002405001,Admin @ Indulge,Attempted,2026-04-02 07:18:53+00,2026-04-25 10:51:17.783477+00,Prashant A,Indulge House
+zcrm_480426000002405045,Amit Agarwal,Attempted,2026-04-02 20:37:27+00,2026-04-25 10:51:17.783477+00,Jaibir Singh,Indulge Global
+zcrm_480426000002405074,Amit Agarwal,Attempted,2026-04-02 23:12:02+00,2026-04-25 10:51:17.783477+00,Parshv Gothi,Indulge Global
+zcrm_480426000002407002,Amit Agarwal,Attempted,2026-04-02 08:46:10+00,2026-04-25 10:51:17.783477+00,Sanjay Ajmera,Indulge Global
+zcrm_480426000002407047,Admin @ Indulge,New,2026-04-03 14:59:57+00,2026-04-25 10:51:17.783477+00,Dr Shruti Shukla,Indulge Legacy
+zcrm_480426000002411001,Admin @ Indulge,New,2026-04-02 10:46:56+00,2026-04-25 10:51:17.783477+00,Zuha ྀི,Indulge House
+zcrm_480426000002411045,Amit Agarwal,Attempted,2026-04-03 15:51:10+00,2026-04-25 10:51:17.783477+00,Namita Dhawan,Indulge Global
+zcrm_480426000002417002,Amit Agarwal,Attempted,2026-04-02 22:29:58+00,2026-04-25 10:51:17.783477+00,Anshuman Sail,Indulge Global
+zcrm_480426000002418002,Admin @ Indulge,New,2026-04-03 00:02:11+00,2026-04-25 10:51:17.783477+00,Gaurav Narang,Indulge House
+zcrm_480426000002418031,Admin @ Indulge,New,2026-04-03 08:18:18+00,2026-04-25 10:51:17.783477+00,Raghav Patodia,Indulge House
+zcrm_480426000002418061,Admin @ Indulge,New,2026-04-03 12:33:52+00,2026-04-25 10:51:17.783477+00,Aditya Topannavar,Indulge House
+zcrm_480426000002427001,Amit Agarwal,Attempted,2026-04-03 20:59:47+00,2026-04-25 10:51:17.783477+00,Zubair Mullaji(W.E.L.L),Indulge Global
+zcrm_480426000002430006,Meghana Singh,Lost,2026-04-04 22:22:13+00,2026-04-25 10:51:17.783477+00,"SILENT KILLER,",Indulge Global
+zcrm_480426000002432001,Amit Agarwal,Attempted,2026-04-03 21:07:36+00,2026-04-25 10:51:17.783477+00,Ravindra Raj,Indulge Global
+zcrm_480426000002433003,Meghana Singh,Lost,2026-04-04 21:36:45+00,2026-04-25 10:51:17.783477+00,Dhairya Jain,Indulge Global
+zcrm_480426000002437001,Admin @ Indulge,New,2026-04-03 21:27:04+00,2026-04-25 10:51:17.783477+00,Rajat Raikar,Indulge House
+zcrm_480426000002437031,Meghana Singh,In Discussion,2026-04-04 22:44:42+00,2026-04-25 10:51:17.783477+00,Santosh Sanghvi,Indulge Global
+zcrm_480426000002444002,Amit Agarwal,Attempted,2026-04-03 22:07:41+00,2026-04-25 10:51:17.783477+00,Hemang Patel,Indulge Global
+zcrm_480426000002444032,Admin @ Indulge,New,2026-04-03 22:52:23+00,2026-04-25 10:51:17.783477+00,Churchill Ferrao,Indulge House
+zcrm_480426000002444061,Meghana Singh,Nurturing,2026-04-04 18:36:51+00,2026-04-25 10:51:17.783477+00,Shweta Vij,Indulge Global
+zcrm_480426000002444090,Meghana Singh,Lost,2026-04-04 18:55:33+00,2026-04-25 10:51:17.783477+00,Prakash Sangam,Indulge Global
+zcrm_480426000002449001,Katya,Junk,2026-04-03 22:09:53+00,2026-04-25 10:51:17.783477+00,Pranvit Singh Chhabra,Indulge Shop
+zcrm_480426000002449031,Amit Agarwal,Attempted,2026-04-04 01:03:33+00,2026-04-25 10:51:17.783477+00,Khan Masood,Indulge Global
+zcrm_480426000002450007,Amit Agarwal,Junk,2026-04-04 04:09:08+00,2026-04-25 10:51:17.783477+00,kumarbhardwaj9561,Indulge Global
+zcrm_480426000002457009,Meghana Singh,Junk,2026-04-04 18:00:34+00,2026-04-25 10:51:17.783477+00,+919924885459,Indulge Global
+zcrm_480426000002458002,Admin @ Indulge,New,2026-04-03 23:38:47+00,2026-04-25 10:51:17.783477+00,J V Vitorino Fernandes,Indulge House
+zcrm_480426000002458031,Meghana Singh,Nurturing,2026-04-04 20:28:59+00,2026-04-25 10:51:17.783477+00,Stuti Modi,Indulge Global
+zcrm_480426000002461001,Amit Agarwal,Attempted,2026-04-04 00:13:48+00,2026-04-25 10:51:17.783477+00,Vikas Gupta,Indulge Global
+zcrm_480426000002466002,Amit Agarwal,Attempted,2026-04-04 02:55:50+00,2026-04-25 10:51:17.783477+00,Suresh Bharwani,Indulge Global
+zcrm_480426000002472001,Admin @ Indulge,New,2026-04-04 04:17:15+00,2026-04-25 10:51:17.783477+00,Anil Kumar Vij,Indulge Legacy
+zcrm_480426000002472031,Meghana Singh,Lost,2026-04-04 18:36:42+00,2026-04-25 10:51:17.783477+00,Ram Krishna,Indulge Global
+zcrm_480426000002472061,Meghana Singh,Attempted,2026-04-04 19:59:30+00,2026-04-25 10:51:17.783477+00,Tanmay Agarwal,Indulge Global
+zcrm_480426000002472090,Vikram,Lost,2026-04-04 22:26:29+00,2026-04-25 10:51:17.783477+00,Mangesh Gole,Indulge Shop
+zcrm_480426000002472119,Meghana Singh,In Discussion,2026-04-04 22:44:59+00,2026-04-25 10:51:17.783477+00,Mohith Gauri,Indulge Global
+zcrm_480426000002475014,Meghana Singh,Junk,2026-04-04 22:51:10+00,2026-04-25 10:51:17.783477+00,jaiswalritik099,Indulge Global
+zcrm_480426000002487004,Samson Fernandes,Junk,2026-04-04 14:18:12+00,2026-04-25 10:51:17.783477+00,Jakir,Indulge Global
+zcrm_480426000002500001,Meghana Singh,In Discussion,2026-04-04 20:28:49+00,2026-04-25 10:51:17.783477+00,Abhishek Modi,Indulge Global
+zcrm_480426000002500030,Meghana Singh,In Discussion,2026-04-04 21:03:53+00,2026-04-25 10:51:17.783477+00,miraj shah,Indulge Global
+zcrm_480426000002500059,Meghana Singh,Nurturing,2026-04-04 21:09:36+00,2026-04-25 10:51:17.783477+00,Dev Patel,Indulge Global
+zcrm_480426000002502001,Meghana Singh,Lost,2026-04-04 20:37:52+00,2026-04-25 10:51:17.783477+00,+919370566669,Indulge Global
+zcrm_480426000002503001,Admin @ Indulge,New,2026-04-04 20:40:52+00,2026-04-25 10:51:17.783477+00,Rahul R Wadhwa,Indulge House
+zcrm_480426000002504001,Meghana Singh,Junk,2026-04-04 21:04:38+00,2026-04-25 10:51:17.783477+00,miraj shah,Indulge Global
+zcrm_480426000002505001,Admin @ Indulge,New,2026-04-04 21:16:12+00,2026-04-25 10:51:17.783477+00,Sharangowada Patil,Indulge House
+zcrm_480426000002508001,Admin @ Indulge,New,2026-04-04 22:50:12+00,2026-04-25 10:51:17.783477+00,Jasveer,Indulge House
+zcrm_480426000002557001,Meghana Singh,In Discussion,2026-04-05 16:16:20+00,2026-04-25 10:51:17.783477+00,Kabir,Indulge Global
+zcrm_480426000002561017,Amit Agarwal,Junk,2026-04-06 03:37:49+00,2026-04-25 10:51:17.783477+00,Farhan Khan,Indulge Global
+zcrm_480426000002561077,Samson Fernandes,Attempted,2026-04-07 09:15:41+00,2026-04-25 10:51:17.783477+00,Anirudh Agarwaal,Indulge Global
+zcrm_480426000002564029,Amit Agarwal,Attempted,2026-04-07 08:58:52+00,2026-04-25 10:51:17.783477+00,Nitin M Chhabra,Indulge Global
+zcrm_480426000002568045,Samson Fernandes,Attempted,2026-04-07 11:17:33+00,2026-04-25 10:51:17.783477+00,AD,Indulge Global
+zcrm_480426000002570002,Admin @ Indulge,New,2026-04-05 19:45:10+00,2026-04-25 10:51:17.783477+00,Sahil S.,Indulge House
+zcrm_480426000002570031,Amit Agarwal,Attempted,2026-04-05 20:56:42+00,2026-04-25 10:51:17.783477+00,Jai Gandhi,Indulge Global
+zcrm_480426000002570060,Meghana Singh,In Discussion,2026-04-05 21:26:29+00,2026-04-25 10:51:17.783477+00,C Ratheesh,Indulge Global
+zcrm_480426000002570089,Admin @ Indulge,New,2026-04-06 04:20:27+00,2026-04-25 10:51:17.783477+00,Aman Kohli,Indulge House
+zcrm_480426000002570119,Meghana Singh,In Discussion,2026-04-06 06:31:07+00,2026-04-25 10:51:17.783477+00,Navjot Singh,Indulge Global
+zcrm_480426000002570149,Meghana Singh,In Discussion,2026-04-06 15:36:10+00,2026-04-25 10:51:17.783477+00,Shobhit Chawla,Indulge Global
+zcrm_480426000002570179,Meghana Singh,Attempted,2026-04-07 12:12:18+00,2026-04-25 10:51:17.783477+00,Pauliankhum Paite,Indulge Global
+zcrm_480426000002570210,Admin @ Indulge,New,2026-04-07 12:15:05+00,2026-04-25 10:51:17.783477+00,Shaily Goel,Indulge House
+zcrm_480426000002575017,Samson Fernandes,Attempted,2026-04-06 21:35:07+00,2026-04-25 10:51:17.783477+00,Pradeep Jha,Indulge Global
+zcrm_480426000002576001,Amit Agarwal,Attempted,2026-04-05 20:04:00+00,2026-04-25 10:51:17.783477+00,Parv Sharma,Indulge Global
+zcrm_480426000002577065,Meghana Singh,Junk,2026-04-07 13:01:12+00,2026-04-25 10:51:17.783477+00,Vishal,Indulge Global
+zcrm_480426000002578011,Meghana Singh,Junk,2026-04-06 01:30:15+00,2026-04-25 10:51:17.783477+00,Amaan Sheikh,Indulge Global
+zcrm_480426000002580001,Amit Agarwal,Junk,2026-04-05 20:18:32+00,2026-04-25 10:51:17.783477+00,Govind Mittal,Indulge Global
+zcrm_480426000002580031,Admin @ Indulge,New,2026-04-05 22:40:52+00,2026-04-25 10:51:17.783477+00,Nilima Agarwaal,Indulge House
+zcrm_480426000002580061,Amit Agarwal,Junk,2026-04-06 01:12:01+00,2026-04-25 10:51:17.783477+00,6003467611 JamatAll,Indulge Global
+zcrm_480426000002582037,Meghana Singh,Attempted,2026-04-06 08:49:20+00,2026-04-25 10:51:17.783477+00,Umang,Indulge Global
+zcrm_480426000002584029,Amit Agarwal,Attempted,2026-04-07 09:51:20+00,2026-04-25 10:51:17.783477+00,Vaibhav Munjal,Indulge Global
+zcrm_480426000002585002,Amit Agarwal,Lost,2026-04-05 20:31:38+00,2026-04-25 10:51:17.783477+00,Kavita Vakeel,Indulge Global
+zcrm_480426000002585031,Kaniisha Chamarria,Junk,2026-04-06 07:58:58+00,2026-04-25 10:51:17.783477+00,Dr. Maamoun Issa,Indulge Global
+zcrm_480426000002587018,Amit Agarwal,Attempted,2026-04-06 12:43:32+00,2026-04-25 10:51:17.783477+00,Saiganesh Medical Centre,Indulge Global
+zcrm_480426000002587056,Amit Agarwal,Attempted,2026-04-06 15:07:08+00,2026-04-25 10:51:17.783477+00,rai_prashan_10,Indulge Global
+zcrm_480426000002589016,Amit Agarwal,Attempted,2026-04-06 13:24:22+00,2026-04-25 10:51:17.783477+00,muskan k,Indulge Global
+zcrm_480426000002589073,Samson Fernandes,Junk,2026-04-07 12:14:12+00,2026-04-25 10:51:17.783477+00,Smita Deshpande Rao,Indulge Global
+zcrm_480426000002590001,Amit Agarwal,Attempted,2026-04-05 20:34:55+00,2026-04-25 10:51:17.783477+00,Rhishabh Solannki,Indulge Global
+zcrm_480426000002594001,Amit Agarwal,In Discussion,2026-04-05 20:45:54+00,2026-04-25 10:51:17.783477+00,Saad Sheikh,Indulge Global
+zcrm_480426000002594030,Amit Agarwal,Attempted,2026-04-05 22:18:37+00,2026-04-25 10:51:17.783477+00,Ajay Mahipal,Indulge Global
+zcrm_480426000002594059,Meghana Singh,Nurturing,2026-04-06 11:54:56+00,2026-04-25 10:51:17.783477+00,Gaurav Goyal,Indulge Global
+zcrm_480426000002594088,Amit Agarwal,Nurturing,2026-04-06 13:13:50+00,2026-04-25 10:51:17.783477+00,Sweta Jajodia,Indulge Global
+zcrm_480426000002594117,Samson Fernandes,Lost,2026-04-06 15:28:20+00,2026-04-25 10:51:17.783477+00,Sameer Sah,Indulge Global
+zcrm_480426000002596015,Meghana Singh,Attempted,2026-04-06 16:12:16+00,2026-04-25 10:51:17.783477+00,Dual Chandra Ghosh,Indulge Global
+zcrm_480426000002600014,Meghana Singh,Attempted,2026-04-06 09:32:50+00,2026-04-25 10:51:17.783477+00,Bhoopatkar,Indulge Global
+zcrm_480426000002601001,Amit Agarwal,Attempted,2026-04-05 20:59:15+00,2026-04-25 10:51:17.783477+00,Harjeet Kohli,Indulge Global
+zcrm_480426000002601030,Meghana Singh,Attempted,2026-04-07 12:14:04+00,2026-04-25 10:51:17.783477+00,Riyaz Patel,Indulge Global
+zcrm_480426000002603017,Meghana Singh,Attempted,2026-04-06 10:18:27+00,2026-04-25 10:51:17.783477+00,Tharun Sholarajan,Indulge Global
+zcrm_480426000002604002,Amit Agarwal,In Discussion,2026-04-05 21:56:40+00,2026-04-25 10:51:17.783477+00,Pratyush Bhartiya,Indulge Global
+zcrm_480426000002604031,Meghana Singh,In Discussion,2026-04-06 01:51:46+00,2026-04-25 10:51:17.783477+00,prabodh Davkhare,Indulge Global
+zcrm_480426000002604061,Admin @ Indulge,New,2026-04-06 14:47:13+00,2026-04-25 10:51:17.783477+00,Rama Sawant,Indulge House
+zcrm_480426000002604090,Meghana Singh,Attempted,2026-04-06 16:35:12+00,2026-04-25 10:51:17.783477+00,Rituu Memani,Indulge Global
+zcrm_480426000002604119,Amit Agarwal,Attempted,2026-04-06 18:58:25+00,2026-04-25 10:51:17.783477+00,Tunviey M,Indulge Global
+zcrm_480426000002607009,Meghana Singh,Attempted,2026-04-07 10:04:38+00,2026-04-25 10:51:17.783477+00,Saurabh Legal,Indulge Global
+zcrm_480426000002612001,Meghana Singh,Attempted,2026-04-05 23:04:45+00,2026-04-25 10:51:17.783477+00,Pranav M,Indulge Global
+zcrm_480426000002612030,Samson Fernandes,Attempted,2026-04-06 23:20:26+00,2026-04-25 10:51:17.783477+00,Manish Mulchandani,Indulge Global
+zcrm_480426000002612062,Admin @ Indulge,New,2026-04-07 12:09:01+00,2026-04-25 10:51:17.783477+00,Socorro de souza,Indulge House
+zcrm_480426000002613001,Admin @ Indulge,New,2026-04-05 23:09:34+00,2026-04-25 10:51:17.783477+00,sushmita tilve,Indulge House
+zcrm_480426000002613030,Admin @ Indulge,New,2026-04-06 14:53:10+00,2026-04-25 10:51:17.783477+00,Bharggav Gondakar,Indulge House
+zcrm_480426000002613060,Harsh Gupta,New,2026-04-06 17:34:59+00,2026-04-25 10:51:17.783477+00,Archit Mehta,Indulge Shop
+zcrm_480426000002614018,Amit Agarwal,Attempted,2026-04-07 00:09:32+00,2026-04-25 10:51:17.783477+00,alamansari,Indulge Global
+zcrm_480426000002615001,Amit Agarwal,In Discussion,2026-04-05 23:11:38+00,2026-04-25 10:51:17.783477+00,Virendra Nair,Indulge Global
+zcrm_480426000002615030,Admin @ Indulge,New,2026-04-06 11:29:21+00,2026-04-25 10:51:17.783477+00,Nikita Lund,Indulge House
+zcrm_480426000002615059,Meghana Singh,In Discussion,2026-04-06 18:43:44+00,2026-04-25 10:51:17.783477+00,Arjun Prakashh,Indulge Global
+zcrm_480426000002615094,Katya,Junk,2026-04-06 22:05:04+00,2026-04-25 10:51:17.783477+00,Aditya Rasiwasia,Indulge Shop
+zcrm_480426000002615119,Samson Fernandes,Attempted,2026-04-07 00:17:56+00,2026-04-25 10:51:17.783477+00,Anand Srivastava,Indulge Global
+zcrm_480426000002617001,Admin @ Indulge,New,2026-04-05 23:18:50+00,2026-04-25 10:51:17.783477+00,Shyam Sundar,Indulge House
+zcrm_480426000002617031,Amit Agarwal,Lost,2026-04-05 23:36:21+00,2026-04-25 10:51:17.783477+00,Jigar Vora,Indulge Global
+zcrm_480426000002619010,Meghana Singh,Lost,2026-04-06 07:49:44+00,2026-04-25 10:51:17.783477+00,Anmol Mittal,Indulge Global
+zcrm_480426000002620001,Admin @ Indulge,New,2026-04-05 23:26:35+00,2026-04-25 10:51:17.783477+00,Moiz Chipjack,Indulge House
+zcrm_480426000002620031,Vikram,Junk,2026-04-06 23:08:21+00,2026-04-25 10:51:17.783477+00,Sumit Seth,Indulge Shop
+zcrm_480426000002620056,Admin @ Indulge,New,2026-04-07 12:13:36+00,2026-04-25 10:51:17.783477+00,Manoj Kharde,Indulge House
+zcrm_480426000002624001,Meghana Singh,Junk,2026-04-05 23:47:33+00,2026-04-25 10:51:17.783477+00,Bilal Fazlani,Indulge Global
+zcrm_480426000002624030,Admin @ Indulge,New,2026-04-06 15:06:07+00,2026-04-25 10:51:17.783477+00,Jatin Tandel,Indulge House
+zcrm_480426000002624059,Amit Agarwal,In Discussion,2026-04-06 18:13:57+00,2026-04-25 10:51:17.783477+00,Sanjai Tagore Angumpally,Indulge Global
+zcrm_480426000002627033,Amit Agarwal,Junk,2026-04-07 10:17:37+00,2026-04-25 10:51:17.783477+00,Delhi Ilqa,Indulge Global
+zcrm_480426000002628001,Amit Agarwal,In Discussion,2026-04-06 01:58:35+00,2026-04-25 10:51:17.783477+00,Ganesh Nanavare,Indulge Global
+zcrm_480426000002628030,Harsh Gupta,New,2026-04-07 10:45:22+00,2026-04-25 10:51:17.783477+00,Bais Pratap,Indulge Shop
+zcrm_480426000002628055,Meghana Singh,In Discussion,2026-04-07 12:14:27+00,2026-04-25 10:51:17.783477+00,Anil Shah,Indulge Global
+zcrm_480426000002630001,Amit Agarwal,Lost,2026-04-06 03:51:40+00,2026-04-25 10:51:17.783477+00,Meghana M,Indulge Global
+zcrm_480426000002635796,Amit Agarwal,In Discussion,2026-04-06 11:48:32+00,2026-04-25 10:51:17.783477+00,Pulkit Jain,Indulge Global
+zcrm_480426000002638021,Amit Agarwal,In Discussion,2026-04-07 08:42:32+00,2026-04-25 10:51:17.783477+00,Tony Christopher,Indulge Global
+zcrm_480426000002639030,Amit Agarwal,Junk,2026-04-07 08:20:27+00,2026-04-25 10:51:17.783477+00,hello,Indulge Global
+zcrm_480426000002648002,Admin @ Indulge,New,2026-04-06 18:33:10+00,2026-04-25 10:51:17.783477+00,Mahavir Mehta,Indulge House
+zcrm_480426000002648037,Amit Agarwal,Attempted,2026-04-06 19:26:50+00,2026-04-25 10:51:17.783477+00,Hilarion (Larry de Piano-Mann) Duarte lazor,Indulge Global
+zcrm_480426000002648068,Meghana Singh,Junk,2026-04-07 10:15:01+00,2026-04-25 10:51:17.783477+00,Amrita ganguly,Indulge Global
+zcrm_480426000002648099,Admin @ Indulge,New,2026-04-07 12:09:12+00,2026-04-25 10:51:17.783477+00,Natasha,Indulge Legacy
+zcrm_480426000002663002,Amit Agarwal,Lost,2026-04-07 13:57:02+00,2026-04-25 10:51:17.783477+00,Payal,Indulge Global
+zcrm_480426000002667020,Amit Agarwal,Lost,2026-04-09 00:17:11+00,2026-04-25 10:51:17.783477+00,Jajisarma,Indulge Global
+zcrm_480426000002670016,Meghana Singh,Attempted,2026-04-07 13:29:07+00,2026-04-25 10:51:17.783477+00,Aqeeb Khan,Indulge Global
+zcrm_480426000002670041,Admin @ Indulge,New,2026-04-08 10:16:45+00,2026-04-25 10:51:17.783477+00,Amarjeet Swasthi,Indulge Legacy
+zcrm_480426000002670073,Katya,Junk,2026-04-08 18:57:31+00,2026-04-25 10:51:17.783477+00,Robin George,Indulge Shop
+zcrm_480426000002672016,Meghana Singh,Attempted,2026-04-07 13:27:36+00,2026-04-25 10:51:17.783477+00,Mannan Shaikh,Indulge Global
+zcrm_480426000002672041,Amit Agarwal,Attempted,2026-04-07 13:30:24+00,2026-04-25 10:51:17.783477+00,Jaideep Jain,Indulge Global
+zcrm_480426000002672067,Samson Fernandes,Attempted,2026-04-07 22:42:16+00,2026-04-25 10:51:17.783477+00,Manish Oswal,Indulge Global
+zcrm_480426000002672099,Admin @ Indulge,New,2026-04-08 12:43:35+00,2026-04-25 10:51:17.783477+00,Sanjeev Kumar K,Indulge Legacy
+zcrm_480426000002672130,Kaniisha Chamarria,Attempted,2026-04-08 12:52:17+00,2026-04-25 10:51:17.783477+00,Chandan S N,Indulge Global
+zcrm_480426000002672161,Amit Agarwal,In Discussion,2026-04-09 16:50:38+00,2026-04-25 10:51:17.783477+00,Siddheshwar Ghale,Indulge Global
+zcrm_480426000002672194,Admin @ Indulge,New,2026-04-09 16:57:03+00,2026-04-25 10:51:17.783477+00,Tuntun comedy,Indulge Legacy
+zcrm_480426000002674001,Meghana Singh,Attempted,2026-04-07 13:18:40+00,2026-04-25 10:51:17.783477+00,Gurcharan Singh,Indulge Global
+zcrm_480426000002674016,Kaniisha Chamarria,Attempted,2026-04-07 13:22:28+00,2026-04-25 10:51:17.783477+00,Siddhant Puri,Indulge Global
+zcrm_480426000002674031,Meghana Singh,Attempted,2026-04-07 13:29:19+00,2026-04-25 10:51:17.783477+00,San Chawla,Indulge Global
+zcrm_480426000002675017,Kaniisha Chamarria,Junk,2026-04-08 00:15:39+00,2026-04-25 10:51:17.783477+00,PrEm,Indulge Global
+zcrm_480426000002676001,Amit Agarwal,Attempted,2026-04-07 13:19:04+00,2026-04-25 10:51:17.783477+00,Nithin Kumar,Indulge Global
+zcrm_480426000002676016,Amit Agarwal,In Discussion,2026-04-07 13:26:31+00,2026-04-25 10:51:17.783477+00,Swayambh Nama Setty,Indulge Global
+zcrm_480426000002676041,Meghana Singh,In Discussion,2026-04-07 13:32:24+00,2026-04-25 10:51:17.783477+00,Sarathi Ramadas,Indulge Global
+zcrm_480426000002676067,Katya,Junk,2026-04-07 17:14:28+00,2026-04-25 10:51:17.783477+00,Lalit Goyal,Indulge Shop
+zcrm_480426000002676093,Admin @ Indulge,New,2026-04-08 00:37:13+00,2026-04-25 10:51:17.783477+00,Halima Khan Nizami,Indulge House
+zcrm_480426000002676124,Admin @ Indulge,New,2026-04-08 14:58:57+00,2026-04-25 10:51:17.783477+00,Mridusmita Rabha,Indulge House
+zcrm_480426000002676156,Kaniisha Chamarria,Junk,2026-04-08 16:38:15+00,2026-04-25 10:51:17.783477+00,Neel Mehta,Indulge Global
+zcrm_480426000002676187,Amit Agarwal,In Discussion,2026-04-08 21:51:36+00,2026-04-25 10:51:17.783477+00,Raman Chaudhary,Indulge Global
+zcrm_480426000002676218,Kaniisha Chamarria,Junk,2026-04-09 19:04:30+00,2026-04-25 10:51:17.783477+00,Ms Rishu aditya singh,Indulge Global
+zcrm_480426000002680011,Kaniisha Chamarria,Attempted,2026-04-08 05:35:35+00,2026-04-25 10:51:17.783477+00,Shivam,Indulge Global
+zcrm_480426000002683001,Samson Fernandes,Attempted,2026-04-07 13:22:02+00,2026-04-25 10:51:17.783477+00,San Chawla,Indulge Global
+zcrm_480426000002683016,Samson Fernandes,Attempted,2026-04-07 13:23:35+00,2026-04-25 10:51:17.783477+00,Mayoor Balsara,Indulge Global
+zcrm_480426000002683032,Kaniisha Chamarria,Attempted,2026-04-08 09:40:22+00,2026-04-25 10:51:17.783477+00,Shruti Adhav,Indulge Global
+zcrm_480426000002683063,Samson Fernandes,Attempted,2026-04-08 09:57:34+00,2026-04-25 10:51:17.783477+00,Aliya Shaikh,Indulge Global
+zcrm_480426000002683094,Vikram,Junk,2026-04-08 21:02:15+00,2026-04-25 10:51:17.783477+00,Umeid Khan,Indulge Shop
+zcrm_480426000002683125,Harsh Gupta,New,2026-04-08 22:48:18+00,2026-04-25 10:51:17.783477+00,Manish Chatrath,Indulge Shop
+zcrm_480426000002683188,Amit Agarwal,In Discussion,2026-04-09 02:49:00+00,2026-04-25 10:51:17.783477+00,Yash Mehadia,Indulge Global
+zcrm_480426000002683220,Vikram,Lost,2026-04-09 17:30:53+00,2026-04-25 10:51:17.783477+00,Aman Sandher,Indulge Shop
+zcrm_480426000002686001,Meghana Singh,Attempted,2026-04-07 13:22:48+00,2026-04-25 10:51:17.783477+00,Puneeth Bekal,Indulge Global
+zcrm_480426000002686016,Meghana Singh,Attempted,2026-04-07 13:33:28+00,2026-04-25 10:51:17.783477+00,Devesh Kedia,Indulge Global
+zcrm_480426000002686041,Amit Agarwal,In Discussion,2026-04-08 21:11:49+00,2026-04-25 10:51:17.783477+00,Vivek Vashi,Indulge Global
+zcrm_480426000002686073,Amit Agarwal,Attempted,2026-04-08 22:48:13+00,2026-04-25 10:51:17.783477+00,Swati Mahajan,Indulge Global
+zcrm_480426000002686104,Kaniisha Chamarria,Nurturing,2026-04-09 17:45:23+00,2026-04-25 10:51:17.783477+00,Manish Ajmera,Indulge Global
+zcrm_480426000002686137,Admin @ Indulge,New,2026-04-09 19:17:23+00,2026-04-25 10:51:17.783477+00,Isaac Fernandes,Indulge House
+zcrm_480426000002688001,Meghana Singh,Lost,2026-04-07 13:23:04+00,2026-04-25 10:51:17.783477+00,Sagar Brahmabhatt,Indulge Global
+zcrm_480426000002688016,Kaniisha Chamarria,Lost,2026-04-07 13:27:19+00,2026-04-25 10:51:17.783477+00,Akshit Thaman,Indulge Global
+zcrm_480426000002688042,Amit Agarwal,Attempted,2026-04-07 13:30:10+00,2026-04-25 10:51:17.783477+00,Kushal Adatia,Indulge Global
+zcrm_480426000002688067,Meghana Singh,Attempted,2026-04-07 13:31:06+00,2026-04-25 10:51:17.783477+00,Yuvraj Sandhu,Indulge Global
+zcrm_480426000002688092,Kaniisha Chamarria,Attempted,2026-04-08 00:45:56+00,2026-04-25 10:51:17.783477+00,arav Shahani,Indulge Global
+zcrm_480426000002688118,Admin @ Indulge,New,2026-04-08 23:58:50+00,2026-04-25 10:51:17.783477+00,S K Srivastava,Indulge House
+zcrm_480426000002689016,Kaniisha Chamarria,Junk,2026-04-08 04:20:16+00,2026-04-25 10:51:17.783477+00,menakadar3,Indulge Global
+zcrm_480426000002690001,Kaniisha Chamarria,In Discussion,2026-04-07 13:23:55+00,2026-04-25 10:51:17.783477+00,SANJAY Sahni,Indulge Global
+zcrm_480426000002690047,Meghana Singh,Attempted,2026-04-07 13:39:15+00,2026-04-25 10:51:17.783477+00,Shruti R Arhanth,Indulge Global
+zcrm_480426000002690072,Kaniisha Chamarria,Qualified,2026-04-08 06:18:32+00,2026-04-25 10:51:17.783477+00,supal Doshi,Indulge Global
+zcrm_480426000002690103,Katya,Junk,2026-04-09 11:26:26+00,2026-04-25 10:51:17.783477+00,Rohan Arora,Indulge Shop
+zcrm_480426000002691033,Kaniisha Chamarria,Lost,2026-04-09 18:44:20+00,2026-04-25 10:51:17.783477+00,Arnavv,Indulge Global
+zcrm_480426000002692007,Amit Agarwal,Lost,2026-04-08 10:57:59+00,2026-04-25 10:51:17.783477+00,Sachin Yadav,Indulge Global
+zcrm_480426000002693005,Kaniisha Chamarria,In Discussion,2026-04-08 00:26:58+00,2026-04-25 10:51:17.783477+00,Shivanni Shettye Patwardhan,Indulge Global
+zcrm_480426000002696001,Samson Fernandes,Junk,2026-04-07 13:26:48+00,2026-04-25 10:51:17.783477+00,Naresh Chittathuru,Indulge Global
+zcrm_480426000002696026,Amit Agarwal,Attempted,2026-04-07 13:27:53+00,2026-04-25 10:51:17.783477+00,Dharampal Bhitora,Indulge Global
+zcrm_480426000002696051,Meghana Singh,Attempted,2026-04-07 13:29:48+00,2026-04-25 10:51:17.783477+00,Devaki Trivedi,Indulge Global
+zcrm_480426000002696076,Meghana Singh,Attempted,2026-04-07 13:30:30+00,2026-04-25 10:51:17.783477+00,Mansehaj Singh,Indulge Global
+zcrm_480426000002696101,Admin @ Indulge,New,2026-04-07 20:39:38+00,2026-04-25 10:51:17.783477+00,Vikash,Indulge Legacy
+zcrm_480426000002696132,Admin @ Indulge,New,2026-04-08 09:44:03+00,2026-04-25 10:51:17.783477+00,Nicholas Cardozo,Indulge House
+zcrm_480426000002696164,Amit Agarwal,In Discussion,2026-04-09 02:48:49+00,2026-04-25 10:51:17.783477+00,Pranav Sawant,Indulge Global
+zcrm_480426000002696196,Harsh Gupta,New,2026-04-09 18:40:16+00,2026-04-25 10:51:17.783477+00,Vikram Aditya,Indulge Shop
+zcrm_480426000002699001,Kaniisha Chamarria,Nurturing,2026-04-07 13:28:11+00,2026-04-25 10:51:17.783477+00,Kanisheka Reddy,Indulge Global
+zcrm_480426000002699026,Kaniisha Chamarria,Attempted,2026-04-07 13:28:29+00,2026-04-25 10:51:17.783477+00,Jimmy James,Indulge Global
+zcrm_480426000002699051,Meghana Singh,Attempted,2026-04-07 13:31:40+00,2026-04-25 10:51:17.783477+00,Aryan Singh,Indulge Global
+zcrm_480426000002699076,Kaniisha Chamarria,Junk,2026-04-08 14:53:46+00,2026-04-25 10:51:17.783477+00,Jolly Kharbanda,Indulge Global
+zcrm_480426000002699107,Admin @ Indulge,New,2026-04-08 20:55:36+00,2026-04-25 10:51:17.783477+00,Dalbir singh,Indulge House
+zcrm_480426000002699139,Meghana Singh,Attempted,2026-04-09 16:36:55+00,2026-04-25 10:51:17.783477+00,Rammohan Gurjar,Indulge Global
+zcrm_480426000002700016,Kaniisha Chamarria,Attempted,2026-04-07 18:53:31+00,2026-04-25 10:51:17.783477+00,Sid,Indulge Global
+zcrm_480426000002702001,Meghana Singh,Nurturing,2026-04-07 13:28:49+00,2026-04-25 10:51:17.783477+00,Yash Modi,Indulge Global
+zcrm_480426000002702026,Meghana Singh,Junk,2026-04-07 13:32:05+00,2026-04-25 10:51:17.783477+00,Rafik bloch Rafik bloch,Indulge Global
+zcrm_480426000002702051,Meghana Singh,In Discussion,2026-04-07 13:33:02+00,2026-04-25 10:51:17.783477+00,Kapil Jindal,Indulge Global
+zcrm_480426000002702077,Samson Fernandes,Junk,2026-04-07 21:40:26+00,2026-04-25 10:51:17.783477+00,Manpreet Saini,Indulge Global
+zcrm_480426000002702103,Admin @ Indulge,New,2026-04-08 10:31:31+00,2026-04-25 10:51:17.783477+00,Matender Yadav,Indulge Legacy
+zcrm_480426000002702134,Amit Agarwal,Attempted,2026-04-08 16:45:07+00,2026-04-25 10:51:17.783477+00,Narayan Behera,Indulge Global
+zcrm_480426000002702165,Kaniisha Chamarria,In Discussion,2026-04-09 11:18:45+00,2026-04-25 10:51:17.783477+00,Ridhimaa Bhasin,Indulge Global
+zcrm_480426000002705001,Kaniisha Chamarria,Attempted,2026-04-07 13:29:28+00,2026-04-25 10:51:17.783477+00,Priyadarshan Banjan,Indulge Global
+zcrm_480426000002712001,Meghana Singh,Nurturing,2026-04-07 13:32:45+00,2026-04-25 10:51:17.783477+00,Shravi Vaid,Indulge Global
+zcrm_480426000002712026,Kaniisha Chamarria,Lost,2026-04-07 18:14:38+00,2026-04-25 10:51:17.783477+00,Varun Agarwal,Indulge Global
+zcrm_480426000002712057,Samson Fernandes,Lost,2026-04-07 22:54:07+00,2026-04-25 10:51:17.783477+00,Deepak Chhalani,Indulge Global
+zcrm_480426000002712088,Kaniisha Chamarria,In Discussion,2026-04-08 10:38:33+00,2026-04-25 10:51:17.783477+00,Yash Agarwal,Indulge Global
+zcrm_480426000002712114,Vikram,Junk,2026-04-08 11:30:14+00,2026-04-25 10:51:17.783477+00,Sahil Garg,Indulge Shop
+zcrm_480426000002712139,Samson Fernandes,Attempted,2026-04-08 12:44:41+00,2026-04-25 10:51:17.783477+00,Ishan Rai Juneja,Indulge Global
+zcrm_480426000002712170,Samson Fernandes,Attempted,2026-04-09 17:06:15+00,2026-04-25 10:51:17.783477+00,Pratiksh Ajmera,Indulge Global
+zcrm_480426000002715005,Meghana Singh,Junk,2026-04-07 18:29:04+00,2026-04-25 10:51:17.783477+00,V. K.,Indulge Global
+zcrm_480426000002715060,Kaniisha Chamarria,In Discussion,2026-04-08 15:49:34+00,2026-04-25 10:51:17.783477+00,Soham,Indulge Global
+zcrm_480426000002717015,Samson Fernandes,Junk,2026-04-07 20:37:54+00,2026-04-25 10:51:17.783477+00,vs9879260,Indulge Global
+zcrm_480426000002719028,Samson Fernandes,Attempted,2026-04-09 09:48:03+00,2026-04-25 10:51:17.783477+00,Rushikesh Subbanwad Creative Systems Architect,Indulge Global
+zcrm_480426000002725013,Amit Agarwal,Attempted,2026-04-08 19:24:34+00,2026-04-25 10:51:17.783477+00,ִ ࣪?,Indulge Global
+zcrm_480426000002731016,Amit Agarwal,In Discussion,2026-04-09 07:50:59+00,2026-04-25 10:51:17.783477+00,Satish Juttika,Indulge Global
+zcrm_480426000002732006,Samson Fernandes,Attempted,2026-04-07 21:24:34+00,2026-04-25 10:51:17.783477+00,Prem Jaiswal,Indulge Global
+zcrm_480426000002732060,Amit Agarwal,In Discussion,2026-04-08 21:36:13+00,2026-04-25 10:51:17.783477+00,Amit Sharma,Indulge Global
+zcrm_480426000002737026,Meghana Singh,Junk,2026-04-09 13:13:03+00,2026-04-25 10:51:17.783477+00,Azar,Indulge Global
+zcrm_480426000002743001,Meghana Singh,Junk,2026-04-07 18:57:46+00,2026-04-25 10:51:17.783477+00,Ashvir Sangha,Indulge Global
+zcrm_480426000002743032,Admin @ Indulge,New,2026-04-08 18:06:17+00,2026-04-25 10:51:17.783477+00,Akchhansh Misra,Indulge House
+zcrm_480426000002743064,Amit Agarwal,Attempted,2026-04-09 08:31:38+00,2026-04-25 10:51:17.783477+00,Mayuresh Jadhav,Indulge Global
+zcrm_480426000002743095,Meghana Singh,Junk,2026-04-09 11:49:37+00,2026-04-25 10:51:17.783477+00,Priti Halder,Indulge Global
+zcrm_480426000002743126,Meghana Singh,Junk,2026-04-09 17:55:35+00,2026-04-25 10:51:17.783477+00,Shekhar,Indulge Global
+zcrm_480426000002746001,Samson Fernandes,Attempted,2026-04-07 22:10:48+00,2026-04-25 10:51:17.783477+00,Nishant Tibarewal,Indulge Global
+zcrm_480426000002746026,Admin @ Indulge,New,2026-04-08 13:57:34+00,2026-04-25 10:51:17.783477+00,"S*,,>a=<m""-a;;d {?}",Indulge Legacy
+zcrm_480426000002746058,Harsh Gupta,New,2026-04-08 14:40:32+00,2026-04-25 10:51:17.783477+00,Rajiv Shah,Indulge Shop
+zcrm_480426000002746083,Admin @ Indulge,New,2026-04-08 18:16:49+00,2026-04-25 10:51:17.783477+00,Manoj Jain,Indulge House
+zcrm_480426000002760011,Meghana Singh,Junk,2026-04-10 21:49:43+00,2026-04-25 10:51:17.783477+00,darmpaly75DharmPalYadav,Indulge Global
+zcrm_480426000002765003,Katya,Junk,2026-04-09 20:46:21+00,2026-04-25 10:51:17.783477+00,Narendra Sangde,Indulge Shop
+zcrm_480426000002765032,Samson Fernandes,Attempted,2026-04-10 12:28:57+00,2026-04-25 10:51:17.783477+00,Sekar sarala Subiramani,Indulge Global
+zcrm_480426000002765061,Amit Agarwal,Attempted,2026-04-11 08:38:54+00,2026-04-25 10:51:17.783477+00,Gabrish Sangma,Indulge Global
+zcrm_480426000002765091,Admin @ Indulge,New,2026-04-11 09:34:42+00,2026-04-25 10:51:17.783477+00,Kaya Rao Shetty,Indulge House
+zcrm_480426000002765143,Amit Agarwal,Attempted,2026-04-11 16:43:22+00,2026-04-25 10:51:17.783477+00,Akshay Belhe,Indulge Global
+zcrm_480426000002765172,Admin @ Indulge,New,2026-04-11 16:59:26+00,2026-04-25 10:51:17.783477+00,Hysen Dsilva,Indulge House
+zcrm_480426000002773001,Amit Agarwal,Attempted,2026-04-09 21:14:14+00,2026-04-25 10:51:17.783477+00,Mohith,Indulge Global
+zcrm_480426000002777001,Amit Agarwal,Attempted,2026-04-09 21:44:47+00,2026-04-25 10:51:17.783477+00,Shaan,Indulge Global
+zcrm_480426000002777064,Meghana Singh,Junk,2026-04-10 23:04:50+00,2026-04-25 10:51:17.783477+00,Kibriya,Indulge Global
+zcrm_480426000002779027,Meghana Singh,In Discussion,2026-04-11 01:19:01+00,2026-04-25 10:51:17.783477+00,Zen,Indulge Global
+zcrm_480426000002782001,Amit Agarwal,In Discussion,2026-04-09 22:05:11+00,2026-04-25 10:51:17.783477+00,Ruchika Halwasiaa,Indulge Global
+zcrm_480426000002782030,Admin @ Indulge,New,2026-04-10 16:36:56+00,2026-04-25 10:51:17.783477+00,Sanjeev Singla,Indulge House
+zcrm_480426000002782060,Admin @ Indulge,New,2026-04-11 14:17:52+00,2026-04-25 10:51:17.783477+00,Lisa Dsouza,Indulge House
+zcrm_480426000002782089,Harsh Gupta,New,2026-04-11 16:56:30+00,2026-04-25 10:51:17.783477+00,M A N U,Indulge Shop
+zcrm_480426000002783005,Amit Agarwal,In Discussion,2026-04-10 17:18:51+00,2026-04-25 10:51:17.783477+00,Niket Gajjar,Indulge Global
+zcrm_480426000002787002,Amit Agarwal,Attempted,2026-04-09 23:36:26+00,2026-04-25 10:51:17.783477+00,Jatin Goel,Indulge Global
+zcrm_480426000002787032,Admin @ Indulge,New,2026-04-10 06:55:27+00,2026-04-25 10:51:17.783477+00,Sumit Pradhan,Indulge House
+zcrm_480426000002787061,Vikram,Junk,2026-04-10 13:07:41+00,2026-04-25 10:51:17.783477+00,Mr___Love__7000,Indulge Shop
+zcrm_480426000002787091,Harsh Gupta,New,2026-04-10 13:40:40+00,2026-04-25 10:51:17.783477+00,Gurisekhon77,Indulge Shop
+zcrm_480426000002787120,Admin @ Indulge,New,2026-04-10 17:22:40+00,2026-04-25 10:51:17.783477+00,Jennisha V. Coutinho,Indulge House
+zcrm_480426000002787149,Amit Agarwal,Attempted,2026-04-10 17:41:17+00,2026-04-25 10:51:17.783477+00,Pranali Parmar,Indulge Global
+zcrm_480426000002787179,Meghana Singh,In Discussion,2026-04-10 23:33:00+00,2026-04-25 10:51:17.783477+00,Girish Bindal,Indulge Global
+zcrm_480426000002787208,Harsh Gupta,New,2026-04-11 12:09:42+00,2026-04-25 10:51:17.783477+00,Gaurav Kuthiala,Indulge Shop
+zcrm_480426000002793002,Amit Agarwal,Attempted,2026-04-10 05:07:17+00,2026-04-25 10:51:17.783477+00,Shahid Ali,Indulge Global
+zcrm_480426000002793031,Amit Agarwal,In Discussion,2026-04-10 11:49:01+00,2026-04-25 10:51:17.783477+00,Harsimran Kaur,Indulge Global
+zcrm_480426000002793061,Kaniisha Chamarria,Attempted,2026-04-10 12:30:05+00,2026-04-25 10:51:17.783477+00,sayani sri,Indulge Global
+zcrm_480426000002793090,Meghana Singh,Attempted,2026-04-11 11:17:46+00,2026-04-25 10:51:17.783477+00,प्रबंधक कृष्ण तिवारी,Indulge Global
+zcrm_480426000002794007,Amit Agarwal,Attempted,2026-04-10 17:51:24+00,2026-04-25 10:51:17.783477+00,कल्पना,Indulge Global
+zcrm_480426000002797020,Amit Agarwal,Attempted,2026-04-11 08:52:22+00,2026-04-25 10:51:17.783477+00,Rithik Kumar,Indulge Global
+zcrm_480426000002798002,Amit Agarwal,Attempted,2026-04-10 05:38:45+00,2026-04-25 10:51:17.783477+00,Rohan Bysani Gopinath,Indulge Global
+zcrm_480426000002798031,Kaniisha Chamarria,Junk,2026-04-10 11:22:15+00,2026-04-25 10:51:17.783477+00,Narsi Bhai,Indulge Global
+zcrm_480426000002803001,Admin @ Indulge,New,2026-04-10 06:02:13+00,2026-04-25 10:51:17.783477+00,Zeba khan,Indulge Legacy
+zcrm_480426000002803030,Samson Fernandes,Attempted,2026-04-10 17:28:37+00,2026-04-25 10:51:17.783477+00,Saloni Doshi,Indulge Global
+zcrm_480426000002803060,Amit Agarwal,Attempted,2026-04-10 20:01:06+00,2026-04-25 10:51:17.783477+00,Kalpana Bhatwadekar,Indulge Global
+zcrm_480426000002808002,Kaniisha Chamarria,Junk,2026-04-10 07:44:20+00,2026-04-25 10:51:17.783477+00,prity vlaogs,Indulge Global
+zcrm_480426000002808032,Admin @ Indulge,New,2026-04-10 11:43:09+00,2026-04-25 10:51:17.783477+00,Balvinder Singh Khurana,Indulge House
+zcrm_480426000002808091,Amit Agarwal,In Discussion,2026-04-10 21:17:35+00,2026-04-25 10:51:17.783477+00,Muskaan Bhandari,Indulge Global
+zcrm_480426000002808121,Meghana Singh,Junk,2026-04-11 02:53:06+00,2026-04-25 10:51:17.783477+00,Raviraj Bhalekar,Indulge Global
+zcrm_480426000002808151,Amit Agarwal,In Discussion,2026-04-11 08:35:27+00,2026-04-25 10:51:17.783477+00,Jain Pooja,Indulge Global
+zcrm_480426000002808180,Meghana Singh,In Discussion,2026-04-11 09:10:50+00,2026-04-25 10:51:17.783477+00,Ajay Garg,Indulge Global
+zcrm_480426000002808210,Meghana Singh,Junk,2026-04-11 13:09:20+00,2026-04-25 10:51:17.783477+00,Somnath chikadinkop,Indulge Global
+zcrm_480426000002808240,Katya,Junk,2026-04-11 14:34:40+00,2026-04-25 10:51:17.783477+00,Maitray Patel,Indulge Shop
+zcrm_480426000002808269,Admin @ Indulge,New,2026-04-11 17:35:33+00,2026-04-25 10:51:17.783477+00,Ting Tingla,Indulge House
+zcrm_480426000002809007,Amit Agarwal,Attempted,2026-04-10 20:55:45+00,2026-04-25 10:51:17.783477+00,Jay Ghadge,Indulge Global
+zcrm_480426000002814025,Amit Agarwal,Attempted,2026-04-10 18:00:49+00,2026-04-25 10:51:17.783477+00,ZeeLuxuryLife,Indulge Global
+zcrm_480426000002817009,Amit Agarwal,In Discussion,2026-04-10 21:24:40+00,2026-04-25 10:51:17.783477+00,Lakshay Mangal,Indulge Global
+zcrm_480426000002821035,Meghana Singh,Junk,2026-04-11 15:40:06+00,2026-04-25 10:51:17.783477+00,Aryan,Indulge Global
+zcrm_480426000002825015,Amit Agarwal,Attempted,2026-04-11 11:05:19+00,2026-04-25 10:51:17.783477+00,Sakshi jagadale,Indulge Global
+zcrm_480426000002826001,Admin @ Indulge,New,2026-04-10 09:07:04+00,2026-04-25 10:51:17.783477+00,udit chawla,Indulge House
+zcrm_480426000002826030,Meghana Singh,Junk,2026-04-10 23:14:13+00,2026-04-25 10:51:17.783477+00,Aslam Gafoor 277/NEAR OLD MASJID Islampura LACHHMANGARH sikar Pin332311,Indulge Global
+zcrm_480426000002826059,Admin @ Indulge,New,2026-04-11 06:59:05+00,2026-04-25 10:51:17.783477+00,ma6268343457,Indulge Legacy
+zcrm_480426000002826088,Amit Agarwal,Attempted,2026-04-11 09:58:02+00,2026-04-25 10:51:17.783477+00,Amar Mhatre,Indulge Global
+zcrm_480426000002826117,Meghana Singh,Attempted,2026-04-11 10:05:10+00,2026-04-25 10:51:17.783477+00,Rohan P Shah,Indulge Global
+zcrm_480426000002828002,Amit Agarwal,Attempted,2026-04-10 10:09:56+00,2026-04-25 10:51:17.783477+00,Bardhan,Indulge Global
+zcrm_480426000002828031,Kaniisha Chamarria,Attempted,2026-04-10 14:04:53+00,2026-04-25 10:51:17.783477+00,Ishan Shrinet,Indulge Global
+zcrm_480426000002828061,Amit Agarwal,Attempted,2026-04-10 18:55:24+00,2026-04-25 10:51:17.783477+00,Shambhu Singh,Indulge Global
+zcrm_480426000002828091,Amit Agarwal,Attempted,2026-04-11 11:40:08+00,2026-04-25 10:51:17.783477+00,Kuldip Jamdade,Indulge Global
+zcrm_480426000002828120,Meghana Singh,In Discussion,2026-04-11 12:03:41+00,2026-04-25 10:51:17.783477+00,Rajesh Bhasin,Indulge Global
+zcrm_480426000002829001,Samson Fernandes,Attempted,2026-04-10 10:15:16+00,2026-04-25 10:51:17.783477+00,Lalit gujar,Indulge Global
+zcrm_480426000002829060,Vikram,Junk,2026-04-11 02:12:57+00,2026-04-25 10:51:17.783477+00,Madhav gaba,Indulge Shop
+zcrm_480426000002829089,Admin @ Indulge,New,2026-04-11 09:10:38+00,2026-04-25 10:51:17.783477+00,Dara Kumar,Indulge Legacy
+zcrm_480426000002829118,Meghana Singh,Attempted,2026-04-11 11:02:01+00,2026-04-25 10:51:17.783477+00,Deep l Patel,Indulge Global
+zcrm_480426000002829147,Vikram,Junk,2026-04-11 12:08:44+00,2026-04-25 10:51:17.783477+00,Harpreet Singh,Indulge Shop
+zcrm_480426000002830002,Amit Agarwal,Attempted,2026-04-10 16:23:11+00,2026-04-25 10:51:17.783477+00,Jerold Isack,Indulge Global
+zcrm_480426000002835001,Admin @ Indulge,New,2026-04-10 13:41:22+00,2026-04-25 10:51:17.783477+00,Priya goutam 7787,Indulge Legacy
+zcrm_480426000002835030,Amit Agarwal,Junk,2026-04-10 13:57:52+00,2026-04-25 10:51:17.783477+00,imran khan,Indulge Global
+zcrm_480426000002835059,Samson Fernandes,Attempted,2026-04-10 16:54:13+00,2026-04-25 10:51:17.783477+00,Reshma Jain,Indulge Global
+zcrm_480426000002839030,Meghana Singh,Nurturing,2026-04-10 23:59:34+00,2026-04-25 10:51:17.783477+00,shreyash shah,Indulge Global
+zcrm_480426000002839060,Meghana Singh,Lost,2026-04-11 06:34:51+00,2026-04-25 10:51:17.783477+00,Harishteja Avula,Indulge Global
+zcrm_480426000002839090,Meghana Singh,Junk,2026-04-11 07:45:16+00,2026-04-25 10:51:17.783477+00,Sumaniya Raidharbha,Indulge Global
+zcrm_480426000002839119,Amit Agarwal,Attempted,2026-04-11 08:16:23+00,2026-04-25 10:51:17.783477+00,Sudha Sudha,Indulge Global
+zcrm_480426000002840001,Katya,Junk,2026-04-10 16:47:52+00,2026-04-25 10:51:17.783477+00,Shashi,Indulge Shop
+zcrm_480426000002840030,Meghana Singh,Attempted,2026-04-11 03:17:07+00,2026-04-25 10:51:17.783477+00,Md Mohsin,Indulge Global
+zcrm_480426000002840059,Harsh Gupta,New,2026-04-11 09:39:16+00,2026-04-25 10:51:17.783477+00,Ayaan_Jaitley,Indulge Shop
+zcrm_480426000002840088,Vikram,Lost,2026-04-11 16:55:10+00,2026-04-25 10:51:17.783477+00,Arvind Mogal,Indulge Shop
+zcrm_480426000002842001,Admin @ Indulge,New,2026-04-10 16:58:43+00,2026-04-25 10:51:17.783477+00,Singh Sadioura,Indulge House
+zcrm_480426000002842030,Meghana Singh,Junk,2026-04-11 15:27:45+00,2026-04-25 10:51:17.783477+00,Rahul Gupta,Indulge Global
+zcrm_480426000002843002,Admin @ Indulge,New,2026-04-11 10:59:36+00,2026-04-25 10:51:17.783477+00,Raghu Rathnam,Indulge House
+zcrm_480426000002843031,Katya,Junk,2026-04-11 12:03:43+00,2026-04-25 10:51:17.783477+00,Maninderjeet singh Bhullar,Indulge Shop
+zcrm_480426000002843060,Admin @ Indulge,New,2026-04-11 14:17:52+00,2026-04-25 10:51:17.783477+00,Richard Desouza,Indulge House
+zcrm_480426000002845002,Meghana Singh,Junk,2026-04-11 18:21:57+00,2026-04-25 10:51:17.783477+00,SUKHVEER SINGH,Indulge Global
+zcrm_480426000002845031,Katya,Junk,2026-04-11 20:24:24+00,2026-04-25 10:51:17.783477+00,Kapil Mehra,Indulge Shop
+zcrm_480426000002845060,Katya,Junk,2026-04-12 14:16:01+00,2026-04-25 10:51:17.783477+00,Nisarg,Indulge Shop
+zcrm_480426000002845089,Harsh Gupta,New,2026-04-12 17:41:06+00,2026-04-25 10:51:17.783477+00,ਮਨਜੋਤ ਸਿੰਘ,Indulge Shop
+zcrm_480426000002845118,Katya,Junk,2026-04-12 17:58:40+00,2026-04-25 10:51:17.783477+00,Pavan,Indulge Shop
+zcrm_480426000002845147,Admin @ Indulge,New,2026-04-12 20:16:49+00,2026-04-25 10:51:17.783477+00,Gourav Jain,Indulge House
+zcrm_480426000002845176,Amit Agarwal,In Discussion,2026-04-12 22:33:43+00,2026-04-25 10:51:17.783477+00,Rajat pratap Singh,Indulge Global
+zcrm_480426000002845205,Kaniisha Chamarria,Junk,2026-04-13 00:20:01+00,2026-04-25 10:51:17.783477+00,Mohit Gupta,Indulge Global
+zcrm_480426000002845235,Kaniisha Chamarria,Junk,2026-04-13 09:39:59+00,2026-04-25 10:51:17.783477+00,Paparao Utla,Indulge Global
+zcrm_480426000002845267,Vikram,Junk,2026-04-13 17:13:36+00,2026-04-25 10:51:17.783477+00,Suhail,Indulge Shop
+zcrm_480426000002845300,Amit Agarwal,Attempted,2026-04-13 22:32:44+00,2026-04-25 10:51:17.783477+00,Hari Haran,Indulge Global
+zcrm_480426000002845329,Admin @ Indulge,New,2026-04-13 22:38:15+00,2026-04-25 10:51:17.783477+00,Rammohan Yadav,Indulge Legacy
+zcrm_480426000002845358,Vikram,Junk,2026-04-13 23:28:59+00,2026-04-25 10:51:17.783477+00,Gurpreet S. Jolly,Indulge Shop
+zcrm_480426000002845390,Meghana Singh,In Discussion,2026-04-14 22:05:27+00,2026-04-25 10:51:17.783477+00,Ravi Chadha,Indulge Global
+zcrm_480426000002845420,Meghana Singh,Junk,2026-04-14 22:31:13+00,2026-04-25 10:51:17.783477+00,ওবাজু উদ্দিন,Indulge Global
+zcrm_480426000002845449,Vikram,Junk,2026-04-14 23:05:40+00,2026-04-25 10:51:17.783477+00,Prashant kumar Raman,Indulge Shop
+zcrm_480426000002845481,Samson Fernandes,Lost,2026-04-15 09:50:50+00,2026-04-25 10:51:17.783477+00,Ramesh Jatia,Indulge Global
+zcrm_480426000002845514,Amit Agarwal,In Discussion,2026-04-16 04:39:55+00,2026-04-25 10:51:17.783477+00,Amit Goyal,Indulge Global
+zcrm_480426000002845543,Admin @ Indulge,New,2026-04-16 09:02:58+00,2026-04-25 10:51:17.783477+00,kana Ram,Indulge Legacy
+zcrm_480426000002845572,Harsh Gupta,New,2026-04-16 09:10:07+00,2026-04-25 10:51:17.783477+00,Shreyas,Indulge Shop
+zcrm_480426000002845605,Katya,Junk,2026-04-16 10:55:50+00,2026-04-25 10:51:17.783477+00,Imran Seth,Indulge Shop
+zcrm_480426000002845637,Kaniisha Chamarria,In Discussion,2026-04-16 11:34:28+00,2026-04-25 10:51:17.783477+00,Abhay Bihani,Indulge Global
+zcrm_480426000002845666,Kaniisha Chamarria,Junk,2026-04-16 16:12:28+00,2026-04-25 10:51:17.783477+00,Ashish Vishwanath,Indulge Global
+zcrm_480426000002845698,Amit Agarwal,Nurturing,2026-04-16 21:09:35+00,2026-04-25 10:51:17.783477+00,Ruchika Malhan Varma,Indulge Global
+zcrm_480426000002845728,Vikram,Attempted,2026-04-16 22:51:22+00,2026-04-25 10:51:17.783477+00,Tarun,Indulge Shop
+zcrm_480426000002846128,Meghana Singh,Attempted,2026-04-14 22:42:03+00,2026-04-25 10:51:17.783477+00,Saurabh Shetty,Indulge Global
+zcrm_480426000002846256,Amit Agarwal,In Discussion,2026-04-15 12:17:57+00,2026-04-25 10:51:17.783477+00,Leah,Indulge Global
+zcrm_480426000002856002,Meghana Singh,Attempted,2026-04-11 19:01:16+00,2026-04-25 10:51:17.783477+00,Ashwin Mehta,Indulge Global
+zcrm_480426000002856032,Meghana Singh,Nurturing,2026-04-12 06:40:02+00,2026-04-25 10:51:17.783477+00,Abdullah Khan,Indulge Global
+zcrm_480426000002856061,Katya,Junk,2026-04-12 10:51:59+00,2026-04-25 10:51:17.783477+00,Chaitanya,Indulge Shop
+zcrm_480426000002856090,Meghana Singh,Junk,2026-04-12 13:49:26+00,2026-04-25 10:51:17.783477+00,Mangesh Pawar,Indulge Global
+zcrm_480426000002856119,Meghana Singh,Nurturing,2026-04-12 16:34:59+00,2026-04-25 10:51:17.783477+00,Mohit V Agrrawal,Indulge Global
+zcrm_480426000002856148,Amit Agarwal,In Discussion,2026-04-13 08:56:03+00,2026-04-25 10:51:17.783477+00,Isha Shah,Indulge Global
+zcrm_480426000002856180,Katya,Junk,2026-04-13 11:49:31+00,2026-04-25 10:51:17.783477+00,No.,Indulge Shop
+zcrm_480426000002856212,Harsh Gupta,New,2026-04-13 16:49:16+00,2026-04-25 10:51:17.783477+00,Muneeb Rehaman,Indulge Shop
+zcrm_480426000002856249,Harsh Gupta,New,2026-04-13 23:40:21+00,2026-04-25 10:51:17.783477+00,Sumit Bansal,Indulge Shop
+zcrm_480426000002856281,Kaniisha Chamarria,In Discussion,2026-04-14 16:07:27+00,2026-04-25 10:51:17.783477+00,Siddhartha Bhavanasi,Indulge Global
+zcrm_480426000002856310,Meghana Singh,Attempted,2026-04-14 22:27:22+00,2026-04-25 10:51:17.783477+00,Sonu Gupta,Indulge Global
+zcrm_480426000002856339,Harsh Gupta,New,2026-04-15 11:22:22+00,2026-04-25 10:51:17.783477+00,Sangpangchang,Indulge Shop
+zcrm_480426000002856371,Katya,Junk,2026-04-15 12:51:45+00,2026-04-25 10:51:17.783477+00,Athar a,Indulge Shop
+zcrm_480426000002856403,Katya,Junk,2026-04-15 16:06:05+00,2026-04-25 10:51:17.783477+00,Hardik Desai,Indulge Shop
+zcrm_480426000002856435,Kaniisha Chamarria,Lost,2026-04-15 17:18:21+00,2026-04-25 10:51:17.783477+00,Dhruvv Surana,Indulge Global
+zcrm_480426000002856464,Harsh Gupta,New,2026-04-16 00:05:16+00,2026-04-25 10:51:17.783477+00,Bhushan Rajguru,Indulge Shop
+zcrm_480426000002856496,Kaniisha Chamarria,Junk,2026-04-16 12:42:13+00,2026-04-25 10:51:17.783477+00,test memebers,Indulge Global
+zcrm_480426000002856525,Katya,Junk,2026-04-16 14:12:12+00,2026-04-25 10:51:17.783477+00,Emmanuel Suraj,Indulge Shop
+zcrm_480426000002856557,Kaniisha Chamarria,Junk,2026-04-16 17:57:59+00,2026-04-25 10:51:17.783477+00,Indra Bandal,Indulge Global
+zcrm_480426000002856589,Admin @ Indulge,New,2026-04-16 18:24:52+00,2026-04-25 10:51:17.783477+00,Aman Arora Juneja,Indulge House
+zcrm_480426000002856618,Admin @ Indulge,New,2026-04-16 18:44:55+00,2026-04-25 10:51:17.783477+00,Mounika Reddy,Indulge House
+zcrm_480426000002856647,Amit Agarwal,Lost,2026-04-16 20:19:45+00,2026-04-25 10:51:17.783477+00,মনের মানুষ অফিসিয়া,Indulge Global
+zcrm_480426000002856677,Admin @ Indulge,New,2026-04-16 20:32:14+00,2026-04-25 10:51:17.783477+00,Ar. Tanvi Mestry,Indulge House
+zcrm_480426000002860018,Amit Agarwal,Attempted,2026-04-13 00:07:58+00,2026-04-25 10:51:17.783477+00,Vinod Kumar,Indulge Global
+zcrm_480426000002861001,Meghana Singh,Lost,2026-04-11 19:14:00+00,2026-04-25 10:51:17.783477+00,Archit Goyal,Indulge Global
+zcrm_480426000002861030,Kaniisha Chamarria,Attempted,2026-04-11 21:32:27+00,2026-04-25 10:51:17.783477+00,JASMEET SINGH CHANDOK,Indulge Global
+zcrm_480426000002861059,Vikram,Junk,2026-04-11 21:35:09+00,2026-04-25 10:51:17.783477+00,Dinesh Rikhi,Indulge Shop
+zcrm_480426000002861088,Admin @ Indulge,New,2026-04-12 01:29:19+00,2026-04-25 10:51:17.783477+00,Naren Kothari,Indulge Legacy
+zcrm_480426000002861118,Katya,Junk,2026-04-12 13:31:00+00,2026-04-25 10:51:17.783477+00,Singh Melophile,Indulge Shop
+zcrm_480426000002861150,Admin @ Indulge,New,2026-04-12 22:00:51+00,2026-04-25 10:51:17.783477+00,ramjit. 302?☠️,Indulge Legacy
+zcrm_480426000002861179,Amit Agarwal,In Discussion,2026-04-12 23:23:33+00,2026-04-25 10:51:17.783477+00,Gopinath N,Indulge Global
+zcrm_480426000002861208,Samson Fernandes,Attempted,2026-04-13 09:50:25+00,2026-04-25 10:51:17.783477+00,Poorwa Gawde,Indulge Global
+zcrm_480426000002861240,Harsh Gupta,New,2026-04-13 15:05:27+00,2026-04-25 10:51:17.783477+00,Adityaveer Singh,Indulge Shop
+zcrm_480426000002861272,Samson Fernandes,Attempted,2026-04-14 17:08:21+00,2026-04-25 10:51:17.783477+00,Vivek Bhatia,Indulge Global
+zcrm_480426000002861302,Katya,Junk,2026-04-14 20:57:44+00,2026-04-25 10:51:17.783477+00,Ram,Indulge Shop
+zcrm_480426000002861334,Harsh Gupta,New,2026-04-14 22:36:10+00,2026-04-25 10:51:17.783477+00,Sheik Shah,Indulge Shop
+zcrm_480426000002861367,Amit Agarwal,In Discussion,2026-04-15 07:34:09+00,2026-04-25 10:51:17.783477+00,Sapna Yadalam,Indulge Global
+zcrm_480426000002861396,Vikram,Attempted,2026-04-15 19:47:34+00,2026-04-25 10:51:17.783477+00,Dhanashekar v,Indulge Shop
+zcrm_480426000002861457,Amit Agarwal,In Discussion,2026-04-15 23:55:53+00,2026-04-25 10:51:17.783477+00,Dushyant Raichura,Indulge Global
+zcrm_480426000002861486,Amit Agarwal,In Discussion,2026-04-16 00:02:51+00,2026-04-25 10:51:17.783477+00,Arun Kumar Goel,Indulge Global
+zcrm_480426000002861515,Katya,Junk,2026-04-16 08:51:48+00,2026-04-25 10:51:17.783477+00,Sathish babu s,Indulge Shop
+zcrm_480426000002861547,Meghana Singh,Attempted,2026-04-16 11:38:59+00,2026-04-25 10:51:17.783477+00,Shubham Modi,Indulge Global
+zcrm_480426000002861576,Harsh Gupta,New,2026-04-16 12:17:04+00,2026-04-25 10:51:17.783477+00,R,Indulge Shop
+zcrm_480426000002861608,Kaniisha Chamarria,Junk,2026-04-16 19:27:33+00,2026-04-25 10:51:17.783477+00,Sheikh Abdul Gaffar,Indulge Global
+zcrm_480426000002864157,Amit Agarwal,Junk,2026-04-16 20:32:13+00,2026-04-25 10:51:17.783477+00,Karin,Indulge Global
+zcrm_480426000002866001,Meghana Singh,Junk,2026-04-11 19:14:48+00,2026-04-25 10:51:17.783477+00,Hemlal Wiswakarma Deepu,Indulge Global
+zcrm_480426000002866031,Meghana Singh,In Discussion,2026-04-11 19:30:16+00,2026-04-25 10:51:17.783477+00,Siddharth Bansal,Indulge Global
+zcrm_480426000002866063,Katya,Junk,2026-04-12 23:39:55+00,2026-04-25 10:51:17.783477+00,Rahul,Indulge Shop
+zcrm_480426000002866092,Amit Agarwal,Lost,2026-04-12 23:50:47+00,2026-04-25 10:51:17.783477+00,Shwetta Jain,Indulge Global
+zcrm_480426000002866121,Vikram,Junk,2026-04-13 16:25:50+00,2026-04-25 10:51:17.783477+00,Karan Kalra,Indulge Shop
+zcrm_480426000002866153,Meghana Singh,In Discussion,2026-04-14 21:37:33+00,2026-04-25 10:51:17.783477+00,Neil Jangla,Indulge Global
+zcrm_480426000002866182,Admin @ Indulge,New,2026-04-14 22:04:02+00,2026-04-25 10:51:17.783477+00,vai_bhav,Indulge House
+zcrm_480426000002866233,Admin @ Indulge,New,2026-04-15 00:36:46+00,2026-04-25 10:51:17.783477+00,Amlan Ghose,Indulge House
+zcrm_480426000002866263,Meghana Singh,Nurturing,2026-04-15 01:56:26+00,2026-04-25 10:51:17.783477+00,Keval Shah,Indulge Global
+zcrm_480426000002866293,Amit Agarwal,Attempted,2026-04-15 08:45:39+00,2026-04-25 10:51:17.783477+00,Veena Joji,Indulge Global
+zcrm_480426000002866322,Vikram,Junk,2026-04-15 14:04:09+00,2026-04-25 10:51:17.783477+00,Prankul Aggarwal,Indulge Shop
+zcrm_480426000002866354,Admin @ Indulge,New,2026-04-16 08:53:17+00,2026-04-25 10:51:17.783477+00,Sadanand Kudnekar,Indulge House
+zcrm_480426000002866383,Amit Agarwal,In Discussion,2026-04-16 21:08:28+00,2026-04-25 10:51:17.783477+00,Arjun Singh,Indulge Global
+zcrm_480426000002867007,Meghana Singh,Junk,2026-04-11 21:57:08+00,2026-04-25 10:51:17.783477+00,SANKET GAVANE,Indulge Global
+zcrm_480426000002867091,Amit Agarwal,In Discussion,2026-04-13 12:37:22+00,2026-04-25 10:51:17.783477+00,NIKHIL MANE,Indulge Global
+zcrm_480426000002868121,Amit Agarwal,Lost,2026-04-15 22:24:25+00,2026-04-25 10:51:17.783477+00,Marzban Wadia,Indulge Global
+zcrm_480426000002868204,Amit Agarwal,Attempted,2026-04-16 22:26:42+00,2026-04-25 10:51:17.783477+00,Neelamji,Indulge Global
+zcrm_480426000002870147,Kaniisha Chamarria,Junk,2026-04-15 16:12:19+00,2026-04-25 10:51:17.783477+00,ayush,Indulge Global
+zcrm_480426000002872001,Harsh Gupta,New,2026-04-11 19:29:47+00,2026-04-25 10:51:17.783477+00,Harvinder Sanour,Indulge Shop
+zcrm_480426000002872030,Vikram,In Discussion,2026-04-12 09:13:31+00,2026-04-25 10:51:17.783477+00,Pratyaksh goyal,Indulge Shop
+zcrm_480426000002872059,Vikram,In Discussion,2026-04-12 13:57:24+00,2026-04-25 10:51:17.783477+00,Shubham,Indulge Shop
+zcrm_480426000002872091,Samson Fernandes,Attempted,2026-04-13 02:02:59+00,2026-04-25 10:51:17.783477+00,Varun Agrawal,Indulge Global
+zcrm_480426000002872120,Admin @ Indulge,New,2026-04-13 08:26:39+00,2026-04-25 10:51:17.783477+00,rudra,Indulge House
+zcrm_480426000002872153,Amit Agarwal,Attempted,2026-04-13 08:55:23+00,2026-04-25 10:51:17.783477+00,Asit thakkar,Indulge Global
+zcrm_480426000002872185,Vikram,Attempted,2026-04-13 12:26:54+00,2026-04-25 10:51:17.783477+00,Lawrence,Indulge Shop
+zcrm_480426000002872238,Harsh Gupta,New,2026-04-13 18:37:25+00,2026-04-25 10:51:17.783477+00,parth vasani,Indulge Shop
+zcrm_480426000002872270,Vikram,Attempted,2026-04-13 20:47:15+00,2026-04-25 10:51:17.783477+00,Anshu chaudhary,Indulge Shop
+zcrm_480426000002872302,Harsh Gupta,Attempted,2026-04-14 21:13:10+00,2026-04-25 10:51:17.783477+00,Ahmed badam,Indulge Shop
+zcrm_480426000002872334,Meghana Singh,Attempted,2026-04-14 22:05:43+00,2026-04-25 10:51:17.783477+00,Prajwal Galande,Indulge Global
+zcrm_480426000002872363,Admin @ Indulge,New,2026-04-15 06:03:08+00,2026-04-25 10:51:17.783477+00,Siddhant Kachroo,Indulge House
+zcrm_480426000002872392,Samson Fernandes,Attempted,2026-04-15 09:22:33+00,2026-04-25 10:51:17.783477+00,Gibin Joseph,Indulge Global
+zcrm_480426000002872422,Vikram,Attempted,2026-04-15 11:00:21+00,2026-04-25 10:51:17.783477+00,Prince Raj Khullar,Indulge Shop
+zcrm_480426000002872454,Meghana Singh,In Discussion,2026-04-15 11:44:49+00,2026-04-25 10:51:17.783477+00,Ritik Sheth,Indulge Global
+zcrm_480426000002872483,Vikram,Junk,2026-04-15 16:07:31+00,2026-04-25 10:51:17.783477+00,vasa_52,Indulge Shop
+zcrm_480426000002872519,Harsh Gupta,New,2026-04-15 23:23:02+00,2026-04-25 10:51:17.783477+00,Omkar Ekbote,Indulge Shop
+zcrm_480426000002872552,Vikram,Attempted,2026-04-15 23:33:13+00,2026-04-25 10:51:17.783477+00,Adarsh Hampole,Indulge Shop
+zcrm_480426000002872587,Samson Fernandes,Junk,2026-04-16 10:06:47+00,2026-04-25 10:51:17.783477+00,Kanika Mishra,Indulge Global
+zcrm_480426000002872616,Vikram,Junk,2026-04-16 12:37:38+00,2026-04-25 10:51:17.783477+00,PARTH,Indulge Shop
+zcrm_480426000002872648,Samson Fernandes,Junk,2026-04-16 12:41:08+00,2026-04-25 10:51:17.783477+00,test hoempage,Indulge Global
+zcrm_480426000002872680,Samson Fernandes,Attempted,2026-04-16 14:55:59+00,2026-04-25 10:51:17.783477+00,Monika Sagar,Indulge Global
+zcrm_480426000002872716,Samson Fernandes,Junk,2026-04-16 16:52:09+00,2026-04-25 10:51:17.783477+00,Abbas Uddin molla,Indulge Global
+zcrm_480426000002872748,Harsh Gupta,New,2026-04-16 17:13:18+00,2026-04-25 10:51:17.783477+00,Kumar Agarwal,Indulge Shop
+zcrm_480426000002872781,Kaniisha Chamarria,Attempted,2026-04-16 18:41:24+00,2026-04-25 10:51:17.783477+00,Rajat Pasari,Indulge Global
+zcrm_480426000002872813,Vikram,Junk,2026-04-16 21:05:12+00,2026-04-25 10:51:17.783477+00,Vinesh Khade,Indulge Shop
+zcrm_480426000002872842,Amit Agarwal,Attempted,2026-04-16 21:09:23+00,2026-04-25 10:51:17.783477+00,Arjun Singh,Indulge Global
+zcrm_480426000002873008,Meghana Singh,Attempted,2026-04-11 22:55:41+00,2026-04-25 10:51:17.783477+00,Mani Kashyap,Indulge Global
+zcrm_480426000002877028,Amit Agarwal,Attempted,2026-04-12 22:33:58+00,2026-04-25 10:51:17.783477+00,Rajat pratap singh,Indulge Global
+zcrm_480426000002877158,Kaniisha Chamarria,Junk,2026-04-15 21:40:13+00,2026-04-25 10:51:17.783477+00,Michelle - Balthazar Yachting,Indulge Global
+zcrm_480426000002879001,Admin @ Indulge,New,2026-04-11 19:53:59+00,2026-04-25 10:51:17.783477+00,Gopal Das Binnany,Indulge Legacy
+zcrm_480426000002879031,Vikram,Junk,2026-04-12 14:45:35+00,2026-04-25 10:51:17.783477+00,Yash Bhutada,Indulge Shop
+zcrm_480426000002879061,Vikram,Junk,2026-04-12 15:32:53+00,2026-04-25 10:51:17.783477+00,Dhruv,Indulge Shop
+zcrm_480426000002879090,Vikram,Junk,2026-04-12 16:52:18+00,2026-04-25 10:51:17.783477+00,ADV. PUNEET SINGH RAJAL,Indulge Shop
+zcrm_480426000002879120,Amit Agarwal,Attempted,2026-04-12 23:30:17+00,2026-04-25 10:51:17.783477+00,R G,Indulge Global
+zcrm_480426000002879149,Samson Fernandes,Lost,2026-04-13 06:05:19+00,2026-04-25 10:51:17.783477+00,Vansh Kaul,Indulge Global
+zcrm_480426000002879181,Kaniisha Chamarria,In Discussion,2026-04-13 19:50:48+00,2026-04-25 10:51:17.783477+00,Mithun Rebello,Indulge Global
+zcrm_480426000002879210,Amit Agarwal,Junk,2026-04-13 22:48:58+00,2026-04-25 10:51:17.783477+00,Ruchi,Indulge Global
+zcrm_480426000002879239,Kaniisha Chamarria,Junk,2026-04-14 14:22:43+00,2026-04-25 10:51:17.783477+00,Only SPORTS Lover BLOGGING,Indulge Global
+zcrm_480426000002879268,Harsh Gupta,New,2026-04-15 10:11:30+00,2026-04-25 10:51:17.783477+00,Shivam Pujara,Indulge Shop
+zcrm_480426000002879303,Katya,Junk,2026-04-15 15:05:36+00,2026-04-25 10:51:17.783477+00,Deepak,Indulge Shop
+zcrm_480426000002879335,Samson Fernandes,Junk,2026-04-15 15:19:09+00,2026-04-25 10:51:17.783477+00,Aashini Shah,Indulge Global
+zcrm_480426000002879364,Harsh Gupta,New,2026-04-15 18:13:07+00,2026-04-25 10:51:17.783477+00,Devyesh Vats,Indulge Shop
+zcrm_480426000002879402,Amit Agarwal,Attempted,2026-04-16 08:03:53+00,2026-04-25 10:51:17.783477+00,Shimul Harivallabhdas,Indulge Global
+zcrm_480426000002879431,Admin @ Indulge,New,2026-04-16 09:36:03+00,2026-04-25 10:51:17.783477+00,Jairaj Noolvi,Indulge House
+zcrm_480426000002879461,Amit Agarwal,In Discussion,2026-04-16 21:35:46+00,2026-04-25 10:51:17.783477+00,Somu Vadali,Indulge Global
+zcrm_480426000002883043,Meghana Singh,Junk,2026-04-13 14:07:25+00,2026-04-25 10:51:17.783477+00,AMAN GUPTA,Indulge Global
+zcrm_480426000002884002,Vikram,Junk,2026-04-11 21:05:35+00,2026-04-25 10:51:17.783477+00,Pritam Ghadge,Indulge Shop
+zcrm_480426000002884031,Meghana Singh,In Discussion,2026-04-12 14:12:19+00,2026-04-25 10:51:17.783477+00,Rahul Kumar,Indulge Global
+zcrm_480426000002884060,Harsh Gupta,New,2026-04-12 15:21:04+00,2026-04-25 10:51:17.783477+00,Sam,Indulge Shop
+zcrm_480426000002884089,Amit Agarwal,Attempted,2026-04-13 00:10:19+00,2026-04-25 10:51:17.783477+00,Roshan Dhangar,Indulge Global
+zcrm_480426000002884119,Katya,Junk,2026-04-13 01:26:50+00,2026-04-25 10:51:17.783477+00,Abbhiraj,Indulge Shop
+zcrm_480426000002884148,Samson Fernandes,Attempted,2026-04-13 09:00:00+00,2026-04-25 10:51:17.783477+00,Shailendra Gupta,Indulge Global
+zcrm_480426000002884180,Kaniisha Chamarria,Attempted,2026-04-13 14:04:13+00,2026-04-25 10:51:17.783477+00,Arihant Jain,Indulge Global
+zcrm_480426000002884209,Meghana Singh,Nurturing,2026-04-13 14:37:49+00,2026-04-25 10:51:17.783477+00,Anant Dugar,Indulge Global
+zcrm_480426000002884241,Katya,Junk,2026-04-15 00:11:16+00,2026-04-25 10:51:17.783477+00,Lohit,Indulge Shop
+zcrm_480426000002884274,Admin @ Indulge,New,2026-04-15 03:41:46+00,2026-04-25 10:51:17.783477+00,Shubham Naik,Indulge House
+zcrm_480426000002884303,Kaniisha Chamarria,In Discussion,2026-04-15 13:13:52+00,2026-04-25 10:51:17.783477+00,Sabir Shaikh,Indulge Global
+zcrm_480426000002884332,Admin @ Indulge,New,2026-04-15 13:28:56+00,2026-04-25 10:51:17.783477+00,Mustafa,Indulge House
+zcrm_480426000002884367,Amit Agarwal,Attempted,2026-04-16 00:20:08+00,2026-04-25 10:51:17.783477+00,Lavina GOenka,Indulge Global
+zcrm_480426000002884396,Vikram,Junk,2026-04-16 00:42:18+00,2026-04-25 10:51:17.783477+00,Mainoor Solanki,Indulge Shop
+zcrm_480426000002884428,Harsh Gupta,New,2026-04-16 01:15:29+00,2026-04-25 10:51:17.783477+00,bobby,Indulge Shop
+zcrm_480426000002884460,Samson Fernandes,Junk,2026-04-16 09:07:31+00,2026-04-25 10:51:17.783477+00,Colonel Ajay Ahlawat,Indulge Global
+zcrm_480426000002884489,Samson Fernandes,Attempted,2026-04-16 09:19:36+00,2026-04-25 10:51:17.783477+00,Villoo Niko,Indulge Global
+zcrm_480426000002884518,Vikram,Attempted,2026-04-16 11:54:30+00,2026-04-25 10:51:17.783477+00,Rajit Shah,Indulge Shop
+zcrm_480426000002884551,Katya,Junk,2026-04-16 17:19:10+00,2026-04-25 10:51:17.783477+00,Jatin,Indulge Shop
+zcrm_480426000002884583,Harsh Gupta,New,2026-04-16 22:27:50+00,2026-04-25 10:51:17.783477+00,Satyam,Indulge Shop
+zcrm_480426000002887001,Harsh Gupta,New,2026-04-11 21:20:07+00,2026-04-25 10:51:17.783477+00,Arvind Bajaj,Indulge Shop
+zcrm_480426000002887031,Meghana Singh,Lost,2026-04-11 21:31:13+00,2026-04-25 10:51:17.783477+00,Shivani Joshi,Indulge Global
+zcrm_480426000002887060,Vikram,Lost,2026-04-12 12:58:32+00,2026-04-25 10:51:17.783477+00,Gurnoor,Indulge Shop
+zcrm_480426000002887089,Harsh Gupta,New,2026-04-12 14:12:52+00,2026-04-25 10:51:17.783477+00,R,Indulge Shop
+zcrm_480426000002887119,Vikram,Junk,2026-04-12 21:49:47+00,2026-04-25 10:51:17.783477+00,Khan,Indulge Shop
+zcrm_480426000002887148,Amit Agarwal,Lost,2026-04-12 23:13:31+00,2026-04-25 10:51:17.783477+00,mayank ladia,Indulge Global
+zcrm_480426000002887178,Samson Fernandes,Junk,2026-04-13 01:37:33+00,2026-04-25 10:51:17.783477+00,Sam T,Indulge Global
+zcrm_480426000002887207,Harsh Gupta,New,2026-04-13 10:43:48+00,2026-04-25 10:51:17.783477+00,Dhanush,Indulge Shop
+zcrm_480426000002887245,Kaniisha Chamarria,Junk,2026-04-13 14:01:35+00,2026-04-25 10:51:17.783477+00,Vishnu Babar,Indulge Global
+zcrm_480426000002887277,Vikram,Junk,2026-04-13 18:16:27+00,2026-04-25 10:51:17.783477+00,Ghvbi,Indulge Shop
+zcrm_480426000002887310,Meghana Singh,Attempted,2026-04-14 21:36:24+00,2026-04-25 10:51:17.783477+00,Zar Kha,Indulge Global
+zcrm_480426000002887339,Vikram,Junk,2026-04-15 02:26:17+00,2026-04-25 10:51:17.783477+00,No,Indulge Shop
+zcrm_480426000002887371,Admin @ Indulge,New,2026-04-15 07:47:47+00,2026-04-25 10:51:17.783477+00,Vikram Jai,Indulge House
+zcrm_480426000002887400,Amit Agarwal,Attempted,2026-04-15 14:52:34+00,2026-04-25 10:51:17.783477+00,mithila murada,Indulge Global
+zcrm_480426000002887429,Katya,Junk,2026-04-15 18:25:41+00,2026-04-25 10:51:17.783477+00,VIVEK KOTHARI,Indulge Shop
+zcrm_480426000002887464,Meghana Singh,Junk,2026-04-16 12:40:24+00,2026-04-25 10:51:17.783477+00,arfam test,Indulge Global
+zcrm_480426000002887496,Vikram,Attempted,2026-04-16 14:18:13+00,2026-04-25 10:51:17.783477+00,Tasneem Pulav Kantawala,Indulge Shop
+zcrm_480426000002887528,Amit Agarwal,Junk,2026-04-16 22:29:03+00,2026-04-25 10:51:17.783477+00,Pankaj Kumar Yadav,Indulge Global
+zcrm_480426000002889120,Amit Agarwal,In Discussion,2026-04-16 02:20:05+00,2026-04-25 10:51:17.783477+00,Chhaya Momaya,Indulge Global
+zcrm_480426000002890071,Amit Agarwal,Attempted,2026-04-13 21:30:55+00,2026-04-25 10:51:17.783477+00,Ayat,Indulge Global
+zcrm_480426000002891104,Samson Fernandes,In Discussion,2026-04-14 15:26:47+00,2026-04-25 10:51:17.783477+00,MANISH KRISALA,Indulge Global
+zcrm_480426000002892098,Meghana Singh,Attempted,2026-04-14 16:50:20+00,2026-04-25 10:51:17.783477+00,Pardeep Singh,Indulge Global
+zcrm_480426000002894004,Harsh Gupta,New,2026-04-12 10:44:41+00,2026-04-25 10:51:17.783477+00,Shirish Shah,Indulge Shop
+zcrm_480426000002894033,Amit Agarwal,In Discussion,2026-04-12 22:52:23+00,2026-04-25 10:51:17.783477+00,Jainn Anuraag,Indulge Global
+zcrm_480426000002894062,Harsh Gupta,New,2026-04-13 00:14:08+00,2026-04-25 10:51:17.783477+00,Harshal Thite,Indulge Shop
+zcrm_480426000002894092,Admin @ Indulge,New,2026-04-13 10:31:57+00,2026-04-25 10:51:17.783477+00,Karandeep chatha,Indulge House
+zcrm_480426000002894124,Kaniisha Chamarria,Junk,2026-04-13 15:00:22+00,2026-04-25 10:51:17.783477+00,Ram Bahadur,Indulge Global
+zcrm_480426000002894153,Amit Agarwal,Attempted,2026-04-14 00:22:02+00,2026-04-25 10:51:17.783477+00,Shubham Raj,Indulge Global
+zcrm_480426000002894183,Amit Agarwal,In Discussion,2026-04-15 05:36:50+00,2026-04-25 10:51:17.783477+00,Nirav Gandhi,Indulge Global
+zcrm_480426000002894212,Katya,Junk,2026-04-15 10:23:35+00,2026-04-25 10:51:17.783477+00,☬,Indulge Shop
+zcrm_480426000002894247,Kaniisha Chamarria,Nurturing,2026-04-15 19:43:09+00,2026-04-25 10:51:17.783477+00,Mithilesh Reddy,Indulge Global
+zcrm_480426000002894276,Katya,Junk,2026-04-15 23:27:56+00,2026-04-25 10:51:17.783477+00,Aman saini,Indulge Shop
+zcrm_480426000002894308,Katya,Junk,2026-04-16 16:36:42+00,2026-04-25 10:51:17.783477+00,A,Indulge Shop
+zcrm_480426000002894340,Kaniisha Chamarria,Junk,2026-04-16 19:29:02+00,2026-04-25 10:51:17.783477+00,Gaffar Sheik,Indulge Global
+zcrm_480426000002895059,Meghana Singh,Junk,2026-04-14 21:05:31+00,2026-04-25 10:51:17.783477+00,L.M.Fayaz Ahamed,Indulge Global
+zcrm_480426000002895099,Amit Agarwal,In Discussion,2026-04-15 00:40:39+00,2026-04-25 10:51:17.783477+00,HVK,Indulge Global
+zcrm_480426000002896098,Kaniisha Chamarria,Junk,2026-04-15 18:32:54+00,2026-04-25 10:51:17.783477+00,Deepak Stranger,Indulge Global
+zcrm_480426000002896153,Kaniisha Chamarria,Junk,2026-04-16 12:31:19+00,2026-04-25 10:51:17.783477+00,nukambikakuchulapati,Indulge Global
+zcrm_480426000002898005,Meghana Singh,Attempted,2026-04-11 23:47:43+00,2026-04-25 10:51:17.783477+00,Deepanshi pant,Indulge Global
+zcrm_480426000002898035,Meghana Singh,In Discussion,2026-04-12 08:45:55+00,2026-04-25 10:51:17.783477+00,Kiran Vora,Indulge Global
+zcrm_480426000002898064,Meghana Singh,In Discussion,2026-04-12 08:49:09+00,2026-04-25 10:51:17.783477+00,Dinesh Dalamal,Indulge Global
+zcrm_480426000002898093,Admin @ Indulge,New,2026-04-12 09:29:14+00,2026-04-25 10:51:17.783477+00,Sumit Dutta,Indulge House
+zcrm_480426000002898123,Katya,Junk,2026-04-12 18:48:12+00,2026-04-25 10:51:17.783477+00,Aaaaaaaaaa,Indulge Shop
+zcrm_480426000002898152,Harsh Gupta,New,2026-04-12 18:56:26+00,2026-04-25 10:51:17.783477+00,Harsh,Indulge Shop
+zcrm_480426000002898186,Vikram,Junk,2026-04-13 03:22:32+00,2026-04-25 10:51:17.783477+00,ABC,Indulge Shop
+zcrm_480426000002898221,Vikram,Junk,2026-04-13 11:46:14+00,2026-04-25 10:51:17.783477+00,Bhumika,Indulge Shop
+zcrm_480426000002898253,Katya,Junk,2026-04-13 14:19:31+00,2026-04-25 10:51:17.783477+00,Dr siddharth verma,Indulge Shop
+zcrm_480426000002898285,Meghana Singh,Attempted,2026-04-14 21:58:01+00,2026-04-25 10:51:17.783477+00,Shefali Chopra,Indulge Global
+zcrm_480426000002898314,Meghana Singh,In Discussion,2026-04-14 22:15:18+00,2026-04-25 10:51:17.783477+00,Raghav Bir Singh,Indulge Global
+zcrm_480426000002898343,Meghana Singh,Attempted,2026-04-14 22:31:41+00,2026-04-25 10:51:17.783477+00,Sheshadri N,Indulge Global
+zcrm_480426000002898372,Meghana Singh,In Discussion,2026-04-14 23:08:48+00,2026-04-25 10:51:17.783477+00,Nidhi Gupta,Indulge Global
+zcrm_480426000002898401,Meghana Singh,In Discussion,2026-04-14 23:16:07+00,2026-04-25 10:51:17.783477+00,Divya B,Indulge Global
+zcrm_480426000002898430,Amit Agarwal,Attempted,2026-04-15 04:14:28+00,2026-04-25 10:51:17.783477+00,Ranjana,Indulge Global
+zcrm_480426000002898459,Kaniisha Chamarria,Junk,2026-04-15 19:25:19+00,2026-04-25 10:51:17.783477+00,test test,Indulge Global
+zcrm_480426000002898488,Admin @ Indulge,New,2026-04-16 06:46:53+00,2026-04-25 10:51:17.783477+00,rabindra k jaiswal,Indulge Legacy
+zcrm_480426000002898518,Vikram,Attempted,2026-04-16 07:35:58+00,2026-04-25 10:51:17.783477+00,वडेर,Indulge Shop
+zcrm_480426000002898550,Harsh Gupta,New,2026-04-16 13:40:37+00,2026-04-25 10:51:17.783477+00,Nachiket Gaud,Indulge Shop
+zcrm_480426000002898582,Katya,Junk,2026-04-16 22:17:05+00,2026-04-25 10:51:17.783477+00,Smit,Indulge Shop
+zcrm_480426000002898611,Vikram,Attempted,2026-04-16 22:24:58+00,2026-04-25 10:51:17.783477+00,Dr. Vikram Agnihotri,Indulge Shop
+zcrm_480426000002899001,Meghana Singh,Junk,2026-04-11 21:52:40+00,2026-04-25 10:51:17.783477+00,Bonnie Fernandes,Indulge Global
+zcrm_480426000002900036,Samson Fernandes,Attempted,2026-04-13 11:27:29+00,2026-04-25 10:51:17.783477+00,ANAND VARGHESE,Indulge Global
+zcrm_480426000002900123,Meghana Singh,Junk,2026-04-15 17:06:06+00,2026-04-25 10:51:17.783477+00,Rahul,Indulge Global
+zcrm_480426000002902041,Amit Agarwal,Lost,2026-04-13 08:29:14+00,2026-04-25 10:51:17.783477+00,Katya Indulge,Indulge Global
+zcrm_480426000002902184,Kaniisha Chamarria,Junk,2026-04-15 11:03:54+00,2026-04-25 10:51:17.783477+00,Dr Pramila Garg,Indulge Global
+zcrm_480426000002903001,Admin @ Indulge,New,2026-04-11 22:13:23+00,2026-04-25 10:51:17.783477+00,Anil Sah,Indulge Legacy
+zcrm_480426000002903030,Amit Agarwal,Lost,2026-04-12 22:21:54+00,2026-04-25 10:51:17.783477+00,Jai kumar,Indulge Global
+zcrm_480426000002903059,Vikram,Lost,2026-04-13 15:00:17+00,2026-04-25 10:51:17.783477+00,Mayank,Indulge Shop
+zcrm_480426000002903097,Katya,Junk,2026-04-13 18:40:14+00,2026-04-25 10:51:17.783477+00,Dfur6rufg,Indulge Shop
+zcrm_480426000002903129,Katya,Junk,2026-04-13 22:52:18+00,2026-04-25 10:51:17.783477+00,Farhan Ahmed,Indulge Shop
+zcrm_480426000002903161,Amit Agarwal,Attempted,2026-04-14 12:05:14+00,2026-04-25 10:51:17.783477+00,Nishant ji,Indulge Global
+zcrm_480426000002903190,Vikram,In Discussion,2026-04-14 21:08:43+00,2026-04-25 10:51:17.783477+00,Ansh Agarwal,Indulge Shop
+zcrm_480426000002903222,Katya,Junk,2026-04-14 22:00:22+00,2026-04-25 10:51:17.783477+00,Shivam Kad,Indulge Shop
+zcrm_480426000002903254,Harsh Gupta,New,2026-04-14 23:22:01+00,2026-04-25 10:51:17.783477+00,Imon,Indulge Shop
+zcrm_480426000002903286,Amit Agarwal,Lost,2026-04-15 09:34:44+00,2026-04-25 10:51:17.783477+00,Nishi Bhat,Indulge Global
+zcrm_480426000002903319,Vikram,Attempted,2026-04-15 15:06:22+00,2026-04-25 10:51:17.783477+00,सारंग मल्हारीशेठ केसवड,Indulge Shop
+zcrm_480426000002903358,Katya,Junk,2026-04-15 20:31:45+00,2026-04-25 10:51:17.783477+00,Aariish Agarwala,Indulge Shop
+zcrm_480426000002903390,Harsh Gupta,New,2026-04-16 07:02:02+00,2026-04-25 10:51:17.783477+00,Shanav,Indulge Shop
+zcrm_480426000002903422,Admin @ Indulge,New,2026-04-16 11:53:21+00,2026-04-25 10:51:17.783477+00,Rajendra Shinde,Indulge House
+zcrm_480426000002903451,Katya,Junk,2026-04-16 12:37:31+00,2026-04-25 10:51:17.783477+00,Gaurav Aren,Indulge Shop
+zcrm_480426000002903484,Vikram,Attempted,2026-04-16 16:58:10+00,2026-04-25 10:51:17.783477+00,Mathan,Indulge Shop
+zcrm_480426000002906001,Admin @ Indulge,New,2026-04-11 22:27:42+00,2026-04-25 10:51:17.783477+00,Ambika Verma,Indulge House
+zcrm_480426000002906030,Katya,Junk,2026-04-12 15:26:34+00,2026-04-25 10:51:17.783477+00,Sunil,Indulge Shop
+zcrm_480426000002906059,Kaniisha Chamarria,Attempted,2026-04-13 10:59:58+00,2026-04-25 10:51:17.783477+00,Ploy Bunyong,Indulge Global
+zcrm_480426000002906094,Kaniisha Chamarria,Lost,2026-04-13 18:05:09+00,2026-04-25 10:51:17.783477+00,Chandan Dhowan,Indulge Global
+zcrm_480426000002906123,Admin @ Indulge,New,2026-04-13 18:53:30+00,2026-04-25 10:51:17.783477+00,Kamal,Indulge House
+zcrm_480426000002906152,Meghana Singh,Junk,2026-04-15 00:15:48+00,2026-04-25 10:51:17.783477+00,Meena Bhalekar,Indulge Global
+zcrm_480426000002906182,Meghana Singh,In Discussion,2026-04-15 06:32:36+00,2026-04-25 10:51:17.783477+00,Dipika Jhunjhunwala,Indulge Global
+zcrm_480426000002906211,Katya,Junk,2026-04-15 11:24:13+00,2026-04-25 10:51:17.783477+00,MD Sabir,Indulge Shop
+zcrm_480426000002906243,Samson Fernandes,Attempted,2026-04-15 12:24:46+00,2026-04-25 10:51:17.783477+00,Arnav naveen Pandey,Indulge Global
+zcrm_480426000002906272,Harsh Gupta,New,2026-04-15 14:57:25+00,2026-04-25 10:51:17.783477+00,Guru Prabu (GP),Indulge Shop
+zcrm_480426000002906304,Vikram,Attempted,2026-04-16 09:01:26+00,2026-04-25 10:51:17.783477+00,Adarsh,Indulge Shop
+zcrm_480426000002906336,Harsh Gupta,New,2026-04-16 13:58:35+00,2026-04-25 10:51:17.783477+00,sukhpreet,Indulge Shop
+zcrm_480426000002906368,Admin @ Indulge,New,2026-04-16 14:10:36+00,2026-04-25 10:51:17.783477+00,Sushant Malik,Indulge House
+zcrm_480426000002906401,Admin @ Indulge,New,2026-04-16 17:34:24+00,2026-04-25 10:51:17.783477+00,Deepak bansal,Indulge House
+zcrm_480426000002906430,Harsh Gupta,Attempted,2026-04-16 21:47:24+00,2026-04-25 10:51:17.783477+00,Rani Sanghvi,Indulge Shop
+zcrm_480426000002910001,Meghana Singh,Junk,2026-04-11 23:13:38+00,2026-04-25 10:51:17.783477+00,Ali,Indulge Global
+zcrm_480426000002911001,Katya,Junk,2026-04-11 23:54:04+00,2026-04-25 10:51:17.783477+00,Nitesh seth,Indulge Shop
+zcrm_480426000002911030,Meghana Singh,In Discussion,2026-04-12 00:05:55+00,2026-04-25 10:51:17.783477+00,Pankaj Bansal,Indulge Global
+zcrm_480426000002911060,Admin @ Indulge,New,2026-04-12 00:37:35+00,2026-04-25 10:51:17.783477+00,Amol Prakash Polke,Indulge House
+zcrm_480426000002911089,Harsh Gupta,Attempted,2026-04-12 13:00:51+00,2026-04-25 10:51:17.783477+00,Praveen Kumar,Indulge Shop
+zcrm_480426000002911118,Harsh Gupta,Junk,2026-04-12 15:40:58+00,2026-04-25 10:51:17.783477+00,Jyotish,Indulge Shop
+zcrm_480426000002911147,Meghana Singh,Attempted,2026-04-13 10:41:03+00,2026-04-25 10:51:17.783477+00,Sumathi R,Indulge Global
+zcrm_480426000002911179,Katya,Junk,2026-04-13 11:03:33+00,2026-04-25 10:51:17.783477+00,Bruh,Indulge Shop
+zcrm_480426000002911211,Kaniisha Chamarria,In Discussion,2026-04-13 18:43:15+00,2026-04-25 10:51:17.783477+00,Aditya Daftuar,Indulge Global
+zcrm_480426000002911240,Amit Agarwal,Attempted,2026-04-13 21:24:47+00,2026-04-25 10:51:17.783477+00,Md Mahruf Arshad,Indulge Global
+zcrm_480426000002911269,Vikram,Junk,2026-04-14 22:34:54+00,2026-04-25 10:51:17.783477+00,Ash,Indulge Shop
+zcrm_480426000002911302,Harsh Gupta,New,2026-04-15 15:37:50+00,2026-04-25 10:51:17.783477+00,Essa,Indulge Shop
+zcrm_480426000002911334,Harsh Gupta,Attempted,2026-04-15 19:53:45+00,2026-04-25 10:51:17.783477+00,Akshay Singh,Indulge Shop
+zcrm_480426000002911366,Vikram,Attempted,2026-04-15 21:17:19+00,2026-04-25 10:51:17.783477+00,Panjam Sundeep Reddy,Indulge Shop
+zcrm_480426000002911398,Katya,Junk,2026-04-16 00:16:01+00,2026-04-25 10:51:17.783477+00,Sushovan Dasgupta,Indulge Shop
+zcrm_480426000002911430,Amit Agarwal,Junk,2026-04-16 00:47:49+00,2026-04-25 10:51:17.783477+00,Krishnachandra Agarwal sir is in meeting ?? Iyy I iyii III and oii t yyyy y,Indulge Global
+zcrm_480426000002911459,Kaniisha Chamarria,Junk,2026-04-16 15:19:28+00,2026-04-25 10:51:17.783477+00,Harish Raval,Indulge Global
+zcrm_480426000002911491,Harsh Gupta,Attempted,2026-04-16 16:01:23+00,2026-04-25 10:51:17.783477+00,Shiva,Indulge Shop
+zcrm_480426000002915001,Meghana Singh,In Discussion,2026-04-12 03:33:40+00,2026-04-25 10:51:17.783477+00,dwp,Indulge Global
+zcrm_480426000002915157,Amit Agarwal,In Discussion,2026-04-16 00:16:19+00,2026-04-25 10:51:17.783477+00,Dipesh Somani,Indulge Global
+zcrm_480426000002915222,Amit Agarwal,Attempted,2026-04-16 20:53:21+00,2026-04-25 10:51:17.783477+00,Sangeeta Jain,Indulge Global
+zcrm_480426000002916110,Meghana Singh,Junk,2026-04-15 14:22:39+00,2026-04-25 10:51:17.783477+00,Prof Kiran Walia,Indulge Global
+zcrm_480426000002926160,Samson Fernandes,Junk,2026-04-16 11:58:46+00,2026-04-25 10:51:17.783477+00,mkd25647,Indulge Global
+zcrm_480426000002931001,Meghana Singh,Lost,2026-04-12 13:08:49+00,2026-04-25 10:51:17.783477+00,debnath,Indulge Global
+zcrm_480426000002931031,Katya,Lost,2026-04-12 16:34:51+00,2026-04-25 10:51:17.783477+00,Aseem,Indulge Shop
+zcrm_480426000002931061,Katya,Junk,2026-04-12 21:20:35+00,2026-04-25 10:51:17.783477+00,tatti,Indulge Shop
+zcrm_480426000002931091,Samson Fernandes,Attempted,2026-04-13 03:41:23+00,2026-04-25 10:51:17.783477+00,Ayushman Roy,Indulge Global
+zcrm_480426000002931121,Kaniisha Chamarria,Attempted,2026-04-13 06:59:45+00,2026-04-25 10:51:17.783477+00,Srijan Sureka,Indulge Global
+zcrm_480426000002931153,Amit Agarwal,In Discussion,2026-04-13 09:17:34+00,2026-04-25 10:51:17.783477+00,Jay Anghan,Indulge Global
+zcrm_480426000002931185,Meghana Singh,Junk,2026-04-13 12:10:02+00,2026-04-25 10:51:17.783477+00,Ajay Kumar,Indulge Global
+zcrm_480426000002931217,Katya,Junk,2026-04-13 17:03:46+00,2026-04-25 10:51:17.783477+00,Arshad,Indulge Shop
+zcrm_480426000002931249,Katya,Junk,2026-04-13 17:42:26+00,2026-04-25 10:51:17.783477+00,Gaurav Rawat,Indulge Shop
+zcrm_480426000002931281,Amit Agarwal,In Discussion,2026-04-13 20:49:44+00,2026-04-25 10:51:17.783477+00,Athina D’ Silva,Indulge Global
+zcrm_480426000002931310,Meghana Singh,In Discussion,2026-04-14 22:16:55+00,2026-04-25 10:51:17.783477+00,Mahir Gupta,Indulge Global
+zcrm_480426000002931339,Meghana Singh,In Discussion,2026-04-15 00:45:48+00,2026-04-25 10:51:17.783477+00,Serene Bamji,Indulge Global
+zcrm_480426000002931368,Amit Agarwal,Attempted,2026-04-15 05:37:13+00,2026-04-25 10:51:17.783477+00,Nirav Gandhi,Indulge Global
+zcrm_480426000002931397,Amit Agarwal,Attempted,2026-04-15 08:46:42+00,2026-04-25 10:51:17.783477+00,Dg Dharmesh Gathani,Indulge Global
+zcrm_480426000002931426,Admin @ Indulge,New,2026-04-15 19:24:01+00,2026-04-25 10:51:17.783477+00,Shristi,Indulge House
+zcrm_480426000002931459,Amit Agarwal,In Discussion,2026-04-16 05:41:15+00,2026-04-25 10:51:17.783477+00,Manoj Goel,Indulge Global
+zcrm_480426000002931488,Katya,Junk,2026-04-16 07:29:01+00,2026-04-25 10:51:17.783477+00,Priyank,Indulge Shop
+zcrm_480426000002931520,Harsh Gupta,Attempted,2026-04-16 08:30:56+00,2026-04-25 10:51:17.783477+00,Sumit Aggarwal,Indulge Shop
+zcrm_480426000002931552,Kaniisha Chamarria,Attempted,2026-04-16 19:29:28+00,2026-04-25 10:51:17.783477+00,Rohit Sureka,Indulge Global
+zcrm_480426000002931585,Samson Fernandes,Attempted,2026-04-17 11:32:30+00,2026-04-25 10:51:17.783477+00,Shreyas Balasubramanian,Indulge Global
+zcrm_480426000002933002,Harsh Gupta,Junk,2026-04-12 22:31:57+00,2026-04-25 10:51:17.783477+00,Harmann Kalra,Indulge Shop
+zcrm_480426000002933031,Vikram,Junk,2026-04-13 00:03:28+00,2026-04-25 10:51:17.783477+00,We,Indulge Shop
+zcrm_480426000002933060,Kaniisha Chamarria,Junk,2026-04-13 11:44:12+00,2026-04-25 10:51:17.783477+00,लोडू प्रसाद जी,Indulge Global
+zcrm_480426000002933092,Harsh Gupta,Junk,2026-04-13 12:56:04+00,2026-04-25 10:51:17.783477+00,Arun Kumar,Indulge Shop
+zcrm_480426000002933124,Katya,Junk,2026-04-13 16:24:19+00,2026-04-25 10:51:17.783477+00,Sailendra Waghe,Indulge Shop
+zcrm_480426000002933157,Admin @ Indulge,New,2026-04-13 16:34:46+00,2026-04-25 10:51:17.783477+00,Abhijeet Ganu,Indulge House
+zcrm_480426000002933187,Harsh Gupta,Lost,2026-04-13 17:33:25+00,2026-04-25 10:51:17.783477+00,Arnav Jadhav,Indulge Shop
+zcrm_480426000002933219,Harsh Gupta,Junk,2026-04-13 21:20:54+00,2026-04-25 10:51:17.783477+00,Vishnu,Indulge Shop
+zcrm_480426000002933252,Kaniisha Chamarria,Junk,2026-04-14 13:45:09+00,2026-04-25 10:51:17.783477+00,Amruta ben,Indulge Global
+zcrm_480426000002933281,Amit Agarwal,Attempted,2026-04-15 06:19:43+00,2026-04-25 10:51:17.783477+00,Harsh Jain,Indulge Global
+zcrm_480426000002933311,Samson Fernandes,Attempted,2026-04-15 17:38:29+00,2026-04-25 10:51:17.783477+00,Pooja Jangid,Indulge Global
+zcrm_480426000002933344,Kaniisha Chamarria,Junk,2026-04-15 19:30:13+00,2026-04-25 10:51:17.783477+00,test test,Indulge Global
+zcrm_480426000002933373,Amit Agarwal,In Discussion,2026-04-15 20:49:47+00,2026-04-25 10:51:17.783477+00,Criminologist Snehil Dhall,Indulge Global
+zcrm_480426000002933402,Amit Agarwal,Attempted,2026-04-16 01:14:12+00,2026-04-25 10:51:17.783477+00,Sumit Verma,Indulge Global
+zcrm_480426000002933431,Katya,Junk,2026-04-16 06:25:31+00,2026-04-25 10:51:17.783477+00,Ashwin.,Indulge Shop
+zcrm_480426000002933464,Vikram,Attempted,2026-04-16 06:44:42+00,2026-04-25 10:51:17.783477+00,Ajay Yadravkar,Indulge Shop
+zcrm_480426000002933499,Admin @ Indulge,New,2026-04-16 12:35:07+00,2026-04-25 10:51:17.783477+00,Leena Naik,Indulge House
+zcrm_480426000002933528,Meghana Singh,In Discussion,2026-04-16 14:19:19+00,2026-04-25 10:51:17.783477+00,Dattesh Shah,Indulge Global
+zcrm_480426000002933561,Kaniisha Chamarria,Attempted,2026-04-16 19:35:03+00,2026-04-25 10:51:17.783477+00,Harsh Baid,Indulge Global
+zcrm_480426000002935039,Amit Agarwal,Attempted,2026-04-14 09:58:32+00,2026-04-25 10:51:17.783477+00,Atul Dhir,Indulge Global
+zcrm_480426000002935097,Amit Agarwal,Attempted,2026-04-14 10:04:35+00,2026-04-25 10:51:17.783477+00,Deepak Setia,Indulge Global
+zcrm_480426000002935154,Amit Agarwal,In Discussion,2026-04-14 10:09:46+00,2026-04-25 10:51:17.783477+00,Namrata Dhir,Indulge Global
+zcrm_480426000002935214,Amit Agarwal,Attempted,2026-04-14 10:13:33+00,2026-04-25 10:51:17.783477+00,Preetpal Singh Matharoo,Indulge Global
+zcrm_480426000002941179,Kaniisha Chamarria,Attempted,2026-04-14 11:57:54+00,2026-04-25 10:51:17.783477+00,Jaya Randhawa,Indulge Global
+zcrm_480426000002947147,Amit Agarwal,Attempted,2026-04-14 08:28:29+00,2026-04-25 10:51:17.783477+00,Ritwik,Indulge Global
+zcrm_480426000002947224,Amit Agarwal,In Discussion,2026-04-14 08:38:12+00,2026-04-25 10:51:17.783477+00,Gp Capt Balram Singh,Indulge Global
+zcrm_480426000002977006,Amit Agarwal,Attempted,2026-04-17 20:02:02+00,2026-04-25 10:51:17.783477+00,Aditya Jain,Indulge Global
+zcrm_480426000002977046,Amit Agarwal,Attempted,2026-04-18 02:11:31+00,2026-04-25 10:51:17.783477+00,dineshbhaiugrejiya691,Indulge Global
+zcrm_480426000002979024,Amit Agarwal,Attempted,2026-04-18 02:50:42+00,2026-04-25 10:51:17.783477+00,Aethralux Charter Services Inc.,Indulge Global
+zcrm_480426000002983016,Kaniisha Chamarria,In Discussion,2026-04-17 19:29:09+00,2026-04-25 10:51:17.783477+00,Shirali Shetty Vengsarkar,Indulge Global
+zcrm_480426000002983065,Amit Agarwal,Attempted,2026-04-17 23:56:12+00,2026-04-25 10:51:17.783477+00,Vinay,Indulge Global
+zcrm_480426000002983109,Samson Fernandes,Junk,2026-04-18 11:54:37+00,2026-04-25 10:51:17.783477+00,Narinder Singh,Indulge Global
+zcrm_480426000002987019,Amit Agarwal,Attempted,2026-04-17 21:13:27+00,2026-04-25 10:51:17.783477+00,Sk Azhar,Indulge Global
+zcrm_480426000002994003,Kaniisha Chamarria,Attempted,2026-04-17 18:02:52+00,2026-04-25 10:51:17.783477+00,Shweta,Indulge Global
+zcrm_480426000002998020,Samson Fernandes,Junk,2026-04-18 12:26:01+00,2026-04-25 10:51:17.783477+00,Sobiya Khan,Indulge Global
+zcrm_480426000003000018,Samson Fernandes,Junk,2026-04-17 17:07:20+00,2026-04-25 10:51:17.783477+00,Manish Gadiya,Indulge Global
+zcrm_480426000003000071,Kaniisha Chamarria,Junk,2026-04-17 19:49:54+00,2026-04-25 10:51:17.783477+00,Investment management Advisor,Indulge Global
+zcrm_480426000003004021,Amit Agarwal,Lost,2026-04-18 05:46:52+00,2026-04-25 10:51:17.783477+00,Joshi HARISH CHANDRA,Indulge Global
+zcrm_480426000003008001,Kaniisha Chamarria,Junk,2026-04-17 15:28:07+00,2026-04-25 10:51:17.783477+00,test test,Indulge Global
+zcrm_480426000003008033,Amit Agarwal,Lost,2026-04-17 16:58:01+00,2026-04-25 10:51:17.783477+00,its shree shyam electronic,Indulge Global
+zcrm_480426000003008065,Kaniisha Chamarria,In Discussion,2026-04-17 19:16:14+00,2026-04-25 10:51:17.783477+00,Vineetha Jadapalli,Indulge Global
+zcrm_480426000003008097,Amit Agarwal,Attempted,2026-04-18 11:21:17+00,2026-04-25 10:51:17.783477+00,Shetall Narang,Indulge Global
+zcrm_480426000003008129,Meghana Singh,Junk,2026-04-18 16:43:58+00,2026-04-25 10:51:17.783477+00,Saddam Bhai,Indulge Global
+zcrm_480426000003013003,Samson Fernandes,Junk,2026-04-17 16:35:49+00,2026-04-25 10:51:17.783477+00,Komal Chhabra,Indulge Global
+zcrm_480426000003013035,Kaniisha Chamarria,Junk,2026-04-17 19:50:07+00,2026-04-25 10:51:17.783477+00,Test Insta,Indulge Global
+zcrm_480426000003013067,Samson Fernandes,Junk,2026-04-18 00:00:58+00,2026-04-25 10:51:17.783477+00,mainuddin7323,Indulge Global
+zcrm_480426000003013096,Samson Fernandes,Lost,2026-04-18 15:28:00+00,2026-04-25 10:51:17.783477+00,Kulen Patel,Indulge Global
+zcrm_480426000003016023,Amit Agarwal,Junk,2026-04-17 23:18:39+00,2026-04-25 10:51:17.783477+00,Kritika.kl,Indulge Global
+zcrm_480426000003017001,Amit Agarwal,Junk,2026-04-17 16:13:24+00,2026-04-25 10:51:17.783477+00,Bhabak Bikram,Indulge Global
+zcrm_480426000003017033,Samson Fernandes,Attempted,2026-04-18 11:23:42+00,2026-04-25 10:51:17.783477+00,Rajat Kapoor,Indulge Global
+zcrm_480426000003022001,Kaniisha Chamarria,Junk,2026-04-17 16:39:47+00,2026-04-25 10:51:17.783477+00,Khan bhai,Indulge Global
+zcrm_480426000003022033,Kaniisha Chamarria,Junk,2026-04-17 18:57:26+00,2026-04-25 10:51:17.783477+00,আমি টুম্পা সোনা,Indulge Global
+zcrm_480426000003022066,Amit Agarwal,Attempted,2026-04-17 21:04:18+00,2026-04-25 10:51:17.783477+00,Uday v,Indulge Global
+zcrm_480426000003022096,Admin @ Indulge,New,2026-04-18 13:51:49+00,2026-04-25 10:51:17.783477+00,Ashwini Gaonkar,Indulge House
+zcrm_480426000003023012,Amit Agarwal,In Discussion,2026-04-18 10:28:59+00,2026-04-25 10:51:17.783477+00,Saran,Indulge Global
+zcrm_480426000003024019,Amit Agarwal,Attempted,2026-04-18 11:50:47+00,2026-04-25 10:51:17.783477+00,shakeelahmed913717,Indulge Global
+zcrm_480426000003026008,Amit Agarwal,Attempted,2026-04-17 21:26:25+00,2026-04-25 10:51:17.783477+00,mohammediqbalkhan62,Indulge Global
+zcrm_480426000003030001,Kaniisha Chamarria,Junk,2026-04-17 17:23:28+00,2026-04-25 10:51:17.783477+00,Arfam Test,Indulge Global
+zcrm_480426000003030033,Amit Agarwal,Attempted,2026-04-18 00:43:21+00,2026-04-25 10:51:17.783477+00,Anwesh Haudhari,Indulge Global
+zcrm_480426000003030062,Admin @ Indulge,New,2026-04-18 03:08:01+00,2026-04-25 10:51:17.783477+00,Valanca Fernandes,Indulge House
+zcrm_480426000003030091,Amit Agarwal,Attempted,2026-04-18 16:04:26+00,2026-04-25 10:51:17.783477+00,Yadav Devender,Indulge Global
+zcrm_480426000003031002,Kaniisha Chamarria,Junk,2026-04-17 19:31:50+00,2026-04-25 10:51:17.783477+00,9263043725,Indulge Global
+zcrm_480426000003034011,Kaniisha Chamarria,Attempted,2026-04-17 19:29:08+00,2026-04-25 10:51:17.783477+00,Samir Kumar Das,Indulge Global
+zcrm_480426000003035001,Admin @ Indulge,New,2026-04-17 18:03:51+00,2026-04-25 10:51:17.783477+00,Ashish Jalan,Indulge House
+zcrm_480426000003035030,Samson Fernandes,Attempted,2026-04-18 16:35:11+00,2026-04-25 10:51:17.783477+00,Sushmitasahoo Seth,Indulge Global
+zcrm_480426000003035063,Admin @ Indulge,New,2026-04-18 17:44:08+00,2026-04-25 10:51:17.783477+00,Adarsh Kawari,Indulge House
+zcrm_480426000003036001,Kaniisha Chamarria,Junk,2026-04-17 18:29:06+00,2026-04-25 10:51:17.783477+00,Alok Debnath,Indulge Global
+zcrm_480426000003036034,Admin @ Indulge,New,2026-04-18 09:52:41+00,2026-04-25 10:51:17.783477+00,Jai Kumar,Indulge House
+zcrm_480426000003036063,Amit Agarwal,Junk,2026-04-18 12:16:55+00,2026-04-25 10:51:17.783477+00,Eadul Sk,Indulge Global
+zcrm_480426000003040001,Kaniisha Chamarria,Junk,2026-04-17 19:18:09+00,2026-04-25 10:51:17.783477+00,nagaonkardattaram7,Indulge Global
+zcrm_480426000003041001,Kaniisha Chamarria,Attempted,2026-04-17 19:19:20+00,2026-04-25 10:51:17.783477+00,R+R,Indulge Global
+zcrm_480426000003041033,Admin @ Indulge,New,2026-04-18 17:45:09+00,2026-04-25 10:51:17.783477+00,Hatim Kantawalla,Indulge House
+zcrm_480426000003043001,Kaniisha Chamarria,Junk,2026-04-17 19:49:41+00,2026-04-25 10:51:17.783477+00,Arfam Test,Indulge Global
+zcrm_480426000003046001,Amit Agarwal,Attempted,2026-04-17 21:33:22+00,2026-04-25 10:51:17.783477+00,JAI SHRI KRUSHNA,Indulge Global
+zcrm_480426000003047002,Admin @ Indulge,New,2026-04-18 00:40:25+00,2026-04-25 10:51:17.783477+00,Manoj Kudalkar,Indulge House
+zcrm_480426000003047031,Samson Fernandes,Junk,2026-04-18 00:52:32+00,2026-04-25 10:51:17.783477+00,Sk Ashik,Indulge Global
+zcrm_480426000003048001,Admin @ Indulge,New,2026-04-18 00:53:29+00,2026-04-25 10:51:17.783477+00,Vijaya Sarathy,Indulge House
+zcrm_480426000003048030,Amit Agarwal,Attempted,2026-04-18 02:28:48+00,2026-04-25 10:51:17.783477+00,Aayush Mehta,Indulge Global
+zcrm_480426000003048060,Amit Agarwal,Attempted,2026-04-18 08:55:03+00,2026-04-25 10:51:17.783477+00,Ankit Gupta,Indulge Global
+zcrm_480426000003049002,Samson Fernandes,Junk,2026-04-18 05:31:54+00,2026-04-25 10:51:17.783477+00,Mosharaf Ali,Indulge Global
+zcrm_480426000003050002,Amit Agarwal,Lost,2026-04-18 07:13:31+00,2026-04-25 10:51:17.783477+00,Hopon Babu,Indulge Global
+zcrm_480426000003050031,Admin @ Indulge,New,2026-04-18 09:18:19+00,2026-04-25 10:51:17.783477+00,handsome jatav ji,Indulge Legacy
+zcrm_480426000003050060,Samson Fernandes,Junk,2026-04-18 11:11:12+00,2026-04-25 10:51:17.783477+00,Saher Syed,Indulge Global
+zcrm_480426000003050092,Admin @ Indulge,New,2026-04-18 16:40:09+00,2026-04-25 10:51:17.783477+00,Prashaant Thakur,Indulge House
+zcrm_480426000003054001,Samson Fernandes,Lost,2026-04-18 09:09:09+00,2026-04-25 10:51:17.783477+00,Vishnu Prasath,Indulge Global
+zcrm_480426000003054033,Meghana Singh,Nurturing,2026-04-18 17:56:50+00,2026-04-25 10:51:17.783477+00,Aakriti Singh,Indulge Global
+zcrm_480426000003060001,Amit Agarwal,In Discussion,2026-04-18 15:23:50+00,2026-04-25 10:51:17.783477+00,Shail Sarkar,Indulge Global
+zcrm_480426000003063040,Samson Fernandes,Junk,2026-04-20 12:00:48+00,2026-04-25 10:51:17.783477+00,9324769832,Indulge Global
+zcrm_480426000003066031,Meghana Singh,Attempted,2026-04-19 23:30:57+00,2026-04-25 10:51:17.783477+00,Sahil Rana,Indulge Global
+zcrm_480426000003068007,Meghana Singh,Junk,2026-04-19 01:17:48+00,2026-04-25 10:51:17.783477+00,Lal Mohan Kaa Baap Vinod,Indulge Global
+zcrm_480426000003068075,Meghana Singh,Junk,2026-04-20 11:12:52+00,2026-04-25 10:51:17.783477+00,Mahendra Kumar,Indulge Global
+zcrm_480426000003068187,Amit Agarwal,Lost,2026-04-25 08:51:56+00,2026-04-25 10:51:17.783477+00,Rajesh Kumar ️,Indulge Global
+zcrm_480426000003070002,Meghana Singh,Lost,2026-04-18 23:41:11+00,2026-04-25 10:51:17.783477+00,Veenayak Mittal,Indulge Global
+zcrm_480426000003072001,Admin @ Indulge,New,2026-04-18 18:11:58+00,2026-04-25 10:51:17.783477+00,Nikita Chavan,Indulge House
+zcrm_480426000003072030,Meghana Singh,Attempted,2026-04-18 20:19:47+00,2026-04-25 10:51:17.783477+00,Ashish Bhati,Indulge Global
+zcrm_480426000003072059,Kaniisha Chamarria,Attempted,2026-04-19 20:38:46+00,2026-04-25 10:51:17.783477+00,Manisha Zaveri,Indulge Global
+zcrm_480426000003072088,Amit Agarwal,Lost,2026-04-20 20:17:50+00,2026-04-25 10:51:17.783477+00,Nikita Rajpuut Travel Entrepreneur,Indulge Global
+zcrm_480426000003072118,Amit Agarwal,In Discussion,2026-04-21 01:48:47+00,2026-04-25 10:51:17.783477+00,Murtaza Ali,Indulge Global
+zcrm_480426000003072147,Admin @ Indulge,New,2026-04-23 19:21:29+00,2026-04-25 10:51:17.783477+00,Daljeet Singh,Indulge House
+zcrm_480426000003072176,Samson Fernandes,Attempted,2026-04-24 17:21:03+00,2026-04-25 10:51:17.783477+00,Naveen kumar nareti Nareti,Indulge Global
+zcrm_480426000003073011,Meghana Singh,Lost,2026-04-19 11:14:29+00,2026-04-25 10:51:17.783477+00,kummar9,Indulge Global
+zcrm_480426000003073066,Meghana Singh,Junk,2026-04-20 09:36:25+00,2026-04-25 10:51:17.783477+00,rinkusolanki22713,Indulge Global
+zcrm_480426000003074012,Kaniisha Chamarria,Attempted,2026-04-19 20:28:57+00,2026-04-25 10:51:17.783477+00,enamul7738,Indulge Global
+zcrm_480426000003076154,Meghana Singh,Junk,2026-04-20 16:51:35+00,2026-04-25 10:51:17.783477+00,S C Bansal,Indulge Global
+zcrm_480426000003080050,Meghana Singh,Attempted,2026-04-20 13:26:25+00,2026-04-25 10:51:17.783477+00,gawadem259,Indulge Global
+zcrm_480426000003081002,Meghana Singh,Attempted,2026-04-18 19:42:54+00,2026-04-25 10:51:17.783477+00,Mukund Mittal,Indulge Global
+zcrm_480426000003081034,Meghana Singh,Nurturing,2026-04-19 00:22:59+00,2026-04-25 10:51:17.783477+00,Ricky Nagpal,Indulge Global
+zcrm_480426000003081064,Amit Agarwal,In Discussion,2026-04-20 21:52:26+00,2026-04-25 10:51:17.783477+00,Shubham Pille,Indulge Global
+zcrm_480426000003081093,Amit Agarwal,In Discussion,2026-04-21 00:24:09+00,2026-04-25 10:51:17.783477+00,Jignesh Jhaveri,Indulge Global
+zcrm_480426000003081123,Amit Agarwal,In Discussion,2026-04-22 02:56:15+00,2026-04-25 10:51:17.783477+00,Samanvaya Singhal,Indulge Global
+zcrm_480426000003081152,Katya,Attempted,2026-04-23 09:18:46+00,2026-04-25 10:51:17.783477+00,Amulya reddy,Indulge Shop
+zcrm_480426000003081184,Meghana Singh,Attempted,2026-04-23 18:59:40+00,2026-04-25 10:51:17.783477+00,Rohit Aukarapu,Indulge Global
+zcrm_480426000003081217,Amit Agarwal,Attempted,2026-04-23 23:32:37+00,2026-04-25 10:51:17.783477+00,Bhoomi Doshi,Indulge Global
+zcrm_480426000003081247,Admin @ Indulge,New,2026-04-24 06:07:27+00,2026-04-25 10:51:17.783477+00,Brian Carvalho,Indulge House
+zcrm_480426000003081277,Admin @ Indulge,New,2026-04-24 23:55:22+00,2026-04-25 10:51:17.783477+00,Sudhir Singh,Indulge House
+zcrm_480426000003081307,Admin @ Indulge,New,2026-04-25 09:48:54+00,2026-04-25 10:51:17.783477+00,Lakshmi durga,Indulge House
+zcrm_480426000003083112,Amit Agarwal,In Discussion,2026-04-25 08:52:45+00,2026-04-25 10:51:17.783477+00,ShubhamMktg.Rajiiv kumar,Indulge Global
+zcrm_480426000003086001,Meghana Singh,Junk,2026-04-18 19:59:31+00,2026-04-25 10:51:17.783477+00,ajaykuamr12423292653,Indulge Global
+zcrm_480426000003086073,Samson Fernandes,Junk,2026-04-20 11:34:21+00,2026-04-25 10:51:17.783477+00,hk6618875,Indulge Global
+zcrm_480426000003086129,Meghana Singh,Junk,2026-04-20 16:08:04+00,2026-04-25 10:51:17.783477+00,satyaprakashyadav8369,Indulge Global
+zcrm_480426000003086185,Meghana Singh,Junk,2026-04-21 17:33:12+00,2026-04-25 10:51:17.783477+00,RANA,Indulge Global
+zcrm_480426000003086250,Meghana Singh,Attempted,2026-04-23 18:22:44+00,2026-04-25 10:51:17.783477+00,adiiiiiiiiiii,Indulge Global
+zcrm_480426000003088048,Meghana Singh,Junk,2026-04-19 23:28:13+00,2026-04-25 10:51:17.783477+00,Atiq,Indulge Global
+zcrm_480426000003088144,Amit Agarwal,Attempted,2026-04-23 20:03:51+00,2026-04-25 10:51:17.783477+00,Vijaya Gosavi,Indulge Global
+zcrm_480426000003090034,Meghana Singh,Junk,2026-04-20 07:46:54+00,2026-04-25 10:51:17.783477+00,khandipak622,Indulge Global
+zcrm_480426000003092006,Meghana Singh,Attempted,2026-04-18 22:57:36+00,2026-04-25 10:51:17.783477+00,Nidhi,Indulge Global
+zcrm_480426000003093044,Amit Agarwal,Attempted,2026-04-21 21:17:25+00,2026-04-25 10:51:17.783477+00,Babaji Shinde,Indulge Global
+zcrm_480426000003095002,Kaniisha Chamarria,In Discussion,2026-04-18 20:32:35+00,2026-04-25 10:51:17.783477+00,Chithan KMC,Indulge Global
+zcrm_480426000003095031,Meghana Singh,Junk,2026-04-19 08:45:41+00,2026-04-25 10:51:17.783477+00,Fansur Sk,Indulge Global
+zcrm_480426000003095064,Meghana Singh,Junk,2026-04-19 14:00:28+00,2026-04-25 10:51:17.783477+00,亗『saniz』亗,Indulge Global
+zcrm_480426000003095096,Meghana Singh,Nurturing,2026-04-19 18:00:55+00,2026-04-25 10:51:17.783477+00,Ronak Jain,Indulge Global
+zcrm_480426000003095129,Meghana Singh,In Discussion,2026-04-20 04:51:54+00,2026-04-25 10:51:17.783477+00,Pramod Agrawal,Indulge Global
+zcrm_480426000003095158,Meghana Singh,Lost,2026-04-20 08:37:17+00,2026-04-25 10:51:17.783477+00,Nurul Hasan,Indulge Global
+zcrm_480426000003095190,Kaniisha Chamarria,In Discussion,2026-04-20 11:35:18+00,2026-04-25 10:51:17.783477+00,Mohammed faisal vahedna,Indulge Global
+zcrm_480426000003095222,Amit Agarwal,Lost,2026-04-20 20:29:07+00,2026-04-25 10:51:17.783477+00,Spnrai Sripat Rai,Indulge Global
+zcrm_480426000003095251,Amit Agarwal,Junk,2026-04-20 23:18:48+00,2026-04-25 10:51:17.783477+00,Vikrant Bhatia,Indulge Global
+zcrm_480426000003095302,Admin @ Indulge,New,2026-04-23 12:52:23+00,2026-04-25 10:51:17.783477+00,Manoj Gandla,Indulge House
+zcrm_480426000003095332,Katya,Attempted,2026-04-24 11:41:02+00,2026-04-25 10:51:17.783477+00,Deepthi,Indulge Shop
+zcrm_480426000003095365,Kaniisha Chamarria,Junk,2026-04-24 16:14:17+00,2026-04-25 10:51:17.783477+00,iugk ljbkj,Indulge Global
+zcrm_480426000003096018,Meghana Singh,In Discussion,2026-04-19 18:24:19+00,2026-04-25 10:51:17.783477+00,Hemant Kumar,Indulge Global
+zcrm_480426000003097039,Meghana Singh,Junk,2026-04-19 23:39:14+00,2026-04-25 10:51:17.783477+00,popatlaljgada,Indulge Global
+zcrm_480426000003097103,Samson Fernandes,Junk,2026-04-20 15:10:58+00,2026-04-25 10:51:17.783477+00,dasarathlenka86 Tf,Indulge Global
+zcrm_480426000003098001,Meghana Singh,Junk,2026-04-18 20:41:46+00,2026-04-25 10:51:17.783477+00,Rajdeep Ji,Indulge Global
+zcrm_480426000003098031,Meghana Singh,Junk,2026-04-19 10:40:34+00,2026-04-25 10:51:17.783477+00,Kumar Arun,Indulge Global
+zcrm_480426000003098063,Meghana Singh,Junk,2026-04-19 22:05:44+00,2026-04-25 10:51:17.783477+00,‼️HARI ☠️ BHOGTA‼️,Indulge Global
+zcrm_480426000003098092,Meghana Singh,Junk,2026-04-20 11:23:48+00,2026-04-25 10:51:17.783477+00,King of free fire,Indulge Global
+zcrm_480426000003098124,Meghana Singh,Junk,2026-04-20 15:41:15+00,2026-04-25 10:51:17.783477+00,Lanja Reddy,Indulge Global
+zcrm_480426000003098156,Amit Agarwal,Attempted,2026-04-21 00:15:00+00,2026-04-25 10:51:17.783477+00,Saket Maheshwari,Indulge Global
+zcrm_480426000003098186,Amit Agarwal,Junk,2026-04-23 07:07:17+00,2026-04-25 10:51:17.783477+00,Sophie Lane,Indulge Global
+zcrm_480426000003098215,Amit Agarwal,Attempted,2026-04-24 18:20:12+00,2026-04-25 10:51:17.783477+00,Supriyo Mitra,Indulge Global
+zcrm_480426000003098248,Amit Agarwal,In Discussion,2026-04-24 18:39:34+00,2026-04-25 10:51:17.783477+00,Vivek_ Gupta,Indulge Global
+zcrm_480426000003099020,Kaniisha Chamarria,Junk,2026-04-19 20:56:14+00,2026-04-25 10:51:17.783477+00,Doilkumari,Indulge Global
+zcrm_480426000003100021,Meghana Singh,Junk,2026-04-20 02:08:00+00,2026-04-25 10:51:17.783477+00,mamakakku206,Indulge Global
+zcrm_480426000003101007,Meghana Singh,Junk,2026-04-18 22:04:06+00,2026-04-25 10:51:17.783477+00,Amulya Gupta,Indulge Global
+zcrm_480426000003101036,Meghana Singh,Attempted,2026-04-19 10:24:45+00,2026-04-25 10:51:17.783477+00,Tushar Dhawan,Indulge Global
+zcrm_480426000003101068,Meghana Singh,Nurturing,2026-04-20 07:58:38+00,2026-04-25 10:51:17.783477+00,Govindanarayan N,Indulge Global
+zcrm_480426000003101101,Meghana Singh,Junk,2026-04-20 10:11:11+00,2026-04-25 10:51:17.783477+00,sanju sp,Indulge Global
+zcrm_480426000003101133,Samson Fernandes,Attempted,2026-04-20 16:43:19+00,2026-04-25 10:51:17.783477+00,Kavan Mehta,Indulge Global
+zcrm_480426000003101166,Amit Agarwal,Attempted,2026-04-23 01:13:13+00,2026-04-25 10:51:17.783477+00,Shweta Khurana,Indulge Global
+zcrm_480426000003101196,Admin @ Indulge,New,2026-04-23 10:30:16+00,2026-04-25 10:51:17.783477+00,Gaurav Mishra,Indulge House
+zcrm_480426000003101225,Meghana Singh,In Discussion,2026-04-23 10:35:25+00,2026-04-25 10:51:17.783477+00,Sidhant Sidana,Indulge Global
+zcrm_480426000003101257,Amit Agarwal,Attempted,2026-04-23 22:08:08+00,2026-04-25 10:51:17.783477+00,Harish Kasturi,Indulge Global
+zcrm_480426000003101287,Admin @ Indulge,New,2026-04-24 02:34:17+00,2026-04-25 10:51:17.783477+00,Samir Anand,Indulge House
+zcrm_480426000003101316,Kaniisha Chamarria,Attempted,2026-04-24 12:12:31+00,2026-04-25 10:51:17.783477+00,Hari Swaroop,Indulge Global
+zcrm_480426000003101348,Admin @ Indulge,New,2026-04-24 17:02:28+00,2026-04-25 10:51:17.783477+00,Kirtan,Indulge House
+zcrm_480426000003101378,Amit Agarwal,In Discussion,2026-04-25 00:47:04+00,2026-04-25 10:51:17.783477+00,Upen M Doshi,Indulge Global
+zcrm_480426000003103002,Meghana Singh,In Discussion,2026-04-18 21:38:39+00,2026-04-25 10:51:17.783477+00,Shivam Goel,Indulge Global
+zcrm_480426000003103032,Admin @ Indulge,New,2026-04-19 07:03:11+00,2026-04-25 10:51:17.783477+00,•ABBUBAKAR BYAHATTI•,Indulge House
+zcrm_480426000003103061,Meghana Singh,Attempted,2026-04-19 09:49:54+00,2026-04-25 10:51:17.783477+00,Nitesh Luthra,Indulge Global
+zcrm_480426000003103093,Meghana Singh,Junk,2026-04-19 09:53:30+00,2026-04-25 10:51:17.783477+00,Vishal Kumar,Indulge Global
+zcrm_480426000003103125,Meghana Singh,Attempted,2026-04-20 00:25:02+00,2026-04-25 10:51:17.783477+00,"I,am prabir",Indulge Global
+zcrm_480426000003103154,Admin @ Indulge,New,2026-04-20 01:11:40+00,2026-04-25 10:51:17.783477+00,Pooja Gupta,Indulge House
+zcrm_480426000003103183,Admin @ Indulge,New,2026-04-20 15:31:33+00,2026-04-25 10:51:17.783477+00,"rajan,mehra",Indulge Legacy
+zcrm_480426000003103213,Amit Agarwal,In Discussion,2026-04-23 09:50:28+00,2026-04-25 10:51:17.783477+00,Uday Garg,Indulge Global
+zcrm_480426000003103245,Admin @ Indulge,New,2026-04-23 18:27:32+00,2026-04-25 10:51:17.783477+00,sofinaseem Mohammed Nasim,Indulge Legacy
+zcrm_480426000003103274,Kaniisha Chamarria,In Discussion,2026-04-23 23:35:25+00,2026-04-25 10:51:17.783477+00,Mayank rana,Indulge Global
+zcrm_480426000003103303,Amit Agarwal,Attempted,2026-04-24 19:28:00+00,2026-04-25 10:51:17.783477+00,bibung narzary,Indulge Global
+zcrm_480426000003104035,Meghana Singh,In Discussion,2026-04-21 18:37:15+00,2026-04-25 10:51:17.783477+00,Ujjwal,Indulge Global
+zcrm_480426000003105104,Meghana Singh,In Discussion,2026-04-20 18:31:18+00,2026-04-25 10:51:17.783477+00,Dev Jain,Indulge Global
+zcrm_480426000003105155,Amit Agarwal,Attempted,2026-04-23 19:42:28+00,2026-04-25 10:51:17.783477+00,Anupam Shukla,Indulge Global
+zcrm_480426000003106057,Kaniisha Chamarria,Lost,2026-04-21 16:01:18+00,2026-04-25 10:51:17.783477+00,Amr Shreitah (Pristine Jet),Indulge Global
+zcrm_480426000003106120,Kaniisha Chamarria,Attempted,2026-04-24 04:16:17+00,2026-04-25 10:51:17.783477+00,Siddharth Surana,Indulge Global
+zcrm_480426000003107067,Meghana Singh,Nurturing,2026-04-20 16:32:15+00,2026-04-25 10:51:17.783477+00,Mallikarjun BMR,Indulge Global
+zcrm_480426000003107120,Amit Agarwal,Attempted,2026-04-23 07:13:48+00,2026-04-25 10:51:17.783477+00,DC Mishra,Indulge Global
+zcrm_480426000003108003,Meghana Singh,Junk,2026-04-18 23:17:58+00,2026-04-25 10:51:17.783477+00,Chhattisgarh,Indulge Global
+zcrm_480426000003108081,Samson Fernandes,Attempted,2026-04-23 10:23:24+00,2026-04-25 10:51:17.783477+00,Asad,Indulge Global
+zcrm_480426000003110081,Meghana Singh,Junk,2026-04-23 16:59:27+00,2026-04-25 10:51:17.783477+00,PARTH,Indulge Global
+zcrm_480426000003111001,Admin @ Indulge,New,2026-04-18 22:04:53+00,2026-04-25 10:51:17.783477+00,Naveen,Indulge House
+zcrm_480426000003111030,Admin @ Indulge,New,2026-04-19 01:26:25+00,2026-04-25 10:51:17.783477+00,Mona Juneja Malik,Indulge House
+zcrm_480426000003111059,Meghana Singh,Attempted,2026-04-20 12:47:05+00,2026-04-25 10:51:17.783477+00,Shashank Sogani,Indulge Global
+zcrm_480426000003111092,Amit Agarwal,Attempted,2026-04-22 22:00:58+00,2026-04-25 10:51:17.783477+00,Ajay Tuli,Indulge Global
+zcrm_480426000003111121,Samson Fernandes,Lost,2026-04-24 10:25:59+00,2026-04-25 10:51:17.783477+00,Jyoti Gupta,Indulge Global
+zcrm_480426000003111153,Samson Fernandes,Junk,2026-04-24 17:24:52+00,2026-04-25 10:51:17.783477+00,asfasf 24124,Indulge Global
+zcrm_480426000003113049,Samson Fernandes,Junk,2026-04-21 17:21:57+00,2026-04-25 10:51:17.783477+00,rupeshwadkar409,Indulge Global
+zcrm_480426000003115001,Meghana Singh,In Discussion,2026-04-18 22:07:25+00,2026-04-25 10:51:17.783477+00,AG,Indulge Global
+zcrm_480426000003115045,Meghana Singh,In Discussion,2026-04-19 21:37:05+00,2026-04-25 10:51:17.783477+00,Rev.Dr.Leslie Pinto.,Indulge Global
+zcrm_480426000003115085,Samson Fernandes,Attempted,2026-04-20 09:53:07+00,2026-04-25 10:51:17.783477+00,Ashok Pithawalla,Indulge Global
+zcrm_480426000003115156,Amit Agarwal,Lost,2026-04-20 22:01:15+00,2026-04-25 10:51:17.783477+00,Pramila Bhasin,Indulge Global
+zcrm_480426000003115223,Kaniisha Chamarria,Junk,2026-04-24 03:19:03+00,2026-04-25 10:51:17.783477+00,ramjiverma9167,Indulge Global
+zcrm_480426000003116022,Samson Fernandes,Junk,2026-04-20 11:19:05+00,2026-04-25 10:51:17.783477+00,Shrd,Indulge Global
+zcrm_480426000003117003,Meghana Singh,Attempted,2026-04-18 22:18:56+00,2026-04-25 10:51:17.783477+00,Akshay,Indulge Global
+zcrm_480426000003117063,Samson Fernandes,Junk,2026-04-21 14:25:59+00,2026-04-25 10:51:17.783477+00,saypsk58,Indulge Global
+zcrm_480426000003118001,Meghana Singh,Attempted,2026-04-18 22:11:56+00,2026-04-25 10:51:17.783477+00,Tina Garg,Indulge Global
+zcrm_480426000003118031,Meghana Singh,In Discussion,2026-04-19 08:32:45+00,2026-04-25 10:51:17.783477+00,Ratnadeep Saksena,Indulge Global
+zcrm_480426000003118064,Meghana Singh,Junk,2026-04-19 09:33:13+00,2026-04-25 10:51:17.783477+00,ALTER YADAV ???,Indulge Global
+zcrm_480426000003118096,Meghana Singh,In Discussion,2026-04-19 15:06:38+00,2026-04-25 10:51:17.783477+00,Santosh Keloji,Indulge Global
+zcrm_480426000003118129,Admin @ Indulge,New,2026-04-23 06:06:37+00,2026-04-25 10:51:17.783477+00,Shubh Grover,Indulge House
+zcrm_480426000003118159,Admin @ Indulge,New,2026-04-23 08:30:09+00,2026-04-25 10:51:17.783477+00,Vishal FISKE,Indulge House
+zcrm_480426000003118188,Admin @ Indulge,New,2026-04-23 19:06:55+00,2026-04-25 10:51:17.783477+00,JP,Indulge House
+zcrm_480426000003118217,Admin @ Indulge,New,2026-04-23 21:38:42+00,2026-04-25 10:51:17.783477+00,Marlon D'Sa,Indulge House
+zcrm_480426000003118246,Admin @ Indulge,New,2026-04-24 11:09:46+00,2026-04-25 10:51:17.783477+00,Anup Jain,Indulge House
+zcrm_480426000003118275,Admin @ Indulge,New,2026-04-25 08:25:44+00,2026-04-25 10:51:17.783477+00,Ahmed Jaffer,Indulge House
+zcrm_480426000003119118,Kaniisha Chamarria,Junk,2026-04-23 13:39:25+00,2026-04-25 10:51:17.783477+00,ramkumar080901,Indulge Global
+zcrm_480426000003119171,Kaniisha Chamarria,Junk,2026-04-24 14:00:46+00,2026-04-25 10:51:17.783477+00,gandhinitiraj,Indulge Global
+zcrm_480426000003120023,Meghana Singh,Junk,2026-04-19 18:02:31+00,2026-04-25 10:51:17.783477+00,vs8262502,Indulge Global
+zcrm_480426000003120073,Meghana Singh,Junk,2026-04-19 23:10:19+00,2026-04-25 10:51:17.783477+00,Javed Khan,Indulge Global
+zcrm_480426000003121002,Meghana Singh,Junk,2026-04-18 22:48:19+00,2026-04-25 10:51:17.783477+00,ABDUL. WAHID ANSARI7,Indulge Global
+zcrm_480426000003121031,Kaniisha Chamarria,In Discussion,2026-04-19 20:45:27+00,2026-04-25 10:51:17.783477+00,Tamali Sen Gupta,Indulge Global
+zcrm_480426000003121061,Meghana Singh,Attempted,2026-04-20 00:36:30+00,2026-04-25 10:51:17.783477+00,Kushaj Yadav,Indulge Global
+zcrm_480426000003121093,Amit Agarwal,Attempted,2026-04-20 20:23:47+00,2026-04-25 10:51:17.783477+00,Pramod Duggal,Indulge Global
+zcrm_480426000003121122,Kaniisha Chamarria,Attempted,2026-04-23 08:11:45+00,2026-04-25 10:51:17.783477+00,Raj Bhalla,Indulge Global
+zcrm_480426000003121160,Amit Agarwal,In Discussion,2026-04-25 01:20:09+00,2026-04-25 10:51:17.783477+00,Akash Kejriwal,Indulge Global
+zcrm_480426000003122002,Meghana Singh,Attempted,2026-04-19 07:35:08+00,2026-04-25 10:51:17.783477+00,Dnyaneshwar Ghamare,Indulge Global
+zcrm_480426000003122061,Samson Fernandes,Junk,2026-04-20 12:11:36+00,2026-04-25 10:51:17.783477+00,sura.jyadav362,Indulge Global
+zcrm_480426000003122104,Samson Fernandes,Junk,2026-04-20 12:32:11+00,2026-04-25 10:51:17.783477+00,Aruna Gupta,Indulge Global
+zcrm_480426000003122147,Meghana Singh,Junk,2026-04-20 15:46:43+00,2026-04-25 10:51:17.783477+00,??????? ??????,Indulge Global
+zcrm_480426000003122239,Amit Agarwal,Attempted,2026-04-23 21:31:10+00,2026-04-25 10:51:17.783477+00,Ashutosh Bhardwaj,Indulge Global
+zcrm_480426000003123001,Meghana Singh,Junk,2026-04-18 23:15:55+00,2026-04-25 10:51:17.783477+00,Pawan Rajbhar,Indulge Global
+zcrm_480426000003123030,Meghana Singh,Junk,2026-04-19 08:48:37+00,2026-04-25 10:51:17.783477+00,অকুল দরিয়ার মাঝি,Indulge Global
+zcrm_480426000003123096,Kaniisha Chamarria,Attempted,2026-04-24 10:33:57+00,2026-04-25 10:51:17.783477+00,Monit Patel,Indulge Global
+zcrm_480426000003123128,Samson Fernandes,Lost,2026-04-24 17:28:43+00,2026-04-25 10:51:17.783477+00,Neha Bhojwani,Indulge Global
+zcrm_480426000003124055,Meghana Singh,Junk,2026-04-23 18:18:19+00,2026-04-25 10:51:17.783477+00,Shiv Kumar,Indulge Global
+zcrm_480426000003125013,Meghana Singh,Junk,2026-04-19 09:43:09+00,2026-04-25 10:51:17.783477+00,u9876198,Indulge Global
+zcrm_480426000003126087,Samson Fernandes,Attempted,2026-04-23 15:20:28+00,2026-04-25 10:51:17.783477+00,arav khetwani,Indulge Global
+zcrm_480426000003128034,Meghana Singh,Attempted,2026-04-19 23:33:31+00,2026-04-25 10:51:17.783477+00,lina mahato,Indulge Global
+zcrm_480426000003128083,Amit Agarwal,In Discussion,2026-04-21 07:28:24+00,2026-04-25 10:51:17.783477+00,Ravindra Chandavarkar,Indulge Global
+zcrm_480426000003132001,Meghana Singh,Junk,2026-04-19 08:22:44+00,2026-04-25 10:51:17.783477+00,Rabin Sardar,Indulge Global
+zcrm_480426000003132033,Meghana Singh,Junk,2026-04-19 17:37:36+00,2026-04-25 10:51:17.783477+00,Lobe Bauri,Indulge Global
+zcrm_480426000003132066,Samson Fernandes,Junk,2026-04-20 09:30:13+00,2026-04-25 10:51:17.783477+00,एडवोकेट गोपाल प्रधान जी,Indulge Global
+zcrm_480426000003132098,Meghana Singh,Junk,2026-04-20 12:08:44+00,2026-04-25 10:51:17.783477+00,Jyoti Kumari,Indulge Global
+zcrm_480426000003132131,Amit Agarwal,Attempted,2026-04-20 23:01:59+00,2026-04-25 10:51:17.783477+00,Shubh Mishra,Indulge Global
+zcrm_480426000003132160,Admin @ Indulge,New,2026-04-23 17:48:31+00,2026-04-25 10:51:17.783477+00,Anirudh Ani,Indulge House
+zcrm_480426000003132190,Kaniisha Chamarria,Attempted,2026-04-23 22:53:49+00,2026-04-25 10:51:17.783477+00,Balfour Manuel,Indulge Global
+zcrm_480426000003132220,Kaniisha Chamarria,Junk,2026-04-24 13:49:27+00,2026-04-25 10:51:17.783477+00,kuldeepbagri hair stylists,Indulge Global
+zcrm_480426000003132252,Admin @ Indulge,New,2026-04-24 18:14:02+00,2026-04-25 10:51:17.783477+00,Nitin Karne,Indulge House
+zcrm_480426000003134036,Meghana Singh,In Discussion,2026-04-20 18:12:15+00,2026-04-25 10:51:17.783477+00,VARUN,Indulge Global
+zcrm_480426000003135006,Meghana Singh,Attempted,2026-04-19 17:18:34+00,2026-04-25 10:51:17.783477+00,sswapna51866,Indulge Global
+zcrm_480426000003135049,Meghana Singh,Junk,2026-04-19 17:26:35+00,2026-04-25 10:51:17.783477+00,jasimshah919,Indulge Global
+zcrm_480426000003137001,Meghana Singh,Junk,2026-04-19 08:46:08+00,2026-04-25 10:51:17.783477+00,Fansur Sk,Indulge Global
+zcrm_480426000003137035,Meghana Singh,Attempted,2026-04-20 07:39:04+00,2026-04-25 10:51:17.783477+00,Dr l s Patil,Indulge Global
+zcrm_480426000003137064,Samson Fernandes,Lost,2026-04-20 15:56:12+00,2026-04-25 10:51:17.783477+00,Ajay Goyal,Indulge Global
+zcrm_480426000003137096,Admin @ Indulge,New,2026-04-20 20:09:13+00,2026-04-25 10:51:17.783477+00,Dr.Hrithik,Indulge House
+zcrm_480426000003137126,Admin @ Indulge,New,2026-04-23 12:51:02+00,2026-04-25 10:51:17.783477+00,Rajesh,Indulge House
+zcrm_480426000003137155,Amit Agarwal,Attempted,2026-04-24 18:21:59+00,2026-04-25 10:51:17.783477+00,Sapna NarijNaiy,Indulge Global
+zcrm_480426000003139097,Samson Fernandes,Junk,2026-04-22 16:02:53+00,2026-04-25 10:51:17.783477+00,Yamini Mehta,Indulge Global
+zcrm_480426000003140010,Meghana Singh,Junk,2026-04-19 14:35:57+00,2026-04-25 10:51:17.783477+00,M V RAO,Indulge Global
+zcrm_480426000003140055,Meghana Singh,Junk,2026-04-19 15:33:03+00,2026-04-25 10:51:17.783477+00,Aruna Gads,Indulge Global
+zcrm_480426000003140119,Amit Agarwal,Attempted,2026-04-20 21:26:59+00,2026-04-25 10:51:17.783477+00,Ganesh N।।।।।।।।।।।।।।।।। ।।,Indulge Global
+zcrm_480426000003141001,Meghana Singh,Junk,2026-04-19 09:41:27+00,2026-04-25 10:51:17.783477+00,RAVii Singh,Indulge Global
+zcrm_480426000003141033,Meghana Singh,Junk,2026-04-19 12:22:43+00,2026-04-25 10:51:17.783477+00,gunjan yadav,Indulge Global
+zcrm_480426000003141066,Admin @ Indulge,New,2026-04-19 20:31:39+00,2026-04-25 10:51:17.783477+00,Ritu Raj,Indulge Legacy
+zcrm_480426000003141096,Amit Agarwal,In Discussion,2026-04-20 19:47:23+00,2026-04-25 10:51:17.783477+00,Shamit Gandhi,Indulge Global
+zcrm_480426000003141129,Meghana Singh,Junk,2026-04-21 15:36:03+00,2026-04-25 10:51:17.783477+00,Aibangalore Cabs,Indulge Global
+zcrm_480426000003141161,Meghana Singh,In Discussion,2026-04-21 18:03:29+00,2026-04-25 10:51:17.783477+00,Sushant Kalra,Indulge Global
+zcrm_480426000003141193,Admin @ Indulge,New,2026-04-22 16:25:23+00,2026-04-25 10:51:17.783477+00,Kiran Pawadashettar,Indulge House
+zcrm_480426000003141223,Admin @ Indulge,New,2026-04-22 19:44:20+00,2026-04-25 10:51:17.783477+00,Haresh Melwani,Indulge House
+zcrm_480426000003141253,Amit Agarwal,Attempted,2026-04-23 03:33:54+00,2026-04-25 10:51:17.783477+00,Ramesh Joshi,Indulge Global
+zcrm_480426000003141282,Admin @ Indulge,New,2026-04-23 13:51:14+00,2026-04-25 10:51:17.783477+00,test test,Indulge Global
+zcrm_480426000003141314,Amit Agarwal,Attempted,2026-04-23 19:11:11+00,2026-04-25 10:51:17.783477+00,Bhavar Baval,Indulge Global
+zcrm_480426000003141346,Vikram,Attempted,2026-04-24 11:38:51+00,2026-04-25 10:51:17.783477+00,Yash,Indulge Shop
+zcrm_480426000003141378,Samson Fernandes,Junk,2026-04-24 14:54:39+00,2026-04-25 10:51:17.783477+00,arfam test,Indulge Global
+zcrm_480426000003141411,Amit Agarwal,In Discussion,2026-04-25 07:44:21+00,2026-04-25 10:51:17.783477+00,Rajendra Vijan,Indulge Global
+zcrm_480426000003142058,Kaniisha Chamarria,Junk,2026-04-23 21:28:48+00,2026-04-25 10:51:17.783477+00,Limbayyarachha,Indulge Global
+zcrm_480426000003142104,Kaniisha Chamarria,Junk,2026-04-24 11:17:42+00,2026-04-25 10:51:17.783477+00,shantaram chiplunkar,Indulge Global
+zcrm_480426000003144001,Meghana Singh,Junk,2026-04-19 09:54:05+00,2026-04-25 10:51:17.783477+00,Vishal Kumar,Indulge Global
+zcrm_480426000003144034,Amit Agarwal,In Discussion,2026-04-19 19:22:20+00,2026-04-25 10:51:17.783477+00,Nitin Kapoor,Indulge Global
+zcrm_480426000003144066,Admin @ Indulge,New,2026-04-20 12:44:18+00,2026-04-25 10:51:17.783477+00,Shwetha Ud,Indulge House
+zcrm_480426000003144096,Admin @ Indulge,New,2026-04-20 14:49:26+00,2026-04-25 10:51:17.783477+00,Jatin Babbar,Indulge House
+zcrm_480426000003144126,Admin @ Indulge,New,2026-04-20 23:30:31+00,2026-04-25 10:51:17.783477+00,Avik Bardhan,Indulge House
+zcrm_480426000003144155,Admin @ Indulge,New,2026-04-23 21:40:37+00,2026-04-25 10:51:17.783477+00,Dipesh Rane,Indulge House
+zcrm_480426000003144193,Samson Fernandes,Lost,2026-04-24 16:55:22+00,2026-04-25 10:51:17.783477+00,Nó Çrüsh,Indulge Global
+zcrm_480426000003144226,Amit Agarwal,Attempted,2026-04-25 03:16:34+00,2026-04-25 10:51:17.783477+00,ACHIN,Indulge Global
+zcrm_480426000003144256,Amit Agarwal,Attempted,2026-04-25 08:35:28+00,2026-04-25 10:51:17.783477+00,Prashant Kumar Anchalia,Indulge Global
+zcrm_480426000003164002,Kaniisha Chamarria,Attempted,2026-04-22 06:19:47+00,2026-04-25 10:51:17.783477+00,Alessandro Casale Romei,Indulge Global
+zcrm_480426000003164031,Amit Agarwal,Attempted,2026-04-22 20:10:48+00,2026-04-25 10:51:17.783477+00,Jautamkumar Kumar,Indulge Global
+zcrm_480426000003164061,Admin @ Indulge,New,2026-04-23 08:04:53+00,2026-04-25 10:51:17.783477+00,Kanishk Gupta,Indulge Legacy
+zcrm_480426000003164097,Meghana Singh,In Discussion,2026-04-23 18:33:29+00,2026-04-25 10:51:17.783477+00,Parul Tibrewala,Indulge Global
+zcrm_480426000003169188,Amit Agarwal,In Discussion,2026-04-23 09:21:37+00,2026-04-25 10:51:17.783477+00,Rahul Soni,Indulge Global
+zcrm_480426000003185001,Samson Fernandes,Attempted,2026-04-25 10:18:33+00,2026-04-25 10:51:17.783477+00,Amit Pabuwal,Indulge Global
+zcrm_480426000003199071,Kaniisha Chamarria,Qualified,2026-04-25 13:26:37+00,2026-04-25 10:51:17.783477+00,Lakshyya Gupta,Indulge Global
+zcrm_480426000003199081,Kaniisha Chamarria,Qualified,2026-04-25 13:27:14+00,2026-04-25 10:51:17.783477+00,Aayush Gupta,Indulge Global
+zcrm_480426000003199217,Samson Fernandes,Qualified,2026-04-25 14:31:15+00,2026-04-25 10:51:17.783477+00,Sanay Shetty,Indulge Global
+zcrm_480426000003199252,Samson Fernandes,Qualified,2026-04-25 14:32:47+00,2026-04-25 10:51:17.783477+00,Rupesh Kuche,Indulge Global
+zcrm_480426000003199476,Samson Fernandes,Qualified,2026-04-25 11:48:41+00,2026-04-25 10:51:17.783477+00,Mayur Jain,Indulge Global
+zcrm_480426000003200001,Amit Agarwal,Lost,2026-04-25 11:25:35+00,2026-04-25 10:51:17.783477+00,Arvind K Sharma,Indulge Global
+zcrm_480426000003206002,Harsh Gupta,New,2026-04-25 11:35:57+00,2026-04-25 10:51:17.783477+00,Alpa Shah,Indulge Shop
+zcrm_480426000003217002,Samson Fernandes,Attempted,2026-04-25 12:40:51+00,2026-04-25 10:51:17.783477+00,Anshul Agrawal,Indulge Global
+zcrm_480426000003225001,Amit Agarwal,In Discussion,2026-04-25 13:01:48+00,2026-04-25 10:51:17.783477+00,Ramkumar Ram,Indulge Global
+zcrm_480426000003233001,Katya,New,2026-04-25 13:32:58+00,2026-04-25 10:51:17.783477+00,avinash sharma,Indulge Shop
+zcrm_480426000003240001,Admin @ Indulge,New,2026-04-25 11:27:08+00,2026-04-25 10:51:17.783477+00,Akash Parab,Indulge House

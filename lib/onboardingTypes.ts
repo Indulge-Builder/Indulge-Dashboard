@@ -99,24 +99,25 @@ export interface OnboardingAgentRow {
    */
   department?: Department;
 
-  // ── Legacy fields (kept for backward compat with current API route) ──────
+  // ── Scorecard fields ──────────────────────────────────────────────────────
 
-  /** @legacy New leads created this IST month. Same count source as leadsThisMonth. */
-  totalAttempted: number;
+  /** New leads created within the current IST calendar month (all statuses). */
+  leadsCreatedThisMonth: number;
   /**
-   * @legacy Closure count (won deals this IST month from ledger / Zoho).
+   * Closure count — won deals this IST month from ledger / Zoho.
    * Not a currency field — agent cards show this number only.
    * Used for win-shimmer detection.
    */
   totalConverted: number;
-  /** @legacy New leads created today (IST). Mirrors leadsThisMonth for the current day only. */
-  leadsAttendToday: number;
+  /** New leads created today in IST (by created_at, not by activity timestamp). */
+  leadsCreatedTodayIst: number;
 
   // ── This Month Cohort Math fields (populated by updated API route) ────────
 
   /**
    * Leads created within the current IST calendar month (Zoho → webhook).
-   * Source: onboarding_lead_touches.created_at within getCurrentIstMonthUtcBounds().
+   * Source: leads.created_at within getCurrentIstMonthUtcBounds().
+   * Alias of leadsCreatedThisMonth — kept for any components that reference it.
    */
   leadsThisMonth?: number;
 
@@ -280,16 +281,17 @@ export interface PerformanceTotals {
  * Aggregate lead counts for the current IST calendar month, sourced directly
  * from the leads table (all rows, not filtered by agent name).
  *
- *   leads     — total rows where created_at falls in this IST month
- *   attended  — rows where latest_status IN (New | Attempted | In Discussion)
- *   converted — rows where latest_status = Qualified
- *   junk      — all remaining rows (Nurturing, Junk, Lost, Trash, unknown…)
+ *   leads               — total rows where created_at falls in this IST month
+ *                         (system agents excluded)
+ *   attended            — rows where latest_status IN (New | Attempted | In Discussion)
+ *   dealsClosedThisMonth — count of rows in the deals table this IST month
+ *   junk                — all remaining rows (Nurturing, Junk, Lost, Trash, unknown…)
  */
 export interface LeadMonthStats {
-  leads:     number;
-  attended:  number;
-  converted: number;
-  junk:      number;
+  leads:                number;
+  attended:             number;
+  dealsClosedThisMonth: number;
+  junk:                 number;
 }
 
 // ── API payload ───────────────────────────────────────────────────────────────

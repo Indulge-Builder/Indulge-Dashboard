@@ -41,7 +41,7 @@ export default function RenewalsPanel({
       <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.04] to-transparent pointer-events-none rounded-2xl" />
       {/* ── Counter (Left) — same as Spoiled card (joker-box, text-gold-300) ──── */}
       <div className="flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[clamp(140px,18vw,200px)] joker-box rounded-xl border border-liquid-gold-end/35 px-4 py-3">
-        <p className="font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
+        <p className="font-inter font-semibold text-[var(--text-label-xl)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
           RENEWALS
           <br />
           (This Month)

@@ -85,8 +85,9 @@ export const AgentIcon = memo(function AgentIcon({
       </svg>
 
       {/* Initials badge */}
+      {/* min 14px at base breakpoint */}
       <div className="absolute inset-0 flex items-center justify-center rounded-full border border-gold-500/30">
-        <span className="font-cinzel text-[0.6rem] sm:text-[0.8rem] lg:text-[1rem] tracking-widest text-gold-400 select-none">
+        <span className="font-cinzel text-[0.875rem] sm:text-[1rem] lg:text-[1rem] tracking-widest text-gold-400 select-none">
           {getInitials(name)}
         </span>
       </div>

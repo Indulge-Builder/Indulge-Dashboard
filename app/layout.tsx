@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cinzel, Inter, Libre_Baskerville, Montserrat } from "next/font/google";
 import "./globals.css";
 
@@ -32,6 +32,12 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Indulge Global — Live Operations Dashboard",
   description: "Real-time performance dashboard for Indulge Global",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#050507",
 };
 
 export default function RootLayout({

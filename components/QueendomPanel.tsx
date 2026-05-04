@@ -8,6 +8,7 @@ import AgentLeaderboard from "./leaderboard/AgentLeaderboard";
 import JokerMetricsStrip from "./JokerMetricsStrip";
 import RenewalsPanel from "./RenewalsPanel";
 import SpecialDates from "@/components/SpecialDates";
+import { SectionDivider } from "@/components/ui/SectionDivider";
 import type { QueenStats } from "@/lib/types";
 import { getJokerNameForQueendom } from "@/lib/agentRoster";
 import type { RenewalsPanelData } from "@/types";
@@ -58,7 +59,7 @@ function MetricBox({
       style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
     >
       <p
-        className={`font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
+        className={`font-inter font-semibold text-[var(--text-label-xl)] tracking-[0.25em] uppercase ${labelColor} mb-[0.2vh]`}
       >
         {label}
       </p>
@@ -177,14 +178,12 @@ export default function QueendomPanel({
           delayMs={delay}
         />
 
-        <p className="font-inter mb-[0.9vh] mt-[0.35vh] text-[clamp(28px,2.5vw,52px)] font-semibold uppercase tracking-[0.42em] text-gold-300 gold-glow">
-          Queendom
-        </p>
-
-        <div className="flex w-full items-center gap-3">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/22 to-gold-500/38" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/22 to-gold-500/38" />
-        </div>
+        <SectionDivider
+          label="Queendom"
+          accent="champagne"
+          className="my-[0.35vh]"
+          labelClass="!font-inter !font-semibold text-[clamp(28px,2.5vw,52px)] tracking-[0.42em] text-gold-300 gold-glow"
+        />
       </motion.div>
 
       {/* ── 5-Metric Hero Row (tickets + Spoiled for this Queendom’s Joker) ── */}
@@ -198,7 +197,7 @@ export default function QueendomPanel({
           <div className="grid grid-cols-2 min-[700px]:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 w-full">
             {/* 1. Total Solved Today — ANCHOR (Green Glow) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
-              <p className="font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
+              <p className="font-inter font-semibold text-[var(--text-label-xl)] tracking-[0.35em] uppercase text-emerald-300 mb-[0.2vh]">
                 Resolved <br /> (Today)
               </p>
               <AnimatedCounter
@@ -257,7 +256,7 @@ export default function QueendomPanel({
 
             {/* 5. Spoiled — accepted wins (current IST month; see GET /api/jokers) */}
             <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35">
-              <p className="font-inter font-semibold text-[clamp(30px,3vw,46px)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
+              <p className="font-inter font-semibold text-[var(--text-label-xl)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
                 Spoiled
                 <br />
                 (This Month)
@@ -308,20 +307,19 @@ export default function QueendomPanel({
               />
             </div>
             <div
-              className="flex w-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-t border-gold-500/20 pt-4 md:w-[clamp(360px,46vw,680px)] md:border-l md:border-t-0 md:pt-0 md:pl-8 lg:pl-10 md:pr-2 lg:pr-4 md:self-start"
+              className="flex w-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-t border-gold-500/20 pt-4 md:w-[clamp(220px,40%,680px)] md:border-l md:border-t-0 md:pt-0 md:pl-8 lg:pl-10 md:pr-2 lg:pr-4 md:self-start"
               style={
                 leaderboardHeightPx != null && leaderboardHeightPx > 0
                   ? { height: leaderboardHeightPx }
                   : undefined
               }
             >
-              <div className="mb-[2vh] flex w-full flex-shrink-0 items-center gap-4 px-1 sm:px-2">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-                <p className="font-inter flex-shrink-0 text-[clamp(1.5rem,2.2vw,2.6rem)] font-semibold uppercase tracking-[0.42em] text-champagne px-2">
-                  Special Dates
-                </p>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
-              </div>
+              <SectionDivider
+                label="Special Dates"
+                accent="champagne"
+                className="mb-[2vh] w-full flex-shrink-0 gap-4 px-1 sm:px-2"
+                labelClass="!font-inter !font-semibold text-[clamp(1.5rem,2.2vw,2.6rem)] tracking-[0.42em]"
+              />
               <div className="flex min-h-0 flex-1 flex-col">
                 <SpecialDates
                   queendomId={name.toLowerCase() as "ananyshree" | "anishqa"}

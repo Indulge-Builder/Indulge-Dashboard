@@ -59,7 +59,7 @@ export default function Dashboard() {
 
       {/* Main content: Concierge ↔ Onboarding auto-rotating panel */}
       <DashboardController
-        className="min-h-0"
+        className="min-h-0 min-w-0 flex-1"
         ananyshreeStats={ananyshreeStats}
         anishqaStats={anishqaStats}
         renewalsAnanyshree={renewalsAnanyshree}

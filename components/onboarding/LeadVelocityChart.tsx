@@ -245,7 +245,7 @@ export function LeadVelocityChart({ data }: LeadVelocityChartProps) {
             textAnchor="middle"
             dominantBaseline="middle"
             fill="rgba(255,255,255,0.25)"
-            fontSize="12"
+            fontSize="14"
             fontFamily="var(--font-inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial)"
           >
             Collecting data…
@@ -358,7 +358,7 @@ export function LeadVelocityChart({ data }: LeadVelocityChartProps) {
               fill="rgba(255,255,255,0.35)"
               fontSize="10"
               fontFamily="var(--font-inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial)"
-              style={{ fontSize: "clamp(0.65rem, 0.9vmin, 0.85rem)" }}
+              style={{ fontSize: "clamp(14px, 0.9vmin, 0.85rem)" }}
             >
               {label}
             </text>
@@ -381,7 +381,7 @@ export function LeadVelocityChart({ data }: LeadVelocityChartProps) {
             dominantBaseline="middle"
             fill="rgba(255,255,255,0.72)"
             fontFamily="var(--font-inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial)"
-            style={{ fontSize: "clamp(0.6rem, 0.85vmin, 0.8rem)" }}
+            style={{ fontSize: "clamp(14px, 0.85vmin, 0.8rem)" }}
           >
             Onboarding
           </text>
@@ -393,7 +393,7 @@ export function LeadVelocityChart({ data }: LeadVelocityChartProps) {
             dominantBaseline="middle"
             fill="rgba(255,255,255,0.72)"
             fontFamily="var(--font-inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial)"
-            style={{ fontSize: "clamp(0.6rem, 0.85vmin, 0.8rem)" }}
+            style={{ fontSize: "clamp(14px, 0.85vmin, 0.8rem)" }}
           >
             Shop
           </text>

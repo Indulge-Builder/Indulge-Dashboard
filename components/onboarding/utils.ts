@@ -20,7 +20,7 @@ import {
   SHOP_FALLBACK_AGENTS,
   getAgentDepartment,
 } from "@/lib/onboardingAgents";
-import { utcMillisFromZohoCrmDbTimestamp } from "@/lib/istDate";
+import { utcMillisFromDbTimestamp } from "@/lib/istDate";
 import type {
   OnboardingAgentRow,
   OnboardingLedgerRow,
@@ -74,7 +74,7 @@ export const COMPACT_AGENT_NAME_FONT =
 
 /** Metric label inside each chip (Today / Month / Closed) */
 export const COMPACT_METRIC_LABEL_FONT =
-  "clamp(0.55rem, min(1.3vmin, 1.6vh), 1.5rem)";
+  "clamp(0.875rem, min(1.3vmin, 1.6vh), 1.5rem)"; /* min 0.875rem — readable TV floor */
 
 /** Metric value inside each chip */
 export const COMPACT_METRIC_VALUE_FONT =
@@ -82,7 +82,7 @@ export const COMPACT_METRIC_VALUE_FONT =
 
 /** Metric value inside the 3-up horizontal stat tiles (slightly tighter for density) */
 export const COMPACT_METRIC_TILE_VALUE_FONT =
-  "clamp(0.78rem, min(2.05vmin, 2.45vh), 2.35rem)";
+  "clamp(0.875rem, min(2.05vmin, 2.45vh), 2.35rem)"; /* min 0.875rem — readable TV floor */
 
 /** Legend labels under the pipeline bar — Queendom-style label tier */
 export const COMPACT_PIPELINE_RAIL_CAPTION_FONT =
@@ -189,7 +189,7 @@ export function formatLakhsDisplay(lakhs: number): string {
  * Returns "—" on parse failure.
  */
 export function formatLedgerDate(iso: string): string {
-  const ms = utcMillisFromZohoCrmDbTimestamp(iso);
+  const ms = utcMillisFromDbTimestamp(iso);
   if (ms == null) return "—";
   return IST_LEDGER_DATE_FORMATTER.format(new Date(ms));
 }
@@ -201,8 +201,8 @@ export function sortLedgerNewestFirst(
   rows: OnboardingLedgerRow[],
 ): OnboardingLedgerRow[] {
   return [...rows].sort((a, b) => {
-    const tb = utcMillisFromZohoCrmDbTimestamp(b.recordedAt) ?? 0;
-    const ta = utcMillisFromZohoCrmDbTimestamp(a.recordedAt) ?? 0;
+    const tb = utcMillisFromDbTimestamp(b.recordedAt) ?? 0;
+    const ta = utcMillisFromDbTimestamp(a.recordedAt) ?? 0;
     return tb - ta;
   });
 }

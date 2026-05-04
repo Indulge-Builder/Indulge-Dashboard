@@ -1,4 +1,9 @@
 /**
+ * Canonical UI primitive — do not duplicate this pattern elsewhere.
+ * Use this component for any new glass-surface or metric-card UI.
+ */
+
+/**
  * components/ui/StatCard.tsx
  *
  * A "dumb" metric display tile: label on top, value below.

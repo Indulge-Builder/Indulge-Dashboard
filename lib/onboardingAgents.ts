@@ -227,11 +227,11 @@ function zeroedAgent(
     id,
     name,
     department,
-    totalAttempted:       0,
-    totalConverted:       0,
-    leadsAttendToday:     0,
-    leadsThisMonth:       0,
-    closedLakhsThisMonth: 0,
+    leadsCreatedThisMonth: 0,
+    totalConverted:        0,
+    leadsCreatedTodayIst:  0,
+    leadsThisMonth:        0,
+    closedLakhsThisMonth:  0,
   } as const;
 }
 

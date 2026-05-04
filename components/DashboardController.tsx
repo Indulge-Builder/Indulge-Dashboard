@@ -93,8 +93,7 @@ export default function DashboardController({
 
   return (
     <div
-      className={`relative overflow-hidden ${className ?? ""}`}
-      style={{ width: "100vw", height: "100vh" }}
+      className={`relative h-full w-full min-h-0 min-w-0 overflow-hidden ${className ?? ""}`}
     >
       {/* Always clickable: TV remotes often fail to deliver Enter to window; use pointer + P key + OK */}
       <button
@@ -153,7 +152,7 @@ export default function DashboardController({
           {/* Center column — full-height gold separator between Queendoms (md+) */}
           <div
             className="relative hidden shrink-0 self-stretch md:block"
-            style={{ width: "36px" }}
+            style={{ width: "var(--size-center-separator)" }}
             aria-hidden
           >
             <div

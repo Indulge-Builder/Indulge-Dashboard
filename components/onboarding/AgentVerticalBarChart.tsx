@@ -72,7 +72,7 @@ function resolveAgentPipeline(agent: OnboardingAgentRow): PipelineStatusCounts {
   if (agent.pipeline) return agent.pipeline;
   return {
     ...EMPTY_PIPELINE,
-    Attempted: agent.totalAttempted,
+    Attempted: agent.leadsCreatedThisMonth,
     Won:       agent.totalConverted,
   };
 }
@@ -110,21 +110,21 @@ export function AgentVerticalBarChart({
   // ── Styles ────────────────────────────────────────────────────────────────
 
   const headerFont: CSSProperties = {
-    fontSize:      "clamp(0.5rem,0.95vmin,0.82rem)",
+    fontSize:      "clamp(14px, 0.95vmin, 0.82rem)",
     letterSpacing: "0.2em",
   };
 
   const totalFont: CSSProperties = {
-    fontSize: "clamp(0.5rem,0.9vmin,0.78rem)",
+    fontSize: "clamp(14px, 0.9vmin, 0.78rem)",
   };
 
   const nameFont: CSSProperties = {
-    fontSize:      "clamp(0.75rem,1.1vmin,1.0rem)",
+    fontSize:      "clamp(14px, 1.1vmin, 1.0rem)",
     letterSpacing: "0.14em",
   };
 
   const legendFont: CSSProperties = {
-    fontSize: "clamp(0.45rem,0.82vmin,0.72rem)",
+    fontSize: "clamp(14px, 0.82vmin, 0.72rem)",
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────

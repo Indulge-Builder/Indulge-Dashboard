@@ -110,7 +110,7 @@ export function SectionDivider({
         .join(" ")}
     >
       <RuleArm />
-      <p
+      <div
         className={[
           "flex-shrink-0 font-cinzel font-bold uppercase leading-none tracking-[0.28em]",
           "text-[var(--text-label-lg)] px-2",
@@ -122,7 +122,7 @@ export function SectionDivider({
         style={labelStyle}
       >
         {label}
-      </p>
+      </div>
       <RuleArm flip />
     </div>
   );

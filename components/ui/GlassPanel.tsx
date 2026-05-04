@@ -1,4 +1,9 @@
 /**
+ * Canonical UI primitive — do not duplicate this pattern elsewhere.
+ * Use this component for any new glass-surface or metric-card UI.
+ */
+
+/**
  * components/ui/GlassPanel.tsx
  *
  * Core glassmorphism container. Every panel, card, and widget surface in the

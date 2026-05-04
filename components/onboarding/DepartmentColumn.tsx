@@ -127,7 +127,7 @@ function AgentCardContent({
               : "text-sky-200 sky-name-glow"
           }`}
           style={{
-            fontSize:     "clamp(0.6rem, 8cqh, 3.2rem)",
+            fontSize:     "clamp(14px, 8cqh, 3.2rem)",
             background:   "#0f0f0f",
             border:       "1px solid rgba(255,255,255,0.14)",
             borderRadius: "clamp(5px, 0.6vmin, 8px)",
@@ -163,7 +163,7 @@ function AgentCardContent({
             className={`${METRIC_LABEL_CLASS} ${
               isConcierge ? "text-champagne" : "text-sky-200"
             }`}
-            style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+            style={{ fontSize: "clamp(14px, 3.5cqh, 1.4rem)", marginBottom: 0 }}
           >
             Leads <br /> (This Month)
           </span>
@@ -192,7 +192,7 @@ function AgentCardContent({
         >
           <span
             className={`${METRIC_LABEL_CLASS} tracking-[0.22em] text-emerald-300`}
-            style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+            style={{ fontSize: "clamp(14px, 3.5cqh, 1.4rem)", marginBottom: 0 }}
           >
             Leads <br /> (Today)
           </span>
@@ -206,7 +206,7 @@ function AgentCardContent({
             } as CSSProperties}
           >
             <AnimatedCounter
-              value={agent.leadsAttendToday}
+              value={agent.leadsCreatedTodayIst}
               delay={staggerDelay + 110}
               slideOnChange={slide}
               className="text-current"
@@ -223,7 +223,7 @@ function AgentCardContent({
             className={`${METRIC_LABEL_CLASS} ${
               isConcierge ? "text-champagne" : "text-sky-200"
             }`}
-            style={{ fontSize: "clamp(0.35rem, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+            style={{ fontSize: "clamp(14px, 3.5cqh, 1.4rem)", marginBottom: 0 }}
           >
             Closures <br /> (This Month)
           </span>
@@ -290,7 +290,7 @@ const CompactAgentCard = memo(function CompactAgentCard({
   const metricTileBorder = isConcierge
     ? "border-gold-500/20"
     : "border-sky-400/20";
-  const leadsMonth = agent.leadsThisMonth ?? agent.totalAttempted;
+  const leadsMonth = agent.leadsThisMonth ?? agent.leadsCreatedThisMonth;
   const closedCount = agent.totalConverted;
   const firstNameKey = agent.name.trim().toLowerCase().split(/[\s/,]/)[0];
   const idKey = agent.id.trim().toLowerCase();
@@ -315,7 +315,7 @@ const CompactAgentCard = memo(function CompactAgentCard({
   };
 
   const monthPulse = usePulse(leadsMonth);
-  const todayPulse = usePulse(agent.leadsAttendToday);
+  const todayPulse = usePulse(agent.leadsCreatedTodayIst);
   const closedPulse = usePulse(closedCount);
 
   const index = Math.round(staggerDelay / 160);

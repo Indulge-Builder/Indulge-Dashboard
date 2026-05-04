@@ -141,8 +141,8 @@ const AgentCard = memo(function AgentCard({
       <div
         className="relative flex items-center justify-center rounded-full flex-shrink-0"
         style={{
-          width: 220,
-          height: 220,
+          width: "var(--size-celebration-avatar)",
+          height: "var(--size-celebration-avatar)",
           boxShadow:
             "0 0 0 1px rgba(212,175,55,0.4), " +
             "0 0 40px 12px rgba(212,175,55,0.35), " +

@@ -63,14 +63,14 @@
   /* Headings / names */
   --text-heading-xl: clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem);
   --text-heading-lg: clamp(1.65rem, min(3.85vmin, 4.9vh), 3.85rem);
-  --text-heading-md: clamp(1.5rem, min(3.85vmin, 4.4vh), 5.25rem);
-
-  /* Labels */
-  --text-label-xl: clamp(
+  --text-heading-md: clamp(
     1.5rem,
-    3vw,
-    4rem
-  ); /* metric box labels — was 3.9rem max */
+    min(3.85vmin, 4.4vh),
+    3.25rem
+  ); /* heading-md: section titles, leaderboard header */
+
+  /* Labels — hero / broadcast metric captions (was duplicated text-[clamp(30px,3vw,46px)]) */
+  --text-label-xl: clamp(30px, 3vw, 46px);
   --text-label-lg: clamp(
     1.5rem,
     2.5vw,
@@ -101,6 +101,12 @@
   --pad-cell: clamp(6px, 0.8vw, 14px);
   --gap-card: clamp(0.65rem, min(1.4vmin, 1.8vh), 2rem);
 
+  /* Kiosk / layout sizing */
+  --size-celebration-avatar: clamp(140px, 18vmin, 300px);
+  --size-center-separator: clamp(24px, 2vw, 52px);
+  /* Ticker track — horizontal padding only (typography comes from RecommendationTicker.tsx) */
+  --pad-ticker-item-x: 5rem;
+
   /* ── Radii ─────────────────────────────────────────────────────────────── */
   --radius-card: 1rem; /* 16px */
   --radius-panel: 1.5rem; /* 24px */
@@ -113,26 +119,23 @@
   --ease-luxury: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+html {
+  /* Root scale: 100% (~16px) at 1280px, 125% (~20px) at 1920px.
+     Capped at 1920px behavior — counter/heading clamps handle 4K sizing.
+     No breakpoint jump. Replaces the former md: 125% block below. */
+  font-size: clamp(
+    calc(100% + (1024px - 1280px) * 4 / 640),
+    calc(100% + (100vw - 1280px) * 4 / 640),
+    calc(100% + (1920px - 1280px) * 4 / 640)
+  );
+}
+
 html,
 body {
   width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100%;
+  overflow: hidden;
   background: var(--obsidian);
-}
-
-/* Lock to viewport on tablets and up; TV / 3m-distance viewing — 1rem = 20px */
-@media (min-width: 768px) {
-  html {
-    font-size: 125%;
-  }
-
-  html,
-  body {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-  }
 }
 
 /* ── Noise texture overlay ── */
@@ -330,9 +333,8 @@ body::before {
   .ticker-item {
     display: inline-flex;
     align-items: center;
-    padding: 0 5rem; /* Wide spacing for luxury feel */
-    font-size: 2.5rem; /* TV / 3m distance — up from 2rem */
-    color: #f9e27e; /* Soft Gold */
+    padding: 0 var(--pad-ticker-item-x);
+    color: #f9e27e; /* Soft Gold — city/type/suggestion sizes set in RecommendationTicker.tsx */
   }
 
   /* RenewalsPanel — gold gradient text for names */

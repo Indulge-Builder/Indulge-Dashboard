@@ -222,36 +222,58 @@ export async function GET() {
       return [];
     })();
 
-    // ── 3. Lead touches (this-month only — date-bounded to prevent full-table scan)
+    // ── 3. Single unified leads fetch (replaces three separate table scans) ────
+    //
+    // One paginated read fetches all columns needed by:
+    //   • agent attempted/today counts  (agent_name, created_at, latest_status)
+    //   • vertical trendline            (business_vertical, created_at)
+    //   • lead velocity chart           (agent_name, created_at, modified_at, latest_status)
+    //
+    // Month-level "Leads" / attended / junk tiles count every row in the window
+    // (automation owners like "Admin @ Indulge" included). Per-agent cards and
+    // pipeline health still use roster-matched rows only.
+
     let attemptedByIdx: number[] | null = null;
     let leadsTodayByIdx: number[] | null = null;
-    /** All touch rows within this IST month for pipeline + dept counts */
+    /** All known-agent touch rows within this IST month for pipeline + dept counts */
     let allTouchRowsThisMonth: {
       agent_name: string;
       latest_status: string | null;
     }[] = [];
 
     /**
-     * ALL leads rows for this IST month — unfiltered by agent name.
+     * Every `leads` row in this IST month (same set as the Supabase export for the window).
      * Used by leadMonthStats for the 4 metric tiles.
      */
     let allRawLeadsThisMonth: { latest_status: string | null }[] = [];
+
+    // Shared row cache reused by the trendline blocks below.
+    type LeadRow = {
+      agent_name: string;
+      created_at: string;
+      latest_status: string | null;
+      business_vertical: string | null;
+      modified_at: string | null;
+    };
+    let allLeadRowsThisMonth: LeadRow[] = [];
+    let leadsMonthFetchError: Error | null = null;
 
     try {
       // No SQL .in(agent_name) — DB often stores Zoho full names ("Samson Fernandes")
       // while cards use display names ("Samson"). Exact .in would drop those rows.
       const { rows: touchRows, error: touchErr } = await fetchLeadsCreatedInWindow(
-        "agent_name, created_at, latest_status",
+        "agent_name, created_at, latest_status, business_vertical, modified_at",
         monthStart,
         monthEndEx,
       );
 
       if (touchErr) throw touchErr;
 
-      // Capture ALL rows this month (unfiltered) for the metric tiles
+      allLeadRowsThisMonth = touchRows as LeadRow[];
+
       allRawLeadsThisMonth = touchRows as { latest_status: string | null }[];
 
-      const rows = touchRows.filter((row) =>
+      const knownAgentRows = touchRows.filter((row) =>
         names.some((displayName) =>
           onboardingAgentNameMatches(
             displayName,
@@ -261,7 +283,7 @@ export async function GET() {
       );
 
       attemptedByIdx = names.map((displayName) => {
-        return rows.filter(
+        return knownAgentRows.filter(
           (row) =>
             onboardingAgentNameMatches(displayName, String(row.agent_name)) &&
             touchInThisMonth(String(row.created_at)),
@@ -269,19 +291,20 @@ export async function GET() {
       });
 
       leadsTodayByIdx = names.map((displayName) => {
-        return rows.filter(
+        return knownAgentRows.filter(
           (row) =>
             onboardingAgentNameMatches(displayName, String(row.agent_name)) &&
             touchInToday(String(row.created_at)),
         ).length;
       });
 
-      allTouchRowsThisMonth = rows.filter((row) =>
+      allTouchRowsThisMonth = knownAgentRows.filter((row) =>
         touchInThisMonth(String(row.created_at)),
       ) as { agent_name: string; latest_status: string | null }[];
     } catch (e) {
+      leadsMonthFetchError = e instanceof Error ? e : new Error(String(e));
       console.warn(
-        "[/api/onboarding] onboarding_lead_touches unreadable — attempted/leads zeroed",
+        "[/api/onboarding] leads fetch unreadable — attempted/leads zeroed",
         e,
       );
     }
@@ -369,10 +392,10 @@ export async function GET() {
     }
 
     const leadMonthStats: LeadMonthStats = {
-      leads:     allRawLeadsThisMonth.length,
-      attended:  lmsAttended,
-      converted: dealsThisMonth,
-      junk:      Math.max(0, allRawLeadsThisMonth.length - lmsAttended - dealsThisMonth),
+      leads:                allRawLeadsThisMonth.length,
+      attended:             lmsAttended,
+      dealsClosedThisMonth: dealsThisMonth,
+      junk:                 Math.max(0, allRawLeadsThisMonth.length - lmsAttended - dealsThisMonth),
     };
 
     // ── 4. Closure rows — THIS MONTH (IST cohort) from deals table ──────────
@@ -439,11 +462,10 @@ export async function GET() {
         name: r.display_name,
         photoUrl: r.photo_url,
         department: getAgentDepartment(r.display_name),
-        // Legacy fields (backward compat + shimmer detection)
-        totalAttempted: attempted,
+        leadsCreatedThisMonth: attempted,
         totalConverted: closed,
-        leadsAttendToday: leadsToday,
-        // This Month Cohort Math fields
+        leadsCreatedTodayIst: leadsToday,
+        // leadsThisMonth kept as alias for any downstream consumers
         leadsThisMonth: attempted,
         closedLakhsThisMonth: closureDataAvailable ? 0 : undefined,
       };
@@ -483,102 +505,72 @@ export async function GET() {
       shop: buildDeptStats("shop"),
     };
 
-    // ── 8. Vertical Trendline — daily lead counts per business_vertical, last 7 IST days ──
+    // ── 8. Trendlines — reuse allLeadRowsThisMonth (no extra DB round-trips) ──
     //
-    // Simple approach: fetch `leads` rows for the last 7 IST calendar days,
-    // bucket by (IST date, business_vertical), zero-fill missing cells.
+    // Both the vertical trendline and the lead velocity chart are derived from
+    // the same month-window rows already fetched in section 3. Zero extra reads.
+
     let leadTrendline: LeadTrendPoint[] = [];
     let teamAttendedTrend: TeamAttendedDay[] = [];
     let verticalTrendline: VerticalTrendPoint[] = [];
 
-    try {
-      const todayDate  = new Date(`${todayIST}T00:00:00+05:30`);
+    if (!leadsMonthFetchError) {
+      try {
+        const todayDate = new Date(`${todayIST}T00:00:00+05:30`);
 
-      const istFmt = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Asia/Kolkata",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
+        const istFmt = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
 
-      // Full current month: day 1 → last day of month
-      const [istY, istM] = thisMonthIST.split("-") as [string, string];
-      const monthStartMs  = new Date(`${istY}-${istM}-01T00:00:00+05:30`).getTime();
-      const nextMonthMs   = new Date(
-        Number(istM) === 12
-          ? `${Number(istY) + 1}-01-01T00:00:00+05:30`
-          : `${istY}-${String(Number(istM) + 1).padStart(2, "0")}-01T00:00:00+05:30`,
-      ).getTime();
-      const daysInMonth   = Math.round((nextMonthMs - monthStartMs) / 86_400_000);
-      const windowStartUtc = new Date(monthStartMs).toISOString();
+        const [istY, istM] = thisMonthIST.split("-") as [string, string];
+        const monthStartMs = new Date(`${istY}-${istM}-01T00:00:00+05:30`).getTime();
+        const nextMonthMs  = new Date(
+          Number(istM) === 12
+            ? `${Number(istY) + 1}-01-01T00:00:00+05:30`
+            : `${istY}-${String(Number(istM) + 1).padStart(2, "0")}-01T00:00:00+05:30`,
+        ).getTime();
+        const daysInMonth = Math.round((nextMonthMs - monthStartMs) / 86_400_000);
 
-      // Build ordered date keys oldest → newest (full month)
-      const dateKeys: string[] = [];
-      for (let d = 0; d < daysInMonth; d++) {
-        dateKeys.push(istFmt.format(new Date(monthStartMs + d * 86_400_000)));
-      }
+        // Full-month date keys (oldest → newest)
+        const dateKeys: string[] = [];
+        for (let d = 0; d < daysInMonth; d++) {
+          dateKeys.push(istFmt.format(new Date(monthStartMs + d * 86_400_000)));
+        }
 
-      const verticalFetch = await fetchLeadsCreatedInWindow(
-        "business_vertical, created_at",
-        windowStartUtc,
-        monthEndEx,
-      );
-
-      if (!verticalFetch.error) {
-        // Seed zero-filled maps for all 4 verticals × 7 days
-        const counts: Record<string, Record<string, number>> = {};
+        // ── Vertical trendline ───────────────────────────────────────────────
+        const vertCounts: Record<string, Record<string, number>> = {};
         for (const key of dateKeys) {
-          counts[key] = {
+          vertCounts[key] = {
             "Indulge Global": 0,
             "Indulge Shop":   0,
             "Indulge House":  0,
             "Indulge Legacy": 0,
           };
         }
-
-        for (const row of verticalFetch.rows as {
-          business_vertical: string | null;
-          created_at: string;
-        }[]) {
+        for (const row of allLeadRowsThisMonth) {
           const key = toISTDay(String(row.created_at ?? ""));
-          if (!key || !(key in counts)) continue;
-
+          if (!key || !(key in vertCounts)) continue;
           const vertical = row.business_vertical ?? "Indulge Global";
-          const bucket = counts[key];
-          if (bucket && vertical in bucket) {
-            (bucket[vertical] as number)++;
-          }
+          const bucket = vertCounts[key];
+          if (bucket && vertical in bucket) (bucket[vertical] as number)++;
         }
-
         verticalTrendline = dateKeys.map((date) => ({
           date,
-          "Indulge Global": counts[date]?.["Indulge Global"] ?? 0,
-          "Indulge Shop":   counts[date]?.["Indulge Shop"]   ?? 0,
-          "Indulge House":  counts[date]?.["Indulge House"]  ?? 0,
-          "Indulge Legacy": counts[date]?.["Indulge Legacy"] ?? 0,
+          "Indulge Global": vertCounts[date]?.["Indulge Global"] ?? 0,
+          "Indulge Shop":   vertCounts[date]?.["Indulge Shop"]   ?? 0,
+          "Indulge House":  vertCounts[date]?.["Indulge House"]  ?? 0,
+          "Indulge Legacy": vertCounts[date]?.["Indulge Legacy"] ?? 0,
         }));
-      }
 
-      // ── Legacy leadTrendline + teamAttendedTrend (month-to-date, for stat tiles) ──
-      const monthStart1st   = `${istY}-${istM}-01`;
-      const monthStartDate  = new Date(`${monthStart1st}T00:00:00+05:30`);
-      const monthWindowStartMs  = monthStartDate.getTime();
-      const monthWindowStartUtc = monthStartDate.toISOString();
-
-      const daysSoFar = Math.round(
-        (todayDate.getTime() - monthStartDate.getTime()) / 86_400_000,
-      ) + 1;
-
-      const trendFetch = await fetchLeadsCreatedInWindow(
-        "agent_name, created_at, modified_at, latest_status",
-        monthWindowStartUtc,
-        monthEndEx,
-      );
-
-      if (!trendFetch.error) {
+        // ── Lead velocity chart (month-to-date days only) ────────────────────
+        const daysSoFar =
+          Math.round((todayDate.getTime() - monthStartMs) / 86_400_000) + 1;
         const monthDateKeys: string[] = [];
         for (let d = 0; d < daysSoFar; d++) {
-          monthDateKeys.push(istFmt.format(new Date(monthWindowStartMs + d * 86_400_000)));
+          monthDateKeys.push(istFmt.format(new Date(monthStartMs + d * 86_400_000)));
         }
 
         const conciergeByDate: Record<string, number> = {};
@@ -592,12 +584,7 @@ export async function GET() {
           shopAttendedByDate[key] = 0;
         }
 
-        for (const row of trendFetch.rows as {
-          agent_name: string;
-          created_at: string;
-          modified_at: string;
-          latest_status: string | null;
-        }[]) {
+        for (const row of allLeadRowsThisMonth) {
           const createdKey = toISTDay(String(row.created_at ?? ""));
           if (!createdKey) continue;
 
@@ -609,34 +596,29 @@ export async function GET() {
 
           const rowStatus = String(row.latest_status ?? "New").trim();
           if (rowStatus !== "New") {
-            const modKey = toISTDay(
-              String(row.modified_at ?? row.created_at ?? ""),
-            );
+            const modKey = toISTDay(String(row.modified_at ?? row.created_at ?? ""));
             if (!modKey || !(modKey in conciergeByDate)) continue;
             const dept = getAgentDepartment(String(row.agent_name ?? ""));
             if (dept === "concierge")
               onboardingAttendedByDate[modKey] = (onboardingAttendedByDate[modKey] ?? 0) + 1;
-            else shopAttendedByDate[modKey] = (shopAttendedByDate[modKey] ?? 0) + 1;
+            else
+              shopAttendedByDate[modKey] = (shopAttendedByDate[modKey] ?? 0) + 1;
           }
         }
 
         leadTrendline = monthDateKeys.map((date) => ({
           date,
           conciergeLeads: conciergeByDate[date] ?? 0,
-          shopLeads: shopByDate[date] ?? 0,
+          shopLeads:      shopByDate[date]       ?? 0,
         }));
-
         teamAttendedTrend = monthDateKeys.map((date) => ({
           date,
           onboarding: onboardingAttendedByDate[date] ?? 0,
-          shop: shopAttendedByDate[date] ?? 0,
+          shop:       shopAttendedByDate[date]        ?? 0,
         }));
+      } catch (e) {
+        console.warn("[/api/onboarding] trendline computation failed — charts will be empty", e);
       }
-    } catch (e) {
-      console.warn(
-        "[/api/onboarding] trendline query failed — charts will be empty",
-        e,
-      );
     }
 
     // ── 9. Return payload ─────────────────────────────────────────────────
