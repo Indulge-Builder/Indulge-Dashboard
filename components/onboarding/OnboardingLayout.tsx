@@ -1,11 +1,6 @@
 "use client";
 
-/**
- * Presentational shell for the Revenue Dashboard onboarding TV screen.
- * No fetching, Realtime, or shimmer logic — data arrives via props only.
- */
-
-import type { UseOnboardingPanelDataResult } from "@/hooks/useOnboardingPanelData";
+import { useOnboardingPanelData } from "@/hooks/useOnboardingPanelData";
 import { SectionDivider } from "@/components/ui/SectionDivider";
 import { DepartmentColumn } from "./DepartmentColumn";
 import { ConversionLedger } from "./ConversionLedger";
@@ -15,7 +10,8 @@ import {
   ONBOARDING_PAGE_TITLE_FONT,
 } from "./utils";
 
-export default function OnboardingLayout(props: UseOnboardingPanelDataResult) {
+export default function OnboardingLayout() {
+  const props = useOnboardingPanelData();
   const {
     conciergeAgents,
     shopAgents,

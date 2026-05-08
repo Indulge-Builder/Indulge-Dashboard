@@ -21,6 +21,7 @@ import { NextResponse } from "next/server";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
+import { isIncompleteScoreStatus } from "@/lib/ticketAggregation";
 
 // ─── Ticket row shape ─────────────────────────────────────────────────────────
 interface TicketRow {
@@ -130,7 +131,9 @@ export async function GET(): Promise<Response> {
 
     const incomplete = tickets.filter(
       (t) =>
-        t.agent_name?.toLowerCase() === nameLower && t.is_incomplete === true,
+        t.agent_name?.toLowerCase() === nameLower &&
+        isIncompleteScoreStatus(t.status) &&
+        t.is_incomplete === true,
     ).length;
 
     return {

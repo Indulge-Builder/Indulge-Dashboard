@@ -1,48 +1,57 @@
 /**
  * lib/webhookAuth.ts
  *
- * Shared webhook authentication helper.
+ * Webhook authentication helper used by all three POST webhook handlers.
  *
- * Usage (at the top of each POST handler, before reading the body):
+ * Behaviour:
+ *   - Production (NODE_ENV=production): WEBHOOK_SECRET must be set.
+ *     Missing secret → hard rejection of ALL incoming webhook calls.
+ *   - Development / test: missing secret logs a warning and passes through.
+ *     Set WEBHOOK_AUTH_DISABLED=true to suppress the warning in test suites.
  *
- *   const unauthorized = assertWebhookSecret(req);
- *   if (unauthorized) return unauthorized;
+ * Callers send the secret via either header:
+ *   x-webhook-secret: <secret>
+ *   Authorization: Bearer <secret>
  *
- * Secret configuration:
- *   - Set WEBHOOK_SECRET env var to a random, unguessable string (32+ chars).
- *   - Configure Freshdesk / Zoho automations to send:
- *       Header: x-webhook-secret: <your secret>
- *     OR
- *       Header: Authorization: Bearer <your secret>
- *
- * Fail-open during rollout:
- *   - If WEBHOOK_SECRET is unset, the check is SKIPPED and a warning is logged once
- *     per process start. Flip to hard-require once all callers send the header.
+ * Comparison uses Node's crypto.timingSafeEqual to prevent timing attacks.
  */
 
+import { timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-let _missingSecretWarned = false;
+function secretsEqual(a: string, b: string): boolean {
+  // timingSafeEqual requires same-length buffers — length mismatch is instant-reject.
+  const ba = Buffer.from(a, "utf8");
+  const bb = Buffer.from(b, "utf8");
+  if (ba.length !== bb.length) return false;
+  return timingSafeEqual(ba, bb);
+}
 
 export function assertWebhookSecret(req: NextRequest): NextResponse | null {
   const secret = process.env.WEBHOOK_SECRET;
 
   if (!secret) {
-    if (!_missingSecretWarned) {
-      console.warn(
-        "[webhookAuth] WEBHOOK_SECRET env var is not set — webhook authentication is DISABLED. " +
-          "Set WEBHOOK_SECRET and configure callers to send it as the x-webhook-secret header.",
+    if (process.env.NODE_ENV === "production") {
+      console.error(
+        "[webhookAuth] WEBHOOK_SECRET is not set in production — rejecting all webhook calls.",
       );
-      _missingSecretWarned = true;
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return null; // fail-open until secret is deployed
+
+    if (process.env.WEBHOOK_AUTH_DISABLED !== "true") {
+      console.warn(
+        "[webhookAuth] WEBHOOK_SECRET not set — auth disabled (dev/test only). " +
+          "Set WEBHOOK_AUTH_DISABLED=true to suppress this warning.",
+      );
+    }
+    return null;
   }
 
   const token =
     req.headers.get("x-webhook-secret") ??
     req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
 
-  if (!token || token !== secret) {
+  if (!token || !secretsEqual(token, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

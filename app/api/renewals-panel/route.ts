@@ -15,7 +15,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
-import { getCurrentIstMonthUtcBounds } from "@/lib/istMonthBounds";
+import { getCurrentIstMonthUtcBounds } from "@/lib/istDate";
 
 type QueendomId = "ananyshree" | "anishqa";
 

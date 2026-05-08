@@ -15,22 +15,22 @@
  *   │▓▓ Lost │        │▓ Lost  │
  *   │▓▓▓ Won │▓ Won   │▓▓▓ Won │
  *   │▒▒ Disc │▒▒ Disc │        │        ← stacked bars, bottom-up
- *   │████ At │████ At │████ At │
+ *   │████ To │████ To │████ To │
  *   │▓▓ New  │▓ New   │▓▓▓ New │
  *   ─────────────────────────────
  *    AMIT     SAMSON   MEGHANA           ← X-axis labels
  *
- *   ● New  ● Attempted  ● In Disc  ● Won  ● Lost   ← legend
+ *   ● New  ● Touched  ● In Disc  ● Won  ● Lost   ← legend
  *
  * Colour tokens (all from CSS variables — no hardcoded hex):
  *   New           → --color-sky
- *   Attempted     → --color-champagne
+ *   Touched       → --color-champagne
  *   In Discussion → --color-amber
  *   Won           → --color-emerald
  *   Lost          → --color-red
  *
- * Data fallback: when agent.pipeline is absent, derives Attempted from
- * totalAttempted and Won from totalConverted. Other stages default to 0.
+ * Data fallback: when agent.pipeline is absent, derives Touched from
+ * leadsCreatedThisMonth and Won from totalConverted. Other stages default to 0.
  * This keeps the chart useful before the API route is updated.
  */
 
@@ -56,7 +56,7 @@ interface SegmentCfg {
 
 const CFG: Record<PipelineStatus, SegmentCfg> = {
   "New":           { color: "var(--color-sky)",       glow: "rgba(125,211,252,0.08)",  label: "New"     },
-  "Attempted":     { color: "var(--color-champagne)", glow: "rgba(245,230,200,0.08)",  label: "Attempt" },
+  "Touched":       { color: "var(--color-champagne)", glow: "rgba(245,230,200,0.08)",  label: "Touched" },
   "In Discussion": { color: "var(--color-amber)",     glow: "rgba(252,211,77,0.08)",   label: "In Disc" },
   "Won":           { color: "var(--color-emerald)",   glow: "rgba(52,211,153,0.08)",   label: "Won"     },
   "Lost":          { color: "var(--color-red)",       glow: "rgba(248,113,113,0.08)",  label: "Lost"    },
@@ -72,7 +72,7 @@ function resolveAgentPipeline(agent: OnboardingAgentRow): PipelineStatusCounts {
   if (agent.pipeline) return agent.pipeline;
   return {
     ...EMPTY_PIPELINE,
-    Attempted: agent.leadsCreatedThisMonth,
+    Touched: agent.leadsCreatedThisMonth,
     Won:       agent.totalConverted,
   };
 }

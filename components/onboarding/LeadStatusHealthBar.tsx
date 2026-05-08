@@ -45,13 +45,13 @@ export const STATUS_COLORS: Record<
     short:    "Nurturing",
     order:    2,
   },
-  /* Attempted — yellow */
-  Attempted: {
+  /* Touched — yellow (Zoho stage; legacy "Attempted" maps here in API) */
+  Touched: {
     gradient: "linear-gradient(160deg, #fef08a 0%, #eab308 55%, #a16207 100%)",
     flat:     "#eab308",
     glow:     "rgba(234,179,8,0.75)",
-    label:    "Attempted",
-    short:    "Attempted",
+    label:    "Touched",
+    short:    "Touched",
     order:    3,
   },
   /* New — slate */
@@ -93,15 +93,6 @@ const ORDERED_STATUSES: ZohoLeadStatus[] = (
 const BAR_H   = "clamp(44px, 5.2vh, 78px)";
 const RADIUS  = "clamp(7px, 0.85vh, 13px)";
 
-/* ── Gloss sweep — one animated white stripe per ~4 s ─────────────────────── */
-function GlossSweep(_props: { reduced: boolean }) {
-  return null;
-}
-
-/* ── Outer breathing glow ───────────────────────────────────────────────────── */
-function BreathingGlow(_props: { reduced: boolean; dominantGlow: string }) {
-  return null;
-}
 
 function LeadStatusHealthBar_({
   breakdown,
@@ -119,15 +110,6 @@ function LeadStatusHealthBar_({
     () => ORDERED_STATUSES.filter((s) => (breakdown?.[s] ?? 0) > 0),
     [breakdown],
   );
-
-  /* Dominant segment = biggest slice → drives the breathing glow colour */
-  const dominantGlow = useMemo(() => {
-    if (!orderedNonZero.length) return "rgba(255,255,255,0.12)";
-    const top = [...orderedNonZero].sort(
-      (a, b) => (breakdown[b] ?? 0) - (breakdown[a] ?? 0),
-    )[0];
-    return STATUS_COLORS[top].glow;
-  }, [orderedNonZero, breakdown]);
 
   /* ── Empty state ─────────────────────────────────────────────────────────── */
   if (!breakdown || breakdown.total === 0) {
@@ -168,13 +150,8 @@ function LeadStatusHealthBar_({
       {/* Pipeline header */}
       <PipelineLabel />
 
-      {/* Segmented bar wrapper (relative for glow + gloss overlays) */}
-      <div style={{ position: "relative" }}>
-        {/* Breathing outer glow — sits behind the bar */}
-        <BreathingGlow reduced={reduced} dominantGlow={dominantGlow} />
-
-        {/* Bar track */}
-        <div
+      {/* Segmented bar track */}
+      <div
           className="relative w-full overflow-hidden"
           style={{
             height:     BAR_H,
@@ -254,9 +231,6 @@ function LeadStatusHealthBar_({
             }}
           />
 
-          {/* Moving gloss sweep */}
-          <GlossSweep reduced={reduced} />
-
           {/* Bottom depth shadow */}
           <div
             aria-hidden
@@ -285,7 +259,6 @@ function LeadStatusHealthBar_({
             }}
           />
         </div>
-      </div>
 
       {/* Legend — tinted pills, stacked label-over-count */}
       <div

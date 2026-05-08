@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import QueendomPanel from "./QueendomPanel";
-import OnboardingPanel from "./onboarding/OnboardingPanel";
+import OnboardingLayout from "./onboarding/OnboardingLayout";
 import QueendomSkeleton from "./skeletons/QueendomSkeleton";
 import OnboardingSkeleton from "./skeletons/OnboardingSkeleton";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { useKeyboardControls } from "@/hooks/useKeyboardControls";
 import type { QueenStats } from "@/lib/types";
 import type { ActiveScreen, RenewalsPanelData } from "@/types";
 
@@ -17,10 +18,7 @@ const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
   onboarding: 30_000,
 };
 
-const fadeTransition = {
-  duration: 1.5,
-  ease: "easeInOut" as const,
-};
+const fadeTransition = { duration: 1.5, ease: "easeInOut" as const };
 
 interface DashboardControllerProps {
   className?: string;
@@ -36,17 +34,6 @@ interface DashboardControllerProps {
    * animate from 0 quietly — no jarring re-render when the skeleton lifts.
    */
   isInitialLoading: boolean;
-}
-
-/** TV browsers / remotes often omit `key` or use legacy keyCode; fullscreen can eat events before bubble. */
-function isFreezeToggleKey(e: KeyboardEvent): boolean {
-  if (e.key === "p" || e.key === "P") return true;
-  if (e.key === " " || e.code === "Space") return true;
-  if (e.key === "Enter" || e.code === "Enter" || e.code === "NumpadEnter") return true;
-  if (e.code === "MediaPlayPause") return true;
-  // Legacy WebKit / embedded TV engines
-  if (typeof e.keyCode === "number" && e.keyCode === 13) return true;
-  return false;
 }
 
 // Shared exit transition for skeleton overlays — matches the cinematic 1.5s
@@ -70,26 +57,10 @@ export default function DashboardController({
     const timeoutId = window.setTimeout(() => {
       setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
     }, SCREEN_DURATIONS_MS[activeScreen]);
-
     return () => window.clearTimeout(timeoutId);
   }, [activeScreen, isFrozen]);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (isFreezeToggleKey(e)) {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsFrozen((v) => !v);
-        return;
-      }
-      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-      e.preventDefault();
-      setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
-    };
-    // Capture: run before other handlers / fullscreen UI; helps TV + embedded browsers.
-    window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, []);
+  useKeyboardControls(setActiveScreen, setIsFrozen);
 
   return (
     <div
@@ -217,7 +188,7 @@ export default function DashboardController({
         {/* Onboarding screen — isolated from the concierge screens */}
         <div className="relative flex min-h-0 h-full w-full min-w-0 flex-col">
           <ErrorBoundary label="Onboarding" fillParent>
-            <OnboardingPanel />
+            <OnboardingLayout />
           </ErrorBoundary>
           {/* Skeleton overlay — staggered 0.3s so the left→right→onboarding cascade feels intentional */}
           <AnimatePresence>

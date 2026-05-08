@@ -4,11 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { istToday, toISTDay } from "@/lib/istDate";
-import {
-  getAgentDepartment,
-  CONCIERGE_AGENT_DISPLAY_NAMES,
-  SHOP_AGENT_DISPLAY_NAMES,
-} from "@/lib/onboardingAgents";
+import { getAgentDepartment } from "@/lib/onboardingAgents";
 import type {
   LeadStatusByAgent,
   LeadTrendPoint,
@@ -16,7 +12,6 @@ import type {
   OnboardingApiPayload,
   OnboardingLedgerRow,
   PerformanceDayPoint,
-  PerformanceTotals,
   TeamAttendedDay,
   VerticalTrendPoint,
   LeadMonthStats,
@@ -311,39 +306,6 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     }
     return points;
   }, [leadTrendline, teamAttendedTrend, ledger]);
-
-  const performanceTotals = useMemo<PerformanceTotals>(() => {
-    const obLeads = performanceData.reduce((s, d) => s + d.onboarding.leads, 0);
-    const obAttended = performanceData.reduce((s, d) => s + d.onboarding.attended, 0);
-    const obConverted = performanceData.reduce((s, d) => s + d.onboarding.converted, 0);
-    const shLeads = performanceData.reduce((s, d) => s + d.shop.leads, 0);
-    const shAttended = performanceData.reduce((s, d) => s + d.shop.attended, 0);
-    const shConverted = performanceData.reduce((s, d) => s + d.shop.converted, 0);
-
-    const obJunk = (CONCIERGE_AGENT_DISPLAY_NAMES as readonly string[]).reduce(
-      (s, n) => s + (leadStatusByAgent[n]?.Junk ?? 0),
-      0,
-    );
-    const shJunk = (SHOP_AGENT_DISPLAY_NAMES as readonly string[]).reduce(
-      (s, n) => s + (leadStatusByAgent[n]?.Junk ?? 0),
-      0,
-    );
-
-    return {
-      onboarding: {
-        leads: obLeads,
-        attended: obAttended,
-        converted: obConverted,
-        junk: obJunk,
-      },
-      shop: {
-        leads: shLeads,
-        attended: shAttended,
-        converted: shConverted,
-        junk: shJunk,
-      },
-    };
-  }, [performanceData, leadStatusByAgent]);
 
   useEffect(() => {
     let winner: string | null = null;

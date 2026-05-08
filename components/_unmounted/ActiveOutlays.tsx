@@ -37,7 +37,7 @@ import {
   PAID_EXIT_MS,
   MAX_OUTLAYS,
   rowToDisplay,
-} from "./utils";
+} from "./finance-utils";
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface ActiveOutlaysProps {

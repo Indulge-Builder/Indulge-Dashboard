@@ -15,7 +15,7 @@
  *   Closures count + ₹ sum:    onboarding_conversion_ledger.{recorded_at, amount}
  *   Ledger feed (UI table):    deals.{deal_name, agent_name, created_at}
  *   Pipeline Won count:        closure rows this month per department
- *   Pipeline Attempted count:  touch rows this month per department
+ *   Pipeline Touched count:  touch rows this month per department
  *   New / In Discussion / Lost: no data source yet — returns 0 (placeholder)
  *
  * ── Agent fallback strategy ──────────────────────────────────────────────────
@@ -225,7 +225,7 @@ export async function GET() {
     // ── 3. Single unified leads fetch (replaces three separate table scans) ────
     //
     // One paginated read fetches all columns needed by:
-    //   • agent attempted/today counts  (agent_name, created_at, latest_status)
+    //   • agent leads-this-month / today counts  (agent_name, created_at, latest_status)
     //   • vertical trendline            (business_vertical, created_at)
     //   • lead velocity chart           (agent_name, created_at, modified_at, latest_status)
     //
@@ -304,7 +304,7 @@ export async function GET() {
     } catch (e) {
       leadsMonthFetchError = e instanceof Error ? e : new Error(String(e));
       console.warn(
-        "[/api/onboarding] leads fetch unreadable — attempted/leads zeroed",
+        "[/api/onboarding] leads fetch unreadable — lead counts zeroed",
         e,
       );
     }
@@ -323,7 +323,7 @@ export async function GET() {
       const s = raw.trim().toLowerCase();
       if (!s) return "Junk";
       if (s === "new") return "New";
-      if (s === "attempted") return "Attempted";
+      if (s === "touched" || s === "attempted") return "Touched";
       if (s === "in discussion") return "In Discussion";
       if (s === "nurturing") return "Nurturing";
       if (s === "qualified") return "Qualified";
@@ -336,6 +336,19 @@ export async function GET() {
       leadStatusByAgent[displayName] = { ...EMPTY_BREAKDOWN };
     }
 
+    const knownPipelineStatusKeys = new Set([
+      "new",
+      "touched",
+      "attempted",
+      "in discussion",
+      "nurturing",
+      "qualified",
+      "junk",
+      "lost",
+      "trash",
+    ]);
+    const unmappedStatusCounts = new Map<string, number>();
+
     for (const row of allTouchRowsThisMonth) {
       const canonicalName = names.find((n) =>
         onboardingAgentNameMatches(n, String(row.agent_name ?? "")),
@@ -345,20 +358,11 @@ export async function GET() {
       const rawStatus = String(row.latest_status ?? "");
       const normalizedStatus = normalizeLeadStatus(rawStatus);
       const normalizedKey = rawStatus.trim().toLowerCase();
-      if (
-        normalizedKey &&
-        normalizedKey !== "new" &&
-        normalizedKey !== "attempted" &&
-        normalizedKey !== "in discussion" &&
-        normalizedKey !== "nurturing" &&
-        normalizedKey !== "qualified" &&
-        normalizedKey !== "junk" &&
-        normalizedKey !== "lost" &&
-        normalizedKey !== "trash"
-      ) {
-        console.warn("[/api/onboarding] Unmapped latest_status mapped to Junk", {
-          latest_status: rawStatus,
-        });
+      if (normalizedKey && !knownPipelineStatusKeys.has(normalizedKey)) {
+        unmappedStatusCounts.set(
+          normalizedKey,
+          (unmappedStatusCounts.get(normalizedKey) ?? 0) + 1,
+        );
       }
 
       const bd = leadStatusByAgent[canonicalName] as AgentLeadStatusBreakdown;
@@ -366,17 +370,24 @@ export async function GET() {
       bd.total++;
     }
 
+    if (unmappedStatusCounts.size > 0) {
+      console.warn(
+        "[/api/onboarding] Unmapped latest_status values (bucketed as Junk for pipeline bar)",
+        Object.fromEntries(unmappedStatusCounts),
+      );
+    }
+
     // ── Section B — leadMonthStats (metric tiles) ─────────────────────────────
     //
     // Leads    = total rows in leads table this IST month (all agents)
-    // Attended = leads where latest_status IN (New | Attempted | In Discussion)
+    // Attended = leads where latest_status IN (New | Touched | In Discussion)
     // Converted = count of rows in the deals table this IST month
     // Junk     = leads - attended - converted (everything else)
 
     let lmsAttended = 0;
     for (const row of allRawLeadsThisMonth) {
       const s = normalizeLeadStatus(String(row.latest_status ?? ""));
-      if (s === "New" || s === "Attempted" || s === "In Discussion") lmsAttended++;
+      if (s === "New" || s === "Touched" || s === "In Discussion") lmsAttended++;
     }
 
     let dealsThisMonth = 0;
@@ -475,8 +486,8 @@ export async function GET() {
     const buildDeptStats = (dept: Department): DepartmentStats => {
       const deptAgents = agents.filter((a) => a.department === dept);
 
-      // Attempted this month for this dept (from touch rows)
-      const pipelineAttempted = allTouchRowsThisMonth.filter(
+      // Month-to-date lead rows for this dept (Zoho pipeline volume; not per-status yet)
+      const pipelineTouched = allTouchRowsThisMonth.filter(
         (row) => getAgentDepartment(String(row.agent_name)) === dept,
       ).length;
 
@@ -487,7 +498,7 @@ export async function GET() {
 
       const pipeline: PipelineStatusCounts = {
         ...EMPTY_PIPELINE,
-        Attempted: pipelineAttempted,
+        Touched: pipelineTouched,
         Won: pipelineWon,
       };
 

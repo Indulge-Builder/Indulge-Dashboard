@@ -24,7 +24,7 @@ import type { DisplayOutlay } from "@/types";
 import {
   FINANCES_LEDGER_HEADER_LABEL_CLASS,
   FINANCES_LEDGER_CELL_FONT,
-} from "./utils";
+} from "./finance-utils";
 
 // ── Single row (internal — not exported) ─────────────────────────────────────
 function OutlayLedgerRow({

@@ -76,20 +76,6 @@ export const ALL_AGENT_DISPLAY_NAMES: readonly AnyAgentDisplayName[] = [
   ...SHOP_AGENT_DISPLAY_NAMES,
 ] as const;
 
-/**
- * Legacy alias — kept so existing imports of ONBOARDING_AGENT_DISPLAY_NAMES
- * in the current /api/onboarding route continue to compile unchanged.
- * @deprecated Use ALL_AGENT_DISPLAY_NAMES going forward.
- */
-export const ONBOARDING_AGENT_DISPLAY_NAMES = ALL_AGENT_DISPLAY_NAMES;
-
-/**
- * Legacy alias — kept so existing imports of ONBOARDING_AGENT_CARDS
- * in utils.ts and route.ts compile unchanged.
- * Post-overhaul: prefer CONCIERGE_AGENT_CARDS or SHOP_AGENT_CARDS.
- * @deprecated Use CONCIERGE_AGENT_CARDS / SHOP_AGENT_CARDS.
- */
-export const ONBOARDING_AGENT_CARDS = CONCIERGE_AGENT_CARDS;
 
 // ── Department map ────────────────────────────────────────────────────────────
 
@@ -243,9 +229,3 @@ export const SHOP_FALLBACK_AGENTS = SHOP_AGENT_CARDS.map((c) =>
   zeroedAgent(c.id, c.name, "shop"),
 );
 
-/**
- * Legacy flat fallback array for the existing OnboardingPanel until Step 2
- * migrates it to the dual-department layout.
- * @deprecated Use CONCIERGE_FALLBACK_AGENTS / SHOP_FALLBACK_AGENTS.
- */
-export const FALLBACK_AGENTS = CONCIERGE_FALLBACK_AGENTS;

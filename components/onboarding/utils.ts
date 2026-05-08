@@ -46,53 +46,23 @@ const IST_LEDGER_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", {
 });
 
 // ── 1. Typography scale ───────────────────────────────────────────────────────
+// CSS variables defined in app/globals.css — single source of truth.
+// Reference: var(--text-heading-xl), var(--text-heading-lg), etc.
 
-/** "Revenue Dashboard" / "Onboarding" page heading */
-export const ONBOARDING_PAGE_TITLE_FONT =
-  "clamp(2rem, min(4.6vmin, 5.9vh), 4.4rem)";
+/** "Revenue Dashboard" / "Onboarding" page heading → CSS var(--text-heading-xl) */
+export const ONBOARDING_PAGE_TITLE_FONT = "var(--text-heading-xl)";
 
-/** "Live Conversion Ledger" section heading */
-export const ONBOARDING_LEDGER_TITLE_FONT =
-  "clamp(1.65rem, min(3.85vmin, 4.9vh), 3.85rem)";
+/** "Live Conversion Ledger" section heading → CSS var(--text-heading-lg) */
+export const ONBOARDING_LEDGER_TITLE_FONT = "var(--text-heading-lg)";
 
-/** Column header row (Client / Date / Agent) */
-export const ONBOARDING_LEDGER_HEADER_FONT =
-  "clamp(1.05rem, min(2.35vmin, 2.85vh), 2.05rem)";
+/** Column header row (Client / Date / Agent) → CSS var(--text-ledger-header) */
+export const ONBOARDING_LEDGER_HEADER_FONT = "var(--text-ledger-header)";
 
-/** Cell text in each ledger data row */
-export const ONBOARDING_LEDGER_CELL_FONT =
-  "clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem)";
+/** Cell text in each ledger data row → CSS var(--text-ledger-cell) */
+export const ONBOARDING_LEDGER_CELL_FONT = "var(--text-ledger-cell)";
 
-// ── Compact-card scale (DepartmentColumn) ────────────────────────────────────
-
-/**
- * Agent name on compact cards — matches TV dashboard headline tier with
- * ledger headers / dept hero type (same clamp grammar as onboarding scale).
- */
-export const COMPACT_AGENT_NAME_FONT =
-  "clamp(0.95rem, min(2.35vmin, 2.85vh), 2.75rem)";
-
-/** Metric label inside each chip (Today / Month / Closed) */
-export const COMPACT_METRIC_LABEL_FONT =
-  "clamp(0.875rem, min(1.3vmin, 1.6vh), 1.5rem)"; /* min 0.875rem — readable TV floor */
-
-/** Metric value inside each chip */
-export const COMPACT_METRIC_VALUE_FONT =
-  "clamp(0.95rem, min(2.4vmin, 2.9vh), 3rem)";
-
-/** Metric value inside the 3-up horizontal stat tiles (slightly tighter for density) */
-export const COMPACT_METRIC_TILE_VALUE_FONT =
-  "clamp(0.875rem, min(2.05vmin, 2.45vh), 2.35rem)"; /* min 0.875rem — readable TV floor */
-
-/** Legend labels under the pipeline bar — Queendom-style label tier */
-export const COMPACT_PIPELINE_RAIL_CAPTION_FONT =
-  "clamp(18px, min(2.6vmin, 2.8vw), 36px)";
-
-/** Department name heading above each column */
-export const DEPT_HEADING_FONT = "clamp(1.25rem, min(2.8vmin, 3.3vh), 3.2rem)";
-
-/** Total lakhs hero number in the department column header */
-export const DEPT_LAKHS_HERO_FONT = "clamp(1.8rem, min(4.2vmin, 5vh), 5.5rem)";
+/** Department name heading above each column → CSS var(--text-dept-heading) */
+export const DEPT_HEADING_FONT = "var(--text-dept-heading)";
 
 // ── 2. Data constants & fallback agents ──────────────────────────────────────
 

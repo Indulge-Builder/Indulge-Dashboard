@@ -44,7 +44,7 @@ export interface AgentStats {
   pendingScore: number;
   /** Among that monthly pending set: `is_escalated` (shown as Overdue in the leaderboard). */
   overdueCount: number;
-  /** Tickets flagged incomplete (`is_incomplete === true` only). */
+  /** Incomplete column: `is_incomplete` and status ∈ nudge client / nudge vendor / ongoing delivery / invoice due. */
   incomplete: number;
 }
 
@@ -69,4 +69,22 @@ export interface SpecialDate {
   date: string; // YYYY-MM-DD
   type: "birthday" | "anniversary";
   queendom: "ananyshree" | "anishqa";
+}
+
+// ─── Shared structural types ──────────────────────────────────────────────────
+
+/** Standard envelope for all data hooks — UI components check loading/error before rendering data. */
+export interface HookResult<T> {
+  data: T | null;
+  loading: boolean;
+  error: string | null;
+  lastUpdated: Date | null;
+}
+
+/** Shared shape for entries in both concierge (agentRoster.ts) and onboarding (onboardingAgents.ts) rosters. */
+export interface AgentRosterEntry {
+  id: string;
+  displayName: string;
+  queendom?: "ananyshree" | "anishqa";
+  portrait?: string;
 }

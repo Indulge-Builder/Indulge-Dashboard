@@ -32,14 +32,14 @@ export type Department = "concierge" | "shop";
  */
 export type PipelineStatus =
   | "New"
-  | "Attempted"
+  | "Touched"
   | "In Discussion"
   | "Won"
   | "Lost";
 
 export const PIPELINE_STATUSES: readonly PipelineStatus[] = [
   "New",
-  "Attempted",
+  "Touched",
   "In Discussion",
   "Won",
   "Lost",
@@ -51,7 +51,7 @@ export const PIPELINE_STATUSES: readonly PipelineStatus[] = [
  */
 export interface PipelineStatusCounts {
   New: number;
-  Attempted: number;
+  Touched: number;
   "In Discussion": number;
   Won: number;
   Lost: number;
@@ -59,7 +59,7 @@ export interface PipelineStatusCounts {
 
 export const EMPTY_PIPELINE: PipelineStatusCounts = {
   New: 0,
-  Attempted: 0,
+  Touched: 0,
   "In Discussion": 0,
   Won: 0,
   Lost: 0,
@@ -129,7 +129,7 @@ export interface OnboardingAgentRow {
 
   /**
    * Per-agent lead pipeline breakdown by funnel stage.
-   * Optional — derived from totalAttempted / totalConverted as fallback
+   * Optional — derived from leadsCreatedThisMonth / totalConverted as fallback
    * until the API route is updated to provide per-agent pipeline counts.
    */
   pipeline?: PipelineStatusCounts;
@@ -184,7 +184,7 @@ export const BUSINESS_VERTICALS: readonly BusinessVertical[] = [
  * `conciergeLeads`  — new leads (created_at) where getAgentDepartment() === "concierge"
  * `shopLeads`       — new leads (created_at) where getAgentDepartment() === "shop"
  *
- * Both counts include ALL statuses (not just "Attempted") because the chart
+ * Both counts include ALL statuses (not just one funnel stage) because the chart
  * shows raw daily volume, not funnel stage.
  * Points are ordered oldest → newest so the SVG path draws left-to-right.
  */
@@ -214,7 +214,7 @@ export interface VerticalTrendPoint {
 /** The 6 Zoho lead statuses relevant to the onboarding pipeline */
 export type ZohoLeadStatus =
   | "New"
-  | "Attempted"
+  | "Touched"
   | "In Discussion"
   | "Nurturing"
   | "Junk"
@@ -223,7 +223,7 @@ export type ZohoLeadStatus =
 /** Per-status count for one agent */
 export interface AgentLeadStatusBreakdown {
   New: number;
-  Attempted: number;
+  Touched: number;
   "In Discussion": number;
   Nurturing: number;
   Junk: number;
@@ -233,7 +233,7 @@ export interface AgentLeadStatusBreakdown {
 
 export const EMPTY_BREAKDOWN: AgentLeadStatusBreakdown = {
   New: 0,
-  Attempted: 0,
+  Touched: 0,
   "In Discussion": 0,
   Nurturing: 0,
   Junk: 0,
@@ -283,7 +283,7 @@ export interface PerformanceTotals {
  *
  *   leads               — total rows where created_at falls in this IST month
  *                         (system agents excluded)
- *   attended            — rows where latest_status IN (New | Attempted | In Discussion)
+ *   attended            — rows where latest_status IN (New | Touched | In Discussion)
  *   dealsClosedThisMonth — count of rows in the deals table this IST month
  *   junk                — all remaining rows (Nurturing, Junk, Lost, Trash, unknown…)
  */

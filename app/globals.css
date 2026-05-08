@@ -91,6 +91,11 @@
   --text-ob-metric-sub: clamp(1.35rem, min(3.6vmin, 4.1vh), 2.55rem);
   --text-ob-ledger-hdr: clamp(1.25rem, min(2.85vmin, 3.3vh), 2.4rem);
   --text-ob-ledger-cell: clamp(1.3rem, min(2.8vmin, 3.4vh), 3.6rem);
+  /* Ledger compact scale (ConversionLedger column headers + cells) — single source for these JS constants */
+  --text-ledger-header: clamp(1.05rem, min(2.35vmin, 2.85vh), 2.05rem);
+  --text-ledger-cell: clamp(1.15rem, min(2.65vmin, 3.25vh), 3.5rem);
+  /* Department column heading (DepartmentColumn, OnboardingLayout) */
+  --text-dept-heading: clamp(1.25rem, min(2.8vmin, 3.3vh), 3.2rem);
 
   /* Finance widget */
   --text-fin-cell: clamp(1.725rem, min(3.975vmin, 4.875vh), 5.25rem);

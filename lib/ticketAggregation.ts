@@ -26,6 +26,18 @@ const TERMINAL_STATUSES = new Set(["resolved", "closed"]);
 const isTerminal = (s: string | null): boolean =>
   TERMINAL_STATUSES.has((s ?? "").toLowerCase().trim());
 
+/** Pending statuses where `is_incomplete` feeds the agent leaderboard incomplete column. */
+const INCOMPLETE_SCORE_STATUSES = new Set([
+  "nudge client",
+  "nudge vendor",
+  "ongoing delivery",
+  "invoice due",
+]);
+
+export function isIncompleteScoreStatus(s: string | null): boolean {
+  return INCOMPLETE_SCORE_STATUSES.has((s ?? "").toLowerCase().trim());
+}
+
 export interface TicketRowMinimal {
   id: string;
   status: string | null;
@@ -179,7 +191,9 @@ function calcAgent(
   ).length;
   const incomplete = rows.filter(
     (t) =>
-      t.agent_name?.toLowerCase() === nameLower && t.is_incomplete === true,
+      t.agent_name?.toLowerCase() === nameLower &&
+      isIncompleteScoreStatus(t.status) &&
+      t.is_incomplete === true,
   ).length;
 
   return {
