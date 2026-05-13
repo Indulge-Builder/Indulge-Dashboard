@@ -49,7 +49,8 @@ export function assertWebhookSecret(req: NextRequest): NextResponse | null {
 
   const token =
     req.headers.get("x-webhook-secret") ??
-    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
+    req.nextUrl.searchParams.get("secret");
 
   if (!token || !secretsEqual(token, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
