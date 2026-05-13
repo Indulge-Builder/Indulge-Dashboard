@@ -387,7 +387,7 @@ export async function GET() {
     let lmsAttended = 0;
     for (const row of allRawLeadsThisMonth) {
       const s = normalizeLeadStatus(String(row.latest_status ?? ""));
-      if (s === "New" || s === "Touched" || s === "In Discussion") lmsAttended++;
+      if (s === "Touched" || s === "In Discussion" || s === "Nurturing") lmsAttended++;
     }
 
     let dealsThisMonth = 0;
@@ -402,11 +402,17 @@ export async function GET() {
       console.warn("[/api/onboarding] deals count query failed — converted zeroed", e);
     }
 
+    let lmsJunk = 0;
+    for (const row of allRawLeadsThisMonth) {
+      const s = normalizeLeadStatus(String(row.latest_status ?? ""));
+      if (s === "Junk") lmsJunk++;
+    }
+
     const leadMonthStats: LeadMonthStats = {
       leads:                allRawLeadsThisMonth.length,
       attended:             lmsAttended,
       dealsClosedThisMonth: dealsThisMonth,
-      junk:                 Math.max(0, allRawLeadsThisMonth.length - lmsAttended - dealsThisMonth),
+      junk:                 lmsJunk,
     };
 
     // ── 4. Closure rows — THIS MONTH (IST cohort) from deals table ──────────
