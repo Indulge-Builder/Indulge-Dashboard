@@ -290,6 +290,11 @@ export async function POST(req: NextRequest) {
   }
 
   const createdIso = parseWebhookInstant(ticket_created_at);
+  console.info("[freshdesk webhook] ticket_created_at raw vs parsed", {
+    ticket_id: ticketIdStr,
+    raw: ticket_created_at ?? "(absent)",
+    parsed: createdIso ?? "(null)",
+  });
   if (createdIso) {
     row.created_at = createdIso;
   }
