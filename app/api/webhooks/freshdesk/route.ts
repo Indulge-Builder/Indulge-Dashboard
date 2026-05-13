@@ -137,9 +137,6 @@ export async function POST(req: NextRequest) {
   // ── Parse body ─────────────────────────────────────────────────────────────
   let rawBody = await req.text();
 
-  // Temporary: log full raw payload to diagnose timestamp format from Freshdesk.
-  console.error("[freshdesk webhook] RAW BODY:", rawBody.slice(0, 1000));
-
   // Freshdesk sometimes sends "is_escalated": \n} (empty value) when the
   // variable is unset — invalid JSON. Fix before parsing.
   rawBody = rawBody.replace(
@@ -293,11 +290,6 @@ export async function POST(req: NextRequest) {
   }
 
   const createdIso = parseWebhookInstant(ticket_created_at);
-  console.info("[freshdesk webhook] ticket_created_at raw vs parsed", {
-    ticket_id: ticketIdStr,
-    raw: ticket_created_at ?? "(absent)",
-    parsed: createdIso ?? "(null)",
-  });
   if (createdIso) {
     row.created_at = createdIso;
   }

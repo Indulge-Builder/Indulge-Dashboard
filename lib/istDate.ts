@@ -70,8 +70,11 @@ export function utcMillisFromDbTimestamp(
     return null;
   }
 
-  // "+HH" short offset at end → "+HH:00" (e.g. Freshdesk "+00")
+  // Normalise non-standard offsets at end of string:
+  //   "+HHMM"  (e.g. Freshdesk "+0530") → "+HH:MM"
+  //   "+HH"    (e.g. Freshdesk "+00")   → "+HH:00"
   if (s.includes("T")) {
+    s = s.replace(/([+-])(\d{2})(\d{2})$/, "$1$2:$3");
     s = s.replace(/([+-]\d{2})$/, "$1:00");
   }
 

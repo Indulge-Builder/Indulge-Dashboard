@@ -14,7 +14,7 @@ const csv = require("csv-parser");
 const { createClient } = require("@supabase/supabase-js");
 
 const BATCH_SIZE = 100;
-const CSV_FILE = path.join(__dirname, "last 30 - last 30.csv");
+const CSV_FILE = path.join(__dirname, "tickets.csv");
 
 function pick(row, ...names) {
   for (const n of names) {
@@ -45,7 +45,10 @@ function utcMillisFromExportTimestamp(str) {
     const rest = s.slice(s.indexOf("T") + 1);
     if (rest && !/[zZ]|[+-]\d/.test(rest)) s = `${s}+05:30`;
   } else return null;
-  if (s.includes("T")) s = s.replace(/([+-]\d{2})$/, "$1:00");
+  if (s.includes("T")) {
+    s = s.replace(/([+-])(\d{2})(\d{2})$/, "$1$2:$3");
+    s = s.replace(/([+-]\d{2})$/, "$1:00");
+  }
   const t = new Date(s).getTime();
   return Number.isNaN(t) ? null : t;
 }
@@ -94,8 +97,13 @@ function transformRow(row) {
   const resolvedRaw = pick(row, "resolved_at", "Resolved time");
   const resolved_at = normalizeResolvedAt(resolvedRaw);
 
+  // Freshdesk export uses a "Tags" column; "Is escalated" column doesn't exist.
+  // Derive is_escalated from the overdue_sync tag, same as scripts/importTickets.ts.
+  const tagsRaw = (pick(row, "tags", "Tags") || "").trim();
   const escalatedRaw = pick(row, "is_escalated", "Is escalated");
-  const is_escalated = normalizeIsEscalated(escalatedRaw);
+  const is_escalated = tagsRaw.includes("overdue_sync")
+    ? true
+    : normalizeIsEscalated(escalatedRaw);
 
   return {
     ticket_id,
