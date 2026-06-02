@@ -15,6 +15,7 @@
  */
 
 import { useEffect } from "react";
+import { stepActiveScreen } from "@/lib/dashboardScreens";
 import type { ActiveScreen } from "@/types";
 
 type ScreenDispatch = (updater: (s: ActiveScreen) => ActiveScreen) => void;
@@ -43,7 +44,8 @@ export function useKeyboardControls(
       }
       if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
       e.preventDefault();
-      setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
+      const delta = e.key === "ArrowRight" ? 1 : -1;
+      setActiveScreen((s) => stepActiveScreen(s, delta === 1 ? 1 : -1));
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);

@@ -69,6 +69,8 @@ export interface SpecialDate {
   date: string; // YYYY-MM-DD
   type: "birthday" | "anniversary";
   queendom: "ananyshree" | "anishqa";
+  /** Expired membership — muted styling on the Special Dates card */
+  isExpired?: boolean;
 }
 
 // ─── Shared structural types ──────────────────────────────────────────────────

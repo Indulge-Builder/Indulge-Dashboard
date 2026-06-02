@@ -4,19 +4,20 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import QueendomPanel from "./QueendomPanel";
 import OnboardingLayout from "./onboarding/OnboardingLayout";
+import HomePanel from "./HomePanel";
 import QueendomSkeleton from "./skeletons/QueendomSkeleton";
 import OnboardingSkeleton from "./skeletons/OnboardingSkeleton";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
+import {
+  HOME_PANEL_ENABLED,
+  SCREEN_DURATIONS_MS,
+  nextActiveScreen,
+} from "@/lib/dashboardScreens";
 import type { QueenStats } from "@/lib/types";
 import type { ActiveScreen, RenewalsPanelData } from "@/types";
 
 export type { ActiveScreen };
-
-const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
-  concierge: 30_000,
-  onboarding: 30_000,
-};
 
 const fadeTransition = { duration: 1.5, ease: "easeInOut" as const };
 
@@ -55,7 +56,7 @@ export default function DashboardController({
   useEffect(() => {
     if (isFrozen) return;
     const timeoutId = window.setTimeout(() => {
-      setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"));
+      setActiveScreen((s) => nextActiveScreen(s));
     }, SCREEN_DURATIONS_MS[activeScreen]);
     return () => window.clearTimeout(timeoutId);
   }, [activeScreen, isFrozen]);
@@ -205,6 +206,25 @@ export default function DashboardController({
           </AnimatePresence>
         </div>
       </motion.div>
+
+      {HOME_PANEL_ENABLED && (
+        <motion.div
+          className="absolute inset-0 h-full w-full"
+          style={{ pointerEvents: activeScreen === "home" ? "auto" : "none" }}
+          initial={false}
+          animate={{
+            opacity: activeScreen === "home" ? 1 : 0,
+            zIndex: activeScreen === "home" ? 10 : 0,
+          }}
+          transition={fadeTransition}
+        >
+          <div className="relative flex min-h-0 h-full w-full min-w-0 flex-col">
+            <ErrorBoundary label="Home" fillParent>
+              <HomePanel />
+            </ErrorBoundary>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

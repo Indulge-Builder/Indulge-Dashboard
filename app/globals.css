@@ -609,3 +609,33 @@ body::before {
 .ob-metric-flash {
   animation: ob-metric-pulse 0.55s ease-out forwards;
 }
+
+/* ── HomePanel — react-clock luxury overrides ────────────────────────────────
+   Scoped to .home-panel-clock so these rules never bleed into other panels.
+   The wrapper div carries this class; react-clock mounts inside it.
+   GPU law: no box-shadow or color tweens — all static, no animation here.
+   ────────────────────────────────────────────────────────────────────────── */
+.home-panel-clock .react-clock {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.home-panel-clock .react-clock__face {
+  border-color: rgba(212, 175, 55, 0.35) !important;
+  background-color: rgba(10, 10, 10, 0.92) !important;
+}
+
+.home-panel-clock .react-clock__mark__body {
+  background-color: rgba(212, 175, 55, 0.4) !important;
+}
+
+/* Hour + minute hands — antique gold */
+.home-panel-clock .react-clock__hour-hand__body,
+.home-panel-clock .react-clock__minute-hand__body {
+  background-color: #d4af37 !important;
+}
+
+/* Second hand — gold-bright for contrast */
+.home-panel-clock .react-clock__second-hand__body {
+  background-color: #f9e27e !important;
+}

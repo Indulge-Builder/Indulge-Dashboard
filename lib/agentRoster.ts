@@ -17,9 +17,7 @@ export const ROSTER_ANISHQA: string[] = [
 
 export const ROSTER_ANANYSHREE: string[] = [
   "Sanika Ahire",
-  "Ragadh Shahul",
-  "Aditya Sonde",
-  "Shaurya Verma",
+  "Sakshi Bhutkar",
   "Poorti Gulati",
   "Anshika Eark",
   "Ajith Sajan",

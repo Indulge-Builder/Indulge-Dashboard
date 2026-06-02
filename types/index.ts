@@ -64,10 +64,10 @@ export interface JokerRecommendationItem {
 export type QueendomId = "ananyshree" | "anishqa";
 
 /**
- * The two screens DashboardController rotates between.
+ * The screens DashboardController rotates between.
  * Previously defined inline in DashboardController.tsx only.
  */
-export type ActiveScreen = "concierge" | "onboarding";
+export type ActiveScreen = "concierge" | "onboarding" | "home";
 
 /**
  * Data returned by GET /api/renewals-panel.
