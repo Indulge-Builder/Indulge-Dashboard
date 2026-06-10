@@ -12,8 +12,8 @@ export const ACTIVE_SCREEN_ORDER: ActiveScreen[] = HOME_PANEL_ENABLED
   : ["concierge", "onboarding"];
 
 export const SCREEN_DURATIONS_MS: Record<ActiveScreen, number> = {
-  concierge: 30_000,
-  onboarding: 30_000,
+  concierge: 50_000,
+  onboarding: 10_000,
   home: 30_000,
 };
 
