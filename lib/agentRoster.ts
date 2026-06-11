@@ -13,6 +13,7 @@ export const ROSTER_ANISHQA: string[] = [
   "Rupali Chodankar",
   "Eeti Srinivsulu",
   "Ekta Nihalani",
+  "Rutika Kale",
 ];
 
 export const ROSTER_ANANYSHREE: string[] = [
