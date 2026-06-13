@@ -10,19 +10,26 @@ import AnimatedCounter from "./AnimatedCounter";
 const pillBase =
   "flex min-w-0 max-w-full flex-wrap items-center gap-x-[clamp(1rem,1.2vw,2.25rem)] gap-y-2 rounded-full border border-gold-500/20 bg-black/40 px-[clamp(1.25rem,1.5vw,2.75rem)] py-[clamp(0.875rem,1.3vh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
 
+// Stacked variant: a softer rounded card (not a full pill) so the two-line
+// block reads as one intentional unit rather than a squashed pill.
+const stackedPillBase =
+  "flex min-w-0 max-w-full flex-col gap-y-[clamp(0.5rem,0.9vh,1.1rem)] rounded-[clamp(1.5rem,2vw,2.75rem)] border border-gold-500/20 bg-black/40 px-[clamp(1.5rem,1.7vw,3rem)] py-[clamp(0.875rem,1.3vh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
+
 function MetricPill({
   children,
   delaySec,
   slideFrom,
+  stacked = false,
 }: {
   children: ReactNode;
   delaySec: number;
   slideFrom: "left" | "right";
+  stacked?: boolean;
 }) {
   const xInit = slideFrom === "left" ? -12 : 12;
   return (
     <motion.div
-      className={pillBase}
+      className={stacked ? stackedPillBase : pillBase}
       initial={{ opacity: 0, x: xInit }}
       animate={{ opacity: 1, x: 0 }}
       transition={{
@@ -55,6 +62,8 @@ interface QueendomWingspanHeaderProps {
   name: string;
   membersTotal: number;
   complimentaryCount: number;
+  /** Clients whose latest_subscription_status is Expired (To Be Revived pill). */
+  toBeRevivedCount: number;
   /** Base delay in ms for AnimatedCounter entrance stagger */
   delayMs: number;
 }
@@ -63,10 +72,12 @@ export default function QueendomWingspanHeader({
   name,
   membersTotal,
   complimentaryCount,
+  toBeRevivedCount,
   delayMs,
 }: QueendomWingspanHeaderProps) {
   const leftDelay = delayMs + 400;
   const rightDelay = delayMs + 520;
+  const revivedDelay = delayMs + 640;
   const delayLeftSec = delayMs / 1000;
   const delayRightSec = delayMs / 1000 + 0.04;
 
@@ -91,16 +102,31 @@ export default function QueendomWingspanHeader({
           {name}
         </h2>
 
-        {/* Right metric — hug center (start-aligned in column) */}
+        {/* Right metric — Celebrity over To Be Revived in one stacked pill */}
         <div className="flex min-w-0 justify-start justify-self-stretch pl-1 sm:pl-2">
-          <MetricPill delaySec={delayRightSec} slideFrom="right">
-            <span className={`${metricLabelClass} text-champagne`}>Celebrity</span>
-            <AnimatedCounter
-              value={complimentaryCount}
-              className={unpaidNumberClass}
-              delay={rightDelay}
-              slideOnChange
+          <MetricPill delaySec={delayRightSec} slideFrom="right" stacked>
+            <div className="flex min-w-0 items-center justify-between gap-x-[clamp(1rem,1.2vw,2.25rem)]">
+              <span className={`${metricLabelClass} text-champagne`}>Celebrity</span>
+              <AnimatedCounter
+                value={complimentaryCount}
+                className={unpaidNumberClass}
+                delay={rightDelay}
+                slideOnChange
+              />
+            </div>
+            <div
+              aria-hidden
+              className="h-px w-full bg-gradient-to-r from-transparent via-gold-500/30 to-transparent"
             />
+            <div className="flex min-w-0 items-center justify-between gap-x-[clamp(1rem,1.2vw,2.25rem)]">
+              <span className={`${metricLabelClass} text-champagne`}>To Be Revived</span>
+              <AnimatedCounter
+                value={toBeRevivedCount}
+                className={unpaidNumberClass}
+                delay={revivedDelay}
+                slideOnChange
+              />
+            </div>
           </MetricPill>
         </div>
       </div>

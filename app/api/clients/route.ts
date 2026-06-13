@@ -12,6 +12,7 @@ interface ClientRow {
 interface QueenBucket {
   total: number;
   celebrityActive: number;
+  toBeRevived: number;
 }
 
 interface AggregatedStats {
@@ -43,19 +44,26 @@ function isPaidMembership(type: string | null | undefined): boolean {
 }
 
 // ─── Aggregation ──────────────────────────────────────────────────────────────
-// All rows are pre-filtered to latest_subscription_status = Active.
-// total: paid — membership is Premium, Genie, Monthly Trial, or Standard.
-// celebrityActive: membership = Celebrity (unpaid / complimentary pill).
+// total / celebrityActive count only Active rows; toBeRevived counts Expired rows.
+// total: Active paid — membership is Premium, Genie, Monthly Trial, or Standard.
+// celebrityActive: Active Celebrity membership (unpaid / complimentary pill).
+// toBeRevived: latest_subscription_status = Expired (any membership tier).
 function aggregate(rows: ClientRow[]): AggregatedStats {
   const result: AggregatedStats = {
-    ananyshree: { total: 0, celebrityActive: 0 },
-    anishqa: { total: 0, celebrityActive: 0 },
+    ananyshree: { total: 0, celebrityActive: 0, toBeRevived: 0 },
+    anishqa: { total: 0, celebrityActive: 0, toBeRevived: 0 },
   };
 
   for (const row of rows) {
     const queendom = normalizeQueendom(row.group);
     if (!queendom) continue;
     const bucket: QueenBucket = result[queendom];
+
+    if (row.latest_subscription_status === "Expired") {
+      bucket.toBeRevived++;
+      continue;
+    }
+    if (row.latest_subscription_status !== "Active") continue;
 
     const tier = row.latest_subscription_membership_type;
     if (isCelebrityMembership(tier)) {
@@ -75,7 +83,7 @@ export const GET = withApiGuard(async (_req, db) => {
   const { data, error } = await db
     .from("clients")
     .select("group, latest_subscription_status, latest_subscription_membership_type")
-    .eq("latest_subscription_status", "Active");
+    .in("latest_subscription_status", ["Active", "Expired"]);
 
   if (error) {
     console.error("[/api/clients] Supabase error:", error.message);

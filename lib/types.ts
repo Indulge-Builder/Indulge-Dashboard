@@ -3,6 +3,8 @@ export interface MemberStats {
   total: number;
   /** Active Celebrity-tier clients in this Queendom (complimentary / unpaid pill). */
   celebrityActive: number;
+  /** Clients whose latest_subscription_status is Expired (To Be Revived pill). */
+  toBeRevived: number;
 }
 
 export interface TicketStats {

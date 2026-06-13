@@ -181,6 +181,7 @@ export default function QueendomPanel({
           name={name}
           membersTotal={safeNum(stats.members.total)}
           complimentaryCount={safeNum(stats.members.celebrityActive)}
+          toBeRevivedCount={safeNum(stats.members.toBeRevived)}
           delayMs={delay}
         />
 

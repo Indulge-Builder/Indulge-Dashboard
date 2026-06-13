@@ -34,7 +34,7 @@ import type { OverdueTicketItem, RenewalsPanelData, MemberApiResponse } from "@/
 // ─── Zero initial state ───────────────────────────────────────────────────────
 // All counters animate up from 0 on first load — this is intentional UX.
 
-const ZERO_MEMBERS: MemberStats = { total: 0, celebrityActive: 0 };
+const ZERO_MEMBERS: MemberStats = { total: 0, celebrityActive: 0, toBeRevived: 0 };
 
 const ZERO_TICKETS: TicketStats = {
   totalReceived: 0,
