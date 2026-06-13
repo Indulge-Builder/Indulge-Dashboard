@@ -329,8 +329,8 @@ export default function QueendomPanel({
               <SectionDivider
                 label="Special Dates"
                 accent="champagne"
-                className="mb-[2vh] w-full flex-shrink-0 gap-4 px-1 sm:px-2"
-                labelClass="!font-inter !font-semibold text-[clamp(1.5rem,2.2vw,2.6rem)] tracking-[0.42em]"
+                className="mb-[2vh] w-full flex-shrink-0 gap-3 px-1 sm:px-2"
+                labelClass="!font-inter !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9vw,2.3rem)] whitespace-nowrap"
               />
               <div className="flex min-h-0 flex-1 flex-col">
                 <SpecialDates

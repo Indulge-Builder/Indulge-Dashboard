@@ -119,9 +119,9 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               }
             >
               <>
-                <div className="flex items-center justify-center leading-none flex-shrink-0">
+                <div className="flex items-center justify-center flex-shrink-0">
                   <span
-                    className={`font-edu font-bold text-[clamp(2.25rem,4.4vw,3.4rem)] tabular-nums ${
+                    className={`font-edu font-bold text-[clamp(2rem,4vw,3.1rem)] leading-[1.1] tabular-nums ${
                       isExpired ? "text-stone-400/80" : "text-champagne/95"
                     }`}
                   >
@@ -150,7 +150,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                     />
                   )}
                   <span
-                    className={`font-baskerville font-semibold text-[clamp(1.4rem,2.45vw,2.4rem)] truncate text-center leading-tight ${
+                    className={`font-baskerville font-semibold text-[clamp(1.25rem,2.2vw,2.2rem)] text-center leading-tight line-clamp-2 break-words ${
                       isExpired ? "text-stone-400/75" : "text-champagne/90"
                     }`}
                   >
