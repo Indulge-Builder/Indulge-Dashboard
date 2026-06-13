@@ -105,7 +105,7 @@ export default function QueendomWingspanHeader({
         {/* Right metric — Celebrity over To Be Revived in one stacked pill */}
         <div className="flex min-w-0 justify-start justify-self-stretch pl-1 sm:pl-2">
           <MetricPill delaySec={delayRightSec} slideFrom="right" stacked>
-            <div className="flex min-w-0 items-center justify-between gap-x-[clamp(1rem,1.2vw,2.25rem)]">
+            <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2vw,2.25rem)]">
               <span className={`${metricLabelClass} text-champagne`}>Celebrity</span>
               <AnimatedCounter
                 value={complimentaryCount}
@@ -118,7 +118,7 @@ export default function QueendomWingspanHeader({
               aria-hidden
               className="h-px w-full bg-gradient-to-r from-transparent via-gold-500/30 to-transparent"
             />
-            <div className="flex min-w-0 items-center justify-between gap-x-[clamp(1rem,1.2vw,2.25rem)]">
+            <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2vw,2.25rem)]">
               <span className={`${metricLabelClass} text-champagne`}>To Be Revived</span>
               <AnimatedCounter
                 value={toBeRevivedCount}
