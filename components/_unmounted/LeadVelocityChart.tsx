@@ -12,7 +12,18 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import type { TeamAttendedDay } from "@/lib/onboardingTypes";
+
+/**
+ * Team-level daily "attended" counts for the velocity chart.
+ * Defined locally: the server-side pipeline that produced this shape
+ * (leadTrendline / teamAttendedTrend in /api/onboarding) was removed when this
+ * chart was unmounted. Rebuild that pipeline if this chart is re-mounted.
+ */
+export interface TeamAttendedDay {
+  date: string; // "YYYY-MM-DD" in IST
+  onboarding: number; // sum of non-New leads for onboarding agents that day
+  shop: number; // sum of non-New leads for shop agents that day
+}
 
 // ── SVG coordinate system ─────────────────────────────────────────────────────
 //

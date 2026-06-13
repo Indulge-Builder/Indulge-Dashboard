@@ -217,7 +217,6 @@ function zeroedAgent(
     totalConverted:        0,
     leadsCreatedTodayIst:  0,
     leadsThisMonth:        0,
-    closedLakhsThisMonth:  0,
   } as const;
 }
 

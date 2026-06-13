@@ -2,28 +2,48 @@
  * lib/apiGuard.ts
  *
  * Standard wrapper for all GET API route handlers.
- * Provides: 503 guard, structured error responses.
+ * Provides: 503 guard, catch-all error response, and the no-store JSON helper.
  *
  * Usage:
  *   export const GET = withApiGuard(async (_req, db) => {
  *     const { data } = await db.from("tickets").select("id, status");
- *     return NextResponse.json(data);
+ *     return noStoreJson(data);
  *   });
+ *
+ * Routes that must degrade to an empty 200 payload instead of a 503 when the
+ * DB is unconfigured (TV-resilience routes) pass `noDbResponse`:
+ *   export const GET = withApiGuard(handler, { noDbResponse: () => noStoreJson(EMPTY) });
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "./supabaseAdmin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-type ApiHandler = (req: Request, db: SupabaseClient) => Promise<NextResponse>;
+/** JSON response with the live-dashboard cache policy — never cache. */
+export function noStoreJson(data: unknown, init?: { status?: number }): NextResponse {
+  return NextResponse.json(data, {
+    status: init?.status ?? 200,
+    headers: { "Cache-Control": "no-store" },
+  });
+}
 
-export function withApiGuard(handler: ApiHandler) {
-  return async (req: Request): Promise<NextResponse> => {
+type ApiHandler = (req: NextRequest, db: SupabaseClient) => Promise<NextResponse>;
+
+interface ApiGuardOptions {
+  /** Response when SUPABASE_SERVICE_ROLE_KEY is missing (default: 503). */
+  noDbResponse?: () => NextResponse;
+}
+
+export function withApiGuard(handler: ApiHandler, opts?: ApiGuardOptions) {
+  return async (req: NextRequest): Promise<NextResponse> => {
     const db = supabaseAdmin;
     if (!db) {
-      return NextResponse.json(
-        { error: "Database not configured" },
-        { status: 503 },
+      return (
+        opts?.noDbResponse?.() ??
+        NextResponse.json(
+          { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
+          { status: 503 },
+        )
       );
     }
     try {

@@ -50,6 +50,21 @@ export default function RootLayout({
       lang="en"
       className={`${cinzel.variable} ${inter.variable} ${libreBaskerville.variable} ${montserrat.variable}`}
     >
+      <head>
+        {/* "Edu AU VIC WA NT Hand Arrows" is not in next/font's catalog, so it
+            loads from Google Fonts — preconnected and as a parallel <link>
+            instead of the former render-blocking @import in globals.css. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Hand+Arrows:wght@400..700&display=swap"
+        />
+      </head>
       <body
         className="bg-obsidian text-champagne overflow-hidden antialiased"
         suppressHydrationWarning

@@ -1,88 +1,44 @@
 "use client";
 
 import { memo, useState, useCallback } from "react";
-import {
-  Utensils,
-  MapPin,
-  Bed,
-  Leaf,
-  Star,
-  type LucideIcon,
-} from "lucide-react";
-import type { JokerRecommendationItem } from "@/types";
+import { AlertTriangle } from "lucide-react";
+import type { OverdueTicketItem } from "@/types";
 
-// ── Map jokers.type (string) to Lucide icon ─────────────────────────────────
-// Keys are normalized at lookup time (lowercase, spaces stripped).
-const TYPE_ICON_MAP: Record<string, LucideIcon> = {
-  restaurant: Utensils,
-  hotel: Bed,
-  travel: MapPin,
-  spa: Leaf,
-  experience: Star,
-  default: Star,
-};
+const TICKER_DURATION_S = 40; // seconds for one 3×-list half-cycle — slow, calm scroll
 
-// ── Type-based color coding (icon, border) — bright for 15ft visibility ───────
-// Keys are normalized at lookup time (lowercase, spaces stripped) so singular
-// and plural forms both resolve correctly via getColorsForType / getIconForType.
-const TYPE_COLORS: Record<string, { icon: string; border: string }> = {
-  restaurant: {
-    icon: "#F5D76E",
-    border: "rgba(245, 215, 110, 0.6)",
-  },
-  travel: {
-    icon: "#5DADE2",
-    border: "rgba(93, 173, 226, 0.6)",
-  },
-  hotel: {
-    icon: "#BB8FCE",
-    border: "rgba(187, 143, 206, 0.6)",
-  },
-  spa: {
-    icon: "#58D68D",
-    border: "rgba(88, 214, 141, 0.6)",
-  },
-  experience: {
-    icon: "#F1948A",
-    border: "rgba(241, 148, 138, 0.6)",
-  },
-  default: {
-    icon: "#F1948A",
-    border: "rgba(241, 148, 138, 0.6)",
-  },
-};
+/**
+ * The loop animation slides the track by -50%, so the track must be two
+ * identical halves. Each half needs enough items to span the widest TV
+ * viewport (4K) — but no more: every extra copy inflates the always-animating
+ * compositor layer that old TV GPUs pay for on every frame.
+ *
+ * MIN_ITEMS_PER_HALF (10) comfortably exceeds 4K width at this item size.
+ * The scroll duration scales with the repeat count so px/s speed is identical
+ * to the original 3×-list / 40s tuning for any list length.
+ */
+const MIN_ITEMS_PER_HALF = 10;
 
-function getIconForType(type: string): LucideIcon {
-  const key = type.toLowerCase().trim().replace(/\s+/g, "");
-  return TYPE_ICON_MAP[key] ?? TYPE_ICON_MAP.default;
+function repeatsPerHalf(count: number): number {
+  if (count === 0) return 0;
+  return Math.max(1, Math.ceil(MIN_ITEMS_PER_HALF / count));
 }
 
-function getColorsForType(type: string) {
-  const key = type.toLowerCase().trim().replace(/\s+/g, "");
-  return TYPE_COLORS[key] ?? TYPE_COLORS.default;
-}
-
-const TICKER_DURATION_S = 40; // seconds for full cycle — slower, calmer scroll
-
-// ── Triple the array for seamless infinite scroll without gaps ───────────────
-function tripleList<T>(items: T[]): T[] {
-  if (items.length === 0) return [];
-  return [...items, ...items, ...items];
-}
+// Overdue red — bright enough for 15ft TV visibility.
+const OVERDUE_COLOR = "#F1948A";
+const OVERDUE_BORDER = "rgba(241, 148, 138, 0.6)";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Single ticker item — [CITY] | [TYPE]: [SUGGESTION]
-// Cinzel for CITY/TYPE, Sans-Serif for SUGGESTION. Memoized by suggestion text.
+// Single ticker item — ⚠ [SUBJECT] · #[TICKET ID] · [AGENT]
+// Memoized by ticket identity + display fields.
 // ─────────────────────────────────────────────────────────────────────────────
 function tickerItemPropsAreEqual(
-  prev: { item: JokerRecommendationItem; isLast: boolean },
-  next: { item: JokerRecommendationItem; isLast: boolean },
+  prev: { item: OverdueTicketItem; isLast: boolean },
+  next: { item: OverdueTicketItem; isLast: boolean },
 ) {
   return (
     prev.item.id === next.item.id &&
-    prev.item.suggestion === next.item.suggestion &&
-    prev.item.city === next.item.city &&
-    prev.item.type === next.item.type &&
+    prev.item.subject === next.item.subject &&
+    prev.item.agentName === next.item.agentName &&
     prev.isLast === next.isLast
   );
 }
@@ -91,36 +47,43 @@ const TickerItem = memo(function TickerItem({
   item,
   isLast,
 }: {
-  item: JokerRecommendationItem;
+  item: OverdueTicketItem;
   isLast: boolean;
 }) {
-  const Icon = getIconForType(item.type);
-  const colors = getColorsForType(item.type);
   return (
     <>
       <div className="ticker-item flex items-center gap-4 sm:gap-6 flex-shrink-0">
         <div
           className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
           style={{
-            border: `2px solid ${colors.border}`,
+            border: `2px solid ${OVERDUE_BORDER}`,
             background: "rgba(5, 5, 5, 0.85)",
           }}
         >
-          <Icon
+          <AlertTriangle
             className="w-8 h-8 sm:w-10 sm:h-10"
-            style={{ color: colors.icon }}
+            style={{ color: OVERDUE_COLOR }}
             strokeWidth={2.5}
           />
         </div>
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <span className="font-cinzel font-semibold text-[clamp(1.7rem,2.8vw,3.3rem)] text-white/95 tracking-wide whitespace-nowrap">
-            {item.city}
+          <span className="font-baskerville font-semibold text-[clamp(1.7rem,2.8vw,3.3rem)] tracking-wide text-champagne truncate max-w-[24ch] sm:max-w-[34ch]">
+            {item.subject}
           </span>
           <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1vw,2.5rem)]">
-            |
+            ·
           </span>
-          <span className="font-baskerville font-semibold text-[clamp(1.7rem,2.8vw,3.3rem)] tracking-wide text-champagne truncate max-w-[20ch] sm:max-w-[28ch]">
-            {item.suggestion}
+          <span
+            className="font-cinzel font-semibold text-[clamp(1.5rem,2.4vw,2.9rem)] tracking-wide whitespace-nowrap"
+            style={{ color: OVERDUE_COLOR }}
+          >
+            #{item.id}
+          </span>
+          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1vw,2.5rem)]">
+            ·
+          </span>
+          <span className="font-cinzel font-semibold text-[clamp(1.6rem,2.6vw,3.1rem)] text-white/95 tracking-wide whitespace-nowrap">
+            {item.agentName}
           </span>
         </div>
       </div>
@@ -135,22 +98,25 @@ const TickerItem = memo(function TickerItem({
 }, tickerItemPropsAreEqual);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Joker Recommendations Ticker — data from parent only; no fetch or Supabase
+// Overdue Ticker — escalated tickets only; data from parent (no fetch/Supabase)
 // ─────────────────────────────────────────────────────────────────────────────
-function RecommendationTickerInner({
-  recommendations,
+function OverdueTickerInner({
+  overdueTickets,
 }: {
-  recommendations: JokerRecommendationItem[];
+  overdueTickets: OverdueTicketItem[];
 }) {
   const [isPaused, setIsPaused] = useState(false);
-  const tripledList = tripleList(recommendations);
-  const doubledForScroll =
-    tripledList.length > 0 ? [...tripledList, ...tripledList] : [];
+  const repeats = repeatsPerHalf(overdueTickets.length);
+  const half: OverdueTicketItem[] = [];
+  for (let r = 0; r < repeats; r++) half.push(...overdueTickets);
+  const doubledForScroll = half.length > 0 ? [...half, ...half] : [];
+  // Same px/s as the original tuning (3 copies per half over 40s).
+  const durationS = (TICKER_DURATION_S * repeats) / 3;
 
   const handleMouseEnter = useCallback(() => setIsPaused(true), []);
   const handleMouseLeave = useCallback(() => setIsPaused(false), []);
 
-  if (recommendations.length === 0) {
+  if (overdueTickets.length === 0) {
     return (
       <div
         className="relative w-full flex-shrink-0 py-4 overflow-hidden"
@@ -161,7 +127,7 @@ function RecommendationTickerInner({
         }}
       >
         <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1.4rem,2vw,2.2rem)] tracking-widest uppercase">
-          Loading recommendations…
+          No overdue tickets
         </p>
       </div>
     );
@@ -170,15 +136,15 @@ function RecommendationTickerInner({
   return (
     <div
       role="region"
-      aria-label="Joker recommendations"
+      aria-label="Overdue tickets"
       aria-live="polite"
       className="relative w-full flex-shrink-0 overflow-hidden"
       style={{
         borderTop: "1px solid rgba(212, 175, 55, 0.2)",
         borderBottom: "1px solid rgba(212, 175, 55, 0.2)",
+        // No backdrop-filter: at 92% opaque over an almost-black screen the
+        // blur is invisible, but it forces a full-width GPU pass every frame.
         background: "rgba(5, 5, 5, 0.92)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -197,7 +163,7 @@ function RecommendationTickerInner({
           className={`ticker-track flex items-center ${isPaused ? "ticker-paused" : ""}`}
           style={{
             willChange: "transform",
-            animation: `ticker-scroll ${TICKER_DURATION_S}s linear infinite`,
+            animation: `ticker-scroll ${durationS}s linear infinite`,
           }}
         >
           {doubledForScroll.map((item, i) => (
@@ -213,7 +179,7 @@ function RecommendationTickerInner({
   );
 }
 
-const RecommendationTicker = memo(RecommendationTickerInner);
-RecommendationTicker.displayName = "RecommendationTicker";
+const OverdueTicker = memo(OverdueTickerInner);
+OverdueTicker.displayName = "OverdueTicker";
 
-export default RecommendationTicker;
+export default OverdueTicker;

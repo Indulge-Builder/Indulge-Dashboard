@@ -24,62 +24,18 @@
  */
 export type Department = "concierge" | "shop";
 
-// ── Pipeline ──────────────────────────────────────────────────────────────────
-
-/**
- * Ordered lead-lifecycle stages used in the Pipeline Bar Chart.
- * Order matches the expected funnel left → right.
- */
-export type PipelineStatus =
-  | "New"
-  | "Touched"
-  | "In Discussion"
-  | "Won"
-  | "Lost";
-
-export const PIPELINE_STATUSES: readonly PipelineStatus[] = [
-  "New",
-  "Touched",
-  "In Discussion",
-  "Won",
-  "Lost",
-] as const;
-
-/**
- * Count of leads at each funnel stage for a single department.
- * All values are non-negative integers; 0 when no leads at that stage.
- */
-export interface PipelineStatusCounts {
-  New: number;
-  Touched: number;
-  "In Discussion": number;
-  Won: number;
-  Lost: number;
-}
-
-export const EMPTY_PIPELINE: PipelineStatusCounts = {
-  New: 0,
-  Touched: 0,
-  "In Discussion": 0,
-  Won: 0,
-  Lost: 0,
-};
-
 // ── Per-department rollup ─────────────────────────────────────────────────────
+// (The old PipelineStatus/PipelineStatusCounts funnel system was collapsed in
+// dry-audit D6 — the UI renders ZohoLeadStatus breakdowns below; the only
+// funnel consumer is the parked _unmounted/AgentVerticalBarChart, which now
+// carries its own local copy.)
 
 /**
  * Aggregated scorecard for one department.
- * All monetary values are in Indian Rupees (raw numeric).
  * All date-bound metrics use This Month Cohort Math.
  */
 export interface DepartmentStats {
   department: Department;
-  /** Sum of deal amounts in onboarding_conversion_ledger this IST month (₹). */
-  totalRupeesClosedThisMonth: number;
-  /** Convenience: totalRupeesClosedThisMonth / 100_000 (pre-computed for display). */
-  totalLakhsClosedThisMonth: number;
-  /** Lead-status funnel counts for PipelineBar. */
-  pipeline: PipelineStatusCounts;
   /** Ordered agent cards belonging to this department. */
   agents: OnboardingAgentRow[];
 }
@@ -120,19 +76,6 @@ export interface OnboardingAgentRow {
    * Alias of leadsCreatedThisMonth — kept for any components that reference it.
    */
   leadsThisMonth?: number;
-
-  /**
-   * Sum of won deal amounts (₹) within the current IST calendar month (raw rupees).
-   * Populated by `/api/onboarding` for rollups; agent cards use `totalConverted` (count) only.
-   */
-  closedLakhsThisMonth?: number;
-
-  /**
-   * Per-agent lead pipeline breakdown by funnel stage.
-   * Optional — derived from leadsCreatedThisMonth / totalConverted as fallback
-   * until the API route is updated to provide per-agent pipeline counts.
-   */
-  pipeline?: PipelineStatusCounts;
 }
 
 // ── Ledger row ────────────────────────────────────────────────────────────────
@@ -142,11 +85,6 @@ export interface OnboardingLedgerRow {
   clientName: string;
   /** ISO 8601 UTC string from created_at/recorded_at column. */
   recordedAt: string;
-  /**
-   * @legacy Queendom name or empty string (pre-department era).
-   * Kept so existing mapLedgerRows() in route.ts compiles unchanged.
-   */
-  assignedTo: string;
   agentName: string;
   /**
    * Revenue department this deal belongs to.
@@ -176,24 +114,6 @@ export const BUSINESS_VERTICALS: readonly BusinessVertical[] = [
 ] as const;
 
 // ── Lead Trendline ────────────────────────────────────────────────────────────
-
-/**
- * A single data point in the 7–14 day lead-velocity chart.
- *
- * `date`            — IST calendar date string "YYYY-MM-DD" (X-axis label)
- * `conciergeLeads`  — new leads (created_at) where getAgentDepartment() === "concierge"
- * `shopLeads`       — new leads (created_at) where getAgentDepartment() === "shop"
- *
- * Both counts include ALL statuses (not just one funnel stage) because the chart
- * shows raw daily volume, not funnel stage.
- * Points are ordered oldest → newest so the SVG path draws left-to-right.
- */
-export interface LeadTrendPoint {
-  /** IST calendar date "YYYY-MM-DD" — used as unique key and X-axis label */
-  date: string;
-  conciergeLeads: number;
-  shopLeads: number;
-}
 
 /**
  * One data point in the 7-day vertical trendline chart.
@@ -244,37 +164,6 @@ export const EMPTY_BREAKDOWN: AgentLeadStatusBreakdown = {
 /** Map from canonical agent name → their status breakdown */
 export type LeadStatusByAgent = Record<string, AgentLeadStatusBreakdown>;
 
-/** Team-level daily "attended" counts for the velocity chart */
-export interface TeamAttendedDay {
-  date: string; // "YYYY-MM-DD" in IST
-  onboarding: number; // sum of non-New leads for onboarding agents that day
-  shop: number; // sum of non-New leads for shop agents that day
-}
-
-// ── Performance graph ─────────────────────────────────────────────────────────
-
-/**
- * One data point per IST calendar day for the PerformanceLineGraph.
- * Derived in OnboardingPanel by merging leadTrendline + teamAttendedTrend
- * + per-day conversion counts from the ledger.
- */
-export interface PerformanceDayPoint {
-  /** IST calendar date "YYYY-MM-DD" — X-axis key and label */
-  date: string;
-  onboarding: { leads: number; attended: number; converted: number };
-  shop:        { leads: number; attended: number; converted: number };
-}
-
-/**
- * Current-period aggregate totals used to calculate the Performance Score
- * for each team. Junk is sourced from leadStatusByAgent; the rest are summed
- * from the PerformanceDayPoint time series.
- */
-export interface PerformanceTotals {
-  onboarding: { leads: number; attended: number; converted: number; junk: number };
-  shop:       { leads: number; attended: number; converted: number; junk: number };
-}
-
 // ── Monthly lead stats (metric tiles) ────────────────────────────────────────
 
 /**
@@ -302,31 +191,20 @@ export interface LeadMonthStats {
  * `agents` and `ledger` are the legacy flat arrays (backward compat).
  * `departments` is the new dual-department rollup — absent from the current
  * route, populated after Step 3.
- * `leadTrendline` powers the Lead Velocity SVG chart — 14 daily data points.
  */
 export interface OnboardingApiPayload {
   agents: OnboardingAgentRow[];
   ledger: OnboardingLedgerRow[];
   /**
-   * Per-department aggregated stats + agent cards + pipeline.
+   * Per-department aggregated stats + agent cards.
    * Strict shape: once present, all inner fields are required and non-null.
    */
   departments?: {
     concierge: DepartmentStats;
     shop: DepartmentStats;
   };
-  /**
-   * Daily lead-touch counts for the last 14 IST calendar days (including today).
-   * Ordered oldest → newest. Empty array until the API route is updated.
-   * Both department counts can be 0 for days with no activity.
-   */
-  leadTrendline?: LeadTrendPoint[];
-
   /** Per-agent Zoho lead status breakdown for current IST month. */
   leadStatusByAgent?: LeadStatusByAgent;
-
-  /** Team-level daily "attended" (status != New) counts for last 14 IST days. */
-  teamAttendedTrend?: TeamAttendedDay[];
 
   /**
    * Daily new-lead counts split by business_vertical for the current IST calendar

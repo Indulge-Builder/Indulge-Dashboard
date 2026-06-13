@@ -46,8 +46,8 @@ Gold appears on: borders (`rgba(212,175,55,0.08–0.55)`), text glows (`.queen-n
 **Law 3 — Type lives on the `clamp()` scale.**
 Never use a fixed `px` font size for primary UI copy. Every font size is either a CSS variable (`--text-*`), a `clamp()` expression, or a Tailwind extended class (`text-8xl` etc., which are also `rem`-based). The root `html` font-size scales 1280→1920px, so `rem` values already adapt — clamps add the floor/ceiling needed for 4K screens.
 
-**Law 4 — Both screens are always mounted.**
-The concierge and onboarding views are never unmounted during auto-rotation. Only `opacity` and `zIndex` change. Do not add `AnimatePresence` unmounts to the top-level screen layers — it causes layout reflow and a visible flash as the component tree rebuilds.
+**Law 4 — All screen layers are always mounted.**
+The concierge, onboarding, and (when enabled) home views are never unmounted during auto-rotation. Only `opacity` and `zIndex` change. Do not add `AnimatePresence` unmounts to the top-level screen layers — it causes layout reflow and a visible flash as the component tree rebuilds.
 
 ### 1.3 Environment
 
@@ -57,6 +57,7 @@ The concierge and onboarding views are never unmounted during auto-rotation. Onl
 - **No scroll on TV:** `html, body { overflow: hidden }`. All panels must fit within viewport.
 - **Interaction:** PAUSE/RESUME key (`Space`, `P`, `Enter`, `NumpadEnter`, `MediaPlayPause`), `ArrowLeft`/`ArrowRight` screen switch — implemented in `hooks/useKeyboardControls.ts` (window capture phase). No hover states are relied upon for readability.
 - **Theme color:** `#050507` (viewport `themeColor` in `app/layout.tsx`).
+- **Screen rotation** (`lib/dashboardScreens.ts`): Concierge **60 s** → Onboarding **10 s** → (Home **30 s**, only when `NEXT_PUBLIC_HOME_PANEL_ENABLED=true`). Crossfade between screens is 1.5 s `easeInOut` opacity + zIndex swap (Law 4).
 
 ### 1.4 The Noise Overlay
 
@@ -520,6 +521,18 @@ All use `rgba(201, 168, 76, 0.032–0.065)` — barely visible gold warmth.
 | `.card-gradient-overlay` | Top-left gold highlight `linear-gradient(to bottom right, rgba(212,175,55,0.04), transparent)` |
 | `.joker-box` | `border: 1px solid rgba(249,226,126,0.35); background: --surface-joker gradient` |
 
+### 5.9 HomePanel Clock Overrides
+
+`react-clock` (HomePanel world clocks) is restyled via rules scoped to `.home-panel-clock` — they must never bleed into other panels. All static, no animation (GPU law).
+
+| Selector (inside `.home-panel-clock`) | Override |
+| ------------------------------------- | -------- |
+| `.react-clock` | `width/height: 100%` |
+| `.react-clock__face` | border `rgba(212,175,55,0.35)`, background `rgba(10,10,10,0.92)` (= `--surface-card`) |
+| `.react-clock__mark__body` | `rgba(212,175,55,0.4)` |
+| `.react-clock__hour-hand__body`, `.react-clock__minute-hand__body` | `#d4af37` (antique gold) |
+| `.react-clock__second-hand__body` | `#f9e27e` (gold-bright, for contrast) |
+
 ---
 
 ## 6. Component Library
@@ -619,6 +632,7 @@ Animates a numeric value from 0 (or previous value) to a new value. Used for all
 | `OnboardingLayout` | `components/onboarding/OnboardingLayout.tsx` | Revenue Dashboard (`useOnboardingPanelData`), 3-column grid | `h-full min-h-0 flex-1 overflow-hidden` |
 | `RecommendationTicker` | `components/RecommendationTicker.tsx` | Bottom dock horizontal ticker | `z-10`, CSS marquee `ticker-scroll` 40s |
 | `CelebrationOverlay` | `components/CelebrationOverlay.tsx` | Full-screen win overlay | `fixed inset-0 z-50`, 3s timeout |
+| `HomePanel` | `components/HomePanel.tsx` | Home screen (WIP, env-gated): 4 world clocks + daily quote | `h-full w-full min-h-0 overflow-hidden flex flex-col bg-obsidian` |
 
 ### 6.3 Data Display Components
 
@@ -636,9 +650,12 @@ Animates a numeric value from 0 (or previous value) to a new value. Used for all
 | `PerformanceLineGraph` | `components/onboarding/PerformanceLineGraph.tsx` | Native SVG, 4 vertical trend lines |
 | `LeadStatusHealthBar` | `components/onboarding/LeadStatusHealthBar.tsx` | Segmented pipeline bar |
 
-**Unmounted / orphaned (exist in repo, not imported by OnboardingLayout):**
-- `components/onboarding/LeadVelocityChart.tsx`
-- `components/onboarding/AgentVerticalBarChart.tsx`
+**Unmounted (parked in `components/_unmounted/`, not imported anywhere):**
+
+- `LeadVelocityChart.tsx`, `AgentVerticalBarChart.tsx` — onboarding charts
+- `ActiveOutlays.tsx`, `OutlayLedger.tsx`, `finance-utils.ts` — finance widgets
+
+Wrap in `<ErrorBoundary>` if mounting any of these.
 
 ---
 
@@ -668,15 +685,22 @@ app/page.tsx
     │   │   └── Anishqa column
     │   │       ├── ErrorBoundary → QueendomPanel (side=right)
     │   │       └── AnimatePresence → QueendomSkeleton
-    │   └── motion.div [onboarding layer — opacity/zIndex]
-    │       ├── ErrorBoundary → OnboardingLayout (calls useOnboardingPanelData)
-    │       │   ├── ambient-glow-stage
-    │       │   ├── header (SectionDivider × 2 + title)
-    │       │   └── grid 3-col (lg)
-    │       │       ├── DepartmentColumn (concierge / "Onboarding")
-    │       │       ├── center: LeadMonthStats + PerformanceLineGraph + ConversionLedger
-    │       │       └── DepartmentColumn (shop)
-    │       └── AnimatePresence → OnboardingSkeleton
+    │   ├── motion.div [onboarding layer — opacity/zIndex]
+    │   │   ├── ErrorBoundary → OnboardingLayout (calls useOnboardingPanelData)
+    │   │   │   ├── ambient-glow-stage
+    │   │   │   ├── header (SectionDivider × 2 + title)
+    │   │   │   └── grid 3-col (lg)
+    │   │   │       ├── DepartmentColumn (concierge / "Onboarding")
+    │   │   │       ├── center: LeadMonthStats + PerformanceLineGraph + ConversionLedger
+    │   │   │       └── DepartmentColumn (shop)
+    │   │   └── AnimatePresence → OnboardingSkeleton
+    │   └── motion.div [home layer — only rendered when NEXT_PUBLIC_HOME_PANEL_ENABLED=true]
+    │       └── ErrorBoundary → HomePanel
+    │           ├── ambient-glow-center
+    │           ├── identity row (SectionDivider + title)
+    │           ├── 4 × ClockCard (GlassPanel variant=card radius=panel shadow=md glow overlay
+    │           │                  → .home-panel-clock react-clock + Cinzel city label + digital time)
+    │           └── daily quote (Baskerville italic, rotates by day-of-month % 12)
     └── div z-10 [ticker dock]
         └── ErrorBoundary → RecommendationTicker
 ```
@@ -896,7 +920,7 @@ Fonts are loaded via `next/font/google` in `app/layout.tsx` (Inter, Cinzel, Libr
 
 No Recharts, Chart.js, D3, or external chart library. All graphs are native `<svg>` elements with Framer Motion for entrance animations. `PerformanceLineGraph` renders polylines, circles, and text directly in SVG. Follow this pattern for any new data visualization.
 
-**Performance graph vertical colors:** `#6B8FFF` (Global), `#FFB020` (Shop), `#34D399` (Legacy), `#C084FC` (House).
+**Performance graph vertical colors** (`PerformanceLineGraph.tsx`): Indulge Global `#6B8FFF` (soft blue), Shop `#FFB020` (warm gold), House `#34D399` (emerald), Legacy `#C084FC` (lavender). Ring accents: `#5A7FFF` / `#E09A30` / `#22C585` / `#A855F7`.
 
 ### 11.6 Realtime Safety
 
@@ -960,4 +984,4 @@ Before writing any new component or modifying an existing one:
 
 ---
 
-*Last updated: 2026-05-08 — Full rewrite from codebase scan. Previous version superseded.*
+*Last updated: 2026-06-11 — Refreshed from codebase scan: added HomePanel (§5.9, §6.2, §7.1), screen rotation timings (§1.3), corrected House/Legacy graph colors (§11.5), updated `_unmounted/` paths (§6.3).*

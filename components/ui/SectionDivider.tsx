@@ -56,6 +56,16 @@ export interface SectionDividerProps {
   labelStyle?: CSSProperties;
   /** Additional classes on the outer wrapper div. */
   className?:  string;
+  /**
+   * Dual-rule variant (dry-audit A6): when set without a label, renders two
+   * h-px arms meeting at the center (gap-3), each with the given gradient
+   * classes/styles — the "rule — rule" pattern from QueendomPanel's header.
+   * Pass the site's exact gradient strings for pixel-identical output.
+   */
+  leftRuleClass?:  string;
+  rightRuleClass?: string;
+  leftRuleStyle?:  CSSProperties;
+  rightRuleStyle?: CSSProperties;
 }
 
 // ── Accent lookup ─────────────────────────────────────────────────────────────
@@ -91,7 +101,27 @@ export function SectionDivider({
   labelClass = "",
   labelStyle,
   className  = "",
+  leftRuleClass,
+  rightRuleClass,
+  leftRuleStyle,
+  rightRuleStyle,
 }: SectionDividerProps) {
+  // Dual-rule variant — two arms meeting at center, no label
+  if (!label && (leftRuleClass || rightRuleClass || leftRuleStyle || rightRuleStyle)) {
+    return (
+      <div className={["flex w-full items-center gap-3", className].filter(Boolean).join(" ")}>
+        <div
+          className={["h-px flex-1", leftRuleClass].filter(Boolean).join(" ")}
+          style={leftRuleStyle}
+        />
+        <div
+          className={["h-px flex-1", rightRuleClass].filter(Boolean).join(" ")}
+          style={rightRuleStyle}
+        />
+      </div>
+    );
+  }
+
   // Plain horizontal rule — no label
   if (!label) {
     return (

@@ -1,18 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { fetchJson } from "@/lib/clientFetch";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import { istToday, toISTDay } from "@/lib/istDate";
+import { istToday } from "@/lib/istDate";
 import { getAgentDepartment } from "@/lib/onboardingAgents";
 import type {
   LeadStatusByAgent,
-  LeadTrendPoint,
   OnboardingAgentRow,
   OnboardingApiPayload,
   OnboardingLedgerRow,
-  PerformanceDayPoint,
-  TeamAttendedDay,
   VerticalTrendPoint,
   LeadMonthStats,
 } from "@/lib/onboardingTypes";
@@ -36,7 +34,6 @@ export interface UseOnboardingPanelDataResult {
   verticalTrendline: VerticalTrendPoint[];
   ledgerScrollDuration: string;
   prefersReducedMotion: boolean;
-  shimmerStampByAgentId: Record<string, number>;
   leadStatusByAgent: LeadStatusByAgent;
   todayDate: string;
 }
@@ -66,12 +63,8 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     };
   }, []);
 
-  const [leadTrendline, setLeadTrendline] = useState<LeadTrendPoint[]>([]);
   const [leadStatusByAgent, setLeadStatusByAgent] = useState<LeadStatusByAgent>(
     {},
-  );
-  const [teamAttendedTrend, setTeamAttendedTrend] = useState<TeamAttendedDay[]>(
-    [],
   );
   const [verticalTrendline, setVerticalTrendline] = useState<VerticalTrendPoint[]>([]);
   const [leadMonthStats, setLeadMonthStats] = useState<LeadMonthStats>({
@@ -85,56 +78,44 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     OnboardingApiPayload["departments"]
   > | null>(null);
 
-  const prevConvertedRef = useRef<Record<string, number>>({});
-  const [shimmerStampByAgentId, setShimmerStampByAgentId] = useState<
-    Record<string, number>
-  >({});
-  const shimmerClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debouncedLoadRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const [dealsReconnect, setDealsReconnect] = useState(0);
-  const [leadsReconnect, setLeadsReconnect] = useState(0);
+  const loadAbortRef = useRef<AbortController | null>(null);
 
   const prefersReducedMotion = usePrefersReducedMotion();
 
+  // Overlapping loads (5-min poll vs debounced Realtime refetch) race: abort
+  // the previous in-flight request so a stale response can never land after a
+  // fresher one (dry-audit C3).
   const load = useCallback(async () => {
+    loadAbortRef.current?.abort();
     const ac = new AbortController();
-    try {
-      const res = await fetch("/api/onboarding", {
-        cache: "no-store",
-        signal: ac.signal,
-      });
-      if (!res.ok) return;
-      const data = (await res.json()) as OnboardingApiPayload;
+    loadAbortRef.current = ac;
 
-      if (Array.isArray(data.agents) && data.agents.length > 0) {
-        setAgents(data.agents);
-      } else {
-        setAgents([...CONCIERGE_FALLBACK_AGENTS, ...SHOP_FALLBACK_AGENTS]);
-      }
+    const data = await fetchJson<OnboardingApiPayload>("/api/onboarding", {
+      signal: ac.signal,
+    });
+    if (loadAbortRef.current === ac) loadAbortRef.current = null;
+    if (data === null) return;
 
-      const raw = Array.isArray(data.ledger) ? data.ledger : [];
-      setLedger(sortLedgerNewestFirst(raw).slice(0, LIVE_LEDGER_MAX));
+    if (Array.isArray(data.agents) && data.agents.length > 0) {
+      setAgents(data.agents);
+    } else {
+      setAgents([...CONCIERGE_FALLBACK_AGENTS, ...SHOP_FALLBACK_AGENTS]);
+    }
 
-      if (data.departments) {
-        setDeptStats(data.departments);
-      }
+    const raw = Array.isArray(data.ledger) ? data.ledger : [];
+    setLedger(sortLedgerNewestFirst(raw).slice(0, LIVE_LEDGER_MAX));
 
-      if (Array.isArray(data.leadTrendline) && data.leadTrendline.length > 0) {
-        setLeadTrendline(data.leadTrendline);
-      }
+    if (data.departments) {
+      setDeptStats(data.departments);
+    }
 
-      if (data.leadStatusByAgent) setLeadStatusByAgent(data.leadStatusByAgent);
-      if (data.teamAttendedTrend) setTeamAttendedTrend(data.teamAttendedTrend);
-      if (Array.isArray(data.verticalTrendline) && data.verticalTrendline.length > 0) {
-        setVerticalTrendline(data.verticalTrendline);
-      }
-      if (data.leadMonthStats) {
-        setLeadMonthStats(data.leadMonthStats);
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") return;
-      console.error("[OnboardingPanel] load failed:", err);
+    if (data.leadStatusByAgent) setLeadStatusByAgent(data.leadStatusByAgent);
+    if (Array.isArray(data.verticalTrendline) && data.verticalTrendline.length > 0) {
+      setVerticalTrendline(data.verticalTrendline);
+    }
+    if (data.leadMonthStats) {
+      setLeadMonthStats(data.leadMonthStats);
     }
   }, []);
 
@@ -160,21 +141,16 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     return () => {
       clearInterval(id);
       if (debouncedLoadRef.current) clearTimeout(debouncedLoadRef.current);
+      loadAbortRef.current?.abort();
     };
   }, [load]);
 
-  useEffect(() => {
-    const client = supabase;
-    if (!client) return;
-
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const ch = client
-      .channel("deals-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "deals" },
-        (payload) => {
+  useRealtimeChannel(
+    "deals-live",
+    [
+      {
+        table: "deals",
+        handler: (payload) => {
           if (payload.eventType === "INSERT") {
             const raw = payload.new as Record<string, unknown> | null;
             if (!raw) return;
@@ -192,35 +168,17 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
           }
           scheduleDebouncedLoad();
         },
-      )
-      .subscribe((status) => {
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          void load();
-          reconnectTimer = setTimeout(
-            () => setDealsReconnect((n) => n + 1),
-            3000,
-          );
-        }
-      });
+      },
+    ],
+    () => void load(),
+  );
 
-    return () => {
-      client.removeChannel(ch);
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-    };
-  }, [scheduleDebouncedLoad, load, firePulse, dealsReconnect]);
-
-  useEffect(() => {
-    const client = supabase;
-    if (!client) return;
-
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const ch = client
-      .channel("leads-touches-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "leads" },
-        (payload) => {
+  useRealtimeChannel(
+    "leads-touches-live",
+    [
+      {
+        table: "leads",
+        handler: (payload) => {
           if (payload.eventType === "INSERT") {
             const raw = payload.new as Record<string, unknown> | null;
             const agentName = (raw?.agent_name as string | undefined) ?? "";
@@ -230,22 +188,10 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
           }
           scheduleDebouncedLoad();
         },
-      )
-      .subscribe((status) => {
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          void load();
-          reconnectTimer = setTimeout(
-            () => setLeadsReconnect((n) => n + 1),
-            3000,
-          );
-        }
-      });
-
-    return () => {
-      client.removeChannel(ch);
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-    };
-  }, [scheduleDebouncedLoad, load, firePulse, leadsReconnect]);
+      },
+    ],
+    () => void load(),
+  );
 
   const conciergeAgents = useMemo<OnboardingAgentRow[]>(() => {
     if (deptStats) return deptStats.concierge.agents;
@@ -267,76 +213,6 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
       : [...SHOP_FALLBACK_AGENTS];
   }, [agents, deptStats]);
 
-  const allAgents = useMemo(
-    () => [...conciergeAgents, ...shopAgents],
-    [conciergeAgents, shopAgents],
-  );
-
-  const performanceData = useMemo<PerformanceDayPoint[]>(() => {
-    const convMap: Record<string, { onboarding: number; shop: number }> = {};
-    for (const row of ledger) {
-      const date = toISTDay(row.recordedAt);
-      if (!date) continue;
-      if (!convMap[date]) convMap[date] = { onboarding: 0, shop: 0 };
-      const dept = row.department ?? getAgentDepartment(row.agentName);
-      if (dept === "concierge") convMap[date].onboarding++;
-      else convMap[date].shop++;
-    }
-
-    const n = Math.max(leadTrendline.length, teamAttendedTrend.length);
-    const points: PerformanceDayPoint[] = [];
-    for (let i = 0; i < n; i++) {
-      const lt = leadTrendline[i];
-      const at = teamAttendedTrend[i];
-      const date = lt?.date ?? at?.date ?? "";
-      const conv = convMap[date] ?? { onboarding: 0, shop: 0 };
-      points.push({
-        date,
-        onboarding: {
-          leads: lt?.conciergeLeads ?? 0,
-          attended: at?.onboarding ?? 0,
-          converted: conv.onboarding,
-        },
-        shop: {
-          leads: lt?.shopLeads ?? 0,
-          attended: at?.shop ?? 0,
-          converted: conv.shop,
-        },
-      });
-    }
-    return points;
-  }, [leadTrendline, teamAttendedTrend, ledger]);
-
-  useEffect(() => {
-    let winner: string | null = null;
-
-    for (const agent of allAgents) {
-      const prev = prevConvertedRef.current[agent.id];
-      if (prev !== undefined && agent.totalConverted > prev) {
-        winner = agent.id;
-        break;
-      }
-    }
-
-    for (const agent of allAgents) {
-      prevConvertedRef.current[agent.id] = agent.totalConverted;
-    }
-
-    if (winner) {
-      if (shimmerClearRef.current) clearTimeout(shimmerClearRef.current);
-      const stamp = Date.now();
-      setShimmerStampByAgentId((m) => ({ ...m, [winner!]: stamp }));
-      shimmerClearRef.current = setTimeout(() => {
-        setShimmerStampByAgentId((m) => {
-          const next = { ...m };
-          delete next[winner!];
-          return next;
-        });
-        shimmerClearRef.current = null;
-      }, 2100);
-    }
-  }, [allAgents]);
-
   const ledgerScrollDuration = useMemo(() => {
     const n = ledger.length;
     return n === 0 ? "48s" : `${Math.max(32, n * 6)}s`;
@@ -351,7 +227,6 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     verticalTrendline,
     ledgerScrollDuration,
     prefersReducedMotion,
-    shimmerStampByAgentId,
     leadStatusByAgent,
     todayDate: istToday().day,
   };

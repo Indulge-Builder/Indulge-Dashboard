@@ -13,19 +13,12 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
+import { getInitials } from "@/lib/format";
 
 // ── Ring geometry ─────────────────────────────────────────────────────────────
 const RING_SIZE    = 80;
 const RING_R       = 32;
 const CIRCUMFERENCE = 2 * Math.PI * RING_R;
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function getInitials(name: string): string {
-  const parts = name.trim().split(" ");
-  return parts.length >= 2
-    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    : name.slice(0, 2).toUpperCase();
-}
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 export interface AgentIconProps {

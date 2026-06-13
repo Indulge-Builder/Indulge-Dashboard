@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
+import { normalizeQueendom } from "@/lib/queendom";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ClientRow {
@@ -52,13 +53,9 @@ function aggregate(rows: ClientRow[]): AggregatedStats {
   };
 
   for (const row of rows) {
-    const grp = (row.group ?? "").toLowerCase().trim();
-
-    let bucket: QueenBucket | null = null;
-    if (grp.includes("ananyshree")) bucket = result.ananyshree;
-    else if (grp.includes("anishqa")) bucket = result.anishqa;
-
-    if (!bucket) continue;
+    const queendom = normalizeQueendom(row.group);
+    if (!queendom) continue;
+    const bucket: QueenBucket = result[queendom];
 
     const tier = row.latest_subscription_membership_type;
     if (isCelebrityMembership(tier)) {
@@ -74,18 +71,7 @@ function aggregate(rows: ClientRow[]): AggregatedStats {
 // ─── GET /api/clients ─────────────────────────────────────────────────────────
 // Uses the service role key — runs on the server only, bypasses RLS entirely.
 // The key is never sent to the browser.
-export async function GET() {
-  const { db, response } = requireSupabaseAdminOr503();
-  if (!db) {
-    return (
-      response ??
-      NextResponse.json(
-        { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
-        { status: 503 },
-      )
-    );
-  }
-
+export const GET = withApiGuard(async (_req, db) => {
   const { data, error } = await db
     .from("clients")
     .select("group, latest_subscription_status, latest_subscription_membership_type")
@@ -96,12 +82,5 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const stats = aggregate(data as ClientRow[]);
-
-  return NextResponse.json(stats, {
-    headers: {
-      // Never cache — always fresh for a live dashboard
-      "Cache-Control": "no-store",
-    },
-  });
-}
+  return noStoreJson(aggregate(data as ClientRow[]));
+});

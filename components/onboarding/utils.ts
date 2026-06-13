@@ -127,32 +127,6 @@ export function orderShopAgentsForDisplay(
 // ── 4. Formatters ─────────────────────────────────────────────────────────────
 
 /**
- * Converts a raw rupee amount to a "₹N L" display string.
- * 1 Lakh = ₹1,00,000. Trailing zeros stripped after decimal.
- * Examples: 200000 → "₹2 L", 250000 → "₹2.5 L"
- */
-export function formatAmountLakh(amount: number): string {
-  const lakhs = amount / 100_000;
-  if (!Number.isFinite(lakhs)) return "—";
-  if (lakhs === 0) return "₹0 L";
-  const str =
-    lakhs % 1 === 0 ? String(lakhs) : lakhs.toFixed(2).replace(/\.?0+$/, "");
-  return `₹${str} L`;
-}
-
-/**
- * Formats a pre-divided lakhs value (i.e. already divided by 100_000) for display.
- * Use for DepartmentStats.totalLakhsClosedThisMonth which is pre-computed.
- * Examples: 2.5 → "₹2.5 L", 12 → "₹12 L"
- */
-export function formatLakhsDisplay(lakhs: number): string {
-  if (!Number.isFinite(lakhs) || lakhs === 0) return "₹0 L";
-  const str =
-    lakhs % 1 === 0 ? String(lakhs) : lakhs.toFixed(2).replace(/\.?0+$/, "");
-  return `₹${str} L`;
-}
-
-/**
  * Returns "22 March" (day + long month, no time, no year) from any timestamp string.
  * Always displays in IST (Asia/Kolkata) — matches the UTC→IST conversion used
  * throughout the project (lib/istDate, /api/tickets, /api/onboarding).
@@ -214,10 +188,6 @@ export function ledgerRowFromInsertPayload(
             : "";
   if (!clientName) return null;
 
-  const q = raw.queendom_name;
-  const assignedTo =
-    q != null && String(q).trim() !== "" ? String(q).trim() : "";
-
   const agentName =
     typeof raw.agent_name === "string"
       ? raw.agent_name
@@ -228,7 +198,6 @@ export function ledgerRowFromInsertPayload(
     id: rowId,
     clientName,
     recordedAt,
-    assignedTo,
     agentName,
     // Derive department from agent name — no DB column needed
     department: getAgentDepartment(agentName),

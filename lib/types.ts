@@ -7,10 +7,9 @@ export interface MemberStats {
 
 export interface TicketStats {
   totalReceived: number; // tickets created in the current IST calendar month (label: Received This Month)
-  totalThisMonth?: number; // deprecated: use totalReceived
-  resolvedThisMonth: number; // cohort math: created this IST month AND status is terminal (resolved/closed/spam/deleted)
+  resolvedThisMonth: number; // cohort math: created this IST month AND status is terminal (resolved/closed)
   solvedToday: number; // cohort math: created today (IST) AND status is terminal
-  pendingToResolve: number; // status NOT terminal — no date gate; includes old open tickets
+  pendingToResolve: number; // created this IST month AND status NOT terminal (month-gated like all metrics; label: Pending This Month)
   jokerSuggestion: number; // tickets with tags.joker_suggestion set (legacy)
 }
 
@@ -55,14 +54,6 @@ export interface QueenStats {
   joker?: JokerStats;
 }
 
-export interface JokerRecommendation {
-  id: string;
-  category: string;
-  text: string;
-  place: string; // city or location name
-  icon: "restaurant" | "travel" | "hotel" | "spa" | "experience";
-}
-
 export interface SpecialDate {
   id: string;
   clientName: string;
@@ -71,22 +62,4 @@ export interface SpecialDate {
   queendom: "ananyshree" | "anishqa";
   /** Expired membership — muted styling on the Special Dates card */
   isExpired?: boolean;
-}
-
-// ─── Shared structural types ──────────────────────────────────────────────────
-
-/** Standard envelope for all data hooks — UI components check loading/error before rendering data. */
-export interface HookResult<T> {
-  data: T | null;
-  loading: boolean;
-  error: string | null;
-  lastUpdated: Date | null;
-}
-
-/** Shared shape for entries in both concierge (agentRoster.ts) and onboarding (onboardingAgents.ts) rosters. */
-export interface AgentRosterEntry {
-  id: string;
-  displayName: string;
-  queendom?: "ananyshree" | "anishqa";
-  portrait?: string;
 }

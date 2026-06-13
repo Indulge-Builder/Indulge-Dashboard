@@ -63,6 +63,18 @@ export interface StatCardProps {
   accent?:    StatCardAccent;
   className?: string;
   style?:     CSSProperties;
+  /**
+   * Escape hatch (dry-audit A1): fully REPLACES the default surface classes
+   * AND disables the default padding, so existing tiles can migrate with
+   * their class strings verbatim — pixel-identical output. New tiles should
+   * use the default surface instead.
+   */
+  surfaceClass?: string;
+  /**
+   * Escape hatch: fully REPLACES the default label classes (incl. accent).
+   * Pass the site's exact existing label class string for verbatim migration.
+   */
+  labelClass?: string;
 }
 
 // ── Accent lookup ─────────────────────────────────────────────────────────────
@@ -85,30 +97,42 @@ export function StatCard({
   accent    = "champagne",
   className = "",
   style,
+  surfaceClass,
+  labelClass,
 }: StatCardProps) {
   return (
     <div
       className={[
-        // Surface: inset dark background, subtle gold border, tight card radius
-        "flex flex-1 flex-col items-center justify-center text-center min-w-0",
-        "bg-surface-inset rounded-card border border-gold-500/20",
-        "shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+        surfaceClass ??
+          [
+            // Surface: inset dark background, subtle gold border, tight card radius
+            "flex flex-1 flex-col items-center justify-center text-center min-w-0",
+            "bg-surface-inset rounded-card border border-gold-500/20",
+            "shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+          ].join(" "),
         className,
       ]
         .filter(Boolean)
         .join(" ")}
-      style={{
-        padding: "clamp(10px, 1.2vh, 20px) clamp(6px, 0.8vw, 14px)",
-        ...style,
-      }}
+      style={
+        surfaceClass != null
+          ? style
+          : {
+              padding: "clamp(10px, 1.2vh, 20px) clamp(6px, 0.8vw, 14px)",
+              ...style,
+            }
+      }
     >
       {/* Label */}
       <p
-        className={[
-          "font-inter font-semibold uppercase leading-snug tracking-[0.25em]",
-          "text-[var(--text-label-xl)] mb-[0.2vh]",
-          LABEL_CLASS[accent],
-        ].join(" ")}
+        className={
+          labelClass ??
+          [
+            "font-inter font-semibold uppercase leading-snug tracking-[0.25em]",
+            "text-[var(--text-label-xl)] mb-[0.2vh]",
+            LABEL_CLASS[accent],
+          ].join(" ")
+        }
       >
         {label}
       </p>

@@ -6,16 +6,12 @@
  * Single source of truth for all dashboard data state, fetch orchestration,
  * and Supabase Realtime subscriptions. Extracted from Dashboard.tsx.
  *
- * IMPORTANT — memory-safety guarantees preserved from the original:
- *   1. All four Supabase channels are removed in a single cleanup return of
- *      the Realtime useEffect (one cleanup removes all four).
- *   2. The 5-minute prune interval is cleared in its own cleanup return.
- *   3. All useCallback fetchers have stable references (empty dep arrays) so
- *      they never trigger Realtime re-subscription.
- *   4. The Realtime useEffect dep array is [ fetchJokers, fetchMembers,
- *      fetchRenewals ] — identical to original. fetchTicketRows is intentionally
- *      absent because the tickets handler only uses setTicketRows functional
- *      updates (no external reference needed).
+ * IMPORTANT — memory-safety guarantees:
+ *   1. Each Supabase channel lives in useRealtimeChannel, which removes it via
+ *      supabase.removeChannel on cleanup and self-heals on CHANNEL_ERROR /
+ *      TIMED_OUT (refetch + 3s resubscribe) — dry-audit C2.
+ *   2. The 5-minute poll/prune interval is cleared in its own cleanup return.
+ *   3. All useCallback fetchers have stable references (empty dep arrays).
  *
  * Math / business logic is NOT touched. All aggregation calls
  * (aggregateTicketStats, mergeAndRankAgents, pruneTicketRowsForDashboardState)
@@ -23,7 +19,8 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { fetchJson } from "@/lib/clientFetch";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
 import { buildRoster, ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
 import type { QueenStats, MemberStats, TicketStats, JokerStats } from "@/lib/types";
 import type { TicketRowMinimal } from "@/lib/ticketAggregation";
@@ -32,7 +29,7 @@ import {
   mergeAndRankAgents,
   pruneTicketRowsForDashboardState,
 } from "@/lib/ticketAggregation";
-import type { JokerRecommendationItem, RenewalsPanelData, MemberApiResponse } from "@/types";
+import type { OverdueTicketItem, RenewalsPanelData, MemberApiResponse } from "@/types";
 
 // ─── Zero initial state ───────────────────────────────────────────────────────
 // All counters animate up from 0 on first load — this is intentional UX.
@@ -104,7 +101,7 @@ function toTicketRow(raw: Record<string, unknown> | null): TicketRowMinimal | nu
 export interface DashboardData {
   ananyshreeStats:    QueenStats;
   anishqaStats:       QueenStats;
-  recommendations:    JokerRecommendationItem[];
+  overdueTickets:     OverdueTicketItem[];
   renewalsAnanyshree: RenewalsPanelData;
   renewalsAnishqa:    RenewalsPanelData;
   /**
@@ -122,7 +119,7 @@ export function useDashboardData(): DashboardData {
   const [ticketRows,         setTicketRows]         = useState<TicketRowMinimal[]>([]);
   const [ananyshreeStats,    setAnanyshreeStats]    = useState<QueenStats>(INIT_ANANYSHREE);
   const [anishqaStats,       setAnishqaStats]       = useState<QueenStats>(INIT_ANISHQA);
-  const [recommendations,    setRecommendations]    = useState<JokerRecommendationItem[]>([]);
+  const [overdueTickets,     setOverdueTickets]     = useState<OverdueTicketItem[]>([]);
   const [renewalsAnanyshree, setRenewalsAnanyshree] = useState<RenewalsPanelData>({
     totalRenewalsThisMonth: 0,
     renewals: [],
@@ -155,65 +152,42 @@ export function useDashboardData(): DashboardData {
   // ── Fetchers (all stable — empty dep arrays) ────────────────────────────────
 
   const fetchTicketRows = useCallback(async () => {
-    try {
-      const res = await fetch("/api/tickets/rows", { cache: "no-store" });
-      if (!res.ok) return;
-      const rows: TicketRowMinimal[] = await res.json();
-      setTicketRows(
-        pruneTicketRowsForDashboardState(Array.isArray(rows) ? rows : []),
-      );
-    } catch (err) {
-      console.error("[useDashboardData] fetchTicketRows failed:", err);
-    }
+    const rows = await fetchJson<TicketRowMinimal[]>("/api/tickets/rows");
+    if (rows === null) return;
+    setTicketRows(
+      pruneTicketRowsForDashboardState(Array.isArray(rows) ? rows : []),
+    );
   }, []);
 
   const fetchMembers = useCallback(async () => {
-    try {
-      const res = await fetch("/api/clients", { cache: "no-store" });
-      if (!res.ok) return;
-      const data: MemberApiResponse = await res.json();
-      setAnanyshreeStats((prev) => ({ ...prev, members: data.ananyshree }));
-      setAnishqaStats((prev)    => ({ ...prev, members: data.anishqa }));
-    } catch (err) {
-      console.error("[useDashboardData] fetchMembers failed:", err);
-    }
+    const data = await fetchJson<MemberApiResponse>("/api/clients");
+    if (data === null) return;
+    setAnanyshreeStats((prev) => ({ ...prev, members: data.ananyshree }));
+    setAnishqaStats((prev)    => ({ ...prev, members: data.anishqa }));
   }, []);
 
   const fetchJokers = useCallback(async () => {
-    try {
-      const res = await fetch("/api/jokers", { cache: "no-store" });
-      if (!res.ok) return;
-      const data: { ananyshree: JokerStats; anishqa: JokerStats } = await res.json();
-      setAnanyshreeStats((prev) => ({ ...prev, joker: data.ananyshree }));
-      setAnishqaStats((prev)    => ({ ...prev, joker: data.anishqa }));
-    } catch (err) {
-      console.error("[useDashboardData] fetchJokers failed:", err);
-    }
+    const data = await fetchJson<{ ananyshree: JokerStats; anishqa: JokerStats }>(
+      "/api/jokers",
+    );
+    if (data === null) return;
+    setAnanyshreeStats((prev) => ({ ...prev, joker: data.ananyshree }));
+    setAnishqaStats((prev)    => ({ ...prev, joker: data.anishqa }));
   }, []);
 
-  const fetchRecommendations = useCallback(async () => {
-    try {
-      const res = await fetch("/api/jokers/recommendations", { cache: "no-store" });
-      if (!res.ok) return;
-      const data: JokerRecommendationItem[] = await res.json();
-      setRecommendations(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("[useDashboardData] fetchRecommendations failed:", err);
-    }
+  const fetchOverdueTickets = useCallback(async () => {
+    const data = await fetchJson<OverdueTicketItem[]>("/api/tickets/overdue");
+    if (data === null) return;
+    setOverdueTickets(Array.isArray(data) ? data : []);
   }, []);
 
   const fetchRenewals = useCallback(async (queendom: "ananyshree" | "anishqa") => {
-    try {
-      const res = await fetch(`/api/renewals-panel?queendom=${queendom}`, {
-        cache: "no-store",
-      });
-      if (!res.ok) return;
-      const data: RenewalsPanelData = await res.json();
-      if (queendom === "ananyshree") setRenewalsAnanyshree(data);
-      else setRenewalsAnishqa(data);
-    } catch (err) {
-      console.error("[useDashboardData] fetchRenewals failed:", err);
-    }
+    const data = await fetchJson<RenewalsPanelData>(
+      `/api/renewals-panel?queendom=${queendom}`,
+    );
+    if (data === null) return;
+    if (queendom === "ananyshree") setRenewalsAnanyshree(data);
+    else setRenewalsAnishqa(data);
   }, []);
 
   const fetchAll = useCallback(
@@ -222,11 +196,11 @@ export function useDashboardData(): DashboardData {
         fetchTicketRows(),
         fetchMembers(),
         fetchJokers(),
-        fetchRecommendations(),
+        fetchOverdueTickets(),
         fetchRenewals("ananyshree"),
         fetchRenewals("anishqa"),
       ]),
-    [fetchTicketRows, fetchMembers, fetchJokers, fetchRecommendations, fetchRenewals],
+    [fetchTicketRows, fetchMembers, fetchJokers, fetchOverdueTickets, fetchRenewals],
   );
 
   // ── Initial load ─────────────────────────────────────────────────────────────
@@ -241,104 +215,51 @@ export function useDashboardData(): DashboardData {
     return () => clearTimeout(safety);
   }, [fetchAll]);
 
-  // ── 5-minute IST month-rollover prune ────────────────────────────────────────
-  // Drops rows whose created_at has rolled into the previous IST month without
-  // requiring a page reload. Cleanup: clearInterval prevents accumulation on
-  // React Strict Mode double-mount and component unmount.
+  // ── 5-minute safety poll + IST month-rollover prune ──────────────────────────
+  // The poll-refetch is the documented safety net when Realtime silently misses
+  // events (dry-audit C2 — matches useOnboardingPanelData). The prune runs even
+  // if the network is down so a month rollover still drops last month's rows.
   useEffect(() => {
     const id = window.setInterval(() => {
       setTicketRows((prev) => pruneTicketRowsForDashboardState(prev));
+      void fetchAll();
     }, 5 * 60_000);
     return () => clearInterval(id);
-  }, []);
+  }, [fetchAll]);
 
   // ── Supabase Realtime subscriptions ──────────────────────────────────────────
-  // Four channels, one useEffect, one cleanup that removes all four.
+  // Four channels via useRealtimeChannel (CHANNEL_ERROR/TIMED_OUT → refetch +
+  // 3s resubscribe; cleanup via removeChannel). Channel names are contractual.
   //
   // Channel map:
   //   dashboard-clients  → clients table  → refetch /api/clients
-  //   dashboard-jokers   → jokers table   → optimistic patch + refetch /api/jokers
+  //   dashboard-jokers   → jokers table   → ticker patch + stats refetch
   //   dashboard-tickets  → tickets table  → optimistic patch ticketRows state
   //   dashboard-renewals → renewals+members tables → refetch /api/renewals-panel
-  //
-  // Dep array: [fetchJokers, fetchMembers, fetchRenewals]
-  //   fetchTicketRows is intentionally absent — the tickets handler uses only
-  //   setTicketRows functional updates and never calls the fetcher directly.
-  useEffect(() => {
-    if (!supabase) return;
 
-    // ── Channel 1: clients ──────────────────────────────────────────────────
-    const clientsChannel = supabase
-      .channel("dashboard-clients")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "clients" },
-        () => { fetchMembers(); },
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
-          console.info("[Realtime] dashboard-clients active");
-      });
+  useRealtimeChannel(
+    "dashboard-clients",
+    [{ table: "clients", handler: () => { fetchMembers(); } }],
+    fetchMembers,
+  );
 
-    // ── Channel 2: jokers ───────────────────────────────────────────────────
-    const jokersChannel = supabase
-      .channel("dashboard-jokers")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "jokers" },
-        (payload) => {
-          if (payload.eventType === "INSERT" && payload.new) {
-            const r = payload.new as Record<string, unknown>;
-            setRecommendations((prev) =>
-              [
-                {
-                  id:         String(r.id ?? crypto.randomUUID()),
-                  city:       ((r.city       as string) ?? "").trim() || "Unknown",
-                  type:       ((r.type       as string) ?? "").trim() || "Experience",
-                  suggestion: ((r.suggestion as string) ?? "").trim() || "—",
-                },
-                ...prev,
-              ].slice(0, 15),
-            );
-          } else if (payload.eventType === "UPDATE" && payload.new) {
-            const r  = payload.new as Record<string, unknown>;
-            const id = String(r.id ?? "");
-            if (!id) return;
-            setRecommendations((prev) =>
-              prev.map((x) =>
-                x.id === id
-                  ? {
-                      id,
-                      city:       ((r.city       as string) ?? "").trim() || "Unknown",
-                      type:       ((r.type       as string) ?? "").trim() || "Experience",
-                      suggestion: ((r.suggestion as string) ?? "").trim() || "—",
-                    }
-                  : x,
-              ),
-            );
-          } else if (payload.eventType === "DELETE" && payload.old) {
-            const id = String((payload.old as Record<string, unknown>).id ?? "");
-            if (!id) return;
-            setRecommendations((prev) => prev.filter((x) => x.id !== id));
-          }
-          // Always refetch aggregated Joker stats after any row change
-          fetchJokers();
-        },
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
-          console.info("[Realtime] dashboard-jokers active");
-      });
+  // Jokers feed the JokerMetricsStrip only (the ticker now shows overdue
+  // tickets, not joker suggestions). Any jokers row change refetches the
+  // aggregated Joker stats from the API.
+  useRealtimeChannel(
+    "dashboard-jokers",
+    [{ table: "jokers", handler: () => { fetchJokers(); } }],
+    fetchJokers,
+  );
 
-    // ── Channel 3: tickets ──────────────────────────────────────────────────
-    // All three event types use functional setTicketRows updates so this handler
-    // never needs to capture fetchTicketRows — no stale-closure risk.
-    const ticketsChannel = supabase
-      .channel("dashboard-tickets")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "tickets" },
-        (payload) => {
+  // All three event types use functional setTicketRows updates — no stale-closure
+  // risk. On channel failure, a full rows refetch heals any missed events.
+  useRealtimeChannel(
+    "dashboard-tickets",
+    [
+      {
+        table: "tickets",
+        handler: (payload) => {
           if (payload.eventType === "INSERT" && payload.new) {
             const row = toTicketRow(payload.new as Record<string, unknown>);
             if (row)
@@ -367,52 +288,49 @@ export function useDashboardData(): DashboardData {
               setTicketRows((prev) => prev.filter((r) => r.id !== oldRow.id));
           }
         },
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
-          console.info("[Realtime] dashboard-tickets active");
-      });
+      },
+      // Second handler (dry-audit C5 pattern): the overdue ticker reads the
+      // escalated set straight from /api/tickets/overdue (not month-gated, so
+      // it can't be patched from the month-scoped ticketRows state). Any
+      // tickets change — escalation flip, status change, delete — refetches it.
+      { table: "tickets", handler: () => { fetchOverdueTickets(); } },
+    ],
+    () => {
+      fetchTicketRows();
+      fetchOverdueTickets();
+    },
+  );
 
-    // ── Channel 4: renewals + members (multiplexed on one channel) ──────────
-    const renewalsChannel = supabase
-      .channel("dashboard-renewals")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "renewals" },
-        () => {
+  useRealtimeChannel(
+    "dashboard-renewals",
+    [
+      {
+        table: "renewals",
+        event: "INSERT",
+        handler: () => {
           fetchRenewals("ananyshree");
           fetchRenewals("anishqa");
         },
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "members" },
-        () => {
+      },
+      {
+        table: "members",
+        event: "INSERT",
+        handler: () => {
           fetchRenewals("ananyshree");
           fetchRenewals("anishqa");
         },
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED" && process.env.NODE_ENV === "development")
-          console.info("[Realtime] dashboard-renewals active");
-      });
-
-    // ── CLEANUP — removes all four channels on unmount / dep change ─────────
-    // Using optional-chaining on supabase for safety even though we checked
-    // above, matching the original pattern exactly.
-    return () => {
-      supabase?.removeChannel(clientsChannel);
-      supabase?.removeChannel(jokersChannel);
-      supabase?.removeChannel(ticketsChannel);
-      supabase?.removeChannel(renewalsChannel);
-    };
-  }, [fetchJokers, fetchMembers, fetchRenewals]);
-  // fetchTicketRows intentionally absent from deps — see comment above channel 3.
+      },
+    ],
+    () => {
+      fetchRenewals("ananyshree");
+      fetchRenewals("anishqa");
+    },
+  );
 
   return {
     ananyshreeStats,
     anishqaStats,
-    recommendations,
+    overdueTickets,
     renewalsAnanyshree,
     renewalsAnishqa,
     isInitialLoading,

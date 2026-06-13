@@ -21,7 +21,6 @@ export default function OnboardingLayout() {
     verticalTrendline,
     ledgerScrollDuration,
     prefersReducedMotion,
-    shimmerStampByAgentId,
     leadStatusByAgent,
     todayDate,
   } = props;
@@ -48,14 +47,13 @@ export default function OnboardingLayout() {
       </div>
 
       <div
-        className="relative grid min-h-0 flex-1 grid-cols-1 gap-[clamp(0.6rem,1.4vw,1.8rem)] lg:grid-cols-[1fr_1fr_1.05fr]"
+        className="relative grid min-h-0 flex-1 grid-cols-1 gap-[clamp(0.6rem,1.4vw,3.4rem)] lg:grid-cols-[1fr_1fr_1.05fr]"
       >
         <div className="flex min-h-[clamp(220px,28vh,380px)] flex-col lg:min-h-0">
           <DepartmentColumn
             department="concierge"
             label="Onboarding"
             agents={conciergeAgents}
-            shimmerStampByAgentId={shimmerStampByAgentId}
             prefersReducedMotion={prefersReducedMotion}
             leadStatusByAgent={leadStatusByAgent}
           />
@@ -63,7 +61,7 @@ export default function OnboardingLayout() {
 
         <div
           className="flex min-h-[clamp(220px,28vh,380px)] flex-col lg:min-h-0"
-          style={{ gap: "clamp(0.55rem,1.2vh,1.25rem)" }}
+          style={{ gap: "clamp(0.55rem,1.2vh,1.75rem)" }}
         >
           <div
             className="relative flex min-h-0 flex-[2] flex-col overflow-hidden rounded-2xl"
@@ -72,8 +70,8 @@ export default function OnboardingLayout() {
               border: "1px solid rgba(255,255,255,0.14)",
               boxShadow:
                 "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
-              padding: "clamp(0.45rem,0.9vmin,1rem)",
-              gap: "clamp(0.2rem,0.4vmin,0.5rem)",
+              padding: "clamp(0.45rem,0.9vmin,1.5rem)",
+              gap: "clamp(0.2rem,0.4vmin,0.75rem)",
             }}
           >
             <div
@@ -146,7 +144,7 @@ export default function OnboardingLayout() {
 
             <div
               className="grid w-full flex-shrink-0"
-              style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "clamp(6px, 1vw, 14px)" }}
+              style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "clamp(6px, 1vw, 28px)" }}
             >
               {(
                 [
@@ -182,8 +180,8 @@ export default function OnboardingLayout() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "clamp(2px, 0.4vmin, 5px)",
-                    padding: "clamp(6px, 1vmin, 12px) clamp(4px, 0.6vmin, 8px)",
+                    gap: "clamp(2px, 0.4vmin, 9px)",
+                    padding: "clamp(6px, 1vmin, 22px) clamp(4px, 0.6vmin, 14px)",
                     borderRadius: "clamp(6px, 0.9vmin, 11px)",
                     background: "rgba(255,255,255,0.028)",
                     border: `1px solid rgba(255,255,255,0.06)`,
@@ -244,7 +242,6 @@ export default function OnboardingLayout() {
             department="shop"
             label="Shop"
             agents={shopAgents}
-            shimmerStampByAgentId={shimmerStampByAgentId}
             prefersReducedMotion={prefersReducedMotion}
             leadStatusByAgent={leadStatusByAgent}
           />

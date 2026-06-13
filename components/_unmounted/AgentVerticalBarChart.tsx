@@ -35,13 +35,36 @@
  */
 
 import type { CSSProperties } from "react";
-import {
-  PIPELINE_STATUSES,
-  EMPTY_PIPELINE,
-  type PipelineStatus,
-  type PipelineStatusCounts,
-  type OnboardingAgentRow,
-} from "@/lib/onboardingTypes";
+import { type OnboardingAgentRow } from "@/lib/onboardingTypes";
+
+// ── Pipeline funnel shape (lives here — this parked chart is its only
+//    consumer; moved out of lib/onboardingTypes per dry-audit D6) ─────────────
+
+type PipelineStatus = "New" | "Touched" | "In Discussion" | "Won" | "Lost";
+
+const PIPELINE_STATUSES: readonly PipelineStatus[] = [
+  "New",
+  "Touched",
+  "In Discussion",
+  "Won",
+  "Lost",
+] as const;
+
+interface PipelineStatusCounts {
+  New: number;
+  Touched: number;
+  "In Discussion": number;
+  Won: number;
+  Lost: number;
+}
+
+const EMPTY_PIPELINE: PipelineStatusCounts = {
+  New: 0,
+  Touched: 0,
+  "In Discussion": 0,
+  Won: 0,
+  Lost: 0,
+};
 
 // ── Segment colour + label config ─────────────────────────────────────────────
 
@@ -67,9 +90,8 @@ const SEG_TRANSITION = "flex 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Derives pipeline counts from available agent fields when agent.pipeline is absent. */
+/** Derives pipeline counts from available agent fields. */
 function resolveAgentPipeline(agent: OnboardingAgentRow): PipelineStatusCounts {
-  if (agent.pipeline) return agent.pipeline;
   return {
     ...EMPTY_PIPELINE,
     Touched: agent.leadsCreatedThisMonth,

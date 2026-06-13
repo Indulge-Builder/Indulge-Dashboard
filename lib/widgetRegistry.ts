@@ -112,7 +112,7 @@ export const WIDGETS: Record<WidgetId, WidgetConfig> = {
     dataSources: [],
     mounted: false,
     description:
-      "UNMOUNTED — Finance outlay tracker (components/finance/ActiveOutlays.tsx). " +
+      "UNMOUNTED — Finance outlay tracker (components/_unmounted/ActiveOutlays.tsx). " +
       "Mount in QueendomPanel wrapped in <ErrorBoundary> when product requires it.",
   },
 };

@@ -20,11 +20,7 @@
  *   └──────────────────┴──────────────────┴───────────────────┘
  */
 
-import type { CSSProperties } from "react";
-
-function Sk({ className = "", style }: { className?: string; style?: CSSProperties }) {
-  return <div className={`skeleton-block ${className}`} style={style} aria-hidden />;
-}
+import { Sk } from "./Sk";
 
 /** Single vertical agent card skeleton — mirrors CompactAgentCard */
 function SkAgentCard({ delay = 0 }: { delay?: number }) {
@@ -81,7 +77,7 @@ function SkDeptColumn({
         style={{
           border: "1px solid rgba(255,255,255,0.14)",
           background: "#0a0f18",
-          padding: "clamp(0.45rem,0.9vmin,1rem)",
+          padding: "clamp(0.45rem,0.9vmin,1.5rem)",
           gap: "clamp(0.2rem,0.4vmin,0.5rem)",
         }}
       >
@@ -138,7 +134,7 @@ function SkDeptColumn({
           style={{
             gridTemplateColumns: "minmax(0,1fr)",
             gridTemplateRows: "repeat(3, minmax(0,1fr))",
-            gap: "clamp(0.3rem,0.55vmin,0.7rem)",
+            gap: "clamp(0.3rem,0.7vmin,1.1rem)",
           }}
         >
           {[0, 0.1, 0.2].map((d, i) => (
@@ -155,7 +151,7 @@ function SkCenterColumn() {
   return (
     <div
       className="flex min-h-0 flex-col"
-      style={{ gap: "clamp(0.55rem,1.2vh,1.25rem)" }}
+      style={{ gap: "clamp(0.55rem,1.2vh,1.75rem)" }}
     >
       {/* ── Performance panel ── */}
       <div
@@ -164,7 +160,7 @@ function SkCenterColumn() {
           background: "rgba(10,10,10,0.88)",
           border: "1px solid rgba(107,143,255,0.18)",
           boxShadow: "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
-          padding: "clamp(0.45rem,0.9vmin,1rem)",
+          padding: "clamp(0.45rem,0.9vmin,1.5rem)",
           gap: "clamp(0.2rem,0.4vmin,0.5rem)",
         }}
       >
@@ -204,7 +200,7 @@ function SkCenterColumn() {
         {/* 4 metric tiles */}
         <div
           className="grid w-full shrink-0"
-          style={{ gridTemplateColumns: "repeat(4,1fr)", gap: "clamp(6px,1vw,14px)" }}
+          style={{ gridTemplateColumns: "repeat(4,1fr)", gap: "clamp(6px, 1vw, 28px)" }}
         >
           {[0, 0.07, 0.14, 0.21].map((d, i) => (
             <Sk
@@ -329,7 +325,7 @@ export default function OnboardingSkeleton() {
         className="relative grid min-h-0 flex-1"
         style={{
           gridTemplateColumns: "1fr 1fr 1.05fr",
-          gap: "clamp(0.6rem,1.4vw,1.8rem)",
+          gap: "clamp(0.6rem,1.4vw,3.4rem)",
         }}
       >
         {/* Column 1: Concierge (gold accent) */}

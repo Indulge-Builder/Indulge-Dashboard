@@ -19,7 +19,6 @@ import type {
   JokerStats,
   AgentStats,
   QueenStats,
-  JokerRecommendation,
   SpecialDate,
 } from "@/lib/types";
 
@@ -29,7 +28,6 @@ export type {
   JokerStats,
   AgentStats,
   QueenStats,
-  JokerRecommendation,
   SpecialDate,
 };
 
@@ -46,15 +44,14 @@ export type { TicketRowMinimal } from "@/lib/ticketAggregation";
 // ─── 4. Shared UI types (previously inline in multiple components) ─────────────
 
 /**
- * Joker recommendation item shape returned by GET /api/jokers/recommendations
- * and used by RecommendationTicker + useDashboardData.
+ * Overdue ticket item shape returned by GET /api/tickets/overdue and used by
+ * OverdueTicker + useDashboardData. One escalated (is_escalated = true) ticket.
  * Canonical home is here; the route re-exports it for backwards compat.
  */
-export interface JokerRecommendationItem {
+export interface OverdueTicketItem {
   id: string;
-  city: string;
-  type: string;
-  suggestion: string;
+  subject: string;
+  agentName: string;
 }
 
 /**

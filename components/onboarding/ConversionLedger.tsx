@@ -33,6 +33,7 @@
 
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { CSSProperties } from "react";
+import { useScreenActive } from "@/hooks/useScreenActive";
 import type { OnboardingLedgerRow } from "@/lib/onboardingTypes";
 import {
   ONBOARDING_LEDGER_TITLE_FONT,
@@ -68,7 +69,7 @@ function ConversionLedgerRow({
 
   return (
     <div
-      className="relative grid grid-cols-3 items-center gap-x-1 border-b border-gold-500/[0.07] py-[clamp(10px,min(1.6vmin,1.8vh),22px)] sm:gap-x-2 md:gap-x-4"
+      className="relative grid grid-cols-3 items-center gap-x-[clamp(0.25rem,1vw,2rem)] border-b border-gold-500/[0.07] py-[clamp(10px,min(1.6vmin,1.8vh),22px)]"
       style={{
         borderLeft: `2px solid ${accent.border}`,
         paddingLeft: "clamp(6px,1vmin,10px)",
@@ -116,6 +117,9 @@ export function ConversionLedger({
   scrollDuration,
   prefersReducedMotion,
 }: ConversionLedgerProps) {
+  // False while the onboarding layer is faded out — pauses the rAF ticker (H3).
+  const isScreenActive = useScreenActive();
+
   // ── Refs for the rAF ticker (mutated directly — no re-renders needed) ──────
   const trackRef = useRef<HTMLDivElement>(null);
   const primaryRef = useRef<HTMLDivElement>(null);
@@ -176,8 +180,11 @@ export function ConversionLedger({
   }, [rows]);
 
   // ── rAF ticker ───────────────────────────────────────────────────────────────
+  // Paused while this screen layer is hidden (dry-audit H3): the layer stays
+  // mounted and posRef survives, so the scroll resumes seamlessly the moment
+  // the fade-in starts — never a frozen frame during the crossfade.
   useEffect(() => {
-    if (prefersReducedMotion || rows.length === 0) return;
+    if (prefersReducedMotion || rows.length === 0 || !isScreenActive) return;
 
     const tick = (time: number) => {
       const track = trackRef.current;
@@ -220,7 +227,7 @@ export function ConversionLedger({
       }
       lastTimeRef.current = null;
     };
-  }, [prefersReducedMotion, rows.length]);
+  }, [prefersReducedMotion, rows.length, isScreenActive]);
 
   return (
     <div
@@ -247,7 +254,7 @@ export function ConversionLedger({
       {/* ── Column headers ── */}
       <div className="relative border-b border-gold-500/10 pb-3 text-center">
         <div
-          className="grid grid-cols-3 gap-x-1 font-inter font-semibold uppercase tracking-[0.2em] text-champagne sm:gap-x-2 md:gap-x-4"
+          className="grid grid-cols-3 gap-x-[clamp(0.25rem,1vw,2rem)] font-inter font-semibold uppercase tracking-[0.2em] text-champagne"
           style={{ fontSize: ONBOARDING_LEDGER_HEADER_FONT }}
         >
           <span className="min-w-0 truncate px-1 text-center">Client</span>

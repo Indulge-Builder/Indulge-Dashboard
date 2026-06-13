@@ -9,13 +9,21 @@
  * Also exports:
  *   GRID_COLS — the Tailwind responsive grid template shared with the header in
  *               AgentLeaderboard.tsx (single source of truth for column widths).
- *   AnimatedValue — internal numeric display with emerald flash on increase.
  */
 
 import { memo, useRef, useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import type { AgentStats } from "@/lib/types";
-import { rowVariants, gpuStyle } from "@/lib/motionPresets";
+import {
+  rowVariants,
+  gpuStyle,
+  surgeBgVariants,
+  surgeSweepVariants,
+  surgeSweepBarVariants,
+  winShimmerBarVariants,
+} from "@/lib/motionPresets";
+import { usePrevious } from "@/hooks/usePrevious";
+import { AnimatedValue } from "@/components/AnimatedValue";
 import { AgentIcon } from "./AgentIcon";
 
 // ── Shared grid template (header + every row must match exactly) ──────────────
@@ -26,79 +34,9 @@ export const GRID_COLS =
   "lg:grid-cols-[5.5rem_minmax(0,2fr)_minmax(8.5rem,1fr)_minmax(8.5rem,1fr)_minmax(9rem,1.1fr)] " +
   "xl:grid-cols-[5.5rem_minmax(0,2fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1.1fr)]";
 
-// ── usePrevious ───────────────────────────────────────────────────────────────
-// Returns the value from the previous render. Used by AnimatedValue and AgentRow
-// to detect increases without any additional state.
-function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T | undefined>(undefined);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref.current;
-}
-
-// ── AnimatedValue ─────────────────────────────────────────────────────────────
-// Numeric display that pops (scale + optional emerald ghost) when value increases.
-// Memoized — stable between renders where value doesn't change.
-interface AnimatedValueProps {
-  value: number;
-  className?: string;
-  style?: React.CSSProperties;
-  highlightOnIncrease?: boolean;
-}
-
-const AnimatedValue = memo(function AnimatedValue({
-  value,
-  className,
-  style,
-  highlightOnIncrease = false,
-}: AnimatedValueProps) {
-  const prev = usePrevious(value);
-  const [changePulse, setChangePulse] = useState(0);
-  const increased = prev !== undefined && value > prev;
-
-  useEffect(() => {
-    if (prev !== undefined && prev !== value) {
-      setChangePulse((n) => n + 1);
-    }
-  }, [prev, value]);
-
-  return (
-    <span
-      className={`relative inline-grid place-items-center ${className ?? ""}`}
-      style={style}
-    >
-      {/* Primary value — pops on increase */}
-      <motion.span
-        key={`base-${changePulse}-${value}`}
-        style={gpuStyle}
-        animate={
-          increased
-            ? { scale: [1.3, 1], opacity: [0.85, 1] }
-            : { scale: 1, opacity: 1 }
-        }
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        {value}
-      </motion.span>
-
-      {/* Emerald ghost layer — fades out on top of the primary value */}
-      {highlightOnIncrease && increased && (
-        <motion.span
-          key={`emerald-${changePulse}-${value}`}
-          className="absolute inset-0 grid place-items-center text-emerald-400"
-          style={gpuStyle}
-          initial={{ opacity: 0.95, scale: 1.3 }}
-          animate={{ opacity: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          aria-hidden
-        >
-          {value}
-        </motion.span>
-      )}
-    </span>
-  );
-});
+// Fluid column gap + horizontal padding — shared by header and rows so they
+// stay pixel-aligned at every viewport size (tokens in globals.css).
+export const GRID_GAP_X = "gap-x-[var(--gap-row-x)] px-[var(--pad-row-x)]";
 
 // ── AgentRow ──────────────────────────────────────────────────────────────────
 export interface AgentRowProps {
@@ -160,7 +98,7 @@ export const AgentRow = memo(function AgentRow({
       style={gpuStyle}
       className="relative overflow-hidden rounded-xl"
     >
-      {/* ── Surge flash: gold burst on score increase ──────────────────────── */}
+      {/* ── Surge flash: gold burst on score increase (presets: motionPresets) ── */}
       {surgeKey > 0 && (
         <motion.div
           key={`surge-bg-${surgeKey}`}
@@ -169,9 +107,7 @@ export const AgentRow = memo(function AgentRow({
             backgroundColor: "rgba(201,168,76,0.3)",
             ...gpuStyle,
           }}
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: [0.9, 0], scale: [0.98, 1] }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          {...surgeBgVariants}
         />
       )}
       {surgeKey > 0 && (
@@ -179,9 +115,7 @@ export const AgentRow = memo(function AgentRow({
           key={`surge-sweep-${surgeKey}`}
           className="absolute inset-0 pointer-events-none z-[2] overflow-hidden rounded-xl"
           style={gpuStyle}
-          initial={{ opacity: 1 }}
-          animate={{ opacity: [1, 1, 0] }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          {...surgeSweepVariants}
         >
           <motion.div
             className="absolute inset-y-0 w-[45%]"
@@ -190,9 +124,7 @@ export const AgentRow = memo(function AgentRow({
                 "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.82) 20%, transparent 100%)",
               ...gpuStyle,
             }}
-            initial={{ x: "-100%" }}
-            animate={{ x: "200%" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            {...surgeSweepBarVariants}
           />
         </motion.div>
       )}
@@ -212,16 +144,14 @@ export const AgentRow = memo(function AgentRow({
               background:
                 "linear-gradient(90deg, transparent, rgba(249,226,126,0.35), rgba(249,226,126,0.6), rgba(249,226,126,0.35), transparent)",
             }}
-            initial={{ x: "-100%" }}
-            animate={{ x: "300%" }}
-            transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            {...winShimmerBarVariants}
           />
         </motion.div>
       )}
 
       {/* ── Data grid ─────────────────────────────────────────────────────── */}
       <div
-        className={`grid ${GRID_COLS} items-center gap-x-3 sm:gap-x-4 lg:gap-x-5 px-2 sm:px-3 py-[1vh] sm:py-[1.2vh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
+        className={`grid ${GRID_COLS} items-center ${GRID_GAP_X} py-[1vh] sm:py-[1.2vh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
       >
         {/* Col 1: Icon — subtle scale pulse on surge, never distorting */}
         <motion.div

@@ -35,10 +35,14 @@ export default function AnimatedCounter({
 
     const timer = setTimeout(() => {
       prevValueRef.current = value
-      motionValue.set(value)
+      // Only drive the spring when it is actually displayed. In slideOnChange
+      // mode the value renders via AnimatePresence below — feeding the spring
+      // would tick a ~3s settling animation per counter on every update with
+      // nothing subscribed to it (pure wasted frames on TV hardware).
+      if (!slideOnChange) motionValue.set(value)
     }, actualDelay)
     return () => clearTimeout(timer)
-  }, [value, motionValue, delay])
+  }, [value, motionValue, delay, slideOnChange])
 
   // Rolling digit / vertical slide: AnimatePresence wrapper when slideOnChange
   if (slideOnChange) {

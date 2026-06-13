@@ -18,7 +18,7 @@ import { useCelebrationDetection } from "@/hooks/useCelebrationDetection";
 import TopBar from "./TopBar";
 import DashboardController from "./DashboardController";
 import CelebrationOverlay from "./CelebrationOverlay";
-import RecommendationTicker from "./RecommendationTicker";
+import OverdueTicker from "./OverdueTicker";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export default function Dashboard() {
@@ -26,7 +26,7 @@ export default function Dashboard() {
   const {
     ananyshreeStats,
     anishqaStats,
-    recommendations,
+    overdueTickets,
     renewalsAnanyshree,
     renewalsAnishqa,
     isInitialLoading,
@@ -70,8 +70,8 @@ export default function Dashboard() {
 
       {/* Ticker — isolated so a marquee/Framer crash never pulls down the panels */}
       <div className="relative z-10 w-full shrink-0">
-        <ErrorBoundary label="Recommendation Ticker">
-          <RecommendationTicker recommendations={recommendations} />
+        <ErrorBoundary label="Overdue Ticker">
+          <OverdueTicker overdueTickets={overdueTickets} />
         </ErrorBoundary>
       </div>
     </div>

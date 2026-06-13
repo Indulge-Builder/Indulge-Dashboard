@@ -113,7 +113,7 @@ Layout top → bottom:
    | Resolved (Today) | Emerald + hero glow | Created IST-today, status terminal |
    | Received (Month) | Champagne | Created this IST month, not void |
    | Resolved (Month) | Green | Created this IST month, status terminal |
-   | Pending (To Resolve) | Red | Status non-terminal, **no date gate** |
+   | Pending (To Resolve) | Red | Created this IST month, status non-terminal (**month-gated**, like all metrics) |
    | Spoiled / Joker Accepted | Gold (`.joker-box`) | Joker accepted counts |
 3. **`RenewalsPanel`** — renewals this month (big handwritten Edu numeral, gold drop shadow) + renewal client names + new member assignments.
 4. **`AgentLeaderboard`** (left) + **`SpecialDates`** (right; height matched via ResizeObserver):
@@ -132,8 +132,8 @@ Layout top → bottom:
 
 - **`PerformanceLineGraph`** — native SVG multi-line chart, one Catmull-Rom spline (tension 0.35) per business vertical, draw-in `pathLength` animation with 0.12 s stagger. Colors: Indulge Global `#6B8FFF`, Shop `#FFB020`, House `#34D399`, Legacy `#C084FC`.
 - **`ConversionLedger`** — auto-scrolling sales closure ledger driven by `requestAnimationFrame` (not CSS keyframes); `dt` capped at 100 ms; on optimistic row prepend, scroll position compensates by average row height so visible content doesn't jump. Max 15 visible rows; scroll duration `max(32, rows × 6)` s.
-- **`LeadStatusHealthBar`** — segmented pipeline bar per agent (Qualified / In Discussion / Nurturing / Attempted / New / Junk). `GlossSweep` & `BreathingGlow` sub-components are stubs returning `null`.
-- Agent cards flash a one-shot `.card-win-shimmer` gold foil sweep and `.ob-metric-flash` pulse when their numbers increase (`shimmerStampByAgentId`).
+- **`LeadStatusHealthBar`** — segmented pipeline bar per agent (Qualified / In Discussion / Nurturing / Touched / New / Junk; Zoho's `attempted` is normalized into `Touched`).
+- Agent card metrics flash an `.ob-metric-flash` pulse when their numbers increase. (The old `.card-win-shimmer` gold-foil sweep was never wired up — its plumbing was removed in dry-audit G6.)
 
 ### 4.3 Home screen — `HomePanel` (WIP, env-gated)
 
@@ -213,7 +213,7 @@ Loaded via `next/font/google` in `app/layout.tsx` (+ Edu via CSS `@import`). New
 
 ### 5.5 Signature utility classes (`globals.css @layer utilities`)
 
-`.glass`, `.glass-pill`, `.gold-border-glow` · text glows `.queen-name-glow`, `.sky-name-glow`, `.gold-glow`, `.emerald-glow-hero`, `.monthly-error-glow`, `.error-overdue-glow` · ambient radial glows `.ambient-glow-center/left/right/stage/column` · separators `.separator-gold-h/v` · `.skeleton-block` (gold foil shimmer) · celebration set (`.celebration-backdrop/-avatar-glow/-name-glow/-shimmer-text/-name-flash`) · win effects `.row-win-shimmer`, `.card-win-shimmer`, `.ob-metric-flash`, `.hot-lead-card-pulse` · `.tabular-nums`, ticker classes, `.renewal-card-text`, `.drop-shadow-gold`, `.joker-box`.
+`.glass`, `.glass-pill`, `.gold-border-glow` · text glows `.queen-name-glow`, `.sky-name-glow`, `.gold-glow`, `.emerald-glow-hero`, `.monthly-error-glow`, `.error-overdue-glow` · ambient radial glows `.ambient-glow-center/left/right/stage/column` · separators `.separator-gold-h/v` · `.skeleton-block` (gold foil shimmer) · celebration set (`.celebration-backdrop/-avatar-glow/-name-glow/-shimmer-text/-name-flash`) · win effects `.row-win-shimmer`, `.ob-metric-flash`, `.hot-lead-card-pulse` · `.tabular-nums`, ticker classes, `.renewal-card-text`, `.drop-shadow-gold`, `.joker-box`.
 
 ### 5.6 Motion presets (`lib/motionPresets.ts`)
 
@@ -231,7 +231,7 @@ Loaded via `next/font/google` in `app/layout.tsx` (+ Edu via CSS `@import`). New
 
 ## 6. Functionality & Business Logic
 
-### 6.1 Ticket status model (`lib/ticketAggregation.ts`)
+### 6.1 Ticket status model (`lib/ticketStatus.ts` — single source for all status sets)
 
 ```
 VOID_STATUSES     = { spam, deleted }      → invisible to ALL math (stripped first, always)
@@ -246,12 +246,12 @@ everything else                            → open/pending
 | Received (Month) | created in current IST month, not void |
 | Resolved (Month) | created in IST month AND now terminal (NOT "resolved_at this month") |
 | Solved Today | created IST-today AND terminal |
-| Pending | non-terminal — **no date gate** (all open tickets ever) |
+| Pending | created in current IST month AND non-terminal — **month-gated** (decision 2026-06-11: every dashboard metric is month-gated; the rows route + client prune both enforce it) |
 | Per-agent stats | same windows filtered by `agent_name`; `overdueCount` = pending ∧ `is_escalated`; `incomplete` = pending ∧ `is_incomplete` |
 
 ### 6.3 IST handling (`lib/istDate.ts`)
 
-All "today"/"this month" logic is IST (UTC+05:30) via `istToday()` and `getCurrentIstMonthUtcBounds()` / `getCurrentIstDayUtcBounds()` / `getLast30DaysUtcBounds()`. Freshdesk sends naive IST strings — `freshdeskTimestampToIsoUtcForDb()` normalizes (date-only → IST midnight; space or zone-less `T` → append `+05:30`; explicit zone → as-is) and always stores UTC `Z` ISO.
+All "today"/"this month" logic is IST (UTC+05:30) via `istToday()` and `getCurrentIstMonthUtcBounds()` / `getCurrentIstDayUtcBounds()`. Freshdesk sends naive IST strings — `freshdeskTimestampToIsoUtcForDb()` normalizes (date-only → IST midnight; space or zone-less `T` → append `+05:30`; explicit zone → as-is) and always stores UTC `Z` ISO.
 
 ### 6.4 Queendom & name matching
 
@@ -278,7 +278,7 @@ Freshdesk ticket event ─► POST /api/webhooks/freshdesk ─► upsert tickets
                                    └► derived QueenStats ─► QueendomPanel re-render (+ celebration)
 
 Zoho lead event ─► POST /api/webhooks/zoho-leads ─► upsert leads
-Zoho deal event ─► POST /api/webhooks/zoho-deals ─► insert deals + onboarding_conversion_ledger
+Zoho deal event ─► POST /api/webhooks/zoho-deals ─► insert deals
                               └► Realtime ─► useOnboardingPanelData: pulse + optimistic ledger prepend
                                               + debounced (2.5 s) /api/onboarding refetch
 
@@ -315,7 +315,7 @@ All tables in `public`. Universal RLS: anon SELECT, authenticated ALL; service r
 | **tickets** | Concierge tickets (Freshdesk webhook only) | `ticket_id` PK · `status` · `queendom_name` · `agent_name` · `created_at` · `resolved_at` · `is_escalated` (only escalation webhook path sets true) · `tags` JSONB · `is_incomplete` |
 | **leads** | Zoho leads (ex `onboarding_lead_touches`) | `lead_id` PK · `agent_name` · `latest_status` · `lead_name` · `created_at` (immutable) · `modified_at` · `business_vertical` (4-value CHECK, default 'Indulge Global') |
 | **deals** | Zoho deals (ex `onboarding_deals`) | `deal_id` PK · `deal_name` · `agent_name` · `created_at`; PK violation 23505 = expected dedup |
-| **onboarding_conversion_ledger** | Scrolling closure ledger + closure counts | `id` UUID · `client_name` · `amount` NUMERIC(14,2) INR · `agent_name` · `queendom_name` (always '') · `recorded_at` · `deal_id` (partial unique idx = dedup) |
+| **onboarding_conversion_ledger** | ⚠️ **Orphaned** — no code path writes or reads it (ledger UI + closure counts come from `deals`). Drop/archive decision pending (dry-audit G4) | `id` UUID · `client_name` · `amount` NUMERIC(14,2) INR · `agent_name` · `queendom_name` (always '') · `recorded_at` · `deal_id` (partial unique idx = dedup) |
 | **jokers** | Joker suggestions (Google Sheet sync) | `client_name` · `city` · `date` · `type` · `suggestion` · `response` ("yes"/"no"/else=pending) · `queendom_name` · `joker_name` |
 | **finance_outlays** | Expense tracking (unmounted widget) | `client_name` · `task` · `amount` · `status` pending/paid · `queendom_name` |
 | **clients** | Member counts | `group` · `latest_subscription_status` (Active/Expired) · `latest_subscription_membership_type` (Premium/Genie/Monthly Trial/Standard = paid; Celebrity = complimentary) |
@@ -333,25 +333,23 @@ All GET routes use `supabaseAdmin`, return `Cache-Control: no-store`.
 
 | Route | Method | Purpose |
 |---|---|---|
-| `/api/tickets` | GET | Full-table 1000-row-batch pagination + server-side aggregation → `{ ananyshree, anishqa }: TicketStats` |
-| `/api/tickets/rows` | GET | Minimal rows for client-side aggregation: this-IST-month rows OR any still-open rows |
-| `/api/agents` | GET | Legacy per-agent stats — **not used by Dashboard** (client derives from rows) |
+| `/api/tickets/rows` | GET | Minimal rows for client-side aggregation: current-IST-month rows only (all metrics, incl. Pending, are month-gated) |
 | `/api/clients` | GET | Active members per queendom → `MemberStats` |
 | `/api/jokers` | GET | Per-joker stats (sent/accepted/rejected/pending/today/month) |
 | `/api/jokers/recommendations` | GET | Latest 15 joker rows for the ticker |
-| `/api/onboarding` | GET | Big payload: agents, top-25 ledger, lead stats per agent, dept split, daily lead trendline, 4-vertical trendline, pipeline breakdown per agent, attended trend |
+| `/api/onboarding` | GET | Big payload: agents, top-25 ledger, lead stats per agent, dept split, 4-vertical trendline, pipeline breakdown per agent |
 | `/api/renewals-panel?queendom=` | GET | Renewals + assignments for one queendom |
 | `/api/webhooks/freshdesk` | POST | "Smart Bouncer" — 3 paths: **deletion** (soft-delete), **escalation-only** (the only path that may set `is_escalated=true`; forced false for SLA-safe statuses), **full upsert** (status+queendom present; resolved → set `resolved_at`; active-clear statuses → clear it; active non-safe → omit `is_escalated` to preserve DB value). Raw body fixup replaces empty `is_escalated` placeholders with `false` |
 | `/api/webhooks/zoho-leads` | POST | Upsert into `leads` on any status; JSON or form-urlencoded; `created_at` never overwritten |
-| `/api/webhooks/zoho-deals` | POST | Dual-write: insert `deals` + insert `onboarding_conversion_ledger` (both deduped on `deal_id`; 23505 silently ignored) |
+| `/api/webhooks/zoho-deals` | POST | Insert `deals` only (deduped on `deal_id`; 23505 silently ignored). The old `onboarding_conversion_ledger` dual-write was removed — the table is orphaned (dry-audit G4, drop/archive decision pending) |
 | `/api/webhooks/zoho-calls` | — | **Not implemented** — README scaffold only |
 
-**Webhook auth** (`lib/webhookAuth.ts`): `x-webhook-secret` or `Authorization: Bearer` vs `WEBHOOK_SECRET` env; **fail-open if unset**. Helpers: `lib/webhookGuard.ts` (POST wrapper), `lib/apiGuard.ts` (GET wrapper, 503 guard).
+**Webhook auth** (`lib/webhookAuth.ts`): `x-webhook-secret` header, `Authorization: Bearer`, or `?secret=` query param vs `WEBHOOK_SECRET` env (timing-safe compare). **Fail-closed in production** when the env var is unset (401 everything); fail-open in dev only. ⚠️ The `?secret=` query param is an anti-pattern (URLs land in proxy/access logs) — kept until the Freshdesk/Zoho automation configs are confirmed not to use it (dry-audit E5); prefer the header. Helpers: `lib/webhookGuard.ts` (POST wrapper, currently unused — Zoho routes share `lib/zohoWebhook.ts` instead to keep their richer error responses), `lib/apiGuard.ts` (GET wrapper + `noStoreJson`, adopted by all GET routes).
 
-Freshdesk status sets used by the webhook:
+Freshdesk status sets used by the webhook (all imported from `lib/ticketStatus.ts`):
 
 ```ts
-RESOLVED_STATUSES        = { resolved, closed }
+TERMINAL_STATUSES        = { resolved, closed }
 SLA_SAFE_STATUSES        = { resolved, closed, nudge client, ongoing delivery, invoice due, spam, deleted }
 ACTIVE_CLEAR_RESOLVED_AT = { open, pending, nudge client, nudge vendor, ongoing delivery, invoice due }
 VOID_STATUSES            = { spam, deleted }
@@ -364,7 +362,7 @@ VOID_STATUSES            = { spam, deleted }
 | Hook | Role |
 |---|---|
 | `useDashboardData` | Central concierge state: fetches `/api/tickets/rows`, `/api/clients`, `/api/jokers`, `/api/renewals-panel`; 4 Realtime channels; 5-min polling; returns `{ ananyshreeStats, anishqaStats, renewalsAnanyshree, renewalsAnishqa, recommendations, isInitialLoading }` |
-| `useOnboardingPanelData` | Revenue state: `/api/onboarding` + deals/leads Realtime; debounced 2.5 s refetch; returns concierge/shop agents, ledger, pulse events, `leadMonthStats`, `verticalTrendline`, `ledgerScrollDuration`, `shimmerStampByAgentId`, `leadStatusByAgent`, `todayDate` |
+| `useOnboardingPanelData` | Revenue state: `/api/onboarding` + deals/leads Realtime (`useRealtimeChannel`); debounced 2.5 s refetch; returns concierge/shop agents, ledger, pulse events, `leadMonthStats`, `verticalTrendline`, `ledgerScrollDuration`, `leadStatusByAgent`, `todayDate` |
 | `useCelebrationDetection` | Diffs `tasksCompletedToday` to fire celebrations |
 | `useKeyboardControls` | TV remote / keyboard freeze + screen switching |
 | `usePrefersReducedMotion` | `matchMedia` hook — skip infinite effects when true |
@@ -375,10 +373,12 @@ VOID_STATUSES            = { spam, deleted }
 
 | File | Contents |
 |---|---|
+| `lib/ticketStatus.ts` | **Single source** for VOID / TERMINAL / INCOMPLETE_SCORE / SLA_SAFE / ACTIVE_CLEAR_RESOLVED_AT sets + `isVoid` / `isTerminal` / `isIncompleteScoreStatus` |
+| `lib/queendom.ts` | `normalizeQueendom()` — the only queendom/group matcher (`.includes()`, never equality) |
 | `lib/ticketAggregation.ts` | All ticket math, void filter, agent stats, ranking, `pruneTicketRowsForDashboardState`, `TicketRowMinimal` |
-| `lib/istDate.ts` | `istToday()`, timestamp parsing rules, IST month/day/30-day UTC bounds, ledger range helpers |
+| `lib/istDate.ts` | `istToday()`, timestamp parsing rules, IST month/day UTC bounds |
 | `lib/agentRoster.ts` | Concierge rosters + `JOKER_ROSTER` |
-| `lib/onboardingAgents.ts` | `normalizeZohoAgentName`, `getDisplayAgentName`, department lookup (deprecated: `ONBOARDING_AGENT_DISPLAY_NAMES`, `ONBOARDING_AGENT_CARDS`, `FALLBACK_AGENTS`) |
+| `lib/onboardingAgents.ts` | `normalizeZohoAgentName`, `getDisplayAgentName`, department lookup, `CONCIERGE_*`/`SHOP_*` card specs + fallback agents |
 | `lib/specialDates.ts` | Static birthday/anniversary data |
 | `lib/motionPresets.ts` | Shared Framer Motion presets (§5.6) |
 | `lib/dashboardScreens.ts` | Screen order, durations, home-panel feature flag |
@@ -394,9 +394,11 @@ VOID_STATUSES            = { spam, deleted }
 
 ## 12. Agent & Joker Rosters
 
-**Queendom Ananyshree (9):** Sanika Ahire, Ragadh Shahul, Aditya Sonde, Shaurya Verma, Poorti Gulati, Anshika Eark, Ajith Sajan, Khushi Shah, Palak Kataria.
+> Source of truth: `lib/agentRoster.ts` (a name missing there silently zeroes that agent's stats on the TV).
 
-**Queendom Anishqa (9):** Sagar Ali, Savio Francis Fernandes, Pranav Gadekar, Dhanush K, Charlotte Dias, Ria Pujhari, Rupali Chodankar, Eeti Srinivsulu, Ekta Nihalani.
+**Queendom Ananyshree (9):** Sanika Ahire, Sakshi Bhutkar, Poorti Gulati, Anshika Eark, Ajith Sajan, Khushi Shah, Palak Kataria, Athul Jose, Ritika Jain.
+
+**Queendom Anishqa (10):** Sagar Ali, Savio Francis Fernandes, Pranav Gadekar, Dhanush K, Charlotte Dias, Ria Pujhari, Rupali Chodankar, Eeti Srinivsulu, Ekta Nihalani, Rutika Kale.
 
 **Jokers:** Lilian Albrecht → ananyshree · Shruti Sharma → anishqa.
 
@@ -411,7 +413,7 @@ VOID_STATUSES            = { spam, deleted }
 | `NEXT_PUBLIC_SUPABASE_URL` | both Supabase clients | Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser Realtime client | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | all API routes | Yes (routes 503 without it) |
-| `WEBHOOK_SECRET` | webhook auth | Optional — **fail-open if missing** |
+| `WEBHOOK_SECRET` | webhook auth | **Fail-closed in production** if missing (401 all webhooks); fail-open in dev only |
 | `NEXT_PUBLIC_HOME_PANEL_ENABLED` | Home screen rotation | Optional (`"true"` to enable WIP home panel) |
 
 Run: `npm run dev` (local) / `npm run build && npm start` (production TV).
@@ -441,12 +443,9 @@ Violating any of these silently corrupts the numbers on the TV:
 
 - **Home panel** — built but production-off (`NEXT_PUBLIC_HOME_PANEL_ENABLED`).
 - **`/api/webhooks/zoho-calls`** — README only, no route; `dataSources.ts` marks `implemented: false`.
-- **Finance widgets** (`ActiveOutlays`, `OutlayLedger`) and onboarding charts (`LeadVelocityChart`, `AgentVerticalBarChart`) — exist, not mounted.
-- **`GlossSweep` / `BreathingGlow`** in `LeadStatusHealthBar` — return `null` (polish stubs).
-- **Dual-write drift risk** — zoho-deals writes `deals` + `onboarding_conversion_ledger` non-transactionally.
-- **Deprecated exports** in `lib/onboardingAgents.ts` still present — don't use in new code.
-- **`/api/agents`** — legacy, unused by the Dashboard.
-- **Doc staleness note:** `claude.md`/`design.md` (2026-05-08) state 30 s/30 s rotation; current code is **concierge 60 s / onboarding 10 s / home 30 s**.
+- **Finance widgets** (`ActiveOutlays`, `OutlayLedger`) and onboarding charts (`LeadVelocityChart`, `AgentVerticalBarChart`) — parked in `components/_unmounted/` (see its README; the charts' server data pipeline was removed and must be rebuilt before re-mounting).
+- **`onboarding_conversion_ledger` table** — orphaned in the DB (no reads or writes); drop/archive decision pending (dry-audit G4).
+- Rotation timing source of truth: `lib/dashboardScreens.ts` — **concierge 60 s / onboarding 10 s / home 30 s**.
 
 ---
 

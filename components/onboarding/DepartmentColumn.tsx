@@ -1,9 +1,10 @@
 "use client";
 
-import { memo, useEffect, useRef, useState, type CSSProperties } from "react";
+import { memo, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { gpuStyle } from "@/lib/motionPresets";
+import { usePulseOnChange } from "@/hooks/usePulseOnChange";
 import {
   EMPTY_BREAKDOWN,
   type AgentLeadStatusBreakdown,
@@ -152,7 +153,7 @@ function AgentCardContent({
       <div style={{ flex: "0 0 auto", minHeight: 0, display: "flex", alignItems: "stretch" }}>
         <div
           className="flex w-full min-w-0 flex-row items-stretch"
-          style={{ minHeight: 0 }}
+          style={{ minHeight: 0, gap: "clamp(3px, 1cqw, 14px)" }}
         >
         {/* Leads (This Month) */}
         <div
@@ -269,7 +270,6 @@ function AgentCardContent({
 interface CompactAgentCardProps {
   agent: OnboardingAgentRow;
   department: Department;
-  shimmerStamp: number;
   prefersReducedMotion: boolean;
   accent: DeptAccent;
   staggerDelay: number;
@@ -279,7 +279,6 @@ interface CompactAgentCardProps {
 const CompactAgentCard = memo(function CompactAgentCard({
   agent,
   department,
-  shimmerStamp,
   prefersReducedMotion,
   accent,
   staggerDelay,
@@ -298,25 +297,9 @@ const CompactAgentCard = memo(function CompactAgentCard({
   const isVikram = idKey === "vikram" || firstNameKey === "vikram";
   const useContainedPortrait = isKatya || isVikram;
 
-  const usePulse = (value: number | string) => {
-    const prevRef = useRef(value);
-    const [active, setActive] = useState(false);
-
-    useEffect(() => {
-      if (prevRef.current !== value) {
-        setActive(true);
-        const t = setTimeout(() => setActive(false), 560);
-        prevRef.current = value;
-        return () => clearTimeout(t);
-      }
-    }, [value]);
-
-    return active;
-  };
-
-  const monthPulse = usePulse(leadsMonth);
-  const todayPulse = usePulse(agent.leadsCreatedTodayIst);
-  const closedPulse = usePulse(closedCount);
+  const monthPulse = usePulseOnChange(leadsMonth);
+  const todayPulse = usePulseOnChange(agent.leadsCreatedTodayIst);
+  const closedPulse = usePulseOnChange(closedCount);
 
   const index = Math.round(staggerDelay / 160);
   const motionProps = prefersReducedMotion
@@ -397,7 +380,6 @@ export interface DepartmentColumnProps {
   department: Department;
   label: string;
   agents: OnboardingAgentRow[];
-  shimmerStampByAgentId: Record<string, number>;
   prefersReducedMotion: boolean;
   leadStatusByAgent: LeadStatusByAgent;
 }
@@ -406,7 +388,6 @@ export function DepartmentColumn({
   department,
   label,
   agents,
-  shimmerStampByAgentId,
   prefersReducedMotion,
   leadStatusByAgent,
 }: DepartmentColumnProps) {
@@ -421,8 +402,8 @@ export function DepartmentColumn({
           border: "1px solid rgba(255,255,255,0.14)",
           background: "#0a0a0a",
           boxShadow: "none",
-          padding: "clamp(0.45rem,0.9vmin,1rem)",
-          gap: "clamp(0.2rem,0.4vmin,0.5rem)",
+          padding: "clamp(0.45rem,0.9vmin,1.5rem)",
+          gap: "clamp(0.2rem,0.4vmin,0.75rem)",
         }}
       >
         {/* Department header — inside the card */}
@@ -458,7 +439,7 @@ export function DepartmentColumn({
           style={{
             gridTemplateColumns: "minmax(0, 1fr)",
             gridTemplateRows: `repeat(${Math.max(agents.length, 1)}, minmax(0, 1fr))`,
-            gap: "clamp(0.3rem,0.55vmin,0.7rem)",
+            gap: "clamp(0.3rem,0.7vmin,1.1rem)",
           }}
         >
           {agents.map((agent, idx) => (
@@ -466,7 +447,6 @@ export function DepartmentColumn({
               key={agent.id}
               agent={agent}
               department={department}
-              shimmerStamp={shimmerStampByAgentId[agent.id] ?? 0}
               prefersReducedMotion={prefersReducedMotion}
               accent={accent}
               staggerDelay={idx * 160}

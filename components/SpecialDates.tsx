@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gift, Heart } from "lucide-react";
 import { getSpecialDates } from "@/lib/specialDates";
+import { istToday, getCurrentIstDayUtcBounds } from "@/lib/istDate";
 
 function parseYmd(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -14,26 +15,21 @@ function formatDay(dateStr: string): string {
   return new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(parseYmd(dateStr));
 }
 
+// "Today" / "passed" / "this month" are IST calendar comparisons (dry-audit
+// D7) — date strings are YYYY-MM-DD so lexicographic compare is correct.
+// Identical output on the IST TV box; a UTC kiosk no longer shifts the day.
+
 function isToday(dateStr: string): boolean {
-  const today = new Date();
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return today.getFullYear() === y && today.getMonth() === m - 1 && today.getDate() === d;
+  return dateStr === istToday().day;
 }
 
 function isDatePassed(dateStr: string): boolean {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dateObj = new Date(y, m - 1, d);
-  dateObj.setHours(0, 0, 0, 0);
-  return dateObj.getTime() < today.getTime();
+  return dateStr < istToday().day;
 }
 
-/** Event is in the viewer’s current calendar month (local time). */
+/** Event is in the current IST calendar month. */
 function isCurrentMonth(dateStr: string): boolean {
-  const today = new Date();
-  const [y, m] = dateStr.split("-").map(Number);
-  return today.getFullYear() === y && today.getMonth() === m - 1;
+  return dateStr.slice(0, 7) === istToday().month;
 }
 
 interface SpecialDatesProps {
@@ -41,17 +37,20 @@ interface SpecialDatesProps {
 }
 
 export default function SpecialDates({ queendomId }: SpecialDatesProps) {
-  // Tick at midnight so the "today" card vanishes as soon as the day ends (e.g. dashboard left on overnight)
-  const [dateKey, setDateKey] = useState(() => new Date().toDateString());
+  // Tick at IST midnight so the "today" card vanishes as soon as the day ends
+  // (e.g. dashboard left on overnight).
+  const [dateKey, setDateKey] = useState(() => istToday().day);
   const midnightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const scheduleNextMidnight = () => {
-      const now = new Date();
-      const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      const msUntilMidnight = nextMidnight.getTime() - now.getTime();
+      const { endExclusiveUtcIso } = getCurrentIstDayUtcBounds();
+      const msUntilMidnight = Math.max(
+        1000,
+        Date.parse(endExclusiveUtcIso) - Date.now(),
+      );
       return setTimeout(() => {
-        setDateKey(new Date().toDateString());
+        setDateKey(istToday().day);
         midnightTimeoutRef.current = scheduleNextMidnight();
       }, msUntilMidnight);
     };
@@ -70,7 +69,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
   }, [queendomId, dateKey]);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col gap-4 overflow-y-auto pb-3 pt-0.5">
+    <div className="flex h-full min-h-0 w-full flex-col gap-[var(--gap-list)] overflow-y-auto pb-3 pt-0.5">
       <AnimatePresence mode="popLayout">
         {filteredDates.map((item) => {
           const isTodayCard = isToday(item.date);
@@ -84,9 +83,9 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className={`
-                relative flex-shrink-0 flex w-full min-h-[clamp(70px,10vh,100px)]
-                flex-row items-center justify-between gap-5
-                rounded-xl overflow-hidden px-5 py-3.5 sm:px-6
+                relative flex-shrink-0 flex w-full min-h-[clamp(70px,10vh,160px)]
+                flex-row items-center justify-between gap-[clamp(1.25rem,1.5vw,2.75rem)]
+                rounded-xl overflow-hidden px-[clamp(1.25rem,1.5vw,2.75rem)] py-[clamp(0.875rem,1.4vh,1.75rem)]
                 ${isAnniversary && !isExpired ? "anniversary-highlight" : ""}
                 ${isExpired ? "special-date-expired" : ""}
               `}

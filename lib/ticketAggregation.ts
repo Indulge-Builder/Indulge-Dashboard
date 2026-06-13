@@ -12,31 +12,8 @@ import {
 import type { TicketStats, AgentStats } from "./types";
 import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "./agentRoster";
 import { buildRoster } from "./agentRoster";
-
-/**
- * Void statuses: spam / deleted tickets stay in Supabase for audit but are
- * completely invisible to the TV dashboard — filtered out before any math.
- */
-export const VOID_STATUSES = new Set(["spam", "deleted"]);
-const isVoid = (s: string | null): boolean =>
-  VOID_STATUSES.has((s ?? "").toLowerCase().trim());
-
-/** Statuses that mean a ticket is legitimately done (actual successes only). */
-const TERMINAL_STATUSES = new Set(["resolved", "closed"]);
-const isTerminal = (s: string | null): boolean =>
-  TERMINAL_STATUSES.has((s ?? "").toLowerCase().trim());
-
-/** Pending statuses where `is_incomplete` feeds the agent leaderboard incomplete column. */
-const INCOMPLETE_SCORE_STATUSES = new Set([
-  "nudge client",
-  "nudge vendor",
-  "ongoing delivery",
-  "invoice due",
-]);
-
-export function isIncompleteScoreStatus(s: string | null): boolean {
-  return INCOMPLETE_SCORE_STATUSES.has((s ?? "").toLowerCase().trim());
-}
+import { isVoid, isTerminal, isIncompleteScoreStatus } from "./ticketStatus";
+import { normalizeQueendom } from "./queendom";
 
 export interface TicketRowMinimal {
   id: string;
@@ -92,11 +69,9 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
   }
 
   for (const row of uniqueRows) {
-    const queendom = (row.queendom_name ?? "").toLowerCase().trim();
-    let bucket: TicketBucket | null = null;
-    if (queendom.includes("ananyshree")) bucket = result.ananyshree;
-    else if (queendom.includes("anishqa")) bucket = result.anishqa;
-    if (!bucket) continue;
+    const queendom = normalizeQueendom(row.queendom_name);
+    if (!queendom) continue;
+    const bucket: TicketBucket = result[queendom];
 
     const createdDay = toISTDay(row.created_at);
     const createdMonth = toISTMonth(row.created_at);
@@ -117,7 +92,9 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
       bucket.solvedToday++;
     }
 
-    // Pending — status is NOT terminal (no date gate: includes old open tickets)
+    // Pending — status is NOT terminal. Month-gated like every other metric:
+    // input rows are already scoped to the current IST month (rows route filter
+    // + pruneTicketRowsForDashboardState), so no extra date check is needed here.
     if (!terminal) {
       bucket.pendingToResolve++;
     }
@@ -180,7 +157,8 @@ function calcAgent(
       t.agent_name?.toLowerCase() === nameLower &&
       toISTMonth(t.created_at) === THIS_MONTH,
   ).length;
-  // Pending = assigned to this agent AND status NOT terminal (no date gate)
+  // Pending = assigned to this agent AND status NOT terminal. Month-gated via
+  // the input row scope (rows route filter + prune), same as the queendom stats.
   const pendingTickets = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&

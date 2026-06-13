@@ -16,10 +16,10 @@
  * Returns: { ananyshree: JokerStats, anishqa: JokerStats }
  */
 
-import { NextResponse } from "next/server";
 import { JOKER_ROSTER } from "@/lib/agentRoster";
-import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
 import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
+import type { JokerStats } from "@/lib/types";
 
 interface JokerRow {
   joker_name: string | null;
@@ -41,17 +41,6 @@ function rowIstDay(row: JokerRow): string {
   return toISTDay(row.created_at);
 }
 
-interface JokerStats {
-  uniqueSuggestionsCount: number;
-  totalSent: number;
-  totalSuggestions: number;
-  acceptedCount: number;
-  rejectedCount: number;
-  pendingSuggestions: number;
-  acceptedToday: number;
-  totalThisMonth: number;
-}
-
 const emptyStats: JokerStats = {
   uniqueSuggestionsCount: 0,
   totalSent: 0,
@@ -64,24 +53,12 @@ const emptyStats: JokerStats = {
 };
 
 const emptyResponse = () =>
-  NextResponse.json(
-    { ananyshree: emptyStats, anishqa: emptyStats },
-    { headers: { "Cache-Control": "no-store" } },
-  );
+  noStoreJson({ ananyshree: emptyStats, anishqa: emptyStats });
 
-export async function GET() {
+// The TV must never see an error from this panel — every failure path degrades
+// to zeroed stats (200), with the guard's 500 as a last-resort backstop.
+export const GET = withApiGuard(async (_req, db) => {
   try {
-    const { db, response } = requireSupabaseAdminOr503();
-    if (!db) {
-      return (
-        response ??
-        NextResponse.json(
-          { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
-          { status: 503 },
-        )
-      );
-    }
-
     const { data: rows, error } = await db
       .from("jokers")
       .select("joker_name, suggestion, response, date, created_at");
@@ -147,15 +124,12 @@ export async function GET() {
       result[queendom] = aggregateForJoker(name);
     }
 
-    return NextResponse.json(
-      {
-        ananyshree: result.ananyshree ?? emptyStats,
-        anishqa: result.anishqa ?? emptyStats,
-      },
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    return noStoreJson({
+      ananyshree: result.ananyshree ?? emptyStats,
+      anishqa: result.anishqa ?? emptyStats,
+    });
   } catch (err) {
     console.error("[/api/jokers] Unexpected error:", err);
     return emptyResponse();
   }
-}
+});

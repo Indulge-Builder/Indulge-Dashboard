@@ -1,4 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Edu+AU+VIC+WA+NT+Hand+Arrows:wght@400..700&display=swap");
+/* Fonts: Cinzel/Inter/Baskerville/Montserrat are self-hosted via next/font in
+   app/layout.tsx. "Edu AU VIC WA NT Hand Arrows" is not available in next/font,
+   so it loads via a preconnected <link> in layout.tsx — never via a
+   render-blocking @import here. */
 
 @tailwind base;
 @tailwind components;
@@ -101,14 +104,24 @@
   --text-fin-cell: clamp(1.725rem, min(3.975vmin, 4.875vh), 5.25rem);
 
   /* ── Spacing scale ─────────────────────────────────────────────────────── */
-  --pad-panel: clamp(12px, 3vw, 40px);
-  --pad-card: clamp(10px, 2vw, 28px);
-  --pad-cell: clamp(6px, 0.8vw, 14px);
-  --gap-card: clamp(0.65rem, min(1.4vmin, 1.8vh), 2rem);
+  /* Caps sized for large-format TVs (up to 4K): spacing keeps scaling with
+     the viewport alongside the fluid type scale instead of stalling at
+     laptop-width caps while the numerals keep growing. */
+  --pad-panel: clamp(12px, 3vw, 72px);
+  --pad-card: clamp(10px, 2vw, 52px);
+  --pad-cell: clamp(6px, 0.8vw, 28px);
+  --gap-card: clamp(0.65rem, min(1.4vmin, 1.8vh), 2.75rem);
+
+  /* Fluid gaps (replace fixed gap-2/3/4 Tailwind steps in TV panels) */
+  --gap-metric: clamp(0.5rem, min(1.15vw, 1.7vh), 2.4rem); /* between metric tiles */
+  --gap-list: clamp(0.7rem, min(1vw, 1.5vh), 1.6rem); /* vertical list item gaps */
+  --gap-section: clamp(1.5rem, 2.2vw, 4.25rem); /* between major side-by-side blocks */
+  --gap-row-x: clamp(0.75rem, 1.4vw, 2.75rem); /* leaderboard grid column gap */
+  --pad-row-x: clamp(0.5rem, 0.8vw, 1.5rem); /* leaderboard row horizontal padding */
 
   /* Kiosk / layout sizing */
   --size-celebration-avatar: clamp(140px, 18vmin, 300px);
-  --size-center-separator: clamp(24px, 2vw, 52px);
+  --size-center-separator: clamp(24px, 2vw, 80px);
   /* Ticker track — horizontal padding only (typography comes from RecommendationTicker.tsx) */
   --pad-ticker-item-x: 5rem;
 
@@ -149,6 +162,11 @@ body::before {
   position: fixed;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  /* Tile at native 256px (stitchTiles makes it seamless) instead of stretching
+     one SVG across the viewport — avoids a full-resolution feTurbulence
+     rasterization (expensive at 4K on TV CPUs). Imperceptible at 3% opacity. */
+  background-repeat: repeat;
+  background-size: 256px 256px;
   opacity: 0.03;
   pointer-events: none;
   z-index: 0;
@@ -572,25 +590,6 @@ body::before {
   50% {
     opacity: 1;
   }
-}
-
-/* z-[15]: foil sweep over full-art onboarding card */
-.card-win-shimmer {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    115deg,
-    transparent 20%,
-    rgba(212, 175, 55, 0.3) 45%,
-    rgba(255, 255, 255, 0.5) 50%,
-    rgba(212, 175, 55, 0.3) 55%,
-    transparent 80%
-  );
-  background-size: 200% auto;
-  animation: foil-shimmer 2s cubic-bezier(0.4, 0, 0.2, 1) 1;
-  pointer-events: none;
-  z-index: 15;
 }
 
 /* Onboarding agent card — live metric pulse */

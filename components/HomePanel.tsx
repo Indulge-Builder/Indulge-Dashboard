@@ -15,6 +15,8 @@ import {
   EASE_LUXURY,
 } from "@/lib/motionPresets";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useScreenActive } from "@/hooks/useScreenActive";
+import { istToday } from "@/lib/istDate";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -82,21 +84,36 @@ type DailyQuote = (typeof DAILY_QUOTES)[number];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// Per-timezone formatter caches — Intl.DateTimeFormat construction is costly
+// on TV CPUs and this panel was building 8 of them per second (2 per clock).
+// Cached formatters produce identical output.
+const cityDateFormatters = new Map<string, Intl.DateTimeFormat>();
+const digitalTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getCityDateFormatter(timezone: string): Intl.DateTimeFormat {
+  let fmt = cityDateFormatters.get(timezone);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year:     "numeric",
+      month:    "numeric",
+      day:      "numeric",
+      hour:     "numeric",
+      minute:   "numeric",
+      second:   "numeric",
+      hour12:   false,
+    });
+    cityDateFormatters.set(timezone, fmt);
+  }
+  return fmt;
+}
+
 /**
  * Derive a local Date object in the given IANA timezone from a UTC base Date.
  * Uses Intl.DateTimeFormat.formatToParts — no external library required.
  */
 function getCityDate(timezone: string, base: Date): Date {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    year:     "numeric",
-    month:    "numeric",
-    day:      "numeric",
-    hour:     "numeric",
-    minute:   "numeric",
-    second:   "numeric",
-    hour12:   false,
-  }).formatToParts(base);
+  const parts = getCityDateFormatter(timezone).formatToParts(base);
 
   const n = (type: string): number =>
     parseInt(parts.find((p) => p.type === type)?.value ?? "0", 10);
@@ -107,13 +124,18 @@ function getCityDate(timezone: string, base: Date): Date {
 
 /** Format base Date as 12-hour time string in the given timezone. */
 function getDigitalTime(timezone: string, base: Date): string {
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    hour:     "2-digit",
-    minute:   "2-digit",
-    second:   "2-digit",
-    hour12:   true,
-  }).format(base);
+  let fmt = digitalTimeFormatters.get(timezone);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      hour:     "2-digit",
+      minute:   "2-digit",
+      second:   "2-digit",
+      hour12:   true,
+    });
+    digitalTimeFormatters.set(timezone, fmt);
+  }
+  return fmt.format(base);
 }
 
 // ─── Clock Card ───────────────────────────────────────────────────────────────
@@ -168,15 +190,21 @@ function ClockCard({ entry, baseDate, reduced }: ClockCardProps) {
 export default function HomePanel() {
   const [now, setNow] = useState<Date>(() => new Date());
   const reduced       = usePrefersReducedMotion();
+  const isScreenActive = useScreenActive();
 
-  // One interval drives all 4 clocks simultaneously
+  // One interval drives all 4 clocks simultaneously — paused while this layer
+  // is hidden (dry-audit H4); snaps to the current time on resume so the
+  // clocks are correct the moment the fade-in starts.
   useEffect(() => {
+    if (!isScreenActive) return;
+    setNow(new Date());
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [isScreenActive]);
 
+  // Quote-of-the-day rotates on the IST calendar day (dry-audit D7).
   const todayQuote: DailyQuote =
-    DAILY_QUOTES[new Date().getDate() % DAILY_QUOTES.length];
+    DAILY_QUOTES[Number(istToday().day.slice(8, 10)) % DAILY_QUOTES.length];
 
   // Spread-safe animation props derived from reduced-motion preference
   const quoteWrapperAnim = reduced ? { ...widgetFadeIn(0), animate: { opacity: 1, y: 0 } } : widgetFadeIn(300);

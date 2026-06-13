@@ -25,6 +25,7 @@
  *     "status":             "{{ticket.status}}",
  *     "queendom_name":      "{{ticket.group.name}}",
  *     "agent_name":         "{{ticket.agent.name}}",
+ *     "subject":            "{{ticket.subject}}",
  *     "ticket_created_at":  "{{ticket.created_at}}",
  *     "resolved_date_time": "{{ticket.resolved_at}}"
  *   }
@@ -49,6 +50,7 @@
  *     status        TEXT        NOT NULL,
  *     queendom_name TEXT        NOT NULL,
  *     agent_name    TEXT,
+ *     subject       TEXT,
  *     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
  *     resolved_at   TIMESTAMPTZ,
  *     is_escalated  BOOLEAN     NOT NULL DEFAULT false
@@ -61,6 +63,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
 import { assertWebhookSecret } from "@/lib/webhookAuth";
+import {
+  SLA_SAFE_STATUSES,
+  ACTIVE_CLEAR_RESOLVED_AT,
+  TERMINAL_STATUSES,
+  VOID_STATUSES,
+} from "@/lib/ticketStatus";
 
 type WebhookType = "upsert" | "update" | "deletion";
 
@@ -73,40 +81,15 @@ interface FreshdeskPayload {
   status?: string;
   queendom_name?: string;
   agent_name?: string; // {{ticket.agent.name}}
+  subject?: string; // {{ticket.subject}} — shown in the Overdue Ticker
   ticket_created_at?: string; // {{ticket.created_at}}
   resolved_date_time?: string; // {{ticket.resolved_at}} — empty string when not yet
   /** SLA breach automation only — must be a JSON boolean. */
   is_escalated?: boolean;
 }
 
-// Statuses where SLA/overdue score must be cleared (explicit false on upsert).
-// "spam" and "deleted" are included so void tickets can never be escalated.
-const SLA_SAFE_STATUSES = new Set([
-  "resolved",
-  "closed",
-  "nudge client",
-  "ongoing delivery",
-  "invoice due",
-  "spam",
-  "deleted",
-]);
-
-// Red list (Open, Pending, Nudge Vendor): do not send is_escalated on upsert —
-// preserves DB (e.g. stays true after SLA breach). Same for resolved_at: clear.
-const ACTIVE_CLEAR_RESOLVED_AT = new Set([
-  "open",
-  "pending",
-  "nudge client",
-  "nudge vendor",
-  "ongoing delivery",
-  "invoice due",
-]);
-
-// Terminal completion — stamp resolved_at and clear escalation (also in SLA_SAFE).
-const RESOLVED_STATUSES = new Set(["resolved", "closed"]);
-
-// Void statuses: ticket is spam or deleted — keep in DB but clear escalation.
-const VOID_STATUSES = new Set(["spam", "deleted"]);
+// Status policy sets (SLA_SAFE / ACTIVE_CLEAR_RESOLVED_AT / TERMINAL / VOID)
+// are shared with the aggregation math — single source: lib/ticketStatus.ts.
 
 /**
  * Convert Freshdesk datetime strings to strict UTC ISO (`…Z`) for `timestamptz`.
@@ -288,13 +271,19 @@ export async function POST(req: NextRequest) {
   if (payload.agent_name !== undefined) {
     row.agent_name = agent_name;
   }
+  // Only overwrite subject when the payload actually carries one, so an update
+  // webhook that omits {{ticket.subject}} can't blank a previously-stored value.
+  if (typeof payload.subject === "string" && payload.subject.trim()) {
+    row.subject = payload.subject.trim();
+  }
 
   const createdIso = parseWebhookInstant(ticket_created_at);
   if (createdIso) {
     row.created_at = createdIso;
   }
 
-  if (RESOLVED_STATUSES.has(statusLower)) {
+  if (TERMINAL_STATUSES.has(statusLower)) {
+    // Terminal completion — stamp resolved_at and clear escalation (also in SLA_SAFE).
     row.resolved_at = parseWebhookInstant(resolved_date_time) ?? now;
     row.is_escalated = false;
   } else if (VOID_STATUSES.has(statusLower)) {

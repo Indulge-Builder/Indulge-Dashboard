@@ -13,38 +13,20 @@
  *      ALTER PUBLICATION supabase_realtime ADD TABLE public.members;
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
+import { NextResponse } from "next/server";
+import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
 import { getCurrentIstMonthUtcBounds } from "@/lib/istDate";
-
-type QueendomId = "ananyshree" | "anishqa";
-
-function normalizeQueendom(q: string | null): QueendomId | null {
-  const s = (q ?? "").toLowerCase().trim();
-  if (s.includes("ananyshree")) return "ananyshree";
-  if (s.includes("anishqa")) return "anishqa";
-  return null;
-}
+import { normalizeQueendom } from "@/lib/queendom";
+import type { QueendomId } from "@/types";
 
 const MONTH_ROW_CAP = 2000;
 
-export async function GET(req: NextRequest) {
+export const GET = withApiGuard(async (req, db) => {
   const queendom = req.nextUrl.searchParams.get("queendom") as QueendomId | null;
   if (!queendom || !["ananyshree", "anishqa"].includes(queendom)) {
     return NextResponse.json(
       { error: "Missing or invalid queendom param" },
       { status: 400 }
-    );
-  }
-
-  const { db, response } = requireSupabaseAdminOr503();
-  if (!db) {
-    return (
-      response ??
-      NextResponse.json(
-        { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
-        { status: 503 },
-      )
     );
   }
 
@@ -102,23 +84,17 @@ export async function GET(req: NextRequest) {
       console.error("[/api/renewals-panel] members error:", membersErr.message);
     }
 
-    return NextResponse.json(
-      {
-        totalRenewalsThisMonth,
-        renewals: latestRenewals,
-        assignments: latestAssignments,
-      },
-      { headers: { "Cache-Control": "no-store" } }
-    );
+    return noStoreJson({
+      totalRenewalsThisMonth,
+      renewals: latestRenewals,
+      assignments: latestAssignments,
+    });
   } catch (err) {
     console.error("[/api/renewals-panel] error:", err);
-    return NextResponse.json(
-      {
-        totalRenewalsThisMonth: 0,
-        renewals: [],
-        assignments: [],
-      },
-      { headers: { "Cache-Control": "no-store" } }
-    );
+    return noStoreJson({
+      totalRenewalsThisMonth: 0,
+      renewals: [],
+      assignments: [],
+    });
   }
-}
+});

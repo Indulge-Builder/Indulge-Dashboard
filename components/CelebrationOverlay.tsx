@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useMemo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { getInitials } from "@/lib/format";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,21 +11,34 @@ interface CelebrationOverlayProps {
   onComplete: () => void;
 }
 
-function getInitials(name: string): string {
-  const parts = name.trim().split(" ");
-  return parts.length >= 2
-    ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-    : name.slice(0, 2).toUpperCase();
+// ─── Web Audio chime ───────────────────────────────────────────────────────────
+// Module-level singleton AudioContext (dry-audit H1): Chromium caps concurrent
+// contexts (~6), so creating one per celebration leaks audio threads over
+// multi-day uptime until construction starts throwing and the chime dies.
+// Create once, resume() on use (contexts start suspended without a gesture).
+let sharedAudioCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext | null {
+  try {
+    if (!sharedAudioCtx) {
+      const Ctor =
+        window.AudioContext ||
+        (window as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!Ctor) return null;
+      sharedAudioCtx = new Ctor();
+    }
+    if (sharedAudioCtx.state === "suspended") void sharedAudioCtx.resume();
+    return sharedAudioCtx;
+  } catch {
+    return null;
+  }
 }
 
-// ─── Web Audio chime (unchanged) ───────────────────────────────────────────────
 function playSuccessSound() {
   try {
-    const ctx = new (
-      window.AudioContext ||
-      (window as { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext!
-    )();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     const master = ctx.createGain();
     master.gain.setValueAtTime(0.14, ctx.currentTime);
     master.connect(ctx.destination);

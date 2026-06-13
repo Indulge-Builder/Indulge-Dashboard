@@ -25,7 +25,8 @@
  *   has the original 3 concierge agents.
  */
 
-import { NextResponse } from "next/server";
+import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
+import { paginateAll } from "@/lib/db";
 import {
   getCurrentIstDayUtcBounds,
   getCurrentIstMonthUtcBounds,
@@ -40,21 +41,16 @@ import {
   getAgentDepartment,
   getDisplayAgentName,
 } from "@/lib/onboardingAgents";
-import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import {
   EMPTY_BREAKDOWN,
-  EMPTY_PIPELINE,
   type AgentLeadStatusBreakdown,
   type Department,
   type DepartmentStats,
   type LeadMonthStats,
   type LeadStatusByAgent,
-  type LeadTrendPoint,
   type OnboardingAgentRow,
   type OnboardingApiPayload,
   type OnboardingLedgerRow,
-  type PipelineStatusCounts,
-  type TeamAttendedDay,
   type VerticalTrendPoint,
   type ZohoLeadStatus,
 } from "@/lib/onboardingTypes";
@@ -75,14 +71,6 @@ const ALL_CANONICAL_CARDS = [
 ];
 
 // ── Empty payload ─────────────────────────────────────────────────────────────
-
-const EMPTY_DEPT_STATS = (dept: Department): DepartmentStats => ({
-  department: dept,
-  totalRupeesClosedThisMonth: 0,
-  totalLakhsClosedThisMonth: 0,
-  pipeline: { ...EMPTY_PIPELINE },
-  agents: [],
-});
 
 const EMPTY: OnboardingApiPayload = { agents: [], ledger: [] };
 
@@ -107,7 +95,6 @@ function mapLedgerRows(ledgerQ: {
       id: String(r.deal_id),
       clientName: r.deal_name,
       recordedAt: r.created_at,
-      assignedTo: "",
       // Store full name in DB, render compact first-name label in UI.
       agentName: getDisplayAgentName(r.agent_name),
       department: getAgentDepartment(r.agent_name),
@@ -116,19 +103,14 @@ function mapLedgerRows(ledgerQ: {
 }
 
 // ── GET handler ───────────────────────────────────────────────────────────────
+// TV resilience: missing DB or any unexpected failure degrades to the EMPTY
+// payload (200) — this screen must render zeros, never an error.
 
-export async function GET() {
-  const { db } = requireSupabaseAdminOr503();
-
-  if (!db) {
-    return NextResponse.json(EMPTY, {
-      headers: { "Cache-Control": "no-store" },
-    });
-  }
-
+export const GET = withApiGuard(
+  async (_req, db) => {
   try {
     // ── IST month bounds (PostgREST filter) + same calendar logic as /api/tickets ──
-    const { day: todayIST, month: thisMonthIST } = istToday();
+    const { month: thisMonthIST } = istToday();
     const { startUtcIso: monthStart, endExclusiveUtcIso: monthEndEx } =
       getCurrentIstMonthUtcBounds();
     const { startUtcIso: todayStartUtc, endExclusiveUtcIso: todayEndExclusiveUtc } =
@@ -152,32 +134,21 @@ export async function GET() {
       return ms >= todayStartMs && ms < todayEndExMs;
     };
 
-    const LEADS_PAGE = 1000;
-    const LEADS_MAX_PAGES = 250;
-
     /** Paginate half-open [start, end) so we never silently drop rows past a single limit. */
-    const fetchLeadsCreatedInWindow = async (
+    const fetchLeadsCreatedInWindow = (
       selectCols: string,
       windowStart: string,
       windowEndExclusive: string,
-    ): Promise<{ rows: Record<string, unknown>[]; error: Error | null }> => {
-      const rows: Record<string, unknown>[] = [];
-      for (let p = 0; p < LEADS_MAX_PAGES; p++) {
-        const from = p * LEADS_PAGE;
-        const { data, error } = await db
+    ) =>
+      paginateAll<Record<string, unknown>>((from, to) =>
+        db
           .from("leads")
           .select(selectCols)
           .gte("created_at", windowStart)
           .lt("created_at", windowEndExclusive)
           .order("created_at", { ascending: true })
-          .range(from, from + LEADS_PAGE - 1);
-        if (error) return { rows: [], error: new Error(error.message) };
-        const batch = (data ?? []) as unknown as Record<string, unknown>[];
-        rows.push(...batch);
-        if (batch.length < LEADS_PAGE) break;
-      }
-      return { rows, error: null };
-    };
+          .range(from, to),
+      );
 
   // ── 1. Agent rows from DB (limit 7; fall back per canonical seat) ──────
     const agentsDbQ = await db
@@ -418,7 +389,6 @@ export async function GET() {
     // ── 4. Closure rows — THIS MONTH (IST cohort) from deals table ──────────
     type ClosureRow = { agent_name: string };
     let closureRows: ClosureRow[] = [];
-    let closureDataAvailable = false;
 
     try {
       const { data: dealsData, error: dealsErr } = await db
@@ -430,7 +400,6 @@ export async function GET() {
 
       if (!dealsErr) {
         closureRows = (dealsData ?? []) as ClosureRow[];
-        closureDataAvailable = true;
       } else {
         console.warn("[/api/onboarding] deals closure query failed", dealsErr);
       }
@@ -484,57 +453,31 @@ export async function GET() {
         leadsCreatedTodayIst: leadsToday,
         // leadsThisMonth kept as alias for any downstream consumers
         leadsThisMonth: attempted,
-        closedLakhsThisMonth: closureDataAvailable ? 0 : undefined,
       };
     });
 
     // ── 7. Build per-department stats ──────────────────────────────────────
-    const buildDeptStats = (dept: Department): DepartmentStats => {
-      const deptAgents = agents.filter((a) => a.department === dept);
-
-      // Month-to-date lead rows for this dept (Zoho pipeline volume; not per-status yet)
-      const pipelineTouched = allTouchRowsThisMonth.filter(
-        (row) => getAgentDepartment(String(row.agent_name)) === dept,
-      ).length;
-
-      // Won count for this dept (from closure rows — already this-month scoped)
-      const pipelineWon = closureRows.filter(
-        (row) => getAgentDepartment(row.agent_name) === dept,
-      ).length;
-
-      const pipeline: PipelineStatusCounts = {
-        ...EMPTY_PIPELINE,
-        Touched: pipelineTouched,
-        Won: pipelineWon,
-      };
-
-      return {
-        department: dept,
-        totalRupeesClosedThisMonth: 0,
-        totalLakhsClosedThisMonth: 0,
-        pipeline,
-        agents: deptAgents,
-      };
-    };
+    // (dry-audit D6: the half-filled pipeline/rupees fields were dropped — the
+    // UI consumes only departments.{concierge,shop}.agents.)
+    const buildDeptStats = (dept: Department): DepartmentStats => ({
+      department: dept,
+      agents: agents.filter((a) => a.department === dept),
+    });
 
     const departments: NonNullable<OnboardingApiPayload["departments"]> = {
       concierge: buildDeptStats("concierge"),
       shop: buildDeptStats("shop"),
     };
 
-    // ── 8. Trendlines — reuse allLeadRowsThisMonth (no extra DB round-trips) ──
+    // ── 8. Trendline — reuse allLeadRowsThisMonth (no extra DB round-trips) ──
     //
-    // Both the vertical trendline and the lead velocity chart are derived from
-    // the same month-window rows already fetched in section 3. Zero extra reads.
+    // The vertical trendline is derived from the same month-window rows
+    // already fetched in section 3. Zero extra reads.
 
-    let leadTrendline: LeadTrendPoint[] = [];
-    let teamAttendedTrend: TeamAttendedDay[] = [];
     let verticalTrendline: VerticalTrendPoint[] = [];
 
     if (!leadsMonthFetchError) {
       try {
-        const todayDate = new Date(`${todayIST}T00:00:00+05:30`);
-
         const istFmt = new Intl.DateTimeFormat("en-CA", {
           timeZone: "Asia/Kolkata",
           year: "numeric",
@@ -581,58 +524,6 @@ export async function GET() {
           "Indulge House":  vertCounts[date]?.["Indulge House"]  ?? 0,
           "Indulge Legacy": vertCounts[date]?.["Indulge Legacy"] ?? 0,
         }));
-
-        // ── Lead velocity chart (month-to-date days only) ────────────────────
-        const daysSoFar =
-          Math.round((todayDate.getTime() - monthStartMs) / 86_400_000) + 1;
-        const monthDateKeys: string[] = [];
-        for (let d = 0; d < daysSoFar; d++) {
-          monthDateKeys.push(istFmt.format(new Date(monthStartMs + d * 86_400_000)));
-        }
-
-        const conciergeByDate: Record<string, number> = {};
-        const shopByDate: Record<string, number> = {};
-        const onboardingAttendedByDate: Record<string, number> = {};
-        const shopAttendedByDate: Record<string, number> = {};
-        for (const key of monthDateKeys) {
-          conciergeByDate[key] = 0;
-          shopByDate[key] = 0;
-          onboardingAttendedByDate[key] = 0;
-          shopAttendedByDate[key] = 0;
-        }
-
-        for (const row of allLeadRowsThisMonth) {
-          const createdKey = toISTDay(String(row.created_at ?? ""));
-          if (!createdKey) continue;
-
-          if (createdKey in conciergeByDate) {
-            const dept = getAgentDepartment(String(row.agent_name ?? ""));
-            if (dept === "concierge") conciergeByDate[createdKey]++;
-            else shopByDate[createdKey]++;
-          }
-
-          const rowStatus = String(row.latest_status ?? "New").trim();
-          if (rowStatus !== "New") {
-            const modKey = toISTDay(String(row.modified_at ?? row.created_at ?? ""));
-            if (!modKey || !(modKey in conciergeByDate)) continue;
-            const dept = getAgentDepartment(String(row.agent_name ?? ""));
-            if (dept === "concierge")
-              onboardingAttendedByDate[modKey] = (onboardingAttendedByDate[modKey] ?? 0) + 1;
-            else
-              shopAttendedByDate[modKey] = (shopAttendedByDate[modKey] ?? 0) + 1;
-          }
-        }
-
-        leadTrendline = monthDateKeys.map((date) => ({
-          date,
-          conciergeLeads: conciergeByDate[date] ?? 0,
-          shopLeads:      shopByDate[date]       ?? 0,
-        }));
-        teamAttendedTrend = monthDateKeys.map((date) => ({
-          date,
-          onboarding: onboardingAttendedByDate[date] ?? 0,
-          shop:       shopAttendedByDate[date]        ?? 0,
-        }));
       } catch (e) {
         console.warn("[/api/onboarding] trendline computation failed — charts will be empty", e);
       }
@@ -643,19 +534,15 @@ export async function GET() {
       agents,
       ledger,
       departments,
-      leadTrendline,
       leadStatusByAgent,
-      teamAttendedTrend,
       verticalTrendline,
       leadMonthStats,
     };
-    return NextResponse.json(payload, {
-      headers: { "Cache-Control": "no-store" },
-    });
+    return noStoreJson(payload);
   } catch (e) {
     console.error("[/api/onboarding]", e);
-    return NextResponse.json(EMPTY, {
-      headers: { "Cache-Control": "no-store" },
-    });
+    return noStoreJson(EMPTY);
   }
-}
+  },
+  { noDbResponse: () => noStoreJson(EMPTY) },
+);

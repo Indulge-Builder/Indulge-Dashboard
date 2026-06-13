@@ -17,47 +17,20 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import {
-  freshdeskTimestampToIsoUtcForDb,
-  normalizeZohoCrmTimestampForIstDigits,
-} from "@/lib/istDate";
 import { normalizeZohoAgentName } from "@/lib/onboardingAgents";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { assertWebhookSecret } from "@/lib/webhookAuth";
+import {
+  readZohoWebhookBody,
+  zohoNowUtcForDb,
+  zohoTimestampToDb,
+} from "@/lib/zohoWebhook";
 
 interface ZohoDealsPayload {
   deal_id?: string | number;
   agent_name?: string;
   deal_name?: string;
   created_at?: string;
-}
-
-function safeJsonParse(text: string): { ok: true; value: unknown } | { ok: false; error: string } {
-  try {
-    return { ok: true, value: JSON.parse(text) as unknown };
-  } catch (e) {
-    const msg =
-      e instanceof Error ? e.message : typeof e === "string" ? e : "Unknown JSON parse error";
-    return { ok: false, error: msg };
-  }
-}
-
-function parseFormUrlEncoded(text: string): Record<string, string> {
-  const params = new URLSearchParams(text);
-  const out: Record<string, string> = {};
-  params.forEach((v, k) => {
-    out[k] = v;
-  });
-  return out;
-}
-
-function toDbTimestamp(isoOrEmpty: string | null): string | null {
-  if (!isoOrEmpty || !isoOrEmpty.trim()) return null;
-  const zohoNormalized = normalizeZohoCrmTimestampForIstDigits(isoOrEmpty.trim());
-  const normalized =
-    freshdeskTimestampToIsoUtcForDb(zohoNormalized) ?? zohoNormalized;
-  const t = Date.parse(normalized);
-  return Number.isFinite(t) ? normalized : null;
 }
 
 function parsePayload(body: unknown): {
@@ -77,14 +50,8 @@ function parsePayload(body: unknown): {
     typeof o.agent_name === "string" ? normalizeZohoAgentName(o.agent_name) : "";
   const dealName = typeof o.deal_name === "string" ? o.deal_name.trim() : "";
   if (!dealId || !agentName || !dealName) return null;
-  const createdAt = typeof o.created_at === "string" ? toDbTimestamp(o.created_at) : null;
+  const createdAt = typeof o.created_at === "string" ? zohoTimestampToDb(o.created_at) : null;
   return { dealId, agentName, dealName, createdAt };
-}
-
-function recordedAtUtcForDb(): string {
-  return (
-    freshdeskTimestampToIsoUtcForDb(new Date().toISOString()) ?? new Date().toISOString()
-  );
 }
 
 export async function POST(req: NextRequest) {
@@ -102,48 +69,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const requestId =
-    req.headers.get("x-request-id") ??
-    req.headers.get("cf-ray") ??
-    `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-  const contentType = req.headers.get("content-type") ?? "";
-
-  console.info("[zoho-deals webhook] accepted", {
-    requestId,
-    contentType,
-  });
-
-  let rawText = "";
-  try {
-    rawText = await req.text();
-  } catch (e) {
-    console.error("[zoho-deals webhook] failed reading body", { requestId, error: e });
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-  }
-
-  let body: unknown;
-  if (contentType.toLowerCase().includes("application/json")) {
-    const parsedJson = safeJsonParse(rawText);
-    if (!parsedJson.ok) {
-      console.error("[zoho-deals webhook] invalid JSON", {
-        requestId,
-        parseError: parsedJson.error,
-      });
-      return NextResponse.json(
-        { error: "Invalid JSON body", detail: parsedJson.error },
-        { status: 400 },
-      );
-    }
-    body = parsedJson.value;
-  } else if (
-    contentType.toLowerCase().includes("application/x-www-form-urlencoded")
-  ) {
-    body = parseFormUrlEncoded(rawText);
-  } else {
-    const parsedJson = safeJsonParse(rawText);
-    body = parsedJson.ok ? parsedJson.value : parseFormUrlEncoded(rawText);
-  }
+  const bodyResult = await readZohoWebhookBody(req, "zoho-deals webhook");
+  if (!bodyResult.ok) return bodyResult.response;
+  const { body, requestId } = bodyResult;
 
   const parsed = parsePayload(body);
   if (!parsed) {
@@ -166,7 +94,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { dealId, agentName, dealName, createdAt } = parsed;
-  const createdAtFinal = createdAt ?? recordedAtUtcForDb();
+  const createdAtFinal = createdAt ?? zohoNowUtcForDb();
 
   console.log("[zoho-deals webhook] insert deal", {
     requestId,
