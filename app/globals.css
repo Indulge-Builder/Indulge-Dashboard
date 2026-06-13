@@ -72,8 +72,10 @@
     3.25rem
   ); /* heading-md: section titles, leaderboard header */
 
-  /* Labels — hero / broadcast metric captions (was duplicated text-[clamp(30px,3vw,46px)]) */
-  --text-label-xl: clamp(30px, 3vw, 46px);
+  /* Labels — hero / broadcast metric captions. Single source of truth for the
+     pill ("Paid"/"Celebrity"), the 5 queendom stat-card titles, and the
+     renewals-bar card titles — keep them all on this token. */
+  --text-label-xl: clamp(2.25rem, 3.2vw, 3.75rem);
   --text-label-lg: clamp(
     1.5rem,
     2.5vw,

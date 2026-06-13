@@ -5,14 +5,12 @@ import { motion } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
 import QueendomWingspanHeader from "./QueendomWingspanHeader";
 import AgentLeaderboard from "./leaderboard/AgentLeaderboard";
-import JokerMetricsStrip from "./JokerMetricsStrip";
 import RenewalsPanel from "./RenewalsPanel";
 import SpecialDates from "@/components/SpecialDates";
 import { SectionDivider } from "@/components/ui/SectionDivider";
 import { StatCard } from "@/components/ui/StatCard";
 import { GoldGlassCard } from "@/components/ui/GoldGlassCard";
 import type { QueenStats } from "@/lib/types";
-import { getJokerNameForQueendom } from "@/lib/agentRoster";
 import { safeNum } from "@/lib/format";
 import type { RenewalsPanelData } from "@/types";
 
@@ -77,7 +75,7 @@ function MetricBox({
     <StatCard
       surfaceClass={boxClass}
       style={boxStyle}
-      labelClass={`font-inter font-semibold text-[var(--text-label-xl)] ${labelTracking} uppercase ${labelColor} mb-[0.2vh]`}
+      labelClass={`font-inter font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] ${labelTracking} uppercase ${labelColor} mb-[0.2vh]`}
       label={label}
     >
       <AnimatedCounter
@@ -99,11 +97,6 @@ export default function QueendomPanel({
   renewalsData,
 }: QueendomPanelProps) {
   const radialOrigin = side === "left" ? "25% 45%" : "75% 45%";
-  const jokerDisplayName = useMemo(
-    () =>
-      getJokerNameForQueendom(name.toLowerCase() as "ananyshree" | "anishqa"),
-    [name],
-  );
 
   // Memoized selector for total count — stable as new rows stream in from WebSocket
   const totalReceived = useMemo(
@@ -345,18 +338,6 @@ export default function QueendomPanel({
               </div>
             </div>
           </div>
-
-          {/* Row 2–3: Joker — full width like scorecard & renewals */}
-          {stats.joker != null && jokerDisplayName != null ? (
-            <div className="flex w-full min-h-0 flex-1 flex-col gap-[var(--gap-card)] border-t border-gold-500/20 pt-[var(--gap-card)]">
-              <JokerMetricsStrip
-                compact
-                jokerName={jokerDisplayName}
-                joker={stats.joker}
-                baseDelayMs={delay + 1450}
-              />
-            </div>
-          ) : null}
         </div>
       </motion.div>
     </motion.section>

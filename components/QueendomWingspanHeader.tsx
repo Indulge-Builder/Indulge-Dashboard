@@ -39,9 +39,11 @@ function MetricPill({
   );
 }
 
-/** Matches `MetricBox` / 5-metric hero label typography in QueendomPanel */
+/** Matches `MetricBox` / 5-metric hero label typography in QueendomPanel.
+ *  Sized up (was --text-label-xl) so pill labels read at least as large as the
+ *  agent leaderboard header (clamp(1.5rem,2.5vw,3rem)) on the TV. */
 const metricLabelClass =
-  "font-inter shrink-0 font-semibold text-[var(--text-label-xl)] tracking-[0.25em] uppercase leading-none";
+  "font-inter shrink-0 font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] tracking-[0.25em] uppercase leading-none";
 
 /** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
 const pillNumberSizeClass = "text-[clamp(2.15rem,3.45vw,3.45rem)]";
@@ -92,7 +94,7 @@ export default function QueendomWingspanHeader({
         {/* Right metric — hug center (start-aligned in column) */}
         <div className="flex min-w-0 justify-start justify-self-stretch pl-1 sm:pl-2">
           <MetricPill delaySec={delayRightSec} slideFrom="right">
-            <span className={`${metricLabelClass} text-champagne`}>Unpaid</span>
+            <span className={`${metricLabelClass} text-champagne`}>Celebrity</span>
             <AnimatedCounter
               value={complimentaryCount}
               className={unpaidNumberClass}

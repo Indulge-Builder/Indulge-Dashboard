@@ -74,7 +74,7 @@ export default function QueendomSkeleton({ side }: { side: "left" | "right" }) {
               }}
             />
 
-            {/* Right pill (Unpaid) */}
+            {/* Right pill (Celebrity) */}
             <div className="flex justify-start">
               <Sk
                 className="rounded-full"

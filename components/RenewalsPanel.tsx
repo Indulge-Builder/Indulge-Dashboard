@@ -56,7 +56,7 @@ export default function RenewalsPanel({
 
       {/* ── Renewals List (Center) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-[var(--gap-list)] min-w-0">
-        <p className="font-inter font-semibold text-[clamp(1.575rem,2.1vw,2.4rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
+        <p className="font-inter font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
           Latest Renewals
         </p>
         <div className="flex flex-col items-center gap-[var(--gap-list)] w-full">
@@ -77,7 +77,7 @@ export default function RenewalsPanel({
 
       {/* ── Latest members (Right) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-[var(--gap-list)] min-w-0">
-        <p className="font-inter font-semibold text-[clamp(1.575rem,2.1vw,2.4rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
+        <p className="font-inter font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
           Latest Members
         </p>
         <div className="flex flex-col items-center gap-[var(--gap-list)] w-full">
