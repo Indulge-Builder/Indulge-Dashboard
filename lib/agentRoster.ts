@@ -5,7 +5,7 @@ import type { AgentStats } from "./types";
 
 export const ROSTER_ANISHQA: string[] = [
   "Sagar Ali",
-  "Savio Francis Fernandes",
+  "Neha Sah",
   "Pranav Gadekar",
   "Dhanush K",
   "Charlotte Dias",
