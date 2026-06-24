@@ -46,11 +46,10 @@ function MetricPill({
   );
 }
 
-/** Matches `MetricBox` / 5-metric hero label typography in QueendomPanel.
- *  Sized up (was --text-label-xl) so pill labels read at least as large as the
- *  agent leaderboard header (clamp(1.5rem,2.5vw,3rem)) on the TV. */
-const metricLabelClass =
-  "font-cinzel shrink-0 font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.25em] uppercase leading-none";
+/** Tier-3 field label (.label-field) — same caption voice as the hero metric
+ *  labels and the leaderboard column headers. Pill labels are field captions,
+ *  not section titles, so they share the quiet uniform tier (colour added at use). */
+const metricLabelClass = "label-field shrink-0";
 
 /** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
 const pillNumberSizeClass = "text-[clamp(2.15rem,3.45cqw,3.45rem)]";

@@ -34,16 +34,16 @@ export default function AgentLeaderboard({
       <div className="z-10 bg-obsidian/98 border-b border-gold-500/20 flex-shrink-0">
         <div className={`grid ${GRID_COLS} ${GRID_GAP_X} pb-[0.9cqh]`}>
           <span />
-          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold text-center">
+          <span className="label-field text-amber-300/95 text-center">
             Genies
           </span>
-          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-green-400 font-semibold text-center">
+          <span className="label-field text-green-400 text-center">
             Today
           </span>
-          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-champagne font-semibold text-center">
+          <span className="label-field text-champagne text-center">
             Monthly
           </span>
-          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-red-400 font-semibold text-center">
+          <span className="label-field text-red-400 text-center">
             Pending
           </span>
         </div>

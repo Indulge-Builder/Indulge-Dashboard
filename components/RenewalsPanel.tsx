@@ -33,19 +33,19 @@ function NameRow({ name, isNew }: { name: string; isNew: boolean }) {
 export default function RenewalsPanel({ data, delay = 0 }: RenewalsPanelProps) {
   return (
     <GoldGlassCard
-      className="flex items-stretch gap-[var(--gap-metric)]"
+      className="elevate-mid flex items-stretch gap-[var(--gap-metric)]"
       style={{ padding: "clamp(12px, 1.5cqw, 40px)" }}
     >
-      {/* ── Counter (Left) — same as Spoiled card (joker-box, text-gold-300) ──── */}
-      <div className="flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[clamp(140px,18cqw,200px)] joker-box rounded-xl border border-liquid-gold-end/35 px-[var(--pad-cell)] py-3">
-        <p className="font-montserrat font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.3em] uppercase text-champagne mb-[0.2cqh]">
-          RENEWALS
+      {/* ── Counter (Left) — lit plinth, foil-gold engraved numerals ─────────── */}
+      <div className="flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[clamp(140px,18cqw,200px)] surface-luxe rounded-xl px-[var(--pad-cell)] py-3">
+        <p className="label-field text-champagne mb-[0.4cqh]">
+          Renewals
           <br />
-          (This Month)
+          <span className="text-[0.62em] opacity-70">(This Month)</span>
         </p>
         <AnimatedCounter
           value={data.totalRenewalsThisMonth}
-          className="font-montserrat text-8xl min-[900px]:text-9xl leading-none text-gold-300 tabular-nums"
+          className="font-montserrat text-8xl min-[900px]:text-9xl leading-none text-foil-gold tabular-nums"
           delay={delay + 200}
           slideOnChange
         />
@@ -53,8 +53,8 @@ export default function RenewalsPanel({ data, delay = 0 }: RenewalsPanelProps) {
 
       {/* ── Renewals List (Center) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-[var(--gap-list)] min-w-0">
-        <p className="font-montserrat font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
-          Renewals
+        <p className="title-card text-champagne mb-[0.6cqh] text-center">
+          Renewed Members
         </p>
         <div className="flex flex-col items-center gap-[var(--gap-list)] w-full">
           {data.renewals.length === 0 ? (
@@ -74,7 +74,7 @@ export default function RenewalsPanel({ data, delay = 0 }: RenewalsPanelProps) {
 
       {/* ── Latest members (Right) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-[var(--gap-list)] min-w-0">
-        <p className="font-montserrat font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
+        <p className="title-card text-champagne mb-[0.6cqh] text-center">
           New Members
         </p>
         <div className="flex flex-col items-center gap-[var(--gap-list)] w-full">

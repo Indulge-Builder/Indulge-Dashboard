@@ -55,7 +55,6 @@ function MetricBox({
   slideOnChange,
   labelColor = "text-champagne",
   valueColor = "text-champagne",
-  labelTracking = "tracking-[0.25em]",
   valueSizeClass = "text-8xl min-[900px]:text-9xl",
   boxClass = "flex-1 flex flex-col items-center justify-center text-center min-w-0 bg-black/30 rounded-xl border border-gold-500/20",
   boxStyle = { padding: "1.2cqh var(--pad-cell)" },
@@ -66,7 +65,6 @@ function MetricBox({
   slideOnChange?: boolean;
   labelColor?: string;
   valueColor?: string;
-  labelTracking?: string;
   valueSizeClass?: string;
   boxClass?: string;
   boxStyle?: CSSProperties;
@@ -75,7 +73,7 @@ function MetricBox({
     <StatCard
       surfaceClass={boxClass}
       style={boxStyle}
-      labelClass={`font-cinzel font-semibold text-[clamp(1.6rem,2.2cqw,2.75rem)] ${labelTracking} uppercase ${labelColor} mb-[0.4cqh]`}
+      labelClass={`label-field ${labelColor} mb-[0.4cqh]`}
       label={label}
     >
       <AnimatedCounter
@@ -215,7 +213,6 @@ export default function QueendomPanel({
               delay={delay + 800}
               slideOnChange
               labelColor="text-emerald-300"
-              labelTracking="tracking-[0.35em]"
               valueColor="text-foil-emerald emerald-glow-hero"
               boxClass="surface-luxe-hero rounded-xl flex flex-col items-center justify-center text-center flex-1 min-w-0"
               boxStyle={{ padding: "1.2cqh var(--pad-cell)" }}
@@ -226,7 +223,7 @@ export default function QueendomPanel({
               {/* Masthead: centered label flanked by gold rules (luxury crest) */}
               <div className="flex items-center justify-center gap-[clamp(0.75rem,1.4cqw,2rem)] px-[var(--pad-cell)] pt-[1cqh] pb-[0.6cqh]">
                 <span className="separator-gold-h flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
-                <span className="font-cinzel font-semibold text-[clamp(1.5rem,2.2cqw,2.6rem)] tracking-[0.42em] uppercase text-champagne/85 whitespace-nowrap">
+                <span className="title-card text-champagne/85 whitespace-nowrap">
                   This Month
                 </span>
                 <span className="separator-gold-h flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
@@ -272,7 +269,6 @@ export default function QueendomPanel({
                   value={jokerAccepted}
                   delay={delay + 1200}
                   slideOnChange
-                  labelTracking="tracking-[0.3em]"
                   valueColor="text-foil-gold"
                   valueSizeClass="text-9xl min-[900px]:text-[9rem]"
                   boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
