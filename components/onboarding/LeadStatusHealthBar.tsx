@@ -90,8 +90,8 @@ const ORDERED_STATUSES: ZohoLeadStatus[] = (
   Object.keys(STATUS_COLORS) as ZohoLeadStatus[]
 ).sort((a, b) => STATUS_COLORS[a].order - STATUS_COLORS[b].order);
 
-const BAR_H   = "clamp(44px, 5.2vh, 78px)";
-const RADIUS  = "clamp(7px, 0.85vh, 13px)";
+const BAR_H   = "clamp(44px, 5.2cqh, 78px)";
+const RADIUS  = "clamp(7px, 0.85cqh, 13px)";
 
 
 function LeadStatusHealthBar_({
@@ -195,7 +195,7 @@ function LeadStatusHealthBar_({
                 {showCount && (
                   <span
                     style={{
-                      fontSize:      "clamp(22px, 2.8vmin, 44px)",
+                      fontSize:      "clamp(22px, 2.8cqmin, 44px)",
                       fontFamily:    "'Cinzel', serif",
                       fontWeight:    700,
                       color:         "rgba(255,255,255,0.97)",
@@ -264,8 +264,8 @@ function LeadStatusHealthBar_({
       <div
         className="flex flex-row items-stretch"
         style={{
-          marginTop: "clamp(18px, 2.6vh, 34px)",
-          gap:       "clamp(6px, 0.65vmin, 10px)",
+          marginTop: "clamp(18px, 2.6cqh, 34px)",
+          gap:       "clamp(6px, 0.65cqmin, 10px)",
         }}
       >
         {orderedNonZero.map((status) => {
@@ -277,23 +277,23 @@ function LeadStatusHealthBar_({
               className="flex flex-1 flex-col items-center justify-center"
               style={{
                 padding:
-                  "clamp(8px, 1vh, 14px) clamp(6px, 0.75vmin, 12px)",
-                borderRadius: "clamp(6px, 0.75vmin, 11px)",
+                  "clamp(8px, 1cqh, 14px) clamp(6px, 0.75cqmin, 12px)",
+                borderRadius: "clamp(6px, 0.75cqmin, 11px)",
                 background:   "#101722",
                 border:       `1px solid color-mix(in srgb, ${cfg.flat} 28%, transparent)`,
-                gap:          "clamp(5px, 0.45vmin, 8px)",
+                gap:          "clamp(5px, 0.45cqmin, 8px)",
               }}
             >
               {/* Label row: glowing dot + status name — Queendom-style label tier */}
               <div
                 className="flex items-center"
-                style={{ gap: "clamp(5px, 0.5vmin, 8px)" }}
+                style={{ gap: "clamp(5px, 0.5cqmin, 8px)" }}
               >
                 <div
                   aria-hidden
                   style={{
-                    width:        "clamp(8px, 1vmin, 14px)",
-                    height:       "clamp(8px, 1vmin, 14px)",
+                    width:        "clamp(8px, 1cqmin, 14px)",
+                    height:       "clamp(8px, 1cqmin, 14px)",
                     borderRadius: "50%",
                     background:   cfg.flat,
                     boxShadow:    `0 0 8px ${cfg.glow}`,
@@ -303,7 +303,7 @@ function LeadStatusHealthBar_({
                 <span
                   style={{
                     fontSize:
-                      "clamp(18px, min(2.6vmin, 2.8vw), 36px)",
+                      "clamp(18px, min(2.6cqmin, 2.8cqw), 36px)",
                     fontFamily:    "'Inter', sans-serif",
                     fontWeight:    600,
                     color:         cfg.flat,
@@ -322,7 +322,7 @@ function LeadStatusHealthBar_({
               <span
                 style={{
                   fontSize:
-                    "clamp(28px, min(4vmin, 4.5vw), 56px)",
+                    "clamp(28px, min(4cqmin, 4.5cqw), 56px)",
                   fontFamily:    "'Cinzel', serif",
                   fontWeight:    700,
                   color:         cfg.flat,
@@ -346,7 +346,7 @@ function PipelineLabel() {
   return (
     <div
       className="flex items-center"
-      style={{ marginTop: "clamp(6px, 0.9vh, 13px)", marginBottom: "clamp(12px, 1.6vh, 22px)", gap: "clamp(8px, 1vmin, 14px)" }}
+      style={{ marginTop: "clamp(6px, 0.9cqh, 13px)", marginBottom: "clamp(12px, 1.6cqh, 22px)", gap: "clamp(8px, 1cqmin, 14px)" }}
     >
       <div
         aria-hidden
@@ -354,7 +354,7 @@ function PipelineLabel() {
       />
       <span
         style={{
-          fontSize:      "clamp(22px, 2.6vmin, 40px)",
+          fontSize:      "clamp(22px, 2.6cqmin, 40px)",
           fontFamily:    "'Cinzel', serif",
           fontWeight:    700,
           color:         "rgba(255,255,255,0.38)",

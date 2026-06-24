@@ -1,7 +1,6 @@
-/* Fonts: Cinzel/Inter/Baskerville/Montserrat are self-hosted via next/font in
-   app/layout.tsx. "Edu AU VIC WA NT Hand Arrows" is not available in next/font,
-   so it loads via a preconnected <link> in layout.tsx — never via a
-   render-blocking @import here. */
+/* Fonts: the dashboard uses a two-font system — Cinzel (titles/labels) and
+   Montserrat (data/body) — both self-hosted via next/font in app/layout.tsx.
+   Inter, Libre Baskerville, and "Edu …" were retired 2026-06-19. */
 
 @tailwind base;
 @tailwind components;
@@ -9,8 +8,7 @@
 
 /* ── Luxury Noir Design System ─────────────────────────────────────────────── */
 :root {
-  /* Legacy font vars (kept for backward-compat) */
-  --font-edu: "Edu AU VIC WA NT Hand Arrows", cursive;
+  /* Title font fallback alias (Montserrat is the data font, set via next/font) */
   --font-cinzel: "Cinzel", serif;
 
   /* ── Surfaces ──────────────────────────────────────────────────────────── */
@@ -477,6 +475,92 @@ body::before {
       rgba(212, 175, 55, 0.35),
       transparent
     );
+  }
+}
+
+/* ── Luxury material system ──────────────────────────────────────────────────
+   One implied light source (top). Every surface gets a bright top "rim" where
+   light catches the edge, a soft gradient fill, and a darker base — so a flat
+   div reads as a physical, lit object on the obsidian instead of a screen
+   rectangle. Two elevation tiers (recessed support vs. floating focal) build
+   hierarchy. All STATIC: no animation, no backdrop-filter (24/7 TV GPU law).
+   ────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Recessed supporting surface — sits INTO the panel (the quiet base plane). */
+  .surface-luxe {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 20%),
+      linear-gradient(180deg, rgba(22, 19, 12, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%);
+    box-shadow:
+      inset 0 1px 0 0 rgba(253, 230, 138, 0.12),
+      inset 0 0 0 1px rgba(212, 175, 55, 0.09),
+      inset 0 -16px 32px -26px rgba(0, 0, 0, 0.85);
+  }
+
+  /* Elevated focal plinth — the green "Today" anchor; emerald-tinted rim+floor. */
+  .surface-luxe-hero {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 24%),
+      linear-gradient(180deg, rgba(20, 28, 22, 0.5) 0%, rgba(0, 0, 0, 0.45) 100%);
+    box-shadow:
+      inset 0 1px 0 0 rgba(214, 255, 233, 0.22),
+      inset 0 0 0 1px rgba(52, 211, 153, 0.18),
+      inset 0 -20px 42px -28px rgba(0, 0, 0, 0.85),
+      inset 0 -44px 64px -52px rgba(52, 211, 153, 0.22);
+  }
+
+  /* Float the focal CARD above the panel: grounding shadow + soft gold aura +
+     bright top rim. Outer shadows are NOT clipped by the card's overflow-hidden;
+     supersedes .gold-border-glow (declared earlier) so it must carry the 1px. */
+  .elevate-hero {
+    box-shadow:
+      inset 0 1px 0 0 rgba(253, 230, 138, 0.22),
+      inset 0 0 0 1px rgba(212, 175, 55, 0.14),
+      0 24px 60px -28px rgba(0, 0, 0, 0.8),
+      0 0 72px -16px rgba(212, 175, 55, 0.14);
+  }
+
+  /* Double-rule "engraving" frame: a second hairline inset from the edge — the
+     Cartier-box / banknote device. Host must be position:relative (GoldGlassCard
+     already is) and may clip via overflow-hidden (the frame sits inside). */
+  .engrave-frame::after {
+    content: "";
+    position: absolute;
+    inset: clamp(6px, 0.7cqw, 14px);
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.12);
+    pointer-events: none;
+  }
+
+  /* Engraved-metal numerals — static metallic inlay, top-light to deep shade.
+     Pairs with the existing *-glow text-shadows (the glow draws from the glyph
+     silhouette, so foil fill + aura coexist). */
+  .text-foil-gold {
+    background: linear-gradient(
+      180deg,
+      #fdf3cf 0%,
+      #f3d77e 38%,
+      #d4af37 70%,
+      #b8902c 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .text-foil-emerald {
+    background: linear-gradient(
+      180deg,
+      #d9fbe9 0%,
+      #6ee7b7 40%,
+      #34d399 72%,
+      #18a47a 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
   }
 }
 

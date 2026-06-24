@@ -19,7 +19,7 @@ function NameRow({ name, isNew }: { name: string; isNew: boolean }) {
         strokeWidth={2.5}
       />
       <span
-        className={`font-inter font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] truncate renewal-card-text ${
+        className={`font-montserrat font-semibold text-[clamp(1.425rem,2.325cqw,2.925rem)] truncate renewal-card-text ${
           isNew ? "celebration-shimmer-text" : ""
         }`}
         style={{ maxWidth: "100%" }}
@@ -30,25 +30,22 @@ function NameRow({ name, isNew }: { name: string; isNew: boolean }) {
   );
 }
 
-export default function RenewalsPanel({
-  data,
-  delay = 0,
-}: RenewalsPanelProps) {
+export default function RenewalsPanel({ data, delay = 0 }: RenewalsPanelProps) {
   return (
     <GoldGlassCard
       className="flex items-stretch gap-[var(--gap-metric)]"
-      style={{ padding: "clamp(12px, 1.5vw, 40px)" }}
+      style={{ padding: "clamp(12px, 1.5cqw, 40px)" }}
     >
       {/* ── Counter (Left) — same as Spoiled card (joker-box, text-gold-300) ──── */}
-      <div className="flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[clamp(140px,18vw,200px)] joker-box rounded-xl border border-liquid-gold-end/35 px-[var(--pad-cell)] py-3">
-        <p className="font-inter font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] tracking-[0.3em] uppercase text-champagne mb-[0.2vh]">
+      <div className="flex flex-col items-center justify-center text-center flex-shrink-0 min-w-[clamp(140px,18cqw,200px)] joker-box rounded-xl border border-liquid-gold-end/35 px-[var(--pad-cell)] py-3">
+        <p className="font-montserrat font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.3em] uppercase text-champagne mb-[0.2cqh]">
           RENEWALS
           <br />
           (This Month)
         </p>
         <AnimatedCounter
           value={data.totalRenewalsThisMonth}
-          className="font-edu text-8xl min-[900px]:text-9xl leading-none text-gold-300 tabular-nums"
+          className="font-montserrat text-8xl min-[900px]:text-9xl leading-none text-gold-300 tabular-nums"
           delay={delay + 200}
           slideOnChange
         />
@@ -56,12 +53,12 @@ export default function RenewalsPanel({
 
       {/* ── Renewals List (Center) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-[var(--gap-list)] min-w-0">
-        <p className="font-inter font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
-          Latest Renewals
+        <p className="font-montserrat font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
+          Renewals
         </p>
         <div className="flex flex-col items-center gap-[var(--gap-list)] w-full">
           {data.renewals.length === 0 ? (
-            <p className="font-inter font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] text-champagne/50">
+            <p className="font-montserrat font-semibold text-[clamp(1.425rem,2.325cqw,2.925rem)] text-champagne/50">
               —
             </p>
           ) : (
@@ -77,12 +74,12 @@ export default function RenewalsPanel({
 
       {/* ── Latest members (Right) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col justify-center items-center gap-[var(--gap-list)] min-w-0">
-        <p className="font-inter font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
-          Latest Members
+        <p className="font-montserrat font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.4em] uppercase text-champagne mb-1 text-center">
+          New Members
         </p>
         <div className="flex flex-col items-center gap-[var(--gap-list)] w-full">
           {data.assignments.length === 0 ? (
-            <p className="font-inter font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] text-champagne/50">
+            <p className="font-montserrat font-semibold text-[clamp(1.425rem,2.325cqw,2.925rem)] text-champagne/50">
               —
             </p>
           ) : (

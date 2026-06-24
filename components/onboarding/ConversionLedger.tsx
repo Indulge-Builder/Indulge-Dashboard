@@ -69,10 +69,10 @@ function ConversionLedgerRow({
 
   return (
     <div
-      className="relative grid grid-cols-3 items-center gap-x-[clamp(0.25rem,1vw,2rem)] border-b border-gold-500/[0.07] py-[clamp(10px,min(1.6vmin,1.8vh),22px)]"
+      className="relative grid grid-cols-3 items-center gap-x-[clamp(0.25rem,1cqw,2rem)] border-b border-gold-500/[0.07] py-[clamp(10px,min(1.6cqmin,1.8cqh),22px)]"
       style={{
         borderLeft: `2px solid ${accent.border}`,
-        paddingLeft: "clamp(6px,1vmin,10px)",
+        paddingLeft: "clamp(6px,1cqmin,10px)",
       }}
       aria-hidden={ariaHidden}
     >
@@ -81,19 +81,19 @@ function ConversionLedgerRow({
         style={{ background: accent.gradient }}
       />
       <span
-        className="relative min-w-0 truncate px-1 text-center font-inter font-medium leading-none text-champagne"
+        className="relative min-w-0 truncate px-1 text-center font-montserrat font-medium leading-none text-champagne"
         style={cell}
       >
         {row.clientName}
       </span>
       <span
-        className="relative min-w-0 truncate px-1 text-center font-inter font-medium leading-none text-champagne/90"
+        className="relative min-w-0 truncate px-1 text-center font-montserrat font-medium leading-none text-champagne/90"
         style={cell}
       >
         {formatLedgerDate(row.recordedAt)}
       </span>
       <span
-        className="relative min-w-0 truncate px-1 text-center font-inter font-semibold leading-none text-champagne"
+        className="relative min-w-0 truncate px-1 text-center font-montserrat font-semibold leading-none text-champagne"
         style={cell}
       >
         {row.agentName}
@@ -234,15 +234,15 @@ export function ConversionLedger({
       className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
       style={{
         padding:
-          "clamp(0.85rem, min(2.1vh, 2.4vmin), 2rem) clamp(0.75rem, min(2.5vmin, 3.2vw), 2.5rem)",
+          "clamp(0.85rem, min(2.1cqh, 2.4cqmin), 2rem) clamp(0.75rem, min(2.5cqmin, 3.2cqw), 2.5rem)",
       }}
     >
       {/* ── Section heading ── */}
-      <div className="relative mb-[1.8vh] flex w-full flex-shrink-0 flex-col items-center gap-y-[0.55vh] text-center">
+      <div className="relative mb-[1.8cqh] flex w-full flex-shrink-0 flex-col items-center gap-y-[0.55cqh] text-center">
         <div className="flex w-full items-center justify-center">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
           <p
-            className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2vmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
+            className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
             style={{ fontSize: ONBOARDING_LEDGER_TITLE_FONT }}
           >
             Conversion Ledger
@@ -254,7 +254,7 @@ export function ConversionLedger({
       {/* ── Column headers ── */}
       <div className="relative border-b border-gold-500/10 pb-3 text-center">
         <div
-          className="grid grid-cols-3 gap-x-[clamp(0.25rem,1vw,2rem)] font-inter font-semibold uppercase tracking-[0.2em] text-champagne"
+          className="grid grid-cols-3 gap-x-[clamp(0.25rem,1cqw,2rem)] font-montserrat font-semibold uppercase tracking-[0.2em] text-champagne"
           style={{ fontSize: ONBOARDING_LEDGER_HEADER_FONT }}
         >
           <span className="min-w-0 truncate px-1 text-center">Client</span>
@@ -267,7 +267,7 @@ export function ConversionLedger({
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden pt-3">
         {rows.length === 0 ? (
           <p
-            className="py-10 text-center font-inter text-gold-500/50"
+            className="py-10 text-center font-montserrat text-gold-500/50"
             style={{ fontSize: ONBOARDING_LEDGER_CELL_FONT }}
           >
             Awaiting conversions…

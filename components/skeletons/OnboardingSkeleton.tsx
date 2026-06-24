@@ -30,8 +30,8 @@ function SkAgentCard({ delay = 0 }: { delay?: number }) {
       style={{
         border: "1px solid rgba(255,255,255,0.08)",
         background: "#0a0f18",
-        gap: "clamp(4px,0.6vmin,8px)",
-        padding: "clamp(5px,0.7vmin,10px)",
+        gap: "clamp(4px,0.6cqmin,8px)",
+        padding: "clamp(5px,0.7cqmin,10px)",
       }}
     >
       {/* Portrait placeholder */}
@@ -39,22 +39,22 @@ function SkAgentCard({ delay = 0 }: { delay?: number }) {
         className="w-full rounded-lg"
         style={{
           flex: "1 1 0",
-          minHeight: "clamp(70px,12vh,160px)",
+          minHeight: "clamp(70px,12cqh,160px)",
           animationDelay: `${delay}s`,
         }}
       />
       {/* Name */}
       <Sk
         className="w-3/4 self-center rounded-md"
-        style={{ height: "clamp(14px,1.8vmin,22px)", animationDelay: `${delay + 0.07}s` }}
+        style={{ height: "clamp(14px,1.8cqmin,22px)", animationDelay: `${delay + 0.07}s` }}
       />
       {/* 3 metric boxes */}
-      <div className="grid grid-cols-3" style={{ gap: "clamp(3px,0.5vmin,7px)" }}>
+      <div className="grid grid-cols-3" style={{ gap: "clamp(3px,0.5cqmin,7px)" }}>
         {[0.14, 0.21, 0.28].map((d, i) => (
           <Sk
             key={i}
             className="rounded-lg"
-            style={{ height: "clamp(38px,5.5vmin,68px)", animationDelay: `${delay + d}s` }}
+            style={{ height: "clamp(38px,5.5cqmin,68px)", animationDelay: `${delay + d}s` }}
           />
         ))}
       </div>
@@ -77,17 +77,17 @@ function SkDeptColumn({
         style={{
           border: "1px solid rgba(255,255,255,0.14)",
           background: "#0a0f18",
-          padding: "clamp(0.45rem,0.9vmin,1.5rem)",
-          gap: "clamp(0.2rem,0.4vmin,0.5rem)",
+          padding: "clamp(0.45rem,0.9cqmin,1.5rem)",
+          gap: "clamp(0.2rem,0.4cqmin,0.5rem)",
         }}
       >
         {/* Department heading */}
         <div
           className="flex shrink-0 flex-col"
           style={{
-            gap: "clamp(0.35rem,0.7vmin,0.8rem)",
-            paddingTop: "clamp(0.4rem,0.9vmin,1rem)",
-            marginBottom: "0.4vh",
+            gap: "clamp(0.35rem,0.7cqmin,0.8rem)",
+            paddingTop: "clamp(0.4rem,0.9cqmin,1rem)",
+            marginBottom: "0.4cqh",
           }}
         >
           <div className="flex w-full items-center gap-2">
@@ -100,8 +100,8 @@ function SkDeptColumn({
             <Sk
               className="shrink-0 rounded-full"
               style={{
-                width: "clamp(60px,8vw,110px)",
-                height: "clamp(14px,1.8vmin,22px)",
+                width: "clamp(60px,8cqw,110px)",
+                height: "clamp(14px,1.8cqmin,22px)",
                 animationDelay: `${delay}s`,
               }}
             />
@@ -134,7 +134,7 @@ function SkDeptColumn({
           style={{
             gridTemplateColumns: "minmax(0,1fr)",
             gridTemplateRows: "repeat(3, minmax(0,1fr))",
-            gap: "clamp(0.3rem,0.7vmin,1.1rem)",
+            gap: "clamp(0.3rem,0.7cqmin,1.1rem)",
           }}
         >
           {[0, 0.1, 0.2].map((d, i) => (
@@ -151,7 +151,7 @@ function SkCenterColumn() {
   return (
     <div
       className="flex min-h-0 flex-col"
-      style={{ gap: "clamp(0.55rem,1.2vh,1.75rem)" }}
+      style={{ gap: "clamp(0.55rem,1.2cqh,1.75rem)" }}
     >
       {/* ── Performance panel ── */}
       <div
@@ -160,17 +160,17 @@ function SkCenterColumn() {
           background: "rgba(10,10,10,0.88)",
           border: "1px solid rgba(107,143,255,0.18)",
           boxShadow: "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
-          padding: "clamp(0.45rem,0.9vmin,1.5rem)",
-          gap: "clamp(0.2rem,0.4vmin,0.5rem)",
+          padding: "clamp(0.45rem,0.9cqmin,1.5rem)",
+          gap: "clamp(0.2rem,0.4cqmin,0.5rem)",
         }}
       >
         {/* Heading */}
         <div
           className="flex shrink-0 flex-col"
           style={{
-            gap: "clamp(0.35rem,0.7vmin,0.8rem)",
-            paddingTop: "clamp(0.4rem,0.9vmin,1rem)",
-            marginBottom: "0.4vh",
+            gap: "clamp(0.35rem,0.7cqmin,0.8rem)",
+            paddingTop: "clamp(0.4rem,0.9cqmin,1rem)",
+            marginBottom: "0.4cqh",
           }}
         >
           <div className="flex w-full items-center gap-2">
@@ -182,7 +182,7 @@ function SkCenterColumn() {
             />
             <Sk
               className="shrink-0 rounded-full"
-              style={{ width: "clamp(80px,10vw,140px)", height: "clamp(14px,1.8vmin,22px)" }}
+              style={{ width: "clamp(80px,10cqw,140px)", height: "clamp(14px,1.8cqmin,22px)" }}
             />
             <div
               className="h-px flex-1"
@@ -200,14 +200,14 @@ function SkCenterColumn() {
         {/* 4 metric tiles */}
         <div
           className="grid w-full shrink-0"
-          style={{ gridTemplateColumns: "repeat(4,1fr)", gap: "clamp(6px, 1vw, 28px)" }}
+          style={{ gridTemplateColumns: "repeat(4,1fr)", gap: "clamp(6px, 1cqw, 28px)" }}
         >
           {[0, 0.07, 0.14, 0.21].map((d, i) => (
             <Sk
               key={i}
               className="rounded-xl"
               style={{
-                height: "clamp(56px,9vmin,100px)",
+                height: "clamp(56px,9cqmin,100px)",
                 animationDelay: `${d}s`,
                 border: "1px solid rgba(255,255,255,0.06)",
               }}
@@ -229,16 +229,16 @@ function SkCenterColumn() {
           background: "rgba(10,10,10,0.88)",
           border: "1px solid rgba(212,175,55,0.15)",
           boxShadow: "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
-          padding: "clamp(0.55rem,1.1vmin,1.2rem)",
-          gap: "clamp(0.3rem,0.5vmin,0.6rem)",
+          padding: "clamp(0.55rem,1.1cqmin,1.2rem)",
+          gap: "clamp(0.3rem,0.5cqmin,0.6rem)",
         }}
       >
         {/* Ledger heading */}
-        <div className="flex w-full shrink-0 items-center gap-3" style={{ marginBottom: "0.8vh" }}>
+        <div className="flex w-full shrink-0 items-center gap-3" style={{ marginBottom: "0.8cqh" }}>
           <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(212,175,55,0.35))" }} />
           <Sk
             className="shrink-0 rounded-full"
-            style={{ width: "clamp(120px,18vw,220px)", height: "clamp(14px,1.8vmin,22px)" }}
+            style={{ width: "clamp(120px,18cqw,220px)", height: "clamp(14px,1.8cqmin,22px)" }}
           />
           <div className="h-px flex-1" style={{ background: "linear-gradient(to left, transparent, rgba(212,175,55,0.35))" }} />
         </div>
@@ -248,8 +248,8 @@ function SkCenterColumn() {
           className="grid shrink-0 w-full"
           style={{
             gridTemplateColumns: "2fr 1fr 1fr 1fr",
-            gap: "clamp(4px,0.8vw,12px)",
-            paddingBottom: "clamp(6px,0.8vh,10px)",
+            gap: "clamp(4px,0.8cqw,12px)",
+            paddingBottom: "clamp(6px,0.8cqh,10px)",
             borderBottom: "1px solid rgba(212,175,55,0.10)",
           }}
         >
@@ -257,21 +257,21 @@ function SkCenterColumn() {
             <Sk
               key={i}
               className="rounded-md"
-              style={{ height: "clamp(12px,1.6vmin,20px)", animationDelay: `${d}s` }}
+              style={{ height: "clamp(12px,1.6cqmin,20px)", animationDelay: `${d}s` }}
             />
           ))}
         </div>
 
         {/* Ledger rows */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden" style={{ gap: "clamp(2px,0.3vmin,4px)" }}>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden" style={{ gap: "clamp(2px,0.3cqmin,4px)" }}>
           {[0, 0.07, 0.14, 0.21, 0.28, 0.35, 0.42].map((d, i) => (
             <div
               key={i}
               className="grid shrink-0 w-full"
               style={{
                 gridTemplateColumns: "2fr 1fr 1fr 1fr",
-                gap: "clamp(4px,0.8vw,12px)",
-                padding: "clamp(5px,0.7vh,9px) 0",
+                gap: "clamp(4px,0.8cqw,12px)",
+                padding: "clamp(5px,0.7cqh,9px) 0",
                 borderBottom: "1px solid rgba(212,175,55,0.06)",
               }}
             >
@@ -279,7 +279,7 @@ function SkCenterColumn() {
                 <Sk
                   key={j}
                   className="rounded-md"
-                  style={{ height: "clamp(14px,1.8vmin,24px)", animationDelay: `${d + dd}s` }}
+                  style={{ height: "clamp(14px,1.8cqmin,24px)", animationDelay: `${d + dd}s` }}
                 />
               ))}
             </div>
@@ -298,23 +298,23 @@ export default function OnboardingSkeleton() {
       className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-obsidian"
       style={{
         padding:
-          "clamp(0.6rem,min(1.6vh,1.8vmin),1.75rem) clamp(0.6rem,min(2.4vmin,3.2vw),2.5rem)",
+          "clamp(0.6rem,min(1.6cqh,1.8cqmin),1.75rem) clamp(0.6rem,min(2.4cqmin,3.2cqw),2.5rem)",
       }}
     >
       {/* Ambient gold radial glow — matches OnboardingPanel */}
       <div className="ambient-glow-center pointer-events-none absolute inset-0" />
 
       {/* ── Page header ── */}
-      <div className="relative mb-[1.4vh] flex-shrink-0 text-center">
-        <div className="mb-[0.7vh] flex w-full items-center gap-3">
+      <div className="relative mb-[1.4cqh] flex-shrink-0 text-center">
+        <div className="mb-[0.7cqh] flex w-full items-center gap-3">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
           <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
         </div>
         <Sk
           className="mx-auto rounded-full"
-          style={{ width: "clamp(160px,20vw,280px)", height: "clamp(24px,3.5vh,44px)" }}
+          style={{ width: "clamp(160px,20cqw,280px)", height: "clamp(24px,3.5cqh,44px)" }}
         />
-        <div className="mt-[0.8vh] flex w-full items-center gap-3">
+        <div className="mt-[0.8cqh] flex w-full items-center gap-3">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/28 to-gold-500/45" />
           <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/28 to-gold-500/45" />
         </div>
@@ -325,7 +325,7 @@ export default function OnboardingSkeleton() {
         className="relative grid min-h-0 flex-1"
         style={{
           gridTemplateColumns: "1fr 1fr 1.05fr",
-          gap: "clamp(0.6rem,1.4vw,3.4rem)",
+          gap: "clamp(0.6rem,1.4cqw,3.4rem)",
         }}
       >
         {/* Column 1: Concierge (gold accent) */}

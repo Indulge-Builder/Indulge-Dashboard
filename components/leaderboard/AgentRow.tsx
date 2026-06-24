@@ -151,7 +151,7 @@ export const AgentRow = memo(function AgentRow({
 
       {/* ── Data grid ─────────────────────────────────────────────────────── */}
       <div
-        className={`grid ${GRID_COLS} items-center ${GRID_GAP_X} py-[1vh] sm:py-[1.2vh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
+        className={`grid ${GRID_COLS} items-center ${GRID_GAP_X} py-[1cqh] sm:py-[1.2cqh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
       >
         {/* Col 1: Icon — subtle scale pulse on surge, never distorting */}
         <motion.div
@@ -174,7 +174,7 @@ export const AgentRow = memo(function AgentRow({
 
         {/* Col 2: Agent name — opacity dip on surge; row-level gold burst carries the drama */}
         <motion.p
-          className="min-w-0 font-baskerville font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
+          className="min-w-0 font-cinzel font-semibold text-[clamp(1.425rem,2.325cqw,2.925rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
           style={gpuStyle}
           animate={surgeKey > 0 ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
@@ -186,15 +186,15 @@ export const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={today}
-            className="font-edu text-[clamp(2.325rem,3.675vw,4.65rem)] leading-none text-green-400 tabular-nums font-semibold"
+            className="font-montserrat text-[clamp(2.325rem,3.675cqw,4.65rem)] leading-none text-green-400 tabular-nums font-semibold"
             highlightOnIncrease
           />
-          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">
+          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-white/25 leading-none">
             /
           </span>
           <AnimatedValue
             value={received}
-            className="font-inter text-[clamp(1.65rem,2.175vw,2.7rem)] text-white/40 leading-none tabular-nums"
+            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-white/40 leading-none tabular-nums"
           />
         </div>
 
@@ -202,15 +202,15 @@ export const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={agent.tasksCompletedThisMonth ?? 0}
-            className="font-edu tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675vw,4.65rem)]"
+            className="font-montserrat tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675cqw,4.65rem)]"
             style={{ color: "rgba(212,175,55,0.9)" }}
           />
-          <span className="font-inter text-[clamp(1.275rem,1.575vw,2.025rem)] text-white/25 leading-none">
+          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-white/25 leading-none">
             /
           </span>
           <AnimatedValue
             value={agent.tasksAssignedThisMonth ?? 0}
-            className="font-inter text-[clamp(1.65rem,2.175vw,2.7rem)] text-white/40 leading-none tabular-nums"
+            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-white/40 leading-none tabular-nums"
           />
         </div>
 
@@ -218,24 +218,24 @@ export const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-0.5 sm:gap-1">
           <AnimatedValue
             value={pending}
-            className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-semibold text-red-400"
+            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-red-400"
             highlightOnIncrease
           />
-          <span className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
             /
           </span>
           <AnimatedValue
             value={overdue}
-            className={`font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-bold ${
+            className={`font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold ${
               hasOverdue ? "error-overdue-glow" : "text-white/40"
             }`}
           />
-          <span className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
             /
           </span>
           <AnimatedValue
             value={incomplete}
-            className="font-edu text-[clamp(1.875rem,2.85vw,3.75rem)] leading-none tabular-nums font-semibold text-slate-200/60"
+            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-slate-200/60"
             highlightOnIncrease
           />
         </div>

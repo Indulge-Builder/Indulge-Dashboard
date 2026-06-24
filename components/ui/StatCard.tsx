@@ -20,7 +20,7 @@
  *   --color-amber      #fcd34d
  *   --color-sky        #7dd3fc
  *   --color-champagne  #f5e6c8
- *   --text-label-xl    clamp(1.35rem, 2.7vw, 3.9rem)
+ *   --text-label-xl    clamp(1.35rem, 2.7cqw, 3.9rem)
  *
  * Accent variants map directly to status semantic colors from the design system.
  * `gold` uses the queen-name-glow utility for premium crown/hero labels.
@@ -118,7 +118,7 @@ export function StatCard({
         surfaceClass != null
           ? style
           : {
-              padding: "clamp(10px, 1.2vh, 20px) clamp(6px, 0.8vw, 14px)",
+              padding: "clamp(10px, 1.2cqh, 20px) clamp(6px, 0.8cqw, 14px)",
               ...style,
             }
       }
@@ -128,8 +128,8 @@ export function StatCard({
         className={
           labelClass ??
           [
-            "font-inter font-semibold uppercase leading-snug tracking-[0.25em]",
-            "text-[var(--text-label-xl)] mb-[0.2vh]",
+            "font-montserrat font-semibold uppercase leading-snug tracking-[0.25em]",
+            "text-[var(--text-label-xl)] mb-[0.2cqh]",
             LABEL_CLASS[accent],
           ].join(" ")
         }

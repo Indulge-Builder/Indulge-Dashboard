@@ -30,15 +30,15 @@ export default function OnboardingLayout() {
       className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-obsidian"
       style={{
         padding:
-          "clamp(0.6rem,min(1.6vh,1.8vmin),1.75rem) clamp(0.6rem,min(2.4vmin,3.2vw),2.5rem)",
+          "clamp(0.6rem,min(1.6cqh,1.8cqmin),1.75rem) clamp(0.6rem,min(2.4cqmin,3.2cqw),2.5rem)",
       }}
     >
       <div className="ambient-glow-center pointer-events-none absolute inset-0" />
 
-      <div className="relative mb-[1.4vh] flex-shrink-0 text-center">
-        <SectionDivider className="mb-[0.7vh]" />
+      <div className="relative mb-[1.4cqh] flex-shrink-0 text-center">
+        <SectionDivider className="mb-[0.7cqh]" />
         <h2
-          className="mb-[0.8vh] font-cinzel font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
+          className="mb-[0.8cqh] font-cinzel font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
           style={{ fontSize: ONBOARDING_PAGE_TITLE_FONT }}
         >
           Revenue Dashboard
@@ -47,9 +47,9 @@ export default function OnboardingLayout() {
       </div>
 
       <div
-        className="relative grid min-h-0 flex-1 grid-cols-1 gap-[clamp(0.6rem,1.4vw,3.4rem)] lg:grid-cols-[1fr_1fr_1.05fr]"
+        className="relative grid min-h-0 flex-1 grid-cols-1 gap-[clamp(0.6rem,1.4cqw,3.4rem)] lg:grid-cols-[1fr_1fr_1.05fr]"
       >
-        <div className="flex min-h-[clamp(220px,28vh,380px)] flex-col lg:min-h-0">
+        <div className="flex min-h-[clamp(220px,28cqh,380px)] flex-col lg:min-h-0">
           <DepartmentColumn
             department="concierge"
             label="Onboarding"
@@ -60,8 +60,8 @@ export default function OnboardingLayout() {
         </div>
 
         <div
-          className="flex min-h-[clamp(220px,28vh,380px)] flex-col lg:min-h-0"
-          style={{ gap: "clamp(0.55rem,1.2vh,1.75rem)" }}
+          className="flex min-h-[clamp(220px,28cqh,380px)] flex-col lg:min-h-0"
+          style={{ gap: "clamp(0.55rem,1.2cqh,1.75rem)" }}
         >
           <div
             className="relative flex min-h-0 flex-[2] flex-col overflow-hidden rounded-2xl"
@@ -70,8 +70,8 @@ export default function OnboardingLayout() {
               border: "1px solid rgba(255,255,255,0.14)",
               boxShadow:
                 "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
-              padding: "clamp(0.45rem,0.9vmin,1.5rem)",
-              gap: "clamp(0.2rem,0.4vmin,0.75rem)",
+              padding: "clamp(0.45rem,0.9cqmin,1.5rem)",
+              gap: "clamp(0.2rem,0.4cqmin,0.75rem)",
             }}
           >
             <div
@@ -85,17 +85,17 @@ export default function OnboardingLayout() {
             <div
               className="relative flex flex-shrink-0 flex-col"
               style={{
-                gap: "clamp(0.35rem, 0.7vmin, 0.8rem)",
-                paddingTop: "clamp(0.4rem, 0.9vmin, 1rem)",
-                marginBottom: "0.4vh",
+                gap: "clamp(0.35rem, 0.7cqmin, 0.8rem)",
+                paddingTop: "clamp(0.4rem, 0.9cqmin, 1rem)",
+                marginBottom: "0.4cqh",
               }}
             >
               <div className="flex w-full items-center gap-2">
                 <div
                   style={{
-                    height: "clamp(1.5px, 0.22vmin, 3px)",
+                    height: "clamp(1.5px, 0.22cqmin, 3px)",
                     flex: 1,
-                    minWidth: "clamp(22px, 3vw, 44px)",
+                    minWidth: "clamp(22px, 3cqw, 44px)",
                     background:
                       "linear-gradient(to right, transparent, rgba(107,143,255,0.30), rgba(107,143,255,0.55))",
                     boxShadow: "0 0 6px rgba(107,143,255,0.24)",
@@ -113,9 +113,9 @@ export default function OnboardingLayout() {
                 </p>
                 <div
                   style={{
-                    height: "clamp(1.5px, 0.22vmin, 3px)",
+                    height: "clamp(1.5px, 0.22cqmin, 3px)",
                     flex: 1,
-                    minWidth: "clamp(22px, 3vw, 44px)",
+                    minWidth: "clamp(22px, 3cqw, 44px)",
                     background:
                       "linear-gradient(to left, transparent, rgba(255,176,32,0.30), rgba(255,176,32,0.55))",
                     boxShadow: "0 0 6px rgba(255,176,32,0.24)",
@@ -144,7 +144,7 @@ export default function OnboardingLayout() {
 
             <div
               className="grid w-full flex-shrink-0"
-              style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "clamp(6px, 1vw, 28px)" }}
+              style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "clamp(6px, 1cqw, 28px)" }}
             >
               {(
                 [
@@ -180,9 +180,9 @@ export default function OnboardingLayout() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "clamp(2px, 0.4vmin, 9px)",
-                    padding: "clamp(6px, 1vmin, 22px) clamp(4px, 0.6vmin, 14px)",
-                    borderRadius: "clamp(6px, 0.9vmin, 11px)",
+                    gap: "clamp(2px, 0.4cqmin, 9px)",
+                    padding: "clamp(6px, 1cqmin, 22px) clamp(4px, 0.6cqmin, 14px)",
+                    borderRadius: "clamp(6px, 0.9cqmin, 11px)",
                     background: "rgba(255,255,255,0.028)",
                     border: `1px solid rgba(255,255,255,0.06)`,
                     borderTop: `2px solid ${accent}`,
@@ -192,8 +192,8 @@ export default function OnboardingLayout() {
                 >
                   <span
                     style={{
-                      fontFamily: "var(--font-inter, system-ui, sans-serif)",
-                      fontSize: "clamp(1.8rem, min(4.2vmin, 5vh), 5.5rem)",
+                      fontFamily: "var(--font-montserrat, system-ui, sans-serif)",
+                      fontSize: "clamp(1.8rem, min(4.2cqmin, 5cqh), 5.5rem)",
                       fontWeight: 700,
                       lineHeight: 1,
                       color,
@@ -205,8 +205,8 @@ export default function OnboardingLayout() {
                   </span>
                   <span
                     style={{
-                      fontFamily: "var(--font-inter, system-ui, sans-serif)",
-                      fontSize: "clamp(14px, min(1.45vmin, 1.75vh), 1.6rem)",
+                      fontFamily: "var(--font-montserrat, system-ui, sans-serif)",
+                      fontSize: "clamp(14px, min(1.45cqmin, 1.75cqh), 1.6rem)",
                       fontWeight: 500,
                       textTransform: "uppercase",
                       letterSpacing: "0.18em",
@@ -237,7 +237,7 @@ export default function OnboardingLayout() {
           </div>
         </div>
 
-        <div className="flex min-h-[clamp(220px,28vh,380px)] flex-col lg:min-h-0">
+        <div className="flex min-h-[clamp(220px,28cqh,380px)] flex-col lg:min-h-0">
           <DepartmentColumn
             department="shop"
             label="Shop"

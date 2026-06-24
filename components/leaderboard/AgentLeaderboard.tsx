@@ -32,25 +32,25 @@ export default function AgentLeaderboard({
       {/* ── Sticky column header ─────────────────────────────────────────── */}
       {/* bg is 98% opaque — backdrop blur was invisible but cost a GPU pass on TV */}
       <div className="z-10 bg-obsidian/98 border-b border-gold-500/20 flex-shrink-0">
-        <div className={`grid ${GRID_COLS} ${GRID_GAP_X} pb-[0.9vh]`}>
+        <div className={`grid ${GRID_COLS} ${GRID_GAP_X} pb-[0.9cqh]`}>
           <span />
-          <span className="font-inter text-[clamp(1.5rem,2.5vw,3rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold text-center">
+          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-amber-300/95 font-semibold text-center">
             Genies
           </span>
-          <span className="font-inter text-[clamp(1.5rem,2.5vw,3rem)] tracking-[0.4em] uppercase text-green-400 font-semibold text-center">
+          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-green-400 font-semibold text-center">
             Today
           </span>
-          <span className="font-inter text-[clamp(1.5rem,2.5vw,3rem)] tracking-[0.4em] uppercase text-champagne font-semibold text-center">
+          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-champagne font-semibold text-center">
             Monthly
           </span>
-          <span className="font-inter text-[clamp(1.5rem,2.5vw,3rem)] tracking-[0.4em] uppercase text-red-400 font-semibold text-center">
+          <span className="font-montserrat text-[clamp(1.5rem,2.5cqw,3rem)] tracking-[0.4em] uppercase text-red-400 font-semibold text-center">
             Pending
           </span>
         </div>
       </div>
 
       {/* ── Agent rows ───────────────────────────────────────────────────── */}
-      <div className="pt-[0.5vh]">
+      <div className="pt-[0.5cqh]">
         <AnimatePresence>
           {agents.map((agent, i) => (
             <AgentRow

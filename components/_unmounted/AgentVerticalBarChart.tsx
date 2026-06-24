@@ -166,7 +166,7 @@ export function AgentVerticalBarChart({
         </p>
         {grandTotal > 0 && (
           <p
-            className="font-inter tabular-nums leading-none text-white/25"
+            className="font-montserrat tabular-nums leading-none text-white/25"
             style={totalFont}
           >
             {grandTotal} leads
@@ -310,7 +310,7 @@ export function AgentVerticalBarChart({
                 />
                 {/* Label */}
                 <span
-                  className="font-inter leading-none tabular-nums"
+                  className="font-montserrat leading-none tabular-nums"
                   style={{ ...legendFont, color: cfg.color, opacity: 0.85 }}
                 >
                   {cfg.label}

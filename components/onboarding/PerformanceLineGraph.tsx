@@ -381,7 +381,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
                 stroke="rgba(255,255,255,0.16)" strokeWidth="0.6" />
               <text x={ML - 5} y={yPos} textAnchor="end" dominantBaseline="middle"
                 fill="rgba(255,255,255,0.28)" fontSize="7"
-                fontFamily="var(--font-inter, system-ui, sans-serif)">
+                fontFamily="var(--font-montserrat, system-ui, sans-serif)">
                 {value}
               </text>
             </g>
@@ -396,7 +396,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
           <text x={VB_W / 2} y={VB_H / 2}
             textAnchor="middle" dominantBaseline="middle"
             fill="rgba(255,255,255,0.20)" fontSize="11"
-            fontFamily="var(--font-inter, system-ui, sans-serif)">
+            fontFamily="var(--font-montserrat, system-ui, sans-serif)">
             Collecting data…
           </text>
         ) : (
@@ -491,7 +491,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
                   strokeWidth="2.8"
                   strokeLinejoin="round"
                   fontSize="7.5"
-                  fontFamily="var(--font-inter, system-ui, sans-serif)"
+                  fontFamily="var(--font-montserrat, system-ui, sans-serif)"
                   fontWeight="700"
                   style={{ paintOrder: "stroke fill" }}
                 >
@@ -505,7 +505,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
               <text key={label} x={x} y={BOTTOM + 8}
                 textAnchor="middle" dominantBaseline="hanging"
                 fill="rgba(255,255,255,0.22)" fontSize="7.5"
-                fontFamily="var(--font-inter, system-ui, sans-serif)">
+                fontFamily="var(--font-montserrat, system-ui, sans-serif)">
                 {label}
               </text>
             ))}
@@ -522,7 +522,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
                   <circle cx={cx} cy={cy} r="2.5" fill={color} fillOpacity="0.9" />
                   <text x={cx + 5} y={cy} dominantBaseline="middle"
                     fill="rgba(255,255,255,0.38)" fontSize="7"
-                    fontFamily="var(--font-inter, system-ui, sans-serif)">
+                    fontFamily="var(--font-montserrat, system-ui, sans-serif)">
                     {VERTICAL_COLORS[v].label}
                   </text>
                 </g>

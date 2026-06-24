@@ -180,7 +180,7 @@ const AgentCard = memo(function AgentCard({
 
       {/* Name card with gold flash sweep */}
       <div className="relative flex flex-col items-center gap-4">
-        <p className="font-inter text-3xl sm:text-4xl tracking-[0.4em] uppercase text-gold-500/80">
+        <p className="font-montserrat text-3xl sm:text-4xl tracking-[0.4em] uppercase text-gold-500/80">
           Ticket Resolved
         </p>
         <div className="relative overflow-hidden rounded-xl px-12 py-4">
@@ -200,7 +200,7 @@ const AgentCard = memo(function AgentCard({
             {agentName}
           </h2>
         </div>
-        <span className="font-inter text-3xl sm:text-4xl tracking-[0.35em] uppercase text-gold-400/70">
+        <span className="font-montserrat text-3xl sm:text-4xl tracking-[0.35em] uppercase text-gold-400/70">
           + 1 Point
         </span>
       </div>

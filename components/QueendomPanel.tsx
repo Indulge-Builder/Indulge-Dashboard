@@ -58,7 +58,7 @@ function MetricBox({
   labelTracking = "tracking-[0.25em]",
   valueSizeClass = "text-8xl min-[900px]:text-9xl",
   boxClass = "flex-1 flex flex-col items-center justify-center text-center min-w-0 bg-black/30 rounded-xl border border-gold-500/20",
-  boxStyle = { padding: "1.2vh var(--pad-cell)" },
+  boxStyle = { padding: "1.2cqh var(--pad-cell)" },
 }: {
   label: ReactNode;
   value: number;
@@ -75,12 +75,12 @@ function MetricBox({
     <StatCard
       surfaceClass={boxClass}
       style={boxStyle}
-      labelClass={`font-inter font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] ${labelTracking} uppercase ${labelColor} mb-[0.2vh]`}
+      labelClass={`font-cinzel font-semibold text-[clamp(1.6rem,2.2cqw,2.75rem)] ${labelTracking} uppercase ${labelColor} mb-[0.4cqh]`}
       label={label}
     >
       <AnimatedCounter
         value={value}
-        className={`font-cinzel font-bold ${valueSizeClass} leading-none tracking-[0.06em] ${valueColor} tabular-nums`}
+        className={`font-montserrat font-bold ${valueSizeClass} leading-none tracking-[-0.01em] ${valueColor} tabular-nums`}
         delay={delay}
         slideOnChange={slideOnChange}
       />
@@ -152,8 +152,8 @@ export default function QueendomPanel({
 
   return (
     <motion.section
-      className="relative flex min-h-[85svh] flex-1 flex-col overflow-y-auto overflow-x-hidden md:min-h-0"
-      style={{ padding: "2vh var(--pad-panel)" }}
+      className="relative flex min-h-[85cqh] flex-1 flex-col overflow-y-auto overflow-x-hidden md:min-h-0"
+      style={{ padding: "2cqh var(--pad-panel)" }}
       variants={queendomContainerVariants}
       initial="hidden"
       animate="visible"
@@ -168,11 +168,11 @@ export default function QueendomPanel({
 
       {/* ── Wingspan header: metrics | name | metrics (luxury broadcast) ── */}
       <motion.div
-        className="relative mb-[1.6vh] flex w-full min-w-0 flex-shrink-0 flex-col items-center"
+        className="relative mb-[1.6cqh] flex w-full min-w-0 flex-shrink-0 flex-col items-center"
         variants={queendomItemVariants}
       >
         <SectionDivider
-          className="mb-[1.1vh]"
+          className="mb-[1.1cqh]"
           leftRuleClass="bg-gradient-to-r from-transparent via-gold-500/25 to-gold-500/40"
           rightRuleClass="bg-gradient-to-l from-transparent via-gold-500/25 to-gold-500/40"
         />
@@ -188,20 +188,27 @@ export default function QueendomPanel({
         <SectionDivider
           label="Queendom"
           accent="champagne"
-          className="my-[0.35vh]"
-          labelClass="!font-inter !font-semibold text-[clamp(28px,2.5vw,52px)] tracking-[0.42em] text-gold-300 gold-glow"
+          className="my-[0.35cqh]"
+          labelClass="!font-cinzel !font-semibold text-[clamp(28px,2.5cqw,52px)] tracking-[0.42em] text-gold-300 gold-glow"
         />
       </motion.div>
 
-      {/* ── 5-Metric Hero Row (tickets + Spoiled for this Queendom’s Joker) ── */}
-      <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={queendomItemVariants}>
-        <GoldGlassCard style={{ padding: "1.6vh var(--pad-card)" }}>
-          <div className="grid grid-cols-2 min-[700px]:grid-cols-5 gap-[var(--gap-metric)] w-full">
-            {/* 1. Total Solved Today — ANCHOR (Green Glow) */}
+      {/* ── 5-Metric Hero Row (tickets + Spoiled for this Queendom’s Joker) ──
+          Material upgrade: the card floats (.elevate-hero) with a double-rule
+          engraving frame; "Today" is a lit emerald plinth; the four "This Month"
+          metrics share one recessed surface split by hairline rules (no boxes). */}
+      <motion.div className="flex-shrink-0 mb-[1.6cqh]" variants={queendomItemVariants}>
+        <GoldGlassCard
+          className="elevate-hero engrave-frame"
+          style={{ padding: "1.6cqh var(--pad-card)" }}
+        >
+          <div className="grid grid-cols-1 min-[700px]:grid-cols-[1fr_4fr] gap-[var(--gap-metric)] w-full items-stretch">
+            {/* 1. Total Solved Today — ANCHOR: lit emerald plinth, foil numerals */}
             <MetricBox
               label={
                 <>
-                  Resolved <br /> (Today)
+                  Resolved <br />
+                  <span className="text-[0.62em] opacity-70">(Today)</span>
                 </>
               }
               value={solvedToday}
@@ -209,81 +216,76 @@ export default function QueendomPanel({
               slideOnChange
               labelColor="text-emerald-300"
               labelTracking="tracking-[0.35em]"
-              valueColor="text-emerald-400 emerald-glow-hero"
-              boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
-              boxStyle={{}}
+              valueColor="text-foil-emerald emerald-glow-hero"
+              boxClass="surface-luxe-hero rounded-xl flex flex-col items-center justify-center text-center flex-1 min-w-0"
+              boxStyle={{ padding: "1.2cqh var(--pad-cell)" }}
             />
 
-            {/* 2. Received (This Month) — from aggregateTicketStats (IST created_at month) */}
-            <MetricBox
-              label={
-                <>
-                  Received
-                  <br />
-                  (This Month)
-                </>
-              }
-              value={totalReceived}
-              delay={delay + 900}
-              slideOnChange
-            />
+            {/* ── "This Month" — one recessed surface, hairline-split metrics ── */}
+            <div className="surface-luxe rounded-xl flex flex-col min-w-0">
+              {/* Masthead: centered label flanked by gold rules (luxury crest) */}
+              <div className="flex items-center justify-center gap-[clamp(0.75rem,1.4cqw,2rem)] px-[var(--pad-cell)] pt-[1cqh] pb-[0.6cqh]">
+                <span className="separator-gold-h flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
+                <span className="font-cinzel font-semibold text-[clamp(1.5rem,2.2cqw,2.6rem)] tracking-[0.42em] uppercase text-champagne/85 whitespace-nowrap">
+                  This Month
+                </span>
+                <span className="separator-gold-h flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
+              </div>
+              <div className="grid grid-cols-2 min-[900px]:grid-cols-4 min-[900px]:divide-x min-[900px]:divide-gold-500/15 flex-1 pb-[0.6cqh]">
+                {/* Received — from aggregateTicketStats (IST created_at month) */}
+                <MetricBox
+                  label="Received"
+                  value={totalReceived}
+                  delay={delay + 900}
+                  slideOnChange
+                  boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
+                  boxStyle={{ padding: "0.6cqh var(--pad-cell)" }}
+                />
 
-            {/* 3. Resolved (This Month) — created this IST month + status resolved only */}
-            <MetricBox
-              label={
-                <>
-                  Resolved
-                  <br />
-                  (This Month)
-                </>
-              }
-              value={resolvedThisMonth}
-              delay={delay + 1000}
-              slideOnChange
-              labelColor="text-green-400"
-              valueColor="text-green-400"
-            />
+                {/* Resolved — created this IST month + status resolved only */}
+                <MetricBox
+                  label="Resolved"
+                  value={resolvedThisMonth}
+                  delay={delay + 1000}
+                  slideOnChange
+                  labelColor="text-green-400"
+                  valueColor="text-green-400"
+                  boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
+                  boxStyle={{ padding: "0.6cqh var(--pad-cell)" }}
+                />
 
-            {/* 4. Pending — yet to score */}
-            <MetricBox
-              label={
-                <>
-                  Pending
-                  <br />
-                  (This Month)
-                </>
-              }
-              value={pendingToResolve}
-              delay={delay + 1100}
-              slideOnChange
-              labelColor="text-red-400"
-              valueColor="text-red-400"
-            />
+                {/* Pending — yet to score */}
+                <MetricBox
+                  label="Pending"
+                  value={pendingToResolve}
+                  delay={delay + 1100}
+                  slideOnChange
+                  labelColor="text-red-400"
+                  valueColor="text-red-400"
+                  boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
+                  boxStyle={{ padding: "0.6cqh var(--pad-cell)" }}
+                />
 
-            {/* 5. Spoiled — accepted wins (current IST month; see GET /api/jokers) */}
-            <MetricBox
-              label={
-                <>
-                  Spoiled
-                  <br />
-                  (This Month)
-                </>
-              }
-              value={jokerAccepted}
-              delay={delay + 1200}
-              slideOnChange
-              labelTracking="tracking-[0.3em]"
-              valueColor="text-gold-300"
-              valueSizeClass="text-9xl min-[900px]:text-[9rem]"
-              boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35"
-              boxStyle={{}}
-            />
+                {/* Spoiled — accepted wins (current IST month; see GET /api/jokers) */}
+                <MetricBox
+                  label="Spoiled"
+                  value={jokerAccepted}
+                  delay={delay + 1200}
+                  slideOnChange
+                  labelTracking="tracking-[0.3em]"
+                  valueColor="text-foil-gold"
+                  valueSizeClass="text-9xl min-[900px]:text-[9rem]"
+                  boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
+                  boxStyle={{ padding: "0.6cqh var(--pad-cell)" }}
+                />
+              </div>
+            </div>
           </div>
         </GoldGlassCard>
       </motion.div>
 
       {/* ── RenewalsPanel: Counter | Renewals | Latest members ───────────────── */}
-      <motion.div className="flex-shrink-0 mb-[1.6vh]" variants={queendomItemVariants}>
+      <motion.div className="flex-shrink-0 mb-[1.6cqh]" variants={queendomItemVariants}>
         <RenewalsPanel
           data={
             renewalsData ?? {
@@ -301,7 +303,7 @@ export default function QueendomPanel({
           participating in the stagger — wrapping would change the animation tree. */}
       <motion.div
         className="relative flex min-h-0 flex-1 flex-col gap-[var(--gap-card)] overflow-hidden rounded-2xl glass gold-border-glow"
-        style={{ padding: "1.6vh var(--pad-card)" }}
+        style={{ padding: "1.6cqh var(--pad-card)" }}
         variants={queendomItemVariants}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
@@ -329,8 +331,8 @@ export default function QueendomPanel({
               <SectionDivider
                 label="Special Dates"
                 accent="champagne"
-                className="mb-[2vh] w-full flex-shrink-0 gap-3 px-1 sm:px-2"
-                labelClass="!font-inter !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9vw,2.3rem)] whitespace-nowrap"
+                className="mb-[2cqh] w-full flex-shrink-0 gap-3 px-1 sm:px-2"
+                labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap"
               />
               <div className="flex min-h-0 flex-1 flex-col">
                 <SpecialDates

@@ -31,7 +31,7 @@ interface DeptAccent {
 const METRIC_BOX_BASE =
   "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-xl border bg-[#101722]";
 const METRIC_LABEL_CLASS =
-  "font-inter shrink-0 font-semibold uppercase leading-none tracking-[0.25em]";
+  "font-montserrat shrink-0 font-semibold uppercase leading-none tracking-[0.25em]";
 const METRIC_VALUE_CLASS =
   "font-cinzel font-bold leading-none tracking-[0.06em] tabular-nums";
 
@@ -131,7 +131,7 @@ function AgentCardContent({
             fontSize:     "clamp(14px, 8cqh, 3.2rem)",
             background:   "#0f0f0f",
             border:       "1px solid rgba(255,255,255,0.14)",
-            borderRadius: "clamp(5px, 0.6vmin, 8px)",
+            borderRadius: "clamp(5px, 0.6cqmin, 8px)",
             padding:      "1cqh 2cqw",
             boxShadow:    "none",
           }}
@@ -327,7 +327,7 @@ const CompactAgentCard = memo(function CompactAgentCard({
         borderLeft: isConcierge ? undefined : "1px solid rgba(255,255,255,0.14)",
         borderRight: isConcierge ? "1px solid rgba(255,255,255,0.14)" : undefined,
         borderBottom: "1px solid rgba(255,255,255,0.14)",
-        borderRadius: "clamp(6px, 0.7vmin, 10px)",
+        borderRadius: "clamp(6px, 0.7cqmin, 10px)",
         containerType: "size",
         ...gpuStyle,
       }}
@@ -402,17 +402,17 @@ export function DepartmentColumn({
           border: "1px solid rgba(255,255,255,0.14)",
           background: "#0a0a0a",
           boxShadow: "none",
-          padding: "clamp(0.45rem,0.9vmin,1.5rem)",
-          gap: "clamp(0.2rem,0.4vmin,0.75rem)",
+          padding: "clamp(0.45rem,0.9cqmin,1.5rem)",
+          gap: "clamp(0.2rem,0.4cqmin,0.75rem)",
         }}
       >
         {/* Department header — inside the card */}
         <div
           className="relative flex flex-shrink-0 flex-col"
           style={{
-            gap:           "clamp(0.35rem, 0.7vmin, 0.8rem)",
-            paddingTop:    "clamp(0.4rem, 0.9vmin, 1rem)",
-            marginBottom:  "0.4vh",
+            gap:           "clamp(0.35rem, 0.7cqmin, 0.8rem)",
+            paddingTop:    "clamp(0.4rem, 0.9cqmin, 1rem)",
+            marginBottom:  "0.4cqh",
           }}
         >
           {/* Title row: rule — LABEL — rule */}
@@ -439,7 +439,7 @@ export function DepartmentColumn({
           style={{
             gridTemplateColumns: "minmax(0, 1fr)",
             gridTemplateRows: `repeat(${Math.max(agents.length, 1)}, minmax(0, 1fr))`,
-            gap: "clamp(0.3rem,0.7vmin,1.1rem)",
+            gap: "clamp(0.3rem,0.7cqmin,1.1rem)",
           }}
         >
           {agents.map((agent, idx) => (

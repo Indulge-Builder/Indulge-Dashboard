@@ -64,11 +64,10 @@ const config: Config = {
         "status-sky":       "var(--color-sky)",
       },
       fontFamily: {
+        // Two-font system: Cinzel (titles/labels), Sora (data/body).
+        // `montserrat` key + --font-montserrat var kept as legacy names → Sora.
         cinzel: ["var(--font-cinzel)", "Cinzel", "serif"],
-        inter: ["var(--font-inter)", "sans-serif"],
-        edu: ["var(--font-edu)", "Oswald", "sans-serif"],
-        baskerville: ["var(--font-libre-baskerville)", "serif"],
-        montserrat: ["var(--font-montserrat)", "Montserrat", "sans-serif"],
+        montserrat: ["var(--font-montserrat)", "Sora", "sans-serif"],
       },
       keyframes: {
         "pulse-ring": {

@@ -67,22 +67,22 @@ const TickerItem = memo(function TickerItem({
           />
         </div>
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <span className="font-baskerville font-semibold text-[clamp(1.7rem,2.8vw,3.3rem)] tracking-wide text-champagne truncate max-w-[24ch] sm:max-w-[34ch]">
+          <span className="font-cinzel font-semibold text-[clamp(1.7rem,2.8cqw,3.3rem)] tracking-wide text-champagne truncate max-w-[24ch] sm:max-w-[34ch]">
             {item.subject}
           </span>
-          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1vw,2.5rem)]">
+          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1cqw,2.5rem)]">
             ·
           </span>
           <span
-            className="font-cinzel font-semibold text-[clamp(1.5rem,2.4vw,2.9rem)] tracking-wide whitespace-nowrap"
+            className="font-cinzel font-semibold text-[clamp(1.5rem,2.4cqw,2.9rem)] tracking-wide whitespace-nowrap"
             style={{ color: OVERDUE_COLOR }}
           >
             #{item.id}
           </span>
-          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1vw,2.5rem)]">
+          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1cqw,2.5rem)]">
             ·
           </span>
-          <span className="font-cinzel font-semibold text-[clamp(1.6rem,2.6vw,3.1rem)] text-white/95 tracking-wide whitespace-nowrap">
+          <span className="font-cinzel font-semibold text-[clamp(1.6rem,2.6cqw,3.1rem)] text-white/95 tracking-wide whitespace-nowrap">
             {item.agentName}
           </span>
         </div>
@@ -126,7 +126,7 @@ function OverdueTickerInner({
           background: "rgba(5, 5, 5, 0.92)",
         }}
       >
-        <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1.4rem,2vw,2.2rem)] tracking-widest uppercase">
+        <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1.4rem,2cqw,2.2rem)] tracking-widest uppercase">
           No overdue tickets
         </p>
       </div>

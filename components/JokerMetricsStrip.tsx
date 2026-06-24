@@ -25,13 +25,13 @@ function JokerMetricBox({
   // Labels match QueendomPanel `MetricBox` / RenewalsPanel RENEWALS; values match hero `AnimatedCounter`.
   const defaultValueClass = `font-cinzel font-bold text-8xl min-[900px]:text-9xl leading-none tracking-[0.06em] text-gold-300 tabular-nums`;
   const defaultSuffixClass =
-    "font-inter text-[clamp(2.1rem,3.375vw,3.375rem)] text-white/45 font-semibold";
+    "font-montserrat text-[clamp(2.1rem,3.375cqw,3.375rem)] text-white/45 font-semibold";
 
   return (
     <StatCard
       surfaceClass="flex flex-col items-center justify-center text-center flex-1 min-w-0 joker-box rounded-xl border border-liquid-gold-end/35"
-      style={{ padding: "1.2vh var(--pad-cell)" }}
-      labelClass="font-inter font-semibold text-[var(--text-label-xl)] tracking-[0.25em] uppercase text-champagne mb-[0.2vh]"
+      style={{ padding: "1.2cqh var(--pad-cell)" }}
+      labelClass="font-montserrat font-semibold text-[var(--text-label-xl)] tracking-[0.25em] uppercase text-champagne mb-[0.2cqh]"
       label={label}
     >
       <div className="flex items-baseline justify-center gap-0.5">
@@ -90,7 +90,7 @@ export default function JokerMetricsStrip({
 
   /** Same section title as RenewalsPanel “Latest Renewals” / “Latest Members”. */
   const jokerTitleClass =
-    "font-inter font-semibold text-[clamp(1.575rem,2.1vw,2.4rem)] tracking-[0.4em] uppercase text-champagne";
+    "font-montserrat font-semibold text-[clamp(1.575rem,2.1cqw,2.4rem)] tracking-[0.4em] uppercase text-champagne";
 
   const innerGrid = (
     <div
@@ -115,7 +115,7 @@ export default function JokerMetricsStrip({
             / {totalRows}
           </>
         }
-        suffixClassName="font-inter text-[clamp(2.1rem,3.375vw,3.375rem)] text-champagne/45 font-semibold"
+        suffixClassName="font-montserrat text-[clamp(2.1rem,3.375cqw,3.375rem)] text-champagne/45 font-semibold"
       />
       <JokerMetricBox
         label="Acceptance Rate"
@@ -130,7 +130,7 @@ export default function JokerMetricsStrip({
   if (compact) {
     return (
       <div className="w-full flex-shrink-0">
-        <p className={`text-center ${jokerTitleClass} mb-[1.2vh]`}>
+        <p className={`text-center ${jokerTitleClass} mb-[1.2cqh]`}>
           {jokerName}
         </p>
         {innerGrid}
@@ -139,12 +139,12 @@ export default function JokerMetricsStrip({
   }
 
   return (
-    <div className="flex-shrink-0 mb-[1.6vh]">
+    <div className="flex-shrink-0 mb-[1.6cqh]">
       <GoldGlassCard
         overlayClass="bg-gradient-to-br from-gold-500/[0.06] to-transparent"
-        style={{ padding: "1.4vh var(--pad-card)" }}
+        style={{ padding: "1.4cqh var(--pad-card)" }}
       >
-        <p className={`text-center ${jokerTitleClass} mb-[1vh]`}>
+        <p className={`text-center ${jokerTitleClass} mb-[1cqh]`}>
           {jokerName}
         </p>
 

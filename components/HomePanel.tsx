@@ -155,12 +155,12 @@ function ClockCard({ entry, baseDate, reduced }: ClockCardProps) {
       <GlassPanel variant="card" radius="panel" shadow="md" glow overlay>
         {/* Inner flex wrapper — GlassPanel's overlay prop wraps children in a
             plain block div, so centering must live here, not on GlassPanel */}
-        <div className="flex flex-col items-center justify-center gap-[clamp(0.5rem,1vh,1.1rem)] px-[clamp(1rem,2.5vw,2.25rem)] py-[clamp(0.85rem,1.6vh,1.75rem)]">
+        <div className="flex flex-col items-center justify-center gap-[clamp(0.5rem,1cqh,1.1rem)] px-[clamp(1rem,2.5cqw,2.25rem)] py-[clamp(0.85rem,1.6cqh,1.75rem)]">
           <div
             className="home-panel-clock flex-shrink-0"
             style={{
-              width:  "clamp(130px, 13vw, 210px)",
-              height: "clamp(130px, 13vw, 210px)",
+              width:  "clamp(130px, 13cqw, 210px)",
+              height: "clamp(130px, 13cqw, 210px)",
             }}
           >
             <Clock value={cityDate} renderNumbers={false} />
@@ -174,8 +174,8 @@ function ClockCard({ entry, baseDate, reduced }: ClockCardProps) {
           </p>
 
           <p
-            className="font-inter tabular-nums tracking-[0.2em] text-champagne/70 text-center leading-none"
-            style={{ fontSize: "clamp(0.85rem, 1.1vw, 1.35rem)" }}
+            className="font-montserrat tabular-nums tracking-[0.2em] text-champagne/70 text-center leading-none"
+            style={{ fontSize: "clamp(0.85rem, 1.1cqw, 1.35rem)" }}
           >
             {digital}
           </p>
@@ -216,17 +216,17 @@ export default function HomePanel() {
 
       {/* ── Panel content — padding mirrors QueendomPanel/OnboardingLayout ── */}
       <div
-        className="relative z-[1] flex-1 min-h-0 flex flex-col overflow-hidden gap-[clamp(0.4rem,0.8vh,0.9rem)]"
-        style={{ padding: "2vh clamp(12px, 3vw, 40px) clamp(10px, 1.5vh, 20px)" }}
+        className="relative z-[1] flex-1 min-h-0 flex flex-col overflow-hidden gap-[clamp(0.4rem,0.8cqh,0.9rem)]"
+        style={{ padding: "2cqh clamp(12px, 3cqw, 40px) clamp(10px, 1.5cqh, 20px)" }}
       >
 
         {/* ── Panel identity row — centered, flanked by gold rules ────────── */}
         <div className="flex-shrink-0 text-center">
-          <SectionDivider className="mb-[0.6vh]" />
-          <div className="flex flex-col items-center gap-[0.25em] py-[0.5vh]">
+          <SectionDivider className="mb-[0.6cqh]" />
+          <div className="flex flex-col items-center gap-[0.25em] py-[0.5cqh]">
             <p
-              className="font-inter uppercase tracking-[0.38em] text-champagne/45 leading-none"
-              style={{ fontSize: "clamp(0.8rem, 1vw, 1.2rem)" }}
+              className="font-montserrat uppercase tracking-[0.38em] text-champagne/45 leading-none"
+              style={{ fontSize: "clamp(0.8rem, 1cqw, 1.2rem)" }}
             >
               INDULGE LIVE
             </p>
@@ -237,7 +237,7 @@ export default function HomePanel() {
               HOME
             </h2>
           </div>
-          <SectionDivider className="mt-[0.6vh]" />
+          <SectionDivider className="mt-[0.6cqh]" />
         </div>
 
         {/* ── World Clocks ────────────────────────────────────────────────── */}
@@ -246,7 +246,7 @@ export default function HomePanel() {
           initial={reduced ? false : "hidden"}
           animate={reduced ? undefined : "visible"}
           style={gpuStyle}
-          className="grid grid-cols-4 gap-[clamp(0.75rem,1.6vw,2rem)] flex-shrink-0"
+          className="grid grid-cols-4 gap-[clamp(0.75rem,1.6cqw,2rem)] flex-shrink-0"
         >
           {CITY_CLOCKS.map((entry) => (
             <ClockCard
@@ -265,11 +265,11 @@ export default function HomePanel() {
           <motion.div
             {...quoteWrapperAnim}
             style={gpuStyle}
-            className="flex flex-col items-center gap-[clamp(0.4rem,0.8vh,0.9rem)] max-w-5xl mx-auto text-center px-6 w-full"
+            className="flex flex-col items-center gap-[clamp(0.4rem,0.8cqh,0.9rem)] max-w-5xl mx-auto text-center px-6 w-full"
           >
             <p
-              className="font-inter uppercase tracking-[0.5em] text-gold-400/60"
-              style={{ fontSize: "clamp(0.75rem, 1vw, 1.1rem)" }}
+              className="font-montserrat uppercase tracking-[0.5em] text-gold-400/60"
+              style={{ fontSize: "clamp(0.75rem, 1cqw, 1.1rem)" }}
             >
               DAILY REFLECTION
             </p>
@@ -278,15 +278,15 @@ export default function HomePanel() {
               initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={reduced ? undefined : { delay: 0.6, duration: 0.8, ease: EASE_LUXURY }}
-              style={{ ...gpuStyle, fontSize: "clamp(1.6rem, 2.6vw, 3.4rem)" }}
+              style={{ ...gpuStyle, fontSize: "clamp(1.6rem, 2.6cqw, 3.4rem)" }}
               className="font-cinzel text-champagne/90 tracking-[0.04em] leading-relaxed text-center max-w-4xl queen-name-glow"
             >
               &ldquo;{todayQuote.text}&rdquo;
             </motion.p>
 
             <p
-              className="font-baskerville italic text-champagne/55 text-center"
-              style={{ fontSize: "clamp(1rem, 1.3vw, 1.6rem)" }}
+              className="font-cinzel italic text-champagne/55 text-center"
+              style={{ fontSize: "clamp(1rem, 1.3cqw, 1.6rem)" }}
             >
               {todayQuote.attribution}
             </p>

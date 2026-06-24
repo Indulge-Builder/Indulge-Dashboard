@@ -43,13 +43,13 @@ function OutlayLedgerRow({
       aria-hidden={ariaHidden}
     >
       <span
-        className="min-w-0 justify-self-center truncate px-1 text-center font-inter font-semibold uppercase leading-none tracking-[0.1em] text-champagne"
+        className="min-w-0 justify-self-center truncate px-1 text-center font-montserrat font-semibold uppercase leading-none tracking-[0.1em] text-champagne"
         style={cell}
       >
         {o.client_name}
       </span>
       <span
-        className="min-w-0 justify-self-center truncate px-1 text-center font-inter font-medium leading-none text-champagne/90"
+        className="min-w-0 justify-self-center truncate px-1 text-center font-montserrat font-medium leading-none text-champagne/90"
         style={cell}
       >
         {o.task}
@@ -107,7 +107,7 @@ export function OutlayLedger({
       {/* ── Scrolling body ── */}
       <div className="relative min-h-0 flex-1 overflow-hidden">
         {outlays.length === 0 ? (
-          <p className="py-8 text-center font-inter font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] text-champagne/40">
+          <p className="py-8 text-center font-montserrat font-semibold text-[clamp(1.425rem,2.325vw,2.925rem)] text-champagne/40">
             No pending items
           </p>
         ) : (

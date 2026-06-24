@@ -34,7 +34,7 @@ export const MAX_OUTLAYS = 10;
  * label size so the two widgets share the same visual rhythm.
  */
 export const FINANCES_LEDGER_HEADER_LABEL_CLASS =
-  "font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-champagne leading-none";
+  "font-montserrat font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-champagne leading-none";
 
 /**
  * Cell font-size for every data row in the outlay ledger.

@@ -8,12 +8,12 @@ import AnimatedCounter from "./AnimatedCounter";
 // moving element forces a backdrop repaint every frame on TV GPUs. Over the
 // near-black ambient gradient the blur was visually undetectable.
 const pillBase =
-  "flex min-w-0 max-w-full flex-wrap items-center gap-x-[clamp(1rem,1.2vw,2.25rem)] gap-y-2 rounded-full border border-gold-500/20 bg-black/40 px-[clamp(1.25rem,1.5vw,2.75rem)] py-[clamp(0.875rem,1.3vh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
+  "flex min-w-0 max-w-full flex-wrap items-center gap-x-[clamp(1rem,1.2cqw,2.25rem)] gap-y-2 rounded-full border border-gold-500/20 bg-black/40 px-[clamp(1.25rem,1.5cqw,2.75rem)] py-[clamp(0.875rem,1.3cqh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
 
 // Stacked variant: a softer rounded card (not a full pill) so the two-line
 // block reads as one intentional unit rather than a squashed pill.
 const stackedPillBase =
-  "flex min-w-0 max-w-full flex-col gap-y-[clamp(0.5rem,0.9vh,1.1rem)] rounded-[clamp(1.5rem,2vw,2.75rem)] border border-gold-500/20 bg-black/40 px-[clamp(1.5rem,1.7vw,3rem)] py-[clamp(0.875rem,1.3vh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
+  "flex min-w-0 max-w-full flex-col gap-y-[clamp(0.5rem,0.9cqh,1.1rem)] rounded-[clamp(1.5rem,2cqw,2.75rem)] border border-gold-500/20 bg-black/40 px-[clamp(1.5rem,1.7cqw,3rem)] py-[clamp(0.875rem,1.3cqh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
 
 function MetricPill({
   children,
@@ -50,13 +50,13 @@ function MetricPill({
  *  Sized up (was --text-label-xl) so pill labels read at least as large as the
  *  agent leaderboard header (clamp(1.5rem,2.5vw,3rem)) on the TV. */
 const metricLabelClass =
-  "font-inter shrink-0 font-semibold text-[clamp(2.5rem,3.6vw,4.25rem)] tracking-[0.25em] uppercase leading-none";
+  "font-cinzel shrink-0 font-semibold text-[clamp(2.5rem,3.6cqw,4.25rem)] tracking-[0.25em] uppercase leading-none";
 
 /** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
-const pillNumberSizeClass = "text-[clamp(2.15rem,3.45vw,3.45rem)]";
+const pillNumberSizeClass = "text-[clamp(2.15rem,3.45cqw,3.45rem)]";
 
 /** White readout with a softer gold aura than `gold-glow` on paid — still “ours,” still cherished */
-const unpaidNumberClass = `font-inter ${pillNumberSizeClass} font-bold leading-none tracking-widest text-white tabular-nums [text-shadow:0_0_12px_rgba(212,175,55,0.42),0_0_26px_rgba(212,175,55,0.2),0_1px_0_rgba(253,230,138,0.28)]`;
+const unpaidNumberClass = `font-montserrat ${pillNumberSizeClass} font-bold leading-none tracking-widest text-white tabular-nums [text-shadow:0_0_12px_rgba(212,175,55,0.42),0_0_26px_rgba(212,175,55,0.2),0_1px_0_rgba(253,230,138,0.28)]`;
 
 interface QueendomWingspanHeaderProps {
   name: string;
@@ -83,14 +83,14 @@ export default function QueendomWingspanHeader({
 
   return (
     <div className="w-full px-2 pt-2 pb-0 min-[500px]:px-4 min-[500px]:pt-3 min-[500px]:pb-0 sm:px-5">
-      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-[clamp(0.75rem,1.5vw,3rem)] gap-y-4">
+      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-[clamp(0.75rem,1.5cqw,3rem)] gap-y-4">
         {/* Left metric — hug center (end-aligned in column) */}
         <div className="flex min-w-0 justify-end justify-self-stretch pr-1 sm:pr-2">
           <MetricPill delaySec={delayLeftSec} slideFrom="left">
             <span className={`${metricLabelClass} text-champagne`}>Paid</span>
             <AnimatedCounter
               value={membersTotal}
-              className={`font-inter ${pillNumberSizeClass} font-bold leading-none tracking-widest text-gold-300 tabular-nums gold-glow`}
+              className={`font-montserrat ${pillNumberSizeClass} font-bold leading-none tracking-widest text-gold-300 tabular-nums gold-glow`}
               delay={leftDelay}
               slideOnChange
             />
@@ -105,7 +105,7 @@ export default function QueendomWingspanHeader({
         {/* Right metric — Celebrity over To Be Revived in one stacked pill */}
         <div className="flex min-w-0 justify-start justify-self-stretch pl-1 sm:pl-2">
           <MetricPill delaySec={delayRightSec} slideFrom="right" stacked>
-            <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2vw,2.25rem)]">
+            <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2cqw,2.25rem)]">
               <span className={`${metricLabelClass} text-champagne`}>Celebrity</span>
               <AnimatedCounter
                 value={complimentaryCount}
@@ -118,7 +118,7 @@ export default function QueendomWingspanHeader({
               aria-hidden
               className="h-px w-full bg-gradient-to-r from-transparent via-gold-500/30 to-transparent"
             />
-            <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2vw,2.25rem)]">
+            <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2cqw,2.25rem)]">
               <span className={`${metricLabelClass} text-champagne`}>To Be Revived</span>
               <AnimatedCounter
                 value={toBeRevivedCount}

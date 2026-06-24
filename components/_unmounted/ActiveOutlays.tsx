@@ -80,7 +80,7 @@ function FinancesHeadingRail() {
             className="absolute inset-0 -z-10 rounded-full border border-gold-500/35 bg-gradient-to-b from-gold-500/[0.14] via-black/45 to-black/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_0_28px_rgba(201,168,76,0.14)]"
             aria-hidden
           />
-          <p className="font-inter font-semibold text-[clamp(1.65rem,2.25vw,2.55rem)] tracking-[0.46em] uppercase text-amber-100 gold-glow text-center">
+          <p className="font-montserrat font-semibold text-[clamp(1.65rem,2.25vw,2.55rem)] tracking-[0.46em] uppercase text-amber-100 gold-glow text-center">
             Finances
           </p>
         </div>
@@ -273,7 +273,7 @@ export default function ActiveOutlays({
     return (
       <div className="flex-shrink-0 mt-2 w-full border-t border-gold-500/15 pt-3">
         <div
-          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-inter text-[clamp(1.4rem,1.9vw,2.2rem)] text-white/40"
+          className="rounded-xl border border-gold-500/20 bg-black/30 px-3 py-2 text-center font-montserrat text-[clamp(1.4rem,1.9vw,2.2rem)] text-white/40"
           style={{ padding: "1.2vh clamp(6px, 0.8vw, 14px)" }}
         >
           Finances unavailable (configure Supabase env).
@@ -318,13 +318,13 @@ export default function ActiveOutlays({
             }`}
             style={{ padding: "1.2vh clamp(8px, 1vw, 16px)" }}
           >
-            <p className="font-inter font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-amber-300 mb-[0.4vh]">
+            <p className="font-montserrat font-semibold text-[clamp(27px,3vw,39px)] tracking-[0.25em] uppercase text-amber-300 mb-[0.4vh]">
               Capital
               <br />
               pending
             </p>
             <div className="flex items-baseline justify-center gap-0.5">
-              <span className="font-inter text-[clamp(2.1rem,3.375vw,3.375rem)] font-semibold text-amber-200/80">
+              <span className="font-montserrat text-[clamp(2.1rem,3.375vw,3.375rem)] font-semibold text-amber-200/80">
                 ₹
               </span>
               <AnimatedCounter
@@ -334,7 +334,7 @@ export default function ActiveOutlays({
                 slideOnChange
               />
               {capitalPendingDisplay.mode === "k" && (
-                <span className="font-inter text-[clamp(2.25rem,3.675vw,3.75rem)] font-semibold text-amber-300/90">
+                <span className="font-montserrat text-[clamp(2.25rem,3.675vw,3.75rem)] font-semibold text-amber-300/90">
                   k
                 </span>
               )}

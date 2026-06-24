@@ -92,7 +92,7 @@ function OfflineFallback({
         // Outer: obsidian background, near-invisible gold border, card radius
         "relative flex flex-col items-center justify-center text-center",
         "bg-[#050507] border border-gold-500/[0.08] rounded-card",
-        "px-[clamp(16px,3vw,40px)] py-[clamp(24px,4vh,56px)]",
+        "px-[clamp(16px,3cqw,40px)] py-[clamp(24px,4cqh,56px)]",
         fillParent ? "flex-1 h-full w-full" : "w-full",
       ]
         .filter(Boolean)
@@ -119,13 +119,13 @@ function OfflineFallback({
 
       {/* Separator — .separator-gold-h utility from Step 1 */}
       <div
-        className="separator-gold-h w-[clamp(80px,30%,200px)] my-[clamp(12px,2vh,24px)]"
+        className="separator-gold-h w-[clamp(80px,30%,200px)] my-[clamp(12px,2cqh,24px)]"
         aria-hidden
       />
 
       {/* Body copy */}
       <p
-        className="font-inter font-medium leading-relaxed text-champagne/35 max-w-[28ch]"
+        className="font-montserrat font-medium leading-relaxed text-champagne/35 max-w-[28ch]"
         style={{ fontSize: "var(--text-label-md)" }}
       >
         This widget is temporarily unavailable.
@@ -138,12 +138,12 @@ function OfflineFallback({
         type="button"
         onClick={onRetry}
         className={[
-          "relative mt-[clamp(16px,2.5vh,32px)]",
-          "font-inter font-semibold uppercase tracking-[0.32em]",
+          "relative mt-[clamp(16px,2.5cqh,32px)]",
+          "font-montserrat font-semibold uppercase tracking-[0.32em]",
           "text-gold-400/60 hover:text-gold-300/80",
           "border border-gold-500/[0.15] hover:border-gold-500/[0.28]",
           "rounded-[var(--radius-pill)]",
-          "px-[clamp(16px,2.5vw,28px)] py-[clamp(8px,1.2vh,14px)]",
+          "px-[clamp(16px,2.5cqw,28px)] py-[clamp(8px,1.2cqh,14px)]",
           "transition-colors duration-300",
           "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-500/40",
         ].join(" ")}

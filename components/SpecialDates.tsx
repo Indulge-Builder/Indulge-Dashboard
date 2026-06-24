@@ -83,9 +83,9 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className={`
-                relative flex-shrink-0 flex w-full min-h-[clamp(70px,10vh,160px)]
-                flex-row items-center justify-between gap-[clamp(1.25rem,1.5vw,2.75rem)]
-                rounded-xl overflow-hidden px-[clamp(1.25rem,1.5vw,2.75rem)] py-[clamp(0.875rem,1.4vh,1.75rem)]
+                relative flex-shrink-0 flex w-full min-h-[clamp(70px,10cqh,160px)]
+                flex-row items-center justify-between gap-[clamp(1.25rem,1.5cqw,2.75rem)]
+                rounded-xl overflow-hidden px-[clamp(1.25rem,1.5cqw,2.75rem)] py-[clamp(0.875rem,1.4cqh,1.75rem)]
                 ${isAnniversary && !isExpired ? "anniversary-highlight" : ""}
                 ${isExpired ? "special-date-expired" : ""}
               `}
@@ -121,7 +121,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               <>
                 <div className="flex items-center justify-center flex-shrink-0">
                   <span
-                    className={`font-edu font-bold text-[clamp(2rem,4vw,3.1rem)] leading-[1.1] tabular-nums ${
+                    className={`font-montserrat font-bold text-[clamp(2rem,4cqw,3.1rem)] leading-[1.1] tabular-nums ${
                       isExpired ? "text-stone-400/80" : "text-champagne/95"
                     }`}
                   >
@@ -137,20 +137,20 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                 >
                   {isTodayCard && !isExpired && (
                     <Gift
-                      className="flex-shrink-0 w-[clamp(2rem,3.5vw,2.75rem)] h-[clamp(2rem,3.5vw,2.75rem)] text-[#D4AF37]"
+                      className="flex-shrink-0 w-[clamp(2rem,3.5cqw,2.75rem)] h-[clamp(2rem,3.5cqw,2.75rem)] text-[#D4AF37]"
                       strokeWidth={1.75}
                       aria-hidden
                     />
                   )}
                   {isAnniversary && !isTodayCard && !isExpired && (
                     <Heart
-                      className="flex-shrink-0 w-[clamp(2rem,3.5vw,2.75rem)] h-[clamp(2rem,3.5vw,2.75rem)] text-rose-400/90 fill-rose-400/30"
+                      className="flex-shrink-0 w-[clamp(2rem,3.5cqw,2.75rem)] h-[clamp(2rem,3.5cqw,2.75rem)] text-rose-400/90 fill-rose-400/30"
                       strokeWidth={1.75}
                       aria-hidden
                     />
                   )}
                   <span
-                    className={`font-baskerville font-semibold text-[clamp(1.25rem,2.2vw,2.2rem)] text-center leading-tight line-clamp-2 break-words ${
+                    className={`font-cinzel font-semibold text-[clamp(1.25rem,2.2cqw,2.2rem)] text-center leading-tight line-clamp-2 break-words ${
                       isExpired ? "text-stone-400/75" : "text-champagne/90"
                     }`}
                   >

@@ -49,7 +49,7 @@ export default function TopBar() {
   return (
     <motion.header
       className="relative flex items-center justify-between px-6 sm:px-12 lg:px-[4.5rem] border-b border-gold-500/15 z-10 flex-shrink-0"
-      style={{ height: "18vh", minHeight: "96px", maxHeight: "165px" }}
+      style={{ height: "18cqh", minHeight: "96px", maxHeight: "165px" }}
       initial={{ opacity: 0, y: -42 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -60,25 +60,25 @@ export default function TopBar() {
       {/* ── Date (left) — hidden on small screens ── */}
       <LiveTimeText
         formatter={DATE_FORMATTER}
-        className="hidden md:block font-inter text-[clamp(24px,3.075vw,45px)] tracking-[0.35em] uppercase text-gold-500 tabular-nums flex-shrink-0"
+        className="hidden md:block font-montserrat text-[clamp(24px,3.075cqw,45px)] tracking-[0.35em] uppercase text-gold-500 tabular-nums flex-shrink-0"
       />
       {/* Spacer so branding stays centred when date is hidden */}
       <div className="md:hidden flex-1" />
 
       {/* ── Central Branding ── */}
       <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center select-none">
-        <h1 className="font-cinzel text-[clamp(2.1rem,4.65vw,4.425rem)] tracking-[0.3em] sm:tracking-[0.38em] text-gold-400 gold-glow uppercase leading-none whitespace-nowrap">
+        <h1 className="font-cinzel text-[clamp(2.1rem,4.65cqw,4.425rem)] tracking-[0.3em] sm:tracking-[0.38em] text-gold-400 gold-glow uppercase leading-none whitespace-nowrap">
           Indulge Global
         </h1>
       </div>
 
       {/* ── Clock + Live (right) ── */}
-      <div className="flex h-full items-center justify-end gap-[clamp(1.5rem,2vw,4rem)] flex-shrink-0">
+      <div className="flex h-full items-center justify-end gap-[clamp(1.5rem,2cqw,4rem)] flex-shrink-0">
         <LiveTimeText
           formatter={TIME_FORMATTER}
-          className="font-inter text-[clamp(27px,3.375vw,48px)] tracking-[0.25em] sm:tracking-[0.35em] text-gold-400 tabular-nums"
+          className="font-montserrat text-[clamp(27px,3.375cqw,48px)] tracking-[0.25em] sm:tracking-[0.35em] text-gold-400 tabular-nums"
         />
-        <span className="inline-flex items-center rounded-full border border-gold-500/40 bg-gold-500/5 px-6 py-[0.5625rem] font-inter text-[clamp(24px,2.775vw,42px)] tracking-[0.3em] uppercase text-gold-400 shadow-[0_0_18px_rgba(201,168,76,0.15)]">
+        <span className="inline-flex items-center rounded-full border border-gold-500/40 bg-gold-500/5 px-6 py-[0.5625rem] font-montserrat text-[clamp(24px,2.775cqw,42px)] tracking-[0.3em] uppercase text-gold-400 shadow-[0_0_18px_rgba(201,168,76,0.15)]">
           Live
         </span>
       </div>
