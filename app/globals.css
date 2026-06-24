@@ -592,7 +592,7 @@ body::before {
     text-transform: uppercase;
     line-height: 1.05;
     letter-spacing: 0.4em;
-    font-size: clamp(1.85rem, 2.5cqw, 3rem);
+    font-size: clamp(2.05rem, 3.5cqw, 4rem);
   }
 
   .label-field {
@@ -601,7 +601,7 @@ body::before {
     text-transform: uppercase;
     line-height: 1.15;
     letter-spacing: 0.22em;
-    font-size: clamp(1.45rem, 2.1cqw, 2.5rem);
+    font-size: clamp(1.7rem, 2.9cqw, 3.3rem);
   }
 }
 
