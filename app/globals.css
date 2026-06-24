@@ -113,11 +113,27 @@
   --gap-card: clamp(0.65rem, min(1.4vmin, 1.8vh), 2.75rem);
 
   /* Fluid gaps (replace fixed gap-2/3/4 Tailwind steps in TV panels) */
-  --gap-metric: clamp(0.5rem, min(1.15vw, 1.7vh), 2.4rem); /* between metric tiles */
-  --gap-list: clamp(0.7rem, min(1vw, 1.5vh), 1.6rem); /* vertical list item gaps */
-  --gap-section: clamp(1.5rem, 2.2vw, 4.25rem); /* between major side-by-side blocks */
+  --gap-metric: clamp(
+    0.5rem,
+    min(1.15vw, 1.7vh),
+    2.4rem
+  ); /* between metric tiles */
+  --gap-list: clamp(
+    0.7rem,
+    min(1vw, 1.5vh),
+    1.6rem
+  ); /* vertical list item gaps */
+  --gap-section: clamp(
+    1.5rem,
+    2.2vw,
+    4.25rem
+  ); /* between major side-by-side blocks */
   --gap-row-x: clamp(0.75rem, 1.4vw, 2.75rem); /* leaderboard grid column gap */
-  --pad-row-x: clamp(0.5rem, 0.8vw, 1.5rem); /* leaderboard row horizontal padding */
+  --pad-row-x: clamp(
+    0.5rem,
+    0.8vw,
+    1.5rem
+  ); /* leaderboard row horizontal padding */
 
   /* Kiosk / layout sizing */
   --size-celebration-avatar: clamp(140px, 18vmin, 300px);
@@ -145,7 +161,7 @@ html {
   font-size: clamp(
     calc(100% + (1024px - 1280px) * 4 / 640),
     calc(100% + (100vw - 1280px) * 6 / 640),
-    calc(100% + (2560px - 1280px) * 6 / 640)
+    calc(100% + (1080px - 1280px) * 6 / 640)
   );
 }
 
@@ -490,7 +506,11 @@ body::before {
   /* Recessed supporting surface — sits INTO the panel (the quiet base plane). */
   .surface-luxe {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 20%),
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0) 20%
+      ),
       linear-gradient(180deg, rgba(22, 19, 12, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%);
     box-shadow:
       inset 0 1px 0 0 rgba(253, 230, 138, 0.12),
@@ -501,8 +521,16 @@ body::before {
   /* Elevated focal plinth — the green "Today" anchor; emerald-tinted rim+floor. */
   .surface-luxe-hero {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 24%),
-      linear-gradient(180deg, rgba(20, 28, 22, 0.5) 0%, rgba(0, 0, 0, 0.45) 100%);
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0) 24%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(20, 28, 22, 0.5) 0%,
+        rgba(0, 0, 0, 0.45) 100%
+      );
     box-shadow:
       inset 0 1px 0 0 rgba(214, 255, 233, 0.22),
       inset 0 0 0 1px rgba(52, 211, 153, 0.18),
@@ -616,8 +644,16 @@ body::before {
   /* Default upcoming date — quiet warm surface, lit from the top. */
   .special-date {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 22%),
-      linear-gradient(180deg, rgba(42, 38, 35, 0.6) 0%, rgba(20, 18, 16, 0.82) 100%);
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.035) 0%,
+        rgba(255, 255, 255, 0) 22%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(42, 38, 35, 0.6) 0%,
+        rgba(20, 18, 16, 0.82) 100%
+      );
     box-shadow:
       inset 0 1px 0 0 rgba(253, 230, 138, 0.14),
       inset 0 0 0 1px rgba(212, 175, 55, 0.18),
@@ -627,8 +663,16 @@ body::before {
   /* Anniversary — rose-gold tinted floor, still top-lit. */
   .anniversary-highlight {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0) 24%),
-      linear-gradient(180deg, rgba(52, 32, 42, 0.7) 0%, rgba(30, 20, 26, 0.88) 100%);
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.045) 0%,
+        rgba(255, 255, 255, 0) 24%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(52, 32, 42, 0.7) 0%,
+        rgba(30, 20, 26, 0.88) 100%
+      );
     box-shadow:
       inset 0 1px 0 0 rgba(255, 225, 235, 0.16),
       inset 0 0 0 1px rgba(212, 175, 55, 0.3),
@@ -641,10 +685,29 @@ body::before {
      boxed). */
   .special-date-today {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 20%),
-      linear-gradient(140deg, rgba(30, 16, 22, 0.96) 0%, rgba(64, 22, 38, 0.95) 34%, rgba(20, 46, 34, 0.94) 68%, rgba(18, 28, 22, 0.96) 100%),
-      radial-gradient(circle at 14% 18%, rgba(249, 226, 126, 0.2) 0%, rgba(249, 226, 126, 0.05) 22%, transparent 48%),
-      radial-gradient(circle at 88% 86%, rgba(212, 175, 55, 0.18) 0%, transparent 52%);
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0) 20%
+      ),
+      linear-gradient(
+        140deg,
+        rgba(30, 16, 22, 0.96) 0%,
+        rgba(64, 22, 38, 0.95) 34%,
+        rgba(20, 46, 34, 0.94) 68%,
+        rgba(18, 28, 22, 0.96) 100%
+      ),
+      radial-gradient(
+        circle at 14% 18%,
+        rgba(249, 226, 126, 0.2) 0%,
+        rgba(249, 226, 126, 0.05) 22%,
+        transparent 48%
+      ),
+      radial-gradient(
+        circle at 88% 86%,
+        rgba(212, 175, 55, 0.18) 0%,
+        transparent 52%
+      );
     box-shadow:
       inset 0 1px 0 0 rgba(253, 230, 138, 0.4),
       inset 0 0 0 1.5px rgba(212, 175, 55, 0.85),
@@ -654,8 +717,11 @@ body::before {
 
   /* Expired — desaturated, recessed; keeps the grey left accent bar. */
   .special-date-expired {
-    background:
-      linear-gradient(180deg, rgba(40, 40, 44, 0.7) 0%, rgba(20, 20, 24, 0.9) 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(40, 40, 44, 0.7) 0%,
+      rgba(20, 20, 24, 0.9) 100%
+    );
     box-shadow:
       inset 3px 0 0 rgba(140, 140, 150, 0.45),
       inset 0 0 0 1px rgba(140, 140, 150, 0.22),
