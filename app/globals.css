@@ -138,13 +138,14 @@
 }
 
 html {
-  /* Root scale: 100% (~16px) at 1280px, 125% (~20px) at 1920px.
-     Capped at 1920px behavior — counter/heading clamps handle 4K sizing.
-     No breakpoint jump. Replaces the former md: 125% block below. */
+  /* Root scale: 100% (~16px) at 1280px, ~137% (~22px) at 1920px, capped at
+     ~175% (~28px) for ≥2560px screens (4K TV / zoomed-out kiosk readability).
+     The `* 6` slope and the `2560px` cap reference are the two knobs — raise
+     the slope to grow every rem-based size on the dashboard at once. */
   font-size: clamp(
     calc(100% + (1024px - 1280px) * 4 / 640),
-    calc(100% + (100vw - 1280px) * 4 / 640),
-    calc(100% + (1920px - 1280px) * 4 / 640)
+    calc(100% + (100vw - 1280px) * 6 / 640),
+    calc(100% + (2560px - 1280px) * 6 / 640)
   );
 }
 
