@@ -73,7 +73,22 @@ export default function HeartbeatBars({ hourly, peak, delay = 0 }: HeartbeatBars
     );
   }
 
+  // Peak-bar label is rendered as an HTML overlay (not SVG <text>) because the
+  // chart SVG uses preserveAspectRatio="none" — rotated text inside it would
+  // shear. Position it by % so it tracks the bar at any container size.
+  const peakBar = peakIdx >= 0 ? bars[peakIdx] : null;
+  const peakLabel =
+    peakBar && peakBar.v > 0
+      ? {
+          leftPct: ((peakBar.x + peakBar.w / 2) / VW) * 100,
+          // anchor on the bar's vertical MIDPOINT so the rotated label sits
+          // centered inside the bar (peakBar.y = top, baseY = bottom).
+          topPct: (((peakBar.y + baseY) / 2) / VH) * 100,
+        }
+      : null;
+
   return (
+    <div className="relative h-full w-full">
     <svg
       viewBox={`0 0 ${VW} ${VH}`}
       preserveAspectRatio="none"
@@ -137,5 +152,28 @@ export default function HeartbeatBars({ hourly, peak, delay = 0 }: HeartbeatBars
         );
       })}
     </svg>
+
+      {/* Peak-hour label — rotated, written INSIDE the gold bar (HTML overlay so
+          it doesn't shear under the SVG's non-uniform scaling). */}
+      {peakLabel && (
+        <motion.span
+          className="pointer-events-none absolute font-montserrat font-bold leading-none"
+          style={{
+            left: `${peakLabel.leftPct}%`,
+            top: `${peakLabel.topPct}%`,
+            transform: "translate(-50%, -50%) rotate(-90deg)",
+            transformOrigin: "center center",
+            color: "#3a2c08",
+            fontSize: "clamp(12px, 1.7cqw, 20px)",
+            letterSpacing: "0.04em",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: delay + peakIdx * 0.012 + 0.45 }}
+        >
+          {hourToAmPm(peakIdx)}
+        </motion.span>
+      )}
+    </div>
   );
 }
