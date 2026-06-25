@@ -136,7 +136,7 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
                     />
                   )}
                   <span
-                    className={`font-cinzel font-semibold text-[clamp(1.25rem,2.2cqw,2.2rem)] text-center leading-tight line-clamp-2 break-words ${
+                    className={`font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] text-center leading-tight line-clamp-2 break-words ${
                       isExpired ? "text-stone-400/75" : "text-champagne/90"
                     }`}
                   >

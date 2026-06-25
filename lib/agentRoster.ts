@@ -4,7 +4,6 @@ import type { AgentStats } from "./types";
 // Names must match exactly what is stored in the `agent_name` column in Supabase.
 
 export const ROSTER_ANISHQA: string[] = [
-  "Sagar Ali",
   "Neha Sah",
   "Pranav Gadekar",
   "Dhanush K",
