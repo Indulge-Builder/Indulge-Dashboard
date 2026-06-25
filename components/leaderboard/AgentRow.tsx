@@ -174,7 +174,7 @@ export const AgentRow = memo(function AgentRow({
 
         {/* Col 2: Agent name — opacity dip on surge; row-level gold burst carries the drama */}
         <motion.p
-          className="min-w-0 font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
+          className="min-w-0 font-cinzel font-semibold text-[clamp(1.65rem,2.7cqw,3.35rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
           style={gpuStyle}
           animate={surgeKey > 0 ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}

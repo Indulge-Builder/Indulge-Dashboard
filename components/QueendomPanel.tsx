@@ -386,14 +386,14 @@ export default function QueendomPanel({
         {/* Heartbeat — resolutions by hour of day */}
         <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
           <SectionDivider
-            label="Resolve Rhythm"
+            label="Arrival Rhythm"
             accent="champagne"
             className="mb-[0.6cqh] flex-shrink-0 gap-2 px-1"
             labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap"
           />
           <div className="min-h-0 flex-1">
             <HeartbeatBars
-              hourly={series?.hourlyResolved ?? []}
+              hourly={series?.hourlyArrivals ?? []}
               peak={series?.peakHour ?? 0}
               delay={delay / 1000 + 0.5}
             />

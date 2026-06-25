@@ -4,9 +4,9 @@
  * components/charts/HeartbeatBars.tsx
  *
  * "The Heartbeat" — a thin, wide 24-bar burst showing the Queendom's daily
- * rhythm: how many tickets get resolved in each hour of the day (IST). The
- * tallest bar (peak hour) glows gold; the rest are champagne. Tick labels at
- * 0 / 6 / 12 / 18 / 24h anchor the eye.
+ * rhythm: how many tickets ARRIVE (are created) in each hour of the day (IST).
+ * The tallest bar (peak arrival hour) glows gold and is labelled with its time;
+ * the rest are champagne. Tick labels at 12am / 6am / 12pm / 6pm anchor the eye.
  *
  * Native SVG only. 0..100 × 0..36 viewBox stretched to fill the container.
  */
@@ -32,7 +32,7 @@ function hourToAmPm(hr: number): string {
 }
 
 interface HeartbeatBarsProps {
-  /** 24-length array: tickets resolved per IST hour. */
+  /** 24-length array: tickets created (arrived) per IST hour. */
   hourly: number[];
   peak: number;
   delay?: number;
@@ -68,7 +68,7 @@ export default function HeartbeatBars({ hourly, peak, delay = 0 }: HeartbeatBars
   if (total === 0) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <span className="label-field text-champagne/40">No resolutions yet today</span>
+        <span className="label-field text-champagne/40">No tickets yet this month</span>
       </div>
     );
   }
@@ -94,7 +94,7 @@ export default function HeartbeatBars({ hourly, peak, delay = 0 }: HeartbeatBars
       preserveAspectRatio="none"
       className="h-full w-full overflow-visible"
       role="img"
-      aria-label="Tickets resolved by hour of day"
+      aria-label="Tickets received by hour of day"
     >
       <defs>
         <linearGradient id={`barGold-${uid}`} x1="0" y1="0" x2="0" y2="1">

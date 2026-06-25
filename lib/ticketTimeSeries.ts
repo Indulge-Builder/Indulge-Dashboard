@@ -4,7 +4,8 @@
  * Pure time-series derivations from the same minimal ticket rows that feed
  * lib/ticketAggregation.ts. Powers the two thin Queendom graphs:
  *   - Pulse:     daily Received vs Resolved across the current IST month.
- *   - Heartbeat: tickets resolved per IST hour-of-day (the team's rhythm).
+ *   - Heartbeat: tickets CREATED (arrived) per IST hour-of-day — shows what time
+ *                of day the most tickets come in (load / staffing signal).
  *
  * Same invariants as aggregateTicketStats — dedup by id, strip VOID rows, match
  * queendom with normalizeQueendom, terminal = {resolved, closed}. Cohort math
@@ -30,8 +31,8 @@ export interface DailyPoint {
 export interface TicketTimeSeries {
   /** One entry per IST day from 1 → today (inclusive). */
   daily: DailyPoint[];
-  /** 24-length array indexed by IST hour-of-day: tickets resolved that hour. */
-  hourlyResolved: number[];
+  /** 24-length array indexed by IST hour-of-day: tickets CREATED (arrived) that hour. */
+  hourlyArrivals: number[];
   /** Convenience peaks for axis scaling / labels (0 when empty). */
   peakDaily: number;
   peakHour: number;
@@ -43,7 +44,7 @@ const EMPTY_BOTH: Record<Queendom, TicketTimeSeries> = {
 };
 
 function emptySeries(): TicketTimeSeries {
-  return { daily: [], hourlyResolved: new Array(24).fill(0), peakDaily: 0, peakHour: 0 };
+  return { daily: [], hourlyArrivals: new Array(24).fill(0), peakDaily: 0, peakHour: 0 };
 }
 
 /** Resolution timestamp for a terminal ticket — resolved_at, else created_at. */
@@ -79,20 +80,22 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
     if (!queendom) continue;
     const bucket = acc[queendom as Queendom];
 
-    // Received — by created_at day, current IST month only.
+    // Received — by created_at day, current IST month only. The Heartbeat's
+    // hourly buckets are ARRIVAL-based (created_at hour) so the chart answers
+    // "what time of day do the most tickets come in" — a load/staffing signal.
     if (toISTMonth(row.created_at) === thisMonthIST) {
       const dom = Number(toISTDay(row.created_at).slice(8, 10));
       if (dom >= 1 && dom <= 31) bucket.received[dom]++;
+      const h = toISTHour(row.created_at);
+      if (h >= 0 && h <= 23) bucket.hourly[h]++;
     }
 
-    // Resolved — terminal tickets, bucketed by resolution day + hour (IST).
+    // Resolved — terminal tickets, bucketed by resolution day (Daily Flow line).
     if (isTerminal(row.status)) {
       const ts = resolutionTs(row);
       if (toISTMonth(ts) === thisMonthIST) {
         const dom = Number(toISTDay(ts).slice(8, 10));
         if (dom >= 1 && dom <= 31) bucket.resolved[dom]++;
-        const h = toISTHour(ts);
-        if (h >= 0 && h <= 23) bucket.hourly[h]++;
       }
     }
   }
@@ -109,7 +112,7 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
       if (resolved > peakDaily) peakDaily = resolved;
     }
     const peakHour = b.hourly.reduce((m, v) => (v > m ? v : m), 0);
-    return { daily, hourlyResolved: b.hourly, peakDaily, peakHour };
+    return { daily, hourlyArrivals: b.hourly, peakDaily, peakHour };
   };
 
   return { ananyshree: finalize("ananyshree"), anishqa: finalize("anishqa") };
