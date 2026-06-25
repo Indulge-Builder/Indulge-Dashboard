@@ -6,6 +6,8 @@ import AnimatedCounter from "./AnimatedCounter";
 import QueendomWingspanHeader from "./QueendomWingspanHeader";
 import AgentLeaderboard from "./leaderboard/AgentLeaderboard";
 import RenewalsPanel from "./RenewalsPanel";
+import PulseRibbon from "./charts/PulseRibbon";
+import HeartbeatBars from "./charts/HeartbeatBars";
 import SpecialDates from "@/components/SpecialDates";
 import { SectionDivider } from "@/components/ui/SectionDivider";
 import { StatCard } from "@/components/ui/StatCard";
@@ -117,6 +119,8 @@ export default function QueendomPanel({
     () => safeNum(stats.joker?.acceptedCount),
     [stats.joker?.acceptedCount],
   );
+
+  const series = stats.series;
 
   const leaderboardMeasureRef = useRef<HTMLDivElement>(null);
   const [leaderboardHeightPx, setLeaderboardHeightPx] = useState<number | null>(
@@ -336,6 +340,63 @@ export default function QueendomPanel({
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Ticket-flow graphs: Pulse (daily) | Heartbeat (hourly) ──────────────
+          Thin wide band at the panel floor. Both derive from stats.series
+          (lib/ticketTimeSeries) — no extra fetch. Fixed short height (cqh) keeps
+          the band shallow while the agent table above takes the vertical space. */}
+      <motion.div
+        className="relative mt-[1.6cqh] flex min-h-0 w-full flex-shrink-0 flex-col gap-[var(--gap-card)] overflow-hidden rounded-2xl glass gold-border-glow md:flex-row"
+        style={{ padding: "1.2cqh var(--pad-card)", height: "13cqh", minHeight: "92px" }}
+        variants={queendomItemVariants}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
+
+        {/* Pulse — daily received vs resolved */}
+        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
+          <SectionDivider
+            label="Daily Flow"
+            accent="champagne"
+            className="mb-[0.6cqh] flex-shrink-0 gap-2 px-1"
+            labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap"
+          />
+          <div className="min-h-0 flex-1">
+            <PulseRibbon
+              daily={series?.daily ?? []}
+              peak={series?.peakDaily ?? 0}
+              delay={delay / 1000 + 0.4}
+            />
+          </div>
+          <div className="mt-[0.4cqh] flex flex-shrink-0 items-center justify-center gap-4 label-field">
+            <span className="flex items-center gap-1.5 text-champagne/70">
+              <span className="inline-block h-[2px] w-3 rounded-full bg-champagne/70" /> Received
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-300/80">
+              <span className="inline-block h-[2px] w-3 rounded-full bg-emerald-400" /> Resolved
+            </span>
+          </div>
+        </div>
+
+        {/* vertical gold hairline between the two charts (md+) */}
+        <div className="relative z-10 hidden w-px self-stretch bg-gold-500/15 md:block" />
+
+        {/* Heartbeat — resolutions by hour of day */}
+        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
+          <SectionDivider
+            label="Resolve Rhythm"
+            accent="champagne"
+            className="mb-[0.6cqh] flex-shrink-0 gap-2 px-1"
+            labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap"
+          />
+          <div className="min-h-0 flex-1">
+            <HeartbeatBars
+              hourly={series?.hourlyResolved ?? []}
+              peak={series?.peakHour ?? 0}
+              delay={delay / 1000 + 0.5}
+            />
           </div>
         </div>
       </motion.div>

@@ -134,6 +134,26 @@ export function toISTMonth(ts: string | null | undefined): string {
   return toISTDay(ts).slice(0, 7);
 }
 
+const IST_HOUR_FORMATTER = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Kolkata",
+  hour: "2-digit",
+  hour12: false,
+});
+
+/**
+ * IST hour-of-day (0–23) for a timestamp, or -1 if unparseable.
+ * Same UTC→IST instant rules as {@link toISTDay}.
+ */
+export function toISTHour(ts: string | null | undefined): number {
+  const ms = utcMillisFromDbTimestamp(ts);
+  if (ms == null) return -1;
+  // en-GB hour12:false renders "00".."24" — "24" only at exact midnight in some
+  // engines; normalise it back to 0.
+  const h = Number(IST_HOUR_FORMATTER.format(new Date(ms)));
+  if (!Number.isFinite(h)) return -1;
+  return h % 24;
+}
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 // ─── istMonthBounds (merged from lib/istMonthBounds.ts) ───────────────────────

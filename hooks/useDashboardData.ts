@@ -29,6 +29,7 @@ import {
   mergeAndRankAgents,
   pruneTicketRowsForDashboardState,
 } from "@/lib/ticketAggregation";
+import { buildTicketTimeSeries } from "@/lib/ticketTimeSeries";
 import type { OverdueTicketItem, RenewalsPanelData, MemberApiResponse } from "@/types";
 
 // ─── Zero initial state ───────────────────────────────────────────────────────
@@ -91,6 +92,7 @@ function toTicketRow(raw: Record<string, unknown> | null): TicketRowMinimal | nu
     queendom_name: (raw.queendom_name as string | null)                 ?? null,
     agent_name:    (raw.agent_name    as string | null)                 ?? null,
     created_at:    (raw.created_at    as string | null)                 ?? null,
+    resolved_at:   (raw.resolved_at   as string | null)                 ?? null,
     is_escalated:  (raw.is_escalated  as boolean | null)                ?? null,
     is_incomplete: (raw.is_incomplete as boolean | null)                ?? null,
     tags:          (raw.tags          as Record<string, unknown> | null) ?? null,
@@ -137,15 +139,18 @@ export function useDashboardData(): DashboardData {
   useEffect(() => {
     const ticketStats = aggregateTicketStats(ticketRows);
     const { ananyshree: agentsA, anishqa: agentsB } = mergeAndRankAgents(ticketRows);
+    const series = buildTicketTimeSeries(ticketRows);
     setAnanyshreeStats((prev) => ({
       ...prev,
       tickets: ticketStats.ananyshree,
       agents: agentsA,
+      series: series.ananyshree,
     }));
     setAnishqaStats((prev) => ({
       ...prev,
       tickets: ticketStats.anishqa,
       agents: agentsB,
+      series: series.anishqa,
     }));
   }, [ticketRows]);
 

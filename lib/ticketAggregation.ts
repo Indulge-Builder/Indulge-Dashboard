@@ -21,6 +21,8 @@ export interface TicketRowMinimal {
   queendom_name: string | null;
   agent_name: string | null;
   created_at: string | null;
+  /** Terminal-status timestamp (set when status becomes resolved/closed). Used by the time-series graphs. */
+  resolved_at?: string | null;
   is_escalated: boolean | null;
   is_incomplete?: boolean | null;
   tags?: Record<string, unknown> | null;

@@ -54,6 +54,8 @@ export interface QueenStats {
   tickets: TicketStats;
   agents: AgentStats[];
   joker?: JokerStats;
+  /** Daily + hourly ticket timelines for the Pulse / Heartbeat graphs. */
+  series?: import("./ticketTimeSeries").TicketTimeSeries;
 }
 
 export interface SpecialDate {
