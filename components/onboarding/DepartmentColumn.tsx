@@ -128,7 +128,7 @@ function AgentCardContent({
               : "text-sky-200 sky-name-glow"
           }`}
           style={{
-            fontSize:     "clamp(14px, 8cqh, 3.2rem)",
+            fontSize:     "clamp(1.9rem, 3.1cqw, 3.9rem)",
             background:   "#0f0f0f",
             border:       "1px solid rgba(255,255,255,0.14)",
             borderRadius: "clamp(5px, 0.6cqmin, 8px)",
@@ -164,7 +164,7 @@ function AgentCardContent({
             className={`${METRIC_LABEL_CLASS} ${
               isConcierge ? "text-champagne" : "text-sky-200"
             }`}
-            style={{ fontSize: "clamp(14px, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+            style={{ fontSize: "clamp(1.35rem, 1.9cqw, 2.3rem)", marginBottom: 0 }}
           >
             Leads <br /> (This Month)
           </span>
@@ -193,7 +193,7 @@ function AgentCardContent({
         >
           <span
             className={`${METRIC_LABEL_CLASS} tracking-[0.22em] text-emerald-300`}
-            style={{ fontSize: "clamp(14px, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+            style={{ fontSize: "clamp(1.35rem, 1.9cqw, 2.3rem)", marginBottom: 0 }}
           >
             Leads <br /> (Today)
           </span>
@@ -224,7 +224,7 @@ function AgentCardContent({
             className={`${METRIC_LABEL_CLASS} ${
               isConcierge ? "text-champagne" : "text-sky-200"
             }`}
-            style={{ fontSize: "clamp(14px, 3.5cqh, 1.4rem)", marginBottom: 0 }}
+            style={{ fontSize: "clamp(1.35rem, 1.9cqw, 2.3rem)", marginBottom: 0 }}
           >
             Closures <br /> (This Month)
           </span>

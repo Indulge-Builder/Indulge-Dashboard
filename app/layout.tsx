@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Croissant_One, Sora } from "next/font/google";
+import { Playfair_Display, Sora } from "next/font/google";
 import "./globals.css";
 
 // Two-font system (data face swapped Montserrat → Sora, 2026-06-24):
@@ -10,14 +10,13 @@ import "./globals.css";
 // NB: the data face is Sora but the CSS var stays --font-montserrat and the
 // Tailwind utility stays `font-montserrat` (legacy names kept so the direct
 // var(--font-montserrat) refs in charts/onboarding keep resolving).
-// FONT TRIAL (title slot): Croissant One — keeps --font-cinzel var name so
+// FONT TRIAL (title slot): Playfair Display — keeps --font-cinzel var name so
 // every font-cinzel / var(--font-cinzel) ref resolves to the trial face.
-// Ships ONLY weight 400, so all font-bold/font-semibold titles render at 400.
-const cinzel = Croissant_One({
+const cinzel = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-cinzel",
   display: "swap",
-  weight: ["400"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 const sora = Sora({
