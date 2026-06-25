@@ -151,7 +151,7 @@ export const AgentRow = memo(function AgentRow({
 
       {/* ── Data grid ─────────────────────────────────────────────────────── */}
       <div
-        className={`grid ${GRID_COLS} items-center ${GRID_GAP_X} py-[1cqh] sm:py-[1.2cqh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
+        className={`grid ${GRID_COLS} items-center ${GRID_GAP_X} py-[0.55cqh] sm:py-[0.7cqh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
       >
         {/* Col 1: Icon — subtle scale pulse on surge, never distorting */}
         <motion.div
@@ -174,7 +174,7 @@ export const AgentRow = memo(function AgentRow({
 
         {/* Col 2: Agent name — opacity dip on surge; row-level gold burst carries the drama */}
         <motion.p
-          className="min-w-0 font-cinzel font-semibold text-[clamp(1.65rem,2.7cqw,3.35rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
+          className="min-w-0 font-cinzel font-semibold text-[clamp(1.5rem,2.4cqw,3.1rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
           style={gpuStyle}
           animate={surgeKey > 0 ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
