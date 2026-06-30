@@ -27,11 +27,6 @@ function isDatePassed(dateStr: string): boolean {
   return dateStr < istToday().day;
 }
 
-/** Event is in the current IST calendar month. */
-function isCurrentMonth(dateStr: string): boolean {
-  return dateStr.slice(0, 7) === istToday().month;
-}
-
 interface SpecialDatesProps {
   queendomId: "ananyshree" | "anishqa";
 }
@@ -63,7 +58,8 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
   const filteredDates = useMemo(() => {
     return getSpecialDates()
       .filter((d) => d.queendom === queendomId)
-      .filter((d) => isCurrentMonth(d.date))
+      // Month gate removed: show all upcoming dates (incl. next month's July
+      // list) while we're still in June. Passed dates are still hidden.
       .filter((d) => !isDatePassed(d.date))
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [queendomId, dateKey]);
