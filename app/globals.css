@@ -243,6 +243,21 @@ body::before {
       0 0 36px rgba(52, 211, 153, 0.2);
   }
 
+  /* Hero-scale siblings of emerald-glow-hero — same subtle weight, hue only.
+     red-glow-hero styles the ResolveStopwatch 30 min+ phase (1 h+ uses
+     error-overdue-glow); gold-glow-hero is currently unmounted. */
+  .gold-glow-hero {
+    text-shadow:
+      0 0 16px rgba(212, 175, 55, 0.45),
+      0 0 36px rgba(212, 175, 55, 0.2);
+  }
+
+  .red-glow-hero {
+    text-shadow:
+      0 0 16px rgba(248, 113, 113, 0.45),
+      0 0 36px rgba(248, 113, 113, 0.2);
+  }
+
   /* Joker metric box — distinct gold border */
   .joker-box {
     border: 1px solid rgba(249, 226, 126, 0.35);
@@ -311,6 +326,41 @@ body::before {
     transform-style: preserve-3d;
   }
 
+  /* Rotating light rays behind the celebration card — soft gold spokes turning
+     slowly, dissolved toward the edges by a radial mask. GPU law: the only
+     animated property is transform (rotate); the layer lives ~3s then unmounts
+     with the overlay, so the infinite keyframe never runs unattended. */
+  .celebration-rays {
+    background: repeating-conic-gradient(
+      from 0deg,
+      rgba(212, 175, 55, 0.14) 0deg 5deg,
+      transparent 5deg 30deg
+    );
+    -webkit-mask-image: radial-gradient(
+      circle,
+      black 0%,
+      rgba(0, 0, 0, 0.55) 42%,
+      transparent 68%
+    );
+    mask-image: radial-gradient(
+      circle,
+      black 0%,
+      rgba(0, 0, 0, 0.55) 42%,
+      transparent 68%
+    );
+    animation: celebration-rays-spin 26s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes celebration-rays-spin {
+    from {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+    to {
+      transform: translate3d(0, 0, 0) rotate(360deg);
+    }
+  }
+
   /* Gold sweep — sharp light hitting physical gold bar, runs once */
   .celebration-name-flash {
     position: absolute;
@@ -324,7 +374,9 @@ body::before {
       rgba(255, 215, 0, 0.4) 50%,
       transparent 100%
     );
-    animation: gold-sweep 1.2s ease-in-out 0.4s forwards;
+    /* 0.7s delay syncs the sweep with the name card's staggered entrance
+       (avatar → label → name): light hits the gold just as it lands. */
+    animation: gold-sweep 1.2s ease-in-out 0.7s forwards;
   }
 
   @keyframes gold-sweep {
@@ -610,6 +662,22 @@ body::before {
       #6ee7b7 40%,
       #34d399 72%,
       #18a47a 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Red foil — third metal in the set (ResolveStopwatch 30 min+ phase). Same
+     top-light-to-deep-shade structure as gold/emerald, built on --color-red. */
+  .text-foil-red {
+    background: linear-gradient(
+      180deg,
+      #ffe4e1 0%,
+      #fca5a5 40%,
+      #f87171 72%,
+      #d94848 100%
     );
     -webkit-background-clip: text;
     background-clip: text;

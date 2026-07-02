@@ -3,17 +3,20 @@
 /**
  * components/ResolveStopwatch.tsx
  *
- * "Since Last Resolve" — a big digital stopwatch counting up from the
+ * "Time Since Last Resolved" — a big digital stopwatch counting up from the
  * Queendom's most recent ticket resolution (QueenStats.lastResolvedAtMs,
  * maintained monotonically by useDashboardData). When a ticket turns terminal
- * the anchor jumps forward, the digits snap back to 00:00 and the plinth
- * flashes an emerald surge.
+ * the anchor jumps forward, the digits snap back to 00:00 and the card
+ * flashes an emerald surge. The composition (digits, hero glow, flanking
+ * rules, units caption) shifts hue with age, reusing the dashboard's ticket
+ * status colors: emerald → pending red (red-400 foil) at 30 min → overdue
+ * neon red (error-overdue-glow, the leaderboard Overdue count) at 1 h
+ * (PHASE_STYLES).
  *
  * TV-grade clock discipline (dry-audit H3/H4): the 1-second tick runs only
  * while this card is actually visible — useScreenActive() is false when the
- * concierge screen is faded out AND when the band has rotated to the charts
- * view (RotatingViews nests the same context). Elapsed time derives from the
- * wall clock, so pause/resume never drifts.
+ * concierge screen is faded out. Elapsed time derives from the wall clock, so
+ * pause/resume never drifts.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -24,6 +27,38 @@ import { surgeBgVariants } from "@/lib/motionPresets";
 interface ResolveStopwatchProps {
   /** UTC ms of the most recent resolution; null until one is seen. */
   lastResolvedAtMs?: number | null;
+}
+
+// ── Age phases: the longer since the last resolve, the hotter the warning ────
+// < 30 min emerald (healthy) → < 1 h pending red (attention — the red-400 the
+// Pending counts use) → 1 h+ overdue neon red (error-overdue-glow, exactly the
+// leaderboard's Overdue count). Class strings are verbatim literals so
+// Tailwind JIT emits them.
+const PHASE_AGING_MS = 30 * 60_000;
+const PHASE_OVERDUE_MS = 60 * 60_000;
+
+const PHASE_STYLES = {
+  healthy: {
+    digits: "text-foil-emerald emerald-glow-hero",
+    units: "text-emerald-200/75",
+    rule: "via-emerald-300/20 to-emerald-300/45",
+  },
+  attention: {
+    digits: "text-foil-red red-glow-hero",
+    units: "text-red-200/75",
+    rule: "via-red-400/25 to-red-400/50",
+  },
+  overdue: {
+    digits: "error-overdue-glow",
+    units: "text-red-400/85",
+    rule: "via-red-600/30 to-red-600/60",
+  },
+} as const;
+
+function phaseFor(elapsedMs: number): (typeof PHASE_STYLES)[keyof typeof PHASE_STYLES] {
+  if (elapsedMs >= PHASE_OVERDUE_MS) return PHASE_STYLES.overdue;
+  if (elapsedMs >= PHASE_AGING_MS) return PHASE_STYLES.attention;
+  return PHASE_STYLES.healthy;
 }
 
 function formatElapsed(ms: number): { digits: string; units: string } {
@@ -61,8 +96,10 @@ export default function ResolveStopwatch({ lastResolvedAtMs }: ResolveStopwatchP
     }
   }, [lastResolvedAtMs]);
 
-  const elapsed =
-    lastResolvedAtMs == null ? null : formatElapsed(nowMs - lastResolvedAtMs);
+  const elapsedMs =
+    lastResolvedAtMs == null ? null : Math.max(0, nowMs - lastResolvedAtMs);
+  const elapsed = elapsedMs == null ? null : formatElapsed(elapsedMs);
+  const phase = phaseFor(elapsedMs ?? 0);
 
   // The wrapper is its own size container, so the digits scale off ITS height
   // and width (cqh/cqw below are wrapper-relative) and always fill the column
@@ -98,25 +135,25 @@ export default function ResolveStopwatch({ lastResolvedAtMs }: ResolveStopwatchP
           HH:MM:SS grows into the space. */}
       <div className="flex w-full items-center justify-center gap-[3cqw] px-[4cqw]">
         <span
-          className="h-px min-w-0 flex-1 bg-gradient-to-r from-transparent via-emerald-300/20 to-emerald-300/45"
+          className={`h-px min-w-0 flex-1 bg-gradient-to-r from-transparent ${phase.rule}`}
           aria-hidden
         />
         <span
           className={`font-montserrat font-bold ${digitsSizeClass} leading-none tracking-[0.1em] tabular-nums ${
-            elapsed == null
-              ? "text-champagne/35"
-              : "text-foil-emerald emerald-glow-hero"
+            elapsed == null ? "text-champagne/35" : phase.digits
           }`}
         >
           {elapsed?.digits ?? "--:--"}
         </span>
         <span
-          className="h-px min-w-0 flex-1 bg-gradient-to-l from-transparent via-emerald-300/20 to-emerald-300/45"
+          className={`h-px min-w-0 flex-1 bg-gradient-to-l from-transparent ${phase.rule}`}
           aria-hidden
         />
       </div>
       {elapsed != null && (
-        <span className="mt-[3cqh] font-cinzel font-semibold uppercase leading-none tracking-[0.4em] text-[min(16cqh,3rem)] text-emerald-200/75">
+        <span
+          className={`mt-[3cqh] font-cinzel font-semibold uppercase leading-none tracking-[0.4em] text-[min(16cqh,3rem)] ${phase.units}`}
+        >
           {elapsed.units}
         </span>
       )}

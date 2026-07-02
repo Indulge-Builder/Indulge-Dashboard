@@ -88,9 +88,9 @@ app/page.tsx
     ├── CelebrationOverlay                          — fixed inset-0, z-50
     ├── DashboardController                         — rotation + PAUSE + skeletons
     │   ├── [concierge layer]
-    │   │   ├── QueendomPanel (Ananyshree, side=left)
+    │   │   ├── QueendomPanel (Anishqa, side=left)
     │   │   ├── center separator column (gold vertical rule + ambient glow)
-    │   │   └── QueendomPanel (Anishqa, side=right)
+    │   │   └── QueendomPanel (Ananyshree, side=right)
     │   ├── [onboarding layer] → OnboardingLayout
     │   └── [home layer]       → HomePanel (env-gated)
     └── ticker dock (z-10) → RecommendationTicker
@@ -120,9 +120,8 @@ Layout top → bottom:
    - `AgentRow` 5-column grid: SVG progress ring + crown for rank 1 (`AgentIcon`, stroke `#c9a84c`) · agent name (Baskerville champagne) · `completedToday/assignedToday` · `completedThisMonth/assignedThisMonth` · `pending / overdue / incomplete` (red, escalation glow).
    - Ranking: `tasksCompletedThisMonth` DESC, then `tasksCompletedToday` DESC.
    - `SpecialDates` — static client birthdays/anniversaries from `lib/specialDates.ts`.
-5. **Rotating pulse band** (`ui/RotatingViews`, asymmetric dwell 40 s / 10 s, ScreenLayer-style crossfade — both views always mounted; nested `ScreenActivityContext` pauses hidden clocks; snaps back to the default view while the concierge screen is faded out):
-   - Default view (40 s) — "Time Since Last Resolved": **`ResolveStopwatch`** (digital count-up since the Queendom's last resolution; `QueenStats.lastResolvedAtMs` is a monotonic max so row pruning never rewinds it; emerald surge on reset) | "Renewals Coming This Month": **`UpcomingRenewals`** (clients whose `latest_subscription_end` is this IST month via `/api/clients/expiring`, date-ranked `ticker-scroll-y` marquee; past dates red, today gold).
-   - Alternate view (10 s): **`PulseRibbon`** (Daily Flow — received vs resolved per IST day) | **`HeartbeatBars`** (Arrival Rhythm — arrivals per IST hour), both from `stats.series` (`lib/ticketTimeSeries`).
+5. **Pulse band** (static since 2026-07-03 — the `ui/RotatingViews` graphs rotation was removed; `PulseRibbon` / `HeartbeatBars` remain in `components/charts/` unmounted and their `stats.series` data stays derived):
+   - "Time Since Last Resolved": **`ResolveStopwatch`** (digital count-up since the Queendom's last resolution; `QueenStats.lastResolvedAtMs` is a monotonic max so row pruning never rewinds it; emerald surge on reset; digits/glow/rules age emerald → pending red (`text-foil-red`) at 30 min → overdue neon red (`error-overdue-glow`, same as the leaderboard Overdue count) at 1 h) | "Incoming Renewals": **`UpcomingRenewals`** (clients whose `latest_subscription_end` is this IST month via `/api/clients/expiring`, date-ranked `ticker-scroll-y` marquee; past dates red, today gold).
 6. **`JokerMetricsStrip`** — compact bar of Joker stats (sent, accepted, rejected, pending, today, month).
 
 ### 4.2 Revenue screen — `OnboardingLayout` (3-column grid on lg+)

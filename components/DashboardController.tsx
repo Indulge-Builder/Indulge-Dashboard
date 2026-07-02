@@ -148,7 +148,7 @@ export default function DashboardController({
         type="button"
         aria-pressed={isFrozen}
         aria-label={isFrozen ? "Resume auto-switching" : "Pause on this screen"}
-        className={`absolute right-3 top-3 z-[100] min-h-[48px] min-w-[140px] rounded-full border px-5 py-2.5 font-montserrat text-base font-semibold tracking-[0.2em] shadow-lg transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/80 ${
+        className={`absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border px-3 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] shadow-lg transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/80 ${
           isFrozen
             ? "border-emerald-500/50 bg-emerald-950/75 text-emerald-200"
             : "border-gold-500/40 bg-black/50 text-gold-200 hover:bg-black/65"
@@ -161,16 +161,16 @@ export default function DashboardController({
       {/* Screens stay mounted; only opacity/z-index changes (cinematic crossfade, no translateX tearing). */}
       <ScreenLayer isActive={activeScreen === "concierge"}>
         <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch">
-          {/* Ananyshree panel — isolated so its crash cannot affect Anishqa */}
+          {/* Anishqa panel — isolated so its crash cannot affect Ananyshree */}
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-            <ErrorBoundary label="Ananyshree" fillParent>
+            <ErrorBoundary label="Anishqa" fillParent>
               <QueendomPanel
-                name="Ananyshree"
-                stats={ananyshreeStats}
+                name="Anishqa"
+                stats={anishqaStats}
                 side="left"
                 delay={0}
                 celebrationAgent={celebrationAgent}
-                renewalsData={renewalsAnanyshree}
+                renewalsData={renewalsAnishqa}
               />
             </ErrorBoundary>
             {/* Skeleton overlay — sits above the real panel until data is ready */}
@@ -205,16 +205,16 @@ export default function DashboardController({
 
           <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-gold-500/25 to-transparent md:hidden" />
 
-          {/* Anishqa panel — isolated so its crash cannot affect Ananyshree */}
+          {/* Ananyshree panel — isolated so its crash cannot affect Anishqa */}
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-            <ErrorBoundary label="Anishqa" fillParent>
+            <ErrorBoundary label="Ananyshree" fillParent>
               <QueendomPanel
-                name="Anishqa"
-                stats={anishqaStats}
+                name="Ananyshree"
+                stats={ananyshreeStats}
                 side="right"
                 delay={150}
                 celebrationAgent={celebrationAgent}
-                renewalsData={renewalsAnishqa}
+                renewalsData={renewalsAnanyshree}
               />
             </ErrorBoundary>
             {/* Skeleton overlay — staggered 0.15s after left panel for a cascade reveal */}

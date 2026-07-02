@@ -6,6 +6,8 @@
  *   - Pulse:     daily Received vs Resolved across the current IST month.
  *   - Heartbeat: tickets CREATED (arrived) per IST hour-of-day — shows what time
  *                of day the most tickets come in (load / staffing signal).
+ *   (Both charts were unmounted from the Queendom band 2026-07-03 — the series
+ *   stay derived and the chart files remain in components/charts.)
  *
  * Same invariants as aggregateTicketStats — dedup by id, strip VOID rows, match
  * queendom with normalizeQueendom, terminal = {resolved, closed}. Cohort math
