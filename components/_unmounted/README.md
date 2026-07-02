@@ -9,6 +9,7 @@ Components here are fully functional but not currently mounted in any screen.
 | `finance-utils.ts` | Finance helpers (PAID_EXIT_MS, parseAmount, rowToDisplay) | Imported by `ActiveOutlays` | Dependency of `ActiveOutlays` |
 | `LeadVelocityChart.tsx` | Dual-series "leads attended" SVG chart (Onboarding vs Shop) | `OnboardingLayout.tsx` | Its data pipeline (`leadTrendline`/`teamAttendedTrend` in `/api/onboarding` + `performanceData` in `useOnboardingPanelData`) was removed; rebuild it before re-mounting. `TeamAttendedDay` type now lives in this file. |
 | `AgentVerticalBarChart.tsx` | Per-agent stacked pipeline bar chart | `OnboardingLayout.tsx` (DepartmentColumn area) | Uses the `PipelineStatus*` types from `lib/onboardingTypes.ts`, which the live UI no longer renders. |
+| `ConversionLedger.tsx` | rAF-scrolling deals ledger (Client / Date / Agent) | `OnboardingLayout.tsx` center column (replaced by `onboarding/TargetMeter` 2026-07-03) | Data pipeline (`ledger`, `ledgerScrollDuration` in `useOnboardingPanelData`) is still live — re-mount is import + props only. |
 
 **To mount `ActiveOutlays`:**
 1. Import `ActiveOutlays` in `components/QueendomPanel.tsx`

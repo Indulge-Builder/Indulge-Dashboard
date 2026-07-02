@@ -6,17 +6,16 @@
  * .skeleton-block shimmer placeholders so the layout is pixel-stable when
  * the real panel fades in over the top.
  *
- * Layout mirrors OnboardingPanel exactly:
- *   ┌──────────────────────────────────────────────────────────┐
- *   │               ── Revenue Dashboard ──                    │  header
- *   ├──────────────────┬──────────────────┬───────────────────┤
+ * Layout mirrors OnboardingPanel exactly (no screen-level header — the global
+ * header row is the only header, same as the concierge screen):
+ *   ┌──────────────────┬──────────────────┬───────────────────┐
  *   │  Col 1           │  Col 2           │  Col 3            │
  *   │  Concierge dept  │  Performance +   │  Shop dept        │
  *   │  3 agent cards   │  4 metric tiles  │  3 agent cards    │
  *   │                  │  + line graph    │                   │
  *   │                  ├──────────────────┤                   │
- *   │                  │  Conversion      │                   │
- *   │                  │  Ledger          │                   │
+ *   │                  │  Monthly Target  │                   │
+ *   │                  │  ring + legend   │                   │
  *   └──────────────────┴──────────────────┴───────────────────┘
  */
 
@@ -222,18 +221,18 @@ function SkCenterColumn() {
         />
       </div>
 
-      {/* ── Conversion Ledger ── */}
+      {/* ── Monthly Target (ring + legend) ── */}
       <div
         className="relative flex min-h-0 flex-[3] flex-col overflow-hidden rounded-2xl"
         style={{
           background: "rgba(10,10,10,0.88)",
-          border: "1px solid rgba(212,175,55,0.15)",
+          border: "1px solid rgba(255,255,255,0.14)",
           boxShadow: "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
-          padding: "clamp(0.55rem,1.1cqmin,1.2rem)",
+          padding: "clamp(0.55rem,1.1cqmin,1.5rem)",
           gap: "clamp(0.3rem,0.5cqmin,0.6rem)",
         }}
       >
-        {/* Ledger heading */}
+        {/* Heading */}
         <div className="flex w-full shrink-0 items-center gap-3" style={{ marginBottom: "0.8cqh" }}>
           <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(212,175,55,0.35))" }} />
           <Sk
@@ -243,47 +242,27 @@ function SkCenterColumn() {
           <div className="h-px flex-1" style={{ background: "linear-gradient(to left, transparent, rgba(212,175,55,0.35))" }} />
         </div>
 
-        {/* Column header row */}
+        {/* Ring + legend */}
         <div
-          className="grid shrink-0 w-full"
-          style={{
-            gridTemplateColumns: "2fr 1fr 1fr 1fr",
-            gap: "clamp(4px,0.8cqw,12px)",
-            paddingBottom: "clamp(6px,0.8cqh,10px)",
-            borderBottom: "1px solid rgba(212,175,55,0.10)",
-          }}
+          className="flex min-h-0 w-full flex-1 items-center justify-center"
+          style={{ gap: "clamp(0.75rem,2.5cqmin,3rem)" }}
         >
-          {[0, 0.06, 0.12, 0.18].map((d, i) => (
-            <Sk
-              key={i}
-              className="rounded-md"
-              style={{ height: "clamp(12px,1.6cqmin,20px)", animationDelay: `${d}s` }}
-            />
-          ))}
-        </div>
-
-        {/* Ledger rows */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden" style={{ gap: "clamp(2px,0.3cqmin,4px)" }}>
-          {[0, 0.07, 0.14, 0.21, 0.28, 0.35, 0.42].map((d, i) => (
-            <div
-              key={i}
-              className="grid shrink-0 w-full"
-              style={{
-                gridTemplateColumns: "2fr 1fr 1fr 1fr",
-                gap: "clamp(4px,0.8cqw,12px)",
-                padding: "clamp(5px,0.7cqh,9px) 0",
-                borderBottom: "1px solid rgba(212,175,55,0.06)",
-              }}
-            >
-              {[0, 0.04, 0.08, 0.12].map((dd, j) => (
-                <Sk
-                  key={j}
-                  className="rounded-md"
-                  style={{ height: "clamp(14px,1.8cqmin,24px)", animationDelay: `${d + dd}s` }}
-                />
-              ))}
-            </div>
-          ))}
+          <Sk
+            className="aspect-square h-4/5 max-w-[60%] rounded-full"
+            style={{ animationDelay: "0.1s" }}
+          />
+          <div
+            className="flex min-w-0 flex-col justify-center"
+            style={{ gap: "clamp(0.4rem,1.2cqmin,1.2rem)", width: "clamp(90px,12cqw,200px)" }}
+          >
+            {[0, 0.07, 0.14].map((d, i) => (
+              <Sk
+                key={i}
+                className="rounded-md"
+                style={{ height: "clamp(14px,1.8cqmin,24px)", animationDelay: `${d}s` }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -304,23 +283,7 @@ export default function OnboardingSkeleton() {
       {/* Ambient gold radial glow — matches OnboardingPanel */}
       <div className="ambient-glow-center pointer-events-none absolute inset-0" />
 
-      {/* ── Page header ── */}
-      <div className="relative mb-[1.4cqh] flex-shrink-0 text-center">
-        <div className="mb-[0.7cqh] flex w-full items-center gap-3">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
-        </div>
-        <Sk
-          className="mx-auto rounded-full"
-          style={{ width: "clamp(160px,20cqw,280px)", height: "clamp(24px,3.5cqh,44px)" }}
-        />
-        <div className="mt-[0.8cqh] flex w-full items-center gap-3">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/28 to-gold-500/45" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/28 to-gold-500/45" />
-        </div>
-      </div>
-
-      {/* ── 3-column grid — mirrors OnboardingPanel exactly ── */}
+      {/* ── 3-column grid — mirrors OnboardingPanel exactly (no page header) ── */}
       <div
         className="relative grid min-h-0 flex-1"
         style={{

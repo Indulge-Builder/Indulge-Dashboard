@@ -49,10 +49,7 @@ const IST_LEDGER_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", {
 // CSS variables defined in app/globals.css — single source of truth.
 // Reference: var(--text-heading-xl), var(--text-heading-lg), etc.
 
-/** "Revenue Dashboard" / "Onboarding" page heading → CSS var(--text-heading-xl) */
-export const ONBOARDING_PAGE_TITLE_FONT = "var(--text-heading-xl)";
-
-/** "Live Conversion Ledger" section heading → CSS var(--text-heading-lg) */
+/** Section headings (Monthly Target / Conversion Ledger) → CSS var(--text-heading-lg) */
 export const ONBOARDING_LEDGER_TITLE_FONT = "var(--text-heading-lg)";
 
 /** Column header row (Client / Date / Agent) → CSS var(--text-ledger-header) */

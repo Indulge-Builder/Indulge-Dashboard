@@ -1,25 +1,19 @@
 "use client";
 
 import { useOnboardingPanelData } from "@/hooks/useOnboardingPanelData";
-import { SectionDivider } from "@/components/ui/SectionDivider";
 import { DepartmentColumn } from "./DepartmentColumn";
-import { ConversionLedger } from "./ConversionLedger";
+import { TargetMeter } from "./TargetMeter";
 import { PerformanceLineGraph } from "./PerformanceLineGraph";
-import {
-  DEPT_HEADING_FONT,
-  ONBOARDING_PAGE_TITLE_FONT,
-} from "./utils";
+import { DEPT_HEADING_FONT } from "./utils";
 
 export default function OnboardingLayout() {
   const props = useOnboardingPanelData();
   const {
     conciergeAgents,
     shopAgents,
-    ledger,
     pulseEvents,
     leadMonthStats,
     verticalTrendline,
-    ledgerScrollDuration,
     prefersReducedMotion,
     leadStatusByAgent,
     todayDate,
@@ -35,16 +29,9 @@ export default function OnboardingLayout() {
     >
       <div className="ambient-glow-center pointer-events-none absolute inset-0" />
 
-      <div className="relative mb-[1.4cqh] flex-shrink-0 text-center">
-        <SectionDivider className="mb-[0.7cqh]" />
-        <h2
-          className="mb-[0.8cqh] font-cinzel font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
-          style={{ fontSize: ONBOARDING_PAGE_TITLE_FONT }}
-        >
-          Revenue Dashboard
-        </h2>
-        <SectionDivider />
-      </div>
+      {/* No screen-level heading — the global header row is the only header,
+          same as the concierge screen (its "Revenue Dashboard" h2 was removed
+          2026-07-03 as a duplicate). */}
 
       <div
         className="relative grid min-h-0 flex-1 grid-cols-1 gap-[clamp(0.6rem,1.4cqw,3.4rem)] lg:grid-cols-[1fr_1fr_1.05fr]"
@@ -228,11 +215,10 @@ export default function OnboardingLayout() {
             </div>
           </div>
 
-          <div className="relative min-h-0 flex-[3]">
-            <ConversionLedger
-              rows={ledger}
-              scrollDuration={ledgerScrollDuration}
-              prefersReducedMotion={prefersReducedMotion}
+          <div className="relative flex min-h-0 flex-[3] flex-col">
+            <TargetMeter
+              agents={[...conciergeAgents, ...shopAgents]}
+              totalClosed={leadMonthStats.dealsClosedThisMonth}
             />
           </div>
         </div>

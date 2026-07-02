@@ -1,9 +1,13 @@
 "use client";
 
 /**
- * components/onboarding/ConversionLedger.tsx
+ * components/_unmounted/ConversionLedger.tsx
  *
- * The "Conversion Ledger" section of the Onboarding screen.
+ * The "Conversion Ledger" section of the Onboarding screen — UNMOUNTED
+ * 2026-07-03, replaced by onboarding/TargetMeter (monthly-target ring). Its
+ * data pipeline (ledger + ledgerScrollDuration in useOnboardingPanelData) is
+ * still live, so re-mounting only needs the import + props restored in
+ * OnboardingLayout.
  *
  * Layout:
  *   ┌─────────────────────────────────┐
@@ -40,7 +44,7 @@ import {
   ONBOARDING_LEDGER_HEADER_FONT,
   ONBOARDING_LEDGER_CELL_FONT,
   formatLedgerDate,
-} from "./utils";
+} from "../onboarding/utils";
 
 // ── Department accent tokens ───────────────────────────────────────────────────
 const DEPT_ACCENT = {
