@@ -15,6 +15,7 @@
 
 import { useId, useMemo } from "react";
 import { motion } from "framer-motion";
+import { useScreenActive } from "@/hooks/useScreenActive";
 import type { DailyPoint } from "@/lib/ticketTimeSeries";
 
 const VW = 100;
@@ -53,6 +54,11 @@ function smoothPath(points: Array<[number, number]>): string {
 
 export default function PulseRibbon({ daily, peak, delay = 0 }: PulseRibbonProps) {
   const uid = useId().replace(/[:]/g, "");
+  // Clock discipline (dry-audit H3/H4): the infinite marker pulse is a
+  // JS-driven rAF loop, so it must stop while this view is rotated away or the
+  // whole screen is faded out — visibility:hidden hides the paint but not the
+  // per-frame animation work.
+  const active = useScreenActive();
   const { receivedLine, receivedArea, resolvedLine, resolvedArea, lastPt } = useMemo(() => {
     const n = daily.length;
     const max = Math.max(peak, 1);
@@ -160,8 +166,16 @@ export default function PulseRibbon({ daily, peak, delay = 0 }: PulseRibbonProps
             r="1.4"
             fill="#34d399"
             fillOpacity="0.35"
-            animate={{ r: [1.4, 3.2, 1.4], fillOpacity: [0.35, 0, 0.35] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            animate={
+              active
+                ? { r: [1.4, 3.2, 1.4], fillOpacity: [0.35, 0, 0.35] }
+                : { r: 1.4, fillOpacity: 0.35 }
+            }
+            transition={
+              active
+                ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 0.3 }
+            }
           />
           <circle cx={lastPt[0]} cy={lastPt[1]} r="0.9" fill="#34d399" filter={`url(#glow-${uid})`} />
         </>

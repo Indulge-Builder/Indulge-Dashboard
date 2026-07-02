@@ -94,18 +94,21 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
       bucket.solvedToday++;
     }
 
-    // Pending — status is NOT terminal. Month-gated like every other metric:
-    // input rows are already scoped to the current IST month (rows route filter
-    // + pruneTicketRowsForDashboardState), so no extra date check is needed here.
-    if (!terminal) {
+    // Pending — created this IST month AND status NOT terminal. Month-gated
+    // like the rest of the hero row (its title says "This Month"); the gate is
+    // explicit because input rows also include the open backlog from earlier
+    // months, which only Overdue / Incomplete count (D2 revision 2026-07-02).
+    if (createdMonth === thisMonthIST && !terminal) {
       bucket.pendingToResolve++;
     }
 
+    // Joker suggestions stay month-gated (period metric) — explicit check now
+    // that input rows also include the open backlog from earlier months.
     const jokerVal =
       row.tags && typeof row.tags === "object" && "joker_suggestion" in row.tags
         ? (row.tags as { joker_suggestion?: unknown }).joker_suggestion
         : undefined;
-    if (jokerVal != null && jokerVal !== "") {
+    if (jokerVal != null && jokerVal !== "" && createdMonth === thisMonthIST) {
       bucket.jokerSuggestion++;
     }
   }
@@ -159,15 +162,23 @@ function calcAgent(
       t.agent_name?.toLowerCase() === nameLower &&
       toISTMonth(t.created_at) === THIS_MONTH,
   ).length;
-  // Pending = assigned to this agent AND status NOT terminal. Month-gated via
-  // the input row scope (rows route filter + prune), same as the queendom stats.
+  // Pending = assigned to this agent, created this IST month, status NOT
+  // terminal — month-gated (explicitly, since input rows include the open
+  // backlog) so the agents' pending sum matches the queendom Pending stat.
   const pendingTickets = rows.filter(
     (t) =>
       t.agent_name?.toLowerCase() === nameLower &&
-      !isTerminal(t.status),
+      !isTerminal(t.status) &&
+      toISTMonth(t.created_at) === THIS_MONTH,
   );
-  const overdueCount = pendingTickets.filter(
-    (t) => t.is_escalated === true,
+  // Overdue = open AND escalated, ANY month — carries forward until cleared
+  // (D2 revision 2026-07-02). Same for Incomplete below. Deliberately NOT
+  // derived from pendingTickets, so it can exceed the month-gated pending.
+  const overdueCount = rows.filter(
+    (t) =>
+      t.agent_name?.toLowerCase() === nameLower &&
+      !isTerminal(t.status) &&
+      t.is_escalated === true,
   ).length;
   const incomplete = rows.filter(
     (t) =>
@@ -253,18 +264,29 @@ export function mergeAndRankAgents(rows: TicketRowMinimal[]): {
 export const MAX_TICKET_ROWS_IN_DASHBOARD_STATE = 5000;
 
 /**
- * Keep only tickets whose created_at falls in the current IST calendar month
- * (matches aggregateTicketStats / mergeAndRankAgents gates), then cap count
- * (newest first) if the month is extremely large.
+ * Keep tickets created in the current IST calendar month PLUS the still-open
+ * backlog from earlier months (dry-audit D2, revised 2026-07-02 — Overdue /
+ * Incomplete carry forward; every other metric, incl. Pending, stays
+ * month-gated via explicit date checks). Runs on every Realtime patch, so when
+ * an old backlog ticket turns terminal it falls out of state and its Overdue /
+ * Incomplete scores drop live. If over cap, open rows survive first, then
+ * newest-first.
  */
 export function pruneTicketRowsForDashboardState(
   rows: TicketRowMinimal[],
 ): TicketRowMinimal[] {
   const thisMonth = istToday().month;
-  const inMonth = rows.filter((r) => toISTMonth(r.created_at) === thisMonth);
-  if (inMonth.length <= MAX_TICKET_ROWS_IN_DASHBOARD_STATE) return inMonth;
-  return [...inMonth]
+  const kept = rows.filter(
+    (r) =>
+      !isVoid(r.status) &&
+      (toISTMonth(r.created_at) === thisMonth || !isTerminal(r.status)),
+  );
+  if (kept.length <= MAX_TICKET_ROWS_IN_DASHBOARD_STATE) return kept;
+  return [...kept]
     .sort((a, b) => {
+      const openA = isTerminal(a.status) ? 1 : 0;
+      const openB = isTerminal(b.status) ? 1 : 0;
+      if (openA !== openB) return openA - openB;
       const ta = utcMillisFromDbTimestamp(a.created_at) ?? 0;
       const tb = utcMillisFromDbTimestamp(b.created_at) ?? 0;
       return tb - ta;

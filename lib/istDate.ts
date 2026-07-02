@@ -212,6 +212,22 @@ export function getCurrentIstMonthUtcBounds(): {
 }
 
 /**
+ * Current IST calendar month [start, endExclusive) as plain `YYYY-MM-DD`
+ * strings — for Postgres DATE columns (e.g. `clients.latest_subscription_end`),
+ * where the UTC-instant bounds above would compare a date against a timestamp.
+ */
+export function getCurrentIstMonthDateBounds(): {
+  startDate: string;
+  endExclusiveDate: string;
+} {
+  const { month } = istToday();
+  return {
+    startDate: `${month}-01`,
+    endExclusiveDate: `${addOneCalendarMonth(month)}-01`,
+  };
+}
+
+/**
  * Current IST calendar day [start, endExclusive) as UTC ISO strings.
  * Aligns with `toISTDay` / `istToday().day`.
  */

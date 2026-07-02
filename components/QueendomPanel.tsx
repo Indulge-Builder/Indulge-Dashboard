@@ -8,8 +8,11 @@ import AgentLeaderboard from "./leaderboard/AgentLeaderboard";
 import RenewalsPanel from "./RenewalsPanel";
 import PulseRibbon from "./charts/PulseRibbon";
 import HeartbeatBars from "./charts/HeartbeatBars";
+import ResolveStopwatch from "./ResolveStopwatch";
+import UpcomingRenewals from "./UpcomingRenewals";
 import SpecialDates from "@/components/SpecialDates";
 import { SectionDivider } from "@/components/ui/SectionDivider";
+import { RotatingViews } from "@/components/ui/RotatingViews";
 import { StatCard } from "@/components/ui/StatCard";
 import { GoldGlassCard } from "@/components/ui/GoldGlassCard";
 import type { QueenStats } from "@/lib/types";
@@ -48,6 +51,19 @@ const queendomContainerVariants = {
  * panel AND QueendomSkeleton so the layouts stay pixel-stable (dry-audit A9).
  */
 export const SPECIAL_DATES_COL_WIDTH_CLASS = "md:w-[clamp(220px,40%,680px)]";
+
+/** Header style for the graphs-view band titles (Daily Flow / Arrival Rhythm). */
+const BAND_LABEL_CLASS =
+  "!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap";
+
+/** Card-view band titles — as large as the half-band column allows with NO
+ *  overflow: each title's header wrapper is an inline-size container, and the
+ *  font divides the header width (100cqi minus ~5rem of divider rules/gaps)
+ *  by the longest title's measured Cinzel em-width (20.5em at 0.24em
+ *  tracking — "Time Since Last Resolved"), capped at the .title-card max.
+ *  Both card titles share the formula so the pair stays visually matched. */
+const BAND_TITLE_CLASS =
+  "!font-cinzel !font-semibold !leading-[1.1] !tracking-[0.24em] !text-[min(calc((100cqi-5rem)/20.5),4rem)] whitespace-nowrap";
 
 // ── Metric box for the 5-metric hero row (StatCard with verbatim classes) ──
 function MetricBox({
@@ -344,61 +360,121 @@ export default function QueendomPanel({
         </div>
       </motion.div>
 
-      {/* ── Ticket-flow graphs: Pulse (daily) | Heartbeat (hourly) ──────────────
-          Thin wide band at the panel floor. Both derive from stats.series
-          (lib/ticketTimeSeries) — no extra fetch. Fixed short height (cqh) keeps
-          the band shallow while the agent table above takes the vertical space. */}
+      {/* ── Rotating pulse band: live cards ⇄ graphs ─────────────────────────────
+          Thin wide band at the panel floor, auto-rotating between two views
+          (RotatingViews — always mounted, ScreenLayer-style crossfade).
+          Asymmetric dwell 50 s / 10 s of the concierge screen's 60 s visit,
+          and the band snaps back to the default view between visits:
+            Default (50 s): ResolveStopwatch (time since last resolved) |
+              UpcomingRenewals (renewals coming this month, date-ranked marquee).
+            Alternate (10 s): Pulse (daily flow) | Heartbeat (arrival rhythm)
+              — both from stats.series.
+          Fixed short height (cqh) keeps the band shallow while the agent table
+          above takes the vertical space. */}
       <motion.div
-        className="relative mt-[1.6cqh] flex min-h-0 w-full flex-shrink-0 flex-col gap-[var(--gap-card)] overflow-hidden rounded-2xl glass gold-border-glow md:flex-row"
+        className="relative mt-[1.6cqh] min-h-0 w-full flex-shrink-0 overflow-hidden rounded-2xl glass gold-border-glow"
         style={{ padding: "1.2cqh var(--pad-card)", height: "13cqh", minHeight: "92px" }}
         variants={queendomItemVariants}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
 
-        {/* Pulse — daily received vs resolved */}
-        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
-          <SectionDivider
-            label="Daily Flow"
-            accent="champagne"
-            className="mb-[0.6cqh] flex-shrink-0 gap-2 px-1"
-            labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap"
-          />
-          <div className="min-h-0 flex-1">
-            <PulseRibbon
-              daily={series?.daily ?? []}
-              peak={series?.peakDaily ?? 0}
-              delay={delay / 1000 + 0.4}
-            />
-          </div>
-          <div className="mt-[0.4cqh] flex flex-shrink-0 items-center justify-center gap-4 label-field">
-            <span className="flex items-center gap-1.5 text-champagne/70">
-              <span className="inline-block h-[2px] w-3 rounded-full bg-champagne/70" /> Received
-            </span>
-            <span className="flex items-center gap-1.5 text-emerald-300/80">
-              <span className="inline-block h-[2px] w-3 rounded-full bg-emerald-400" /> Resolved
-            </span>
-          </div>
-        </div>
+        <RotatingViews
+          className="z-10"
+          intervalMs={[50_000, 10_000]}
+          views={[
+            /* ── Default view: live cards — stopwatch | renewals coming ── */
+            <div
+              key="cards"
+              className="flex h-full w-full min-h-0 flex-col gap-[var(--gap-card)] md:flex-row"
+            >
+              {/* Time since the last ticket was resolved */}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                {/* Header-only inline-size container: 100cqi in BAND_TITLE_CLASS
+                    = this column's width; content below is untouched. */}
+                <div className="w-full flex-shrink-0 [container-type:inline-size]">
+                  <SectionDivider
+                    label="Time Since Last Resolved"
+                    accent="champagne"
+                    className="mb-[0.6cqh] gap-2 px-1"
+                    labelClass={BAND_TITLE_CLASS}
+                  />
+                </div>
+                <div className="min-h-0 flex-1">
+                  <ResolveStopwatch lastResolvedAtMs={stats.lastResolvedAtMs} />
+                </div>
+              </div>
 
-        {/* vertical gold hairline between the two charts (md+) */}
-        <div className="relative z-10 hidden w-px self-stretch bg-gold-500/15 md:block" />
+              {/* vertical gold hairline between the two halves (md+) */}
+              <div className="hidden w-px self-stretch bg-gold-500/15 md:block" />
 
-        {/* Heartbeat — resolutions by hour of day */}
-        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col">
-          <SectionDivider
-            label="Arrival Rhythm"
-            accent="champagne"
-            className="mb-[0.6cqh] flex-shrink-0 gap-2 px-1"
-            labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap"
-          />
-          <div className="min-h-0 flex-1">
-            <HeartbeatBars
-              hourly={series?.hourlyArrivals ?? []}
-              peak={series?.peakHour ?? 0}
-              delay={delay / 1000 + 0.5}
-            />
-          </div>
-        </div>
+              {/* Memberships expiring this month — the renewals to land */}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <div className="w-full flex-shrink-0 [container-type:inline-size]">
+                  <SectionDivider
+                    label="Incoming Renewals"
+                    accent="champagne"
+                    className="mb-[0.6cqh] gap-2 px-1"
+                    labelClass={BAND_TITLE_CLASS}
+                  />
+                </div>
+                <div className="min-h-0 flex-1">
+                  <UpcomingRenewals clients={stats.renewalsDue ?? []} />
+                </div>
+              </div>
+            </div>,
+
+            /* ── Alternate view: ticket-flow graphs ─────────────────────── */
+            <div
+              key="graphs"
+              className="flex h-full w-full min-h-0 flex-col gap-[var(--gap-card)] md:flex-row"
+            >
+              {/* Pulse — daily received vs resolved */}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <SectionDivider
+                  label="Daily Flow"
+                  accent="champagne"
+                  className="mb-[0.6cqh] flex-shrink-0 gap-2 px-1"
+                  labelClass={BAND_LABEL_CLASS}
+                />
+                <div className="min-h-0 flex-1">
+                  <PulseRibbon
+                    daily={series?.daily ?? []}
+                    peak={series?.peakDaily ?? 0}
+                    delay={delay / 1000 + 0.4}
+                  />
+                </div>
+                <div className="mt-[0.4cqh] flex flex-shrink-0 items-center justify-center gap-4 label-field">
+                  <span className="flex items-center gap-1.5 text-champagne/70">
+                    <span className="inline-block h-[2px] w-3 rounded-full bg-champagne/70" /> Received
+                  </span>
+                  <span className="flex items-center gap-1.5 text-emerald-300/80">
+                    <span className="inline-block h-[2px] w-3 rounded-full bg-emerald-400" /> Resolved
+                  </span>
+                </div>
+              </div>
+
+              {/* vertical gold hairline between the two halves (md+) */}
+              <div className="hidden w-px self-stretch bg-gold-500/15 md:block" />
+
+              {/* Heartbeat — arrivals by hour of day */}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <SectionDivider
+                  label="Arrival Rhythm"
+                  accent="champagne"
+                  className="mb-[0.6cqh] flex-shrink-0 gap-2 px-1"
+                  labelClass={BAND_LABEL_CLASS}
+                />
+                <div className="min-h-0 flex-1">
+                  <HeartbeatBars
+                    hourly={series?.hourlyArrivals ?? []}
+                    peak={series?.peakHour ?? 0}
+                    delay={delay / 1000 + 0.5}
+                  />
+                </div>
+              </div>
+            </div>,
+          ]}
+        />
       </motion.div>
     </motion.section>
   );

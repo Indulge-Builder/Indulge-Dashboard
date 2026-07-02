@@ -14,7 +14,13 @@
  * ticket counts on the day it was received and again on the day it was resolved.
  */
 
-import { istToday, toISTDay, toISTHour, toISTMonth } from "./istDate";
+import {
+  istToday,
+  toISTDay,
+  toISTHour,
+  toISTMonth,
+  utcMillisFromDbTimestamp,
+} from "./istDate";
 import { isVoid, isTerminal } from "./ticketStatus";
 import { normalizeQueendom } from "./queendom";
 import type { TicketRowMinimal } from "./ticketAggregation";
@@ -36,6 +42,13 @@ export interface TicketTimeSeries {
   /** Convenience peaks for axis scaling / labels (0 when empty). */
   peakDaily: number;
   peakHour: number;
+  /**
+   * UTC ms of the most recent resolution among the rows (any month, not just
+   * the charted one) — feeds the ResolveStopwatch. Derivation-only: the hook
+   * keeps a monotonic max on QueenStats.lastResolvedAtMs, because a backlog
+   * ticket that turns terminal is pruned from row state the moment it resolves.
+   */
+  lastResolvedMs: number | null;
 }
 
 const EMPTY_BOTH: Record<Queendom, TicketTimeSeries> = {
@@ -44,12 +57,35 @@ const EMPTY_BOTH: Record<Queendom, TicketTimeSeries> = {
 };
 
 function emptySeries(): TicketTimeSeries {
-  return { daily: [], hourlyArrivals: new Array(24).fill(0), peakDaily: 0, peakHour: 0 };
+  return {
+    daily: [],
+    hourlyArrivals: new Array(24).fill(0),
+    peakDaily: 0,
+    peakHour: 0,
+    lastResolvedMs: null,
+  };
 }
 
 /** Resolution timestamp for a terminal ticket — resolved_at, else created_at. */
 function resolutionTs(row: TicketRowMinimal): string | null {
   return row.resolved_at ?? row.created_at ?? null;
+}
+
+/**
+ * Resolution instant of a single row, if it counts as a resolution: non-void,
+ * terminal, queendom matched. Used by the Realtime patch handler so the
+ * ResolveStopwatch resets even when the resolved row is immediately pruned
+ * from dashboard state (a backlog ticket from an earlier month turning
+ * terminal — dry-audit D2).
+ */
+export function resolutionEventMs(
+  row: TicketRowMinimal,
+): { queendom: Queendom; ms: number } | null {
+  if (isVoid(row.status) || !isTerminal(row.status)) return null;
+  const queendom = normalizeQueendom(row.queendom_name);
+  if (!queendom) return null;
+  const ms = utcMillisFromDbTimestamp(resolutionTs(row));
+  return ms == null ? null : { queendom, ms };
 }
 
 /**
@@ -64,10 +100,13 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
   const { day: todayIST, month: thisMonthIST } = istToday();
   const todayDom = Number(todayIST.slice(8, 10)); // 1..31
 
-  // received[q][dom] and resolved[q][dom]; hourly[q][hour]
-  const acc: Record<Queendom, { received: number[]; resolved: number[]; hourly: number[] }> = {
-    ananyshree: { received: new Array(32).fill(0), resolved: new Array(32).fill(0), hourly: new Array(24).fill(0) },
-    anishqa: { received: new Array(32).fill(0), resolved: new Array(32).fill(0), hourly: new Array(24).fill(0) },
+  // received[q][dom] and resolved[q][dom]; hourly[q][hour]; lastResolvedMs max
+  const acc: Record<
+    Queendom,
+    { received: number[]; resolved: number[]; hourly: number[]; lastResolvedMs: number | null }
+  > = {
+    ananyshree: { received: new Array(32).fill(0), resolved: new Array(32).fill(0), hourly: new Array(24).fill(0), lastResolvedMs: null },
+    anishqa: { received: new Array(32).fill(0), resolved: new Array(32).fill(0), hourly: new Array(24).fill(0), lastResolvedMs: null },
   };
 
   const seen = new Set<string>();
@@ -97,6 +136,11 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
         const dom = Number(toISTDay(ts).slice(8, 10));
         if (dom >= 1 && dom <= 31) bucket.resolved[dom]++;
       }
+      // Stopwatch anchor — most recent resolution regardless of month.
+      const ms = utcMillisFromDbTimestamp(ts);
+      if (ms != null && (bucket.lastResolvedMs == null || ms > bucket.lastResolvedMs)) {
+        bucket.lastResolvedMs = ms;
+      }
     }
   }
 
@@ -112,7 +156,13 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
       if (resolved > peakDaily) peakDaily = resolved;
     }
     const peakHour = b.hourly.reduce((m, v) => (v > m ? v : m), 0);
-    return { daily, hourlyArrivals: b.hourly, peakDaily, peakHour };
+    return {
+      daily,
+      hourlyArrivals: b.hourly,
+      peakDaily,
+      peakHour,
+      lastResolvedMs: b.lastResolvedMs,
+    };
   };
 
   return { ananyshree: finalize("ananyshree"), anishqa: finalize("anishqa") };

@@ -29,8 +29,13 @@ export const gpuStyle: CSSProperties = {
 };
 
 // ─── Luxury easing curve ──────────────────────────────────────────────────────
-/** Matches the CSS `--ease-luxury` variable: smooth deceleration. */
-export const EASE_LUXURY = [0.25, 0.46, 0.45, 0.94] as const;
+/**
+ * Matches the CSS `--ease-luxury` variable: confident deceleration.
+ * Upgraded 2026-07-02 from easeOutQuad (0.25,0.46,0.45,0.94) — the old curve
+ * was too weak to read as intentional on a 15-ft TV. This one starts fast
+ * (instant response) and lands with a long elegant tail.
+ */
+export const EASE_LUXURY = [0.22, 1, 0.36, 1] as const;
 
 // ─── Stagger container + item pair ───────────────────────────────────────────
 /**
@@ -92,7 +97,7 @@ export function widgetFadeIn(delayMs = 0) {
   return {
     initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
-    transition: { delay: delayMs / 1000, duration: 0.5 },
+    transition: { delay: delayMs / 1000, duration: 0.5, ease: EASE_LUXURY },
   } as const;
 }
 

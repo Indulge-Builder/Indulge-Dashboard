@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
+import { EASE_LUXURY } from "@/lib/motionPresets";
 
 // No backdrop-blur: the pill animates x on entrance, and backdrop-filter on a
 // moving element forces a backdrop repaint every frame on TV GPUs. Over the
@@ -36,9 +37,9 @@ function MetricPill({
         opacity: {
           duration: 0.55,
           delay: delaySec,
-          ease: [0.25, 0.46, 0.45, 0.94],
+          ease: EASE_LUXURY,
         },
-        x: { duration: 0.55, delay: delaySec, ease: [0.25, 0.46, 0.45, 0.94] },
+        x: { duration: 0.55, delay: delaySec, ease: EASE_LUXURY },
       }}
     >
       {children}

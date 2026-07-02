@@ -1,7 +1,23 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, type Variants } from "framer-motion"
+import { EASE_LUXURY } from "@/lib/motionPresets"
+
+// Odometer roll — direction (+1 up / -1 down / 0 first render) flows through
+// `custom` so the EXITING digit always reads the direction of the change that
+// evicted it (a stale-closure exit would slide the wrong way when a metric
+// flips from rising to falling). Enter 350ms / exit 250ms: the leave is
+// quicker than the arrival, so the eye lands on the new value.
+const rollVariants: Variants = {
+  enter: (dir: number) => ({ y: dir === 0 ? 0 : dir > 0 ? 12 : -12, opacity: 0 }),
+  center: { y: 0, opacity: 1 },
+  exit: (dir: number) => ({
+    y: dir === 0 ? 0 : dir > 0 ? -12 : 12,
+    opacity: 0,
+    transition: { duration: 0.25, ease: EASE_LUXURY },
+  }),
+}
 
 interface AnimatedCounterProps {
   value?:    number | null
@@ -46,22 +62,26 @@ export default function AnimatedCounter({
 
   // Rolling digit / vertical slide: AnimatePresence wrapper when slideOnChange
   if (slideOnChange) {
-    const slideDir = value > prevValueRef.current ? "up" : "down"
     // On first render keep it a pure opacity fade — no y movement avoids
     // the jarring "all numbers slide in simultaneously" effect on TV screens.
     const isFirst = isFirstRender.current
-    const yIn  = isFirst ? 0 : (slideDir === "up" ? 10 : -10)
-    const yOut = isFirst ? 0 : (slideDir === "up" ? -10 : 10)
+    const dir = isFirst ? 0 : value > prevValueRef.current ? 1 : -1
     return (
       <span className="relative inline-block overflow-hidden tabular-nums align-baseline">
-        <AnimatePresence mode="wait">
+        {/* popLayout (not "wait"): the old digit slides out WHILE the new one
+            slides in — a continuous odometer roll with no blank frame between
+            values. The exiting span is popped to absolute inside this relative
+            wrapper, so the overflow-hidden clip still applies. */}
+        <AnimatePresence mode="popLayout" custom={dir}>
           <motion.span
             key={value}
-            className={className}
-            initial={{ y: yIn, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: yOut, opacity: 0 }}
-            transition={{ duration: isFirst ? 0.5 : 0.35, ease: [0.4, 0, 0.2, 1] }}
+            className={`inline-block ${className ?? ""}`}
+            custom={dir}
+            variants={rollVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: isFirst ? 0.5 : 0.35, ease: EASE_LUXURY }}
           >
             {value.toLocaleString("en-IN")}
           </motion.span>

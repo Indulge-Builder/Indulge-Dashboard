@@ -10,10 +10,11 @@
  * Memoized — re-renders only when pct, name, or showCrown changes.
  */
 
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
 import { getInitials } from "@/lib/format";
+import { EASE_LUXURY } from "@/lib/motionPresets";
 
 // ── Ring geometry ─────────────────────────────────────────────────────────────
 const RING_SIZE    = 80;
@@ -39,6 +40,17 @@ export const AgentIcon = memo(function AgentIcon({
   const clampedPct = Math.min(Math.max(pct, 0), 1);
   const offset     = CIRCUMFERENCE * (1 - clampedPct);
 
+  // Entrance (staggered draw-in from empty) happens exactly once; live pct
+  // updates retarget the arc from its CURRENT fill — no remount, no wipe from
+  // zero, no re-applied stagger delay on a real-time change.
+  const hasEnteredRef = useRef(false);
+  useEffect(() => {
+    hasEnteredRef.current = true;
+  }, []);
+  const arcTransition = hasEnteredRef.current
+    ? { type: "tween" as const, duration: 0.8, ease: EASE_LUXURY }
+    : { type: "tween" as const, duration: 1.2, ease: EASE_LUXURY, delay: animDelay };
+
   return (
     <div className="relative flex-shrink-0 w-[44px] h-[44px] sm:w-[56px] sm:h-[56px] lg:w-[72px] lg:h-[72px]">
       <svg
@@ -55,9 +67,8 @@ export const AgentIcon = memo(function AgentIcon({
           stroke="rgba(255,255,255,0.06)"
           strokeWidth="2.5"
         />
-        {/* Progress arc — animates from 0 to offset on mount / pct change */}
+        {/* Progress arc — draws in once on mount, then retargets smoothly */}
         <motion.circle
-          key={offset}
           cx={RING_SIZE / 2}
           cy={RING_SIZE / 2}
           r={RING_R}
@@ -68,12 +79,7 @@ export const AgentIcon = memo(function AgentIcon({
           strokeDasharray={CIRCUMFERENCE}
           initial={{ strokeDashoffset: CIRCUMFERENCE }}
           animate={{ strokeDashoffset: offset }}
-          transition={{
-            type: "tween",
-            duration: 1.2,
-            ease: "easeOut",
-            delay: animDelay,
-          }}
+          transition={arcTransition}
         />
       </svg>
 

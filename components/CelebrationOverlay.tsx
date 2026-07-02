@@ -3,6 +3,7 @@
 import { memo, useEffect, useMemo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { getInitials } from "@/lib/format";
+import { EASE_LUXURY } from "@/lib/motionPresets";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -231,7 +232,7 @@ function CelebrationOverlayInner({
 
   const exitTransition = reducedMotion
     ? { duration: 0.2 }
-    : { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] };
+    : { duration: 0.4, ease: EASE_LUXURY };
 
   return (
     <AnimatePresence>
@@ -271,15 +272,17 @@ function CelebrationOverlayInner({
             }}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            // Asymmetric timing: weighted spring in (the moment lands), quick
+            // ease-out drift on exit. The transition must live INSIDE the exit
+            // target — `exit:` is not a valid key of the `transition` prop, so
+            // the old spread silently ran the exit on the heavy spring.
             exit={{
               scale: 1,
               opacity: 0,
               y: -20,
+              transition: exitTransition,
             }}
-            transition={{
-              ...springIn,
-              exit: exitTransition,
-            }}
+            transition={springIn}
             layout={false}
           >
             <AgentCard agentName={agentName} />

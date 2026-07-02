@@ -78,7 +78,7 @@ Core tables: `tickets` (Freshdesk, PK `ticket_id`), `leads` (Zoho, PK `lead_id`)
 
 ## Known Sharp Edges
 
-- **"Pending" is month-gated** (decision 2026-06-11, dry-audit **D2**): every dashboard metric counts only tickets created in the current IST month. The rows route filters by `created_at` and the client prune enforces the same gate. Do not re-add an "all open tickets ever" path.
+- **Overdue and Incomplete carry forward; every other metric (incl. Pending) is month-gated** (dry-audit **D2**, revised 2026-07-02): an escalated or incomplete ticket from an earlier month keeps counting until cleared, so the leaderboard's overdue/incomplete scores never reset at month rollover — Overdue can therefore exceed the month-gated Pending. All other metrics (Received / Resolved / Today / Monthly / Pending / Joker) are gated by explicit `toISTDay`/`toISTMonth` checks in `lib/ticketAggregation.ts`. The rows route fetches "current IST month ∪ open backlog" and `pruneTicketRowsForDashboardState` keeps the same set. Any NEW metric must choose its gate explicitly — the input rows are no longer month-only.
 - Both data hooks now share `hooks/useRealtimeChannel.ts` (5-min poll + `CHANNEL_ERROR`/`TIMED_OUT` → refetch + 3s resubscribe; dry-audit **C2**). Channel names (`dashboard-*`, `deals-live`, `leads-touches-live`) are contractual — never rename them, and always clean up via `removeChannel` (the shared hook does both).
 - Hidden screen layers stay mounted but pause their own clocks via `useScreenActive()` (rAF ledger scroll, HomePanel clocks) — resume is seamless because state lives in refs (dry-audit **H3/H4**).
 - `POST /api/webhooks/zoho-calls` is not implemented (README scaffold only).

@@ -29,8 +29,14 @@ import {
   mergeAndRankAgents,
   pruneTicketRowsForDashboardState,
 } from "@/lib/ticketAggregation";
-import { buildTicketTimeSeries } from "@/lib/ticketTimeSeries";
-import type { OverdueTicketItem, RenewalsPanelData, MemberApiResponse } from "@/types";
+import { buildTicketTimeSeries, resolutionEventMs } from "@/lib/ticketTimeSeries";
+import type {
+  OverdueTicketItem,
+  RenewalsPanelData,
+  MemberApiResponse,
+  RenewalsDueResponse,
+  QueendomId,
+} from "@/types";
 
 // ─── Zero initial state ───────────────────────────────────────────────────────
 // All counters animate up from 0 on first load — this is intentional UX.
@@ -65,6 +71,8 @@ const INIT_ANANYSHREE: QueenStats = {
   tickets: ZERO_TICKETS,
   agents: AGENTS_ANANYSHREE,
   joker: ZERO_JOKER,
+  lastResolvedAtMs: null,
+  renewalsDue: [],
 };
 
 const INIT_ANISHQA: QueenStats = {
@@ -72,7 +80,23 @@ const INIT_ANISHQA: QueenStats = {
   tickets: ZERO_TICKETS,
   agents: AGENTS_ANISHQA,
   joker: ZERO_JOKER,
+  lastResolvedAtMs: null,
+  renewalsDue: [],
 };
+
+/**
+ * Monotonic max for the stopwatch anchor — a refetch over pruned rows (or a
+ * month rollover dropping last month's resolved rows) must never move the
+ * "time since last resolve" backward or blank it.
+ */
+function maxResolvedMs(
+  a: number | null | undefined,
+  b: number | null | undefined,
+): number | null {
+  if (a == null) return b ?? null;
+  if (b == null) return a;
+  return Math.max(a, b);
+}
 
 // ─── Realtime payload normaliser ─────────────────────────────────────────────
 /**
@@ -145,12 +169,14 @@ export function useDashboardData(): DashboardData {
       tickets: ticketStats.ananyshree,
       agents: agentsA,
       series: series.ananyshree,
+      lastResolvedAtMs: maxResolvedMs(prev.lastResolvedAtMs, series.ananyshree.lastResolvedMs),
     }));
     setAnishqaStats((prev) => ({
       ...prev,
       tickets: ticketStats.anishqa,
       agents: agentsB,
       series: series.anishqa,
+      lastResolvedAtMs: maxResolvedMs(prev.lastResolvedAtMs, series.anishqa.lastResolvedMs),
     }));
   }, [ticketRows]);
 
@@ -169,6 +195,28 @@ export function useDashboardData(): DashboardData {
     if (data === null) return;
     setAnanyshreeStats((prev) => ({ ...prev, members: data.ananyshree }));
     setAnishqaStats((prev)    => ({ ...prev, members: data.anishqa }));
+  }, []);
+
+  const fetchRenewalsDue = useCallback(async () => {
+    const data = await fetchJson<RenewalsDueResponse>("/api/clients/expiring");
+    if (data === null) return;
+    setAnanyshreeStats((prev) => ({ ...prev, renewalsDue: data.ananyshree ?? [] }));
+    setAnishqaStats((prev)    => ({ ...prev, renewalsDue: data.anishqa ?? [] }));
+  }, []);
+
+  /**
+   * ResolveStopwatch anchor. Called from the Realtime patch path as well as
+   * being derived in the aggregation effect above, because a backlog ticket
+   * (created in an earlier month) that turns terminal is pruned from
+   * ticketRows in the same update — the aggregation pass never sees its
+   * resolution, but the stopwatch must still reset (dry-audit D2).
+   */
+  const bumpLastResolved = useCallback((queendom: QueendomId, ms: number) => {
+    const set = queendom === "ananyshree" ? setAnanyshreeStats : setAnishqaStats;
+    set((prev) => {
+      const next = maxResolvedMs(prev.lastResolvedAtMs, ms);
+      return next === prev.lastResolvedAtMs ? prev : { ...prev, lastResolvedAtMs: next };
+    });
   }, []);
 
   const fetchJokers = useCallback(async () => {
@@ -200,12 +248,13 @@ export function useDashboardData(): DashboardData {
       Promise.all([
         fetchTicketRows(),
         fetchMembers(),
+        fetchRenewalsDue(),
         fetchJokers(),
         fetchOverdueTickets(),
         fetchRenewals("ananyshree"),
         fetchRenewals("anishqa"),
       ]),
-    [fetchTicketRows, fetchMembers, fetchJokers, fetchOverdueTickets, fetchRenewals],
+    [fetchTicketRows, fetchMembers, fetchRenewalsDue, fetchJokers, fetchOverdueTickets, fetchRenewals],
   );
 
   // ── Initial load ─────────────────────────────────────────────────────────────
@@ -223,7 +272,8 @@ export function useDashboardData(): DashboardData {
   // ── 5-minute safety poll + IST month-rollover prune ──────────────────────────
   // The poll-refetch is the documented safety net when Realtime silently misses
   // events (dry-audit C2 — matches useOnboardingPanelData). The prune runs even
-  // if the network is down so a month rollover still drops last month's rows.
+  // if the network is down so a month rollover still drops last month's resolved
+  // rows — open backlog rows survive it (D2 revised: Pending carries forward).
   useEffect(() => {
     const id = window.setInterval(() => {
       setTicketRows((prev) => pruneTicketRowsForDashboardState(prev));
@@ -237,15 +287,23 @@ export function useDashboardData(): DashboardData {
   // 3s resubscribe; cleanup via removeChannel). Channel names are contractual.
   //
   // Channel map:
-  //   dashboard-clients  → clients table  → refetch /api/clients
+  //   dashboard-clients  → clients table  → refetch /api/clients + /api/clients/expiring
   //   dashboard-jokers   → jokers table   → ticker patch + stats refetch
   //   dashboard-tickets  → tickets table  → optimistic patch ticketRows state
   //   dashboard-renewals → renewals+members tables → refetch /api/renewals-panel
 
+  // Two handlers (dry-audit C5 pattern): member counts and the renewals-due
+  // list both live in the clients table but come from different routes.
   useRealtimeChannel(
     "dashboard-clients",
-    [{ table: "clients", handler: () => { fetchMembers(); } }],
-    fetchMembers,
+    [
+      { table: "clients", handler: () => { fetchMembers(); } },
+      { table: "clients", handler: () => { fetchRenewalsDue(); } },
+    ],
+    () => {
+      fetchMembers();
+      fetchRenewalsDue();
+    },
   );
 
   // Jokers feed the JokerMetricsStrip only (the ticker now shows overdue
@@ -267,7 +325,7 @@ export function useDashboardData(): DashboardData {
         handler: (payload) => {
           if (payload.eventType === "INSERT" && payload.new) {
             const row = toTicketRow(payload.new as Record<string, unknown>);
-            if (row)
+            if (row) {
               setTicketRows((prev) => {
                 // If the same ticket ID is already in state (possible with duplicate
                 // INSERT events in Supabase Realtime), overwrite rather than append.
@@ -279,14 +337,20 @@ export function useDashboardData(): DashboardData {
                 }
                 return pruneTicketRowsForDashboardState([...prev, row]);
               });
+              const resolution = resolutionEventMs(row);
+              if (resolution) bumpLastResolved(resolution.queendom, resolution.ms);
+            }
           } else if (payload.eventType === "UPDATE" && payload.new) {
             const row = toTicketRow(payload.new as Record<string, unknown>);
-            if (row)
+            if (row) {
               setTicketRows((prev) =>
                 pruneTicketRowsForDashboardState(
                   prev.map((r) => (r.id === row.id ? row : r)),
                 ),
               );
+              const resolution = resolutionEventMs(row);
+              if (resolution) bumpLastResolved(resolution.queendom, resolution.ms);
+            }
           } else if (payload.eventType === "DELETE" && payload.old) {
             const oldRow = toTicketRow(payload.old as Record<string, unknown>);
             if (oldRow)
@@ -295,9 +359,9 @@ export function useDashboardData(): DashboardData {
         },
       },
       // Second handler (dry-audit C5 pattern): the overdue ticker reads the
-      // escalated set straight from /api/tickets/overdue (not month-gated, so
-      // it can't be patched from the month-scoped ticketRows state). Any
-      // tickets change — escalation flip, status change, delete — refetches it.
+      // escalated set straight from /api/tickets/overdue — it needs the
+      // `subject` column, which the minimal ticketRows state doesn't carry.
+      // Any tickets change — escalation flip, status change, delete — refetches it.
       { table: "tickets", handler: () => { fetchOverdueTickets(); } },
     ],
     () => {

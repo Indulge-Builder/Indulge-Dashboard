@@ -11,8 +11,8 @@ export interface TicketStats {
   totalReceived: number; // tickets created in the current IST calendar month (label: Received This Month)
   resolvedThisMonth: number; // cohort math: created this IST month AND status is terminal (resolved/closed)
   solvedToday: number; // cohort math: created today (IST) AND status is terminal
-  pendingToResolve: number; // created this IST month AND status NOT terminal (month-gated like all metrics; label: Pending This Month)
-  jokerSuggestion: number; // tickets with tags.joker_suggestion set (legacy)
+  pendingToResolve: number; // created this IST month AND status NOT terminal (month-gated, matches the hero row's "This Month" title; label: Pending)
+  jokerSuggestion: number; // tickets created this IST month with tags.joker_suggestion set (legacy)
 }
 
 /** Joker-specific metrics from the `jokers` table (current IST calendar month; see GET /api/jokers). */
@@ -41,12 +41,23 @@ export interface AgentStats {
   tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
   tasksAssignedThisMonth: number;
-  /** Open tickets created this IST month (same cohort as Queendom pending). */
+  /** Open tickets created this IST month (month-gated — agents' sum matches Queendom pending). */
   pendingScore: number;
-  /** Among that monthly pending set: `is_escalated` (shown as Overdue in the leaderboard). */
+  /** Open AND `is_escalated`, ANY month — carries forward until cleared (D2 revised 2026-07-02). May exceed pendingScore. */
   overdueCount: number;
-  /** Incomplete column: `is_incomplete` and status ∈ nudge client / nudge vendor / ongoing delivery / invoice due. */
+  /** `is_incomplete` and status ∈ nudge client / nudge vendor / ongoing delivery / invoice due — ANY month, carries forward. */
   incomplete: number;
+}
+
+/**
+ * A client whose `latest_subscription_end` falls in the current IST month —
+ * a renewal the Queendom is supposed to land (GET /api/clients/expiring).
+ */
+export interface RenewalDueClient {
+  name: string;
+  /** `latest_subscription_end` as YYYY-MM-DD (IST calendar date). */
+  endDate: string;
+  membershipType: string | null;
 }
 
 export interface QueenStats {
@@ -56,6 +67,14 @@ export interface QueenStats {
   joker?: JokerStats;
   /** Daily + hourly ticket timelines for the Pulse / Heartbeat graphs. */
   series?: import("./ticketTimeSeries").TicketTimeSeries;
+  /**
+   * UTC ms of this Queendom's most recent ticket resolution — monotonic max
+   * maintained by useDashboardData (survives row pruning). Drives the
+   * ResolveStopwatch. null until the first resolution is seen.
+   */
+  lastResolvedAtMs?: number | null;
+  /** Renewals due this IST month, ranked by endDate ascending. */
+  renewalsDue?: RenewalDueClient[];
 }
 
 export interface SpecialDate {

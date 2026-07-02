@@ -150,7 +150,9 @@
   --duration-crossfade: 1.5s;
   --duration-counter: 0.7s;
   --duration-row: 0.55s;
-  --ease-luxury: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Confident deceleration — must stay in sync with EASE_LUXURY in
+     lib/motionPresets.ts (upgraded 2026-07-02 from the weaker easeOutQuad). */
+  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
@@ -359,6 +361,18 @@ body::before {
     }
     100% {
       transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  /* Vertical marquee variant (UpcomingRenewals) — same doubled-track contract
+     as ticker-scroll: the track holds two identical halves, so -50% loops
+     seamlessly. Pause with .ticker-paused. */
+  @keyframes ticker-scroll-y {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(0, -50%, 0);
     }
   }
 
@@ -800,6 +814,20 @@ body::before {
   .hot-lead-card-pulse {
     animation: none;
     opacity: 0.4;
+  }
+}
+
+/* ── Reduced motion — pause the perpetual movers ─────────────────────────────
+   Marquee tracks set their animation via inline style (duration is computed
+   per item count), so pausing needs !important. Reduced motion ≠ zero motion:
+   content stays visible and fades still run; only continuous movement stops. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation-play-state: paused !important;
+  }
+  .skeleton-block,
+  .celebration-shimmer-text {
+    animation: none;
   }
 }
 

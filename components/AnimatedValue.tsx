@@ -12,7 +12,7 @@
 
 import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { gpuStyle } from "@/lib/motionPresets";
+import { EASE_LUXURY, gpuStyle } from "@/lib/motionPresets";
 import { usePrevious } from "@/hooks/usePrevious";
 
 interface AnimatedValueProps {
@@ -52,7 +52,7 @@ export const AnimatedValue = memo(function AnimatedValue({
             ? { scale: [1.3, 1], opacity: [0.85, 1] }
             : { scale: 1, opacity: 1 }
         }
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: EASE_LUXURY }}
       >
         {value}
       </motion.span>
@@ -65,7 +65,7 @@ export const AnimatedValue = memo(function AnimatedValue({
           style={gpuStyle}
           initial={{ opacity: 0.95, scale: 1.3 }}
           animate={{ opacity: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: EASE_LUXURY }}
           aria-hidden
         >
           {value}

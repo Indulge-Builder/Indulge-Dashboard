@@ -113,14 +113,17 @@ Layout top → bottom:
    | Resolved (Today) | Emerald + hero glow | Created IST-today, status terminal |
    | Received (Month) | Champagne | Created this IST month, not void |
    | Resolved (Month) | Green | Created this IST month, status terminal |
-   | Pending (To Resolve) | Red | Created this IST month, status non-terminal (**month-gated**, like all metrics) |
+   | Pending (To Resolve) | Red | Created this IST month, status non-terminal (**month-gated** — the hero row's title says "This Month") |
    | Spoiled / Joker Accepted | Gold (`.joker-box`) | Joker accepted counts |
 3. **`RenewalsPanel`** — renewals this month (big handwritten Edu numeral, gold drop shadow) + renewal client names + new member assignments.
 4. **`AgentLeaderboard`** (left) + **`SpecialDates`** (right; height matched via ResizeObserver):
    - `AgentRow` 5-column grid: SVG progress ring + crown for rank 1 (`AgentIcon`, stroke `#c9a84c`) · agent name (Baskerville champagne) · `completedToday/assignedToday` · `completedThisMonth/assignedThisMonth` · `pending / overdue / incomplete` (red, escalation glow).
    - Ranking: `tasksCompletedThisMonth` DESC, then `tasksCompletedToday` DESC.
    - `SpecialDates` — static client birthdays/anniversaries from `lib/specialDates.ts`.
-5. **`JokerMetricsStrip`** — compact bar of Joker stats (sent, accepted, rejected, pending, today, month).
+5. **Rotating pulse band** (`ui/RotatingViews`, asymmetric dwell 40 s / 10 s, ScreenLayer-style crossfade — both views always mounted; nested `ScreenActivityContext` pauses hidden clocks; snaps back to the default view while the concierge screen is faded out):
+   - Default view (40 s) — "Time Since Last Resolved": **`ResolveStopwatch`** (digital count-up since the Queendom's last resolution; `QueenStats.lastResolvedAtMs` is a monotonic max so row pruning never rewinds it; emerald surge on reset) | "Renewals Coming This Month": **`UpcomingRenewals`** (clients whose `latest_subscription_end` is this IST month via `/api/clients/expiring`, date-ranked `ticker-scroll-y` marquee; past dates red, today gold).
+   - Alternate view (10 s): **`PulseRibbon`** (Daily Flow — received vs resolved per IST day) | **`HeartbeatBars`** (Arrival Rhythm — arrivals per IST hour), both from `stats.series` (`lib/ticketTimeSeries`).
+6. **`JokerMetricsStrip`** — compact bar of Joker stats (sent, accepted, rejected, pending, today, month).
 
 ### 4.2 Revenue screen — `OnboardingLayout` (3-column grid on lg+)
 
@@ -246,8 +249,8 @@ everything else                            → open/pending
 | Received (Month) | created in current IST month, not void |
 | Resolved (Month) | created in IST month AND now terminal (NOT "resolved_at this month") |
 | Solved Today | created IST-today AND terminal |
-| Pending | created in current IST month AND non-terminal — **month-gated** (decision 2026-06-11: every dashboard metric is month-gated; the rows route + client prune both enforce it) |
-| Per-agent stats | same windows filtered by `agent_name`; `overdueCount` = pending ∧ `is_escalated`; `incomplete` = pending ∧ `is_incomplete` |
+| Pending | created in current IST month AND non-terminal — **month-gated**, explicit check (D2 revised 2026-07-02: only Overdue and Incomplete carry forward across months; everything else stays month-gated) |
+| Per-agent stats | same windows filtered by `agent_name`; `pendingScore` = month-gated open tickets; `overdueCount` = open ∧ `is_escalated` **any month** (carry-forward — can exceed pending); `incomplete` = `is_incomplete` ∧ incomplete-score status, **any month** (carry-forward) |
 
 ### 6.3 IST handling (`lib/istDate.ts`)
 
@@ -333,8 +336,9 @@ All GET routes use `supabaseAdmin`, return `Cache-Control: no-store`.
 
 | Route | Method | Purpose |
 |---|---|---|
-| `/api/tickets/rows` | GET | Minimal rows for client-side aggregation: current-IST-month rows only (all metrics, incl. Pending, are month-gated) |
+| `/api/tickets/rows` | GET | Minimal rows for client-side aggregation: current-IST-month rows ∪ still-open backlog from earlier months (backlog feeds carry-forward Overdue/Incomplete only; all other metrics month-gate themselves) |
 | `/api/clients` | GET | Active members per queendom → `MemberStats` |
+| `/api/clients/expiring` | GET | Clients whose `latest_subscription_end` falls in the current IST month, both queendoms, ranked soonest-first → UpcomingRenewals card |
 | `/api/jokers` | GET | Per-joker stats (sent/accepted/rejected/pending/today/month) |
 | `/api/jokers/recommendations` | GET | Latest 15 joker rows for the ticker |
 | `/api/onboarding` | GET | Big payload: agents, top-25 ledger, lead stats per agent, dept split, 4-vertical trendline, pipeline breakdown per agent |
@@ -361,7 +365,7 @@ VOID_STATUSES            = { spam, deleted }
 
 | Hook | Role |
 |---|---|
-| `useDashboardData` | Central concierge state: fetches `/api/tickets/rows`, `/api/clients`, `/api/jokers`, `/api/renewals-panel`; 4 Realtime channels; 5-min polling; returns `{ ananyshreeStats, anishqaStats, renewalsAnanyshree, renewalsAnishqa, recommendations, isInitialLoading }` |
+| `useDashboardData` | Central concierge state: fetches `/api/tickets/rows`, `/api/clients`, `/api/clients/expiring`, `/api/jokers`, `/api/renewals-panel`; 4 Realtime channels; 5-min polling; returns `{ ananyshreeStats, anishqaStats, renewalsAnanyshree, renewalsAnishqa, recommendations, isInitialLoading }` |
 | `useOnboardingPanelData` | Revenue state: `/api/onboarding` + deals/leads Realtime (`useRealtimeChannel`); debounced 2.5 s refetch; returns concierge/shop agents, ledger, pulse events, `leadMonthStats`, `verticalTrendline`, `ledgerScrollDuration`, `leadStatusByAgent`, `todayDate` |
 | `useCelebrationDetection` | Diffs `tasksCompletedToday` to fire celebrations |
 | `useKeyboardControls` | TV remote / keyboard freeze + screen switching |

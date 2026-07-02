@@ -20,6 +20,7 @@ import type {
   AgentStats,
   QueenStats,
   SpecialDate,
+  RenewalDueClient,
 } from "@/lib/types";
 
 export type {
@@ -29,6 +30,7 @@ export type {
   AgentStats,
   QueenStats,
   SpecialDate,
+  RenewalDueClient,
 };
 
 // ─── 2. Onboarding types ──────────────────────────────────────────────────────
@@ -84,6 +86,15 @@ export interface RenewalsPanelData {
 export interface MemberApiResponse {
   ananyshree: MemberStats;
   anishqa: MemberStats;
+}
+
+/**
+ * Shape of the GET /api/clients/expiring response — renewals due this IST
+ * month per queendom, ranked by `endDate` ascending (UpcomingRenewals card).
+ */
+export interface RenewalsDueResponse {
+  ananyshree: RenewalDueClient[];
+  anishqa: RenewalDueClient[];
 }
 
 /**

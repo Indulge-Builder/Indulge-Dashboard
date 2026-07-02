@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { EASE_LUXURY } from "@/lib/motionPresets";
 
 // Module-level singletons — toLocale*String constructs a new Intl.DateTimeFormat
 // on every call, which is expensive on TV CPUs and was happening twice per
@@ -52,7 +53,7 @@ export default function TopBar() {
       style={{ height: "18cqh", minHeight: "96px", maxHeight: "165px" }}
       initial={{ opacity: 0, y: -42 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 0.9, ease: EASE_LUXURY }}
     >
       {/* Ambient horizontal glow */}
       <div className="absolute inset-0 bg-gradient-to-r from-gold-500/5 via-gold-500/[0.02] to-gold-500/5 pointer-events-none" />
