@@ -9,8 +9,9 @@
  * Neumorphic live reorder: the row is absolutely positioned by rank
  * (`top = index / totalAgents`) inside AgentLeaderboard's relative region and
  * keeps a stable DOM slot — a rank change only retargets `top`, which glides
- * over 850ms (--neu-dur-reorder / --neu-ease-glide). Top-3 ranks get warm
- * accent-wash plinths (8/7/4%); there are no rank medals.
+ * over 850ms (--neu-dur-reorder / --neu-ease-glide). All rows share the same
+ * plain background (no rank washes, no medals) — rank 1 is marked by the
+ * crown alone.
  *
  * Also exports:
  *   GRID_COLS — the Tailwind responsive grid template shared with the header in
@@ -36,9 +37,6 @@ export const GRID_COLS =
 // Fluid column gap + horizontal padding — shared by header and rows so they
 // stay pixel-aligned at every viewport size (tokens in globals.css).
 export const GRID_GAP_X = "gap-x-[var(--gap-row-x)] px-[var(--pad-row-x)]";
-
-// Top-3 accent-wash strengths (percent of --neu-accent mixed into the row bg).
-const RANK_WASH_PCT = [8, 7, 4] as const;
 
 // ── AgentRow ──────────────────────────────────────────────────────────────────
 export interface AgentRowProps {
@@ -105,11 +103,6 @@ export const AgentRow = memo(function AgentRow({
         top: `calc(${index} * max(${(100 / n).toFixed(3)}%, var(--lb-row-min, 0px)))`,
         height: `calc(max(${(100 / n).toFixed(3)}%, var(--lb-row-min, 0px)) - 0.2cqh)`,
         transition: "top var(--neu-dur-reorder) var(--neu-ease-glide)",
-        background:
-          index < 3
-            ? `color-mix(in srgb, var(--neu-accent) ${RANK_WASH_PCT[index]}%, transparent)`
-            : "transparent",
-        boxShadow: index === 0 ? "var(--neu-shadow-raised-sm)" : "none",
         // Size container: row content sizes below use min(original, Ncqh)
         // so numerals/ring shrink to the row instead of clipping when the
         // leaderboard region is shorter than n full-size rows.
