@@ -15,6 +15,7 @@
 
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCelebrationDetection } from "@/hooks/useCelebrationDetection";
+import { useDaypartTheme } from "@/hooks/useDaypartTheme";
 import TopBar from "./TopBar";
 import DashboardController from "./DashboardController";
 import CelebrationOverlay from "./CelebrationOverlay";
@@ -22,6 +23,9 @@ import OverdueTicker from "./OverdueTicker";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 export default function Dashboard() {
+  // ── Daypart theme: data-neu="light|dark" on <html>, re-checked every 60s ──
+  useDaypartTheme();
+
   // ── Data + realtime state ──────────────────────────────────────────────────
   const {
     ananyshreeStats,
@@ -40,9 +44,13 @@ export default function Dashboard() {
 
   // ── Layout ─────────────────────────────────────────────────────────────────
   return (
-    <div className="relative flex flex-col w-full min-h-screen md:w-screen md:h-screen bg-obsidian overflow-auto md:overflow-hidden">
-      {/* Full-screen ambient glow — decorative, pointer-events-none */}
-      <div className="absolute inset-0 ambient-glow-center" />
+    <div className="relative flex flex-col w-full min-h-screen md:w-screen md:h-screen bg-neu-canvas overflow-auto md:overflow-hidden">
+      {/* Drifting pastel blobs — the only full-canvas ambient layer */}
+      <div className="neu-blobs" aria-hidden>
+        <div className="neu-blob neu-blob-a" />
+        <div className="neu-blob neu-blob-b" />
+        <div className="neu-blob neu-blob-c" />
+      </div>
 
       {/* TopBar — isolated so a clock/date crash never blanks the screen */}
       <ErrorBoundary label="Top Bar">

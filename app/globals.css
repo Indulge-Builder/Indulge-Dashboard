@@ -172,7 +172,11 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--obsidian);
+  /* Serene Neumorphic canvas — warm cream by day, warm charcoal by night
+     (daypart flip via data-neu on <html>, hooks/useDaypartTheme.ts). The old
+     obsidian tokens stay defined above but are retired from use. */
+  background: var(--neu-canvas);
+  transition: background 500ms ease;
 }
 
 /* ── Noise texture overlay ── */
@@ -822,15 +826,17 @@ body::before {
   .skeleton-block {
     background: linear-gradient(
       90deg,
-      var(--surface-card) 0%,
-      var(--surface-elevated) 35%,
-      rgba(212, 175, 55, 0.06) 50%,
-      var(--surface-elevated) 65%,
-      var(--surface-card) 100%
+      var(--neu-surface) 0%,
+      var(--neu-surface-high) 35%,
+      color-mix(in srgb, var(--neu-accent) 14%, var(--neu-surface)) 50%,
+      var(--neu-surface-high) 65%,
+      var(--neu-surface) 100%
     );
     background-size: 400% 100%;
     animation: foil-shimmer 2.4s ease-in-out infinite;
     border-radius: var(--radius-card);
+    box-shadow: var(--neu-shadow-raised-sm);
+    border: 1px solid var(--neu-edge);
   }
 }
 
@@ -984,4 +990,133 @@ body::before {
 /* Second hand — gold-bright for contrast */
 .home-panel-clock .react-clock__second-hand__body {
   background-color: #f9e27e !important;
+}
+
+/* ── Serene Neumorphic helpers ────────────────────────────────────────────────
+   Companions to app/indulge-neumorphic-tokens.css (imported after this file in
+   app/layout.tsx). Everything here is GPU-safe: keyframed transform/opacity
+   only; the tokens file's prefers-reduced-motion rule kills all [class*="neu-"]
+   animations. */
+@layer utilities {
+  /* Raised surface trio — one recipe, three radii tiers */
+  .neu-raised {
+    background: var(--neu-surface);
+    border: 1px solid var(--neu-edge);
+    box-shadow: var(--neu-shadow-raised);
+  }
+  .neu-raised-sm {
+    background: var(--neu-surface);
+    border: 1px solid var(--neu-edge);
+    box-shadow: var(--neu-shadow-raised-sm);
+  }
+
+  /* Sage plinth — the "Resolved Today" hero anchor */
+  .neu-plinth-sage {
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neu-sage) 26%, var(--neu-surface)),
+      color-mix(in srgb, var(--neu-sage) 12%, var(--neu-surface))
+    );
+    border: 1px solid var(--neu-edge);
+    box-shadow: var(--neu-shadow-raised);
+  }
+
+  /* Letterpress type — replaces the retired gold glow text-shadows */
+  .neu-letterpress {
+    text-shadow: 1px 1px 0 rgb(var(--neu-light) / 0.6);
+  }
+  .neu-engraved {
+    text-shadow:
+      0 1px 0 rgb(var(--neu-light) / 0.65),
+      0 -1px 0 rgba(0, 0, 0, 0.14);
+  }
+
+  /* Ambient motion classes (keyframes live in the tokens file) */
+  .neu-anim-bob {
+    animation: neu-bob 6.5s ease-in-out infinite;
+  }
+  .neu-anim-bob-sm {
+    animation: neu-bob-sm 7s ease-in-out infinite;
+  }
+  .neu-anim-rise {
+    animation: neu-rise var(--neu-dur-rise) var(--neu-ease-glide) backwards;
+  }
+  .neu-anim-pop {
+    animation: neu-pop var(--neu-dur-pop) var(--neu-ease-spring) 1;
+  }
+  .neu-anim-breathe {
+    animation: neu-breathe 2.2s ease-in-out infinite;
+  }
+  .neu-anim-dot-pulse {
+    animation: neu-dot-pulse 2.4s ease-in-out infinite;
+  }
+  .neu-anim-crown-float {
+    animation: neu-crown-float 3.2s ease-in-out infinite;
+  }
+  .neu-anim-tag-swing {
+    transform-origin: left center;
+    animation: neu-tag-swing 4.2s ease-in-out infinite;
+  }
+
+  /* Hairline rule arms — replaces the gold separator gradients */
+  .neu-rule-l {
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, var(--neu-accent-deep) 45%, transparent)
+    );
+  }
+  .neu-rule-r {
+    background: linear-gradient(
+      to left,
+      transparent,
+      color-mix(in srgb, var(--neu-accent-deep) 45%, transparent)
+    );
+  }
+}
+
+/* ── Drifting pastel blobs — the only full-canvas ambient layer ─────────────
+   Pure CSS, pointer-events-none, transform-only drift (46–58s). Sits behind
+   all content in Dashboard.tsx. */
+.neu-blobs {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.neu-blob {
+  position: absolute;
+  border-radius: 50%;
+}
+.neu-blob-a {
+  width: 46vw;
+  height: 46vw;
+  left: -12vw;
+  top: -18vh;
+  background: radial-gradient(circle, var(--neu-accent-wash) 0%, transparent 62%);
+  animation: neu-drift-a 46s ease-in-out infinite;
+}
+.neu-blob-b {
+  width: 40vw;
+  height: 40vw;
+  right: -14vw;
+  top: 20vh;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--neu-powder) 9%, transparent) 0%,
+    transparent 62%
+  );
+  animation: neu-drift-b 52s ease-in-out infinite;
+}
+.neu-blob-c {
+  width: 36vw;
+  height: 36vw;
+  left: 28vw;
+  bottom: -20vh;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--neu-sage) 8%, transparent) 0%,
+    transparent 62%
+  );
+  animation: neu-drift-a 58s ease-in-out infinite reverse;
 }
