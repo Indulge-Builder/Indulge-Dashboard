@@ -3,9 +3,12 @@
 /**
  * components/leaderboard/AgentIcon.tsx
  *
- * Circular gold-ring progress indicator with agent initials.
- * The ring fill represents completedToday / assignedToday (0–1).
- * A Crown icon appears above the ring for rank-1 agents.
+ * Circular progress ring with agent initials (neumorphic reskin).
+ * The ring fill represents completedToday / assignedToday (0–1) and gets
+ * RICHER as it fills: stroke width thickens 3 → 5.2 and the stroke color
+ * brightens from putty (--neu-text-tertiary) toward the hue — honey gold for
+ * rank 1 (crown), sage for everyone else. A sage ✓ coin pops in at 100%.
+ * The crown floats gently above rank 1's ring (CSS keyframe, transform-only).
  *
  * Memoized — re-renders only when pct, name, or showCrown changes.
  */
@@ -39,6 +42,15 @@ export const AgentIcon = memo(function AgentIcon({
 }: AgentIconProps) {
   const clampedPct = Math.min(Math.max(pct, 0), 1);
   const offset     = CIRCUMFERENCE * (1 - clampedPct);
+  const done       = clampedPct >= 1;
+
+  // Richer-as-it-fills ring: width 3 → 5.2, hue mix 42% → 100% toward the
+  // accent (rank 1) or sage hue. Both transition via CSS (0.8s ease).
+  const hue = showCrown ? "var(--neu-accent-deep)" : "var(--neu-sage-deep)";
+  const ringWidth = 3 + 2.2 * clampedPct;
+  const ringColor = `color-mix(in srgb, ${hue} ${Math.round(
+    42 + 58 * clampedPct,
+  )}%, var(--neu-text-tertiary))`;
 
   // Entrance (staggered draw-in from empty) happens exactly once; live pct
   // updates retarget the arc from its CURRENT fill — no remount, no wipe from
@@ -64,37 +76,57 @@ export const AgentIcon = memo(function AgentIcon({
           cy={RING_SIZE / 2}
           r={RING_R}
           fill="none"
-          stroke="rgba(255,255,255,0.06)"
-          strokeWidth="2.5"
+          stroke="color-mix(in srgb, var(--neu-accent-deep) 16%, transparent)"
+          strokeWidth="3"
         />
-        {/* Progress arc — draws in once on mount, then retargets smoothly */}
+        {/* Progress arc — draws in once on mount, then retargets smoothly;
+            stroke color + width glide via CSS as completion rises */}
         <motion.circle
           cx={RING_SIZE / 2}
           cy={RING_SIZE / 2}
           r={RING_R}
           fill="none"
-          stroke="#c9a84c"
-          strokeWidth="2.5"
+          stroke={ringColor}
+          strokeWidth={ringWidth}
           strokeLinecap="round"
           strokeDasharray={CIRCUMFERENCE}
           initial={{ strokeDashoffset: CIRCUMFERENCE }}
           animate={{ strokeDashoffset: offset }}
           transition={arcTransition}
+          style={{ transition: "stroke 0.8s ease, stroke-width 0.8s ease" }}
         />
       </svg>
 
       {/* Initials badge */}
       {/* min 14px at base breakpoint */}
-      <div className="absolute inset-0 flex items-center justify-center rounded-full border border-gold-500/30">
-        <span className="font-cinzel text-[0.875rem] sm:text-[1rem] lg:text-[1rem] tracking-widest text-gold-400 select-none">
+      <div className="absolute inset-0 flex items-center justify-center rounded-full">
+        <span className="font-cinzel font-bold text-[0.875rem] sm:text-[1rem] lg:text-[1rem] tracking-widest text-neu-t1 select-none">
           {getInitials(name)}
         </span>
       </div>
 
-      {/* Crown for rank 1 */}
+      {/* Sage ✓ coin — pops in when today's assignments are 100% complete */}
+      {done && (
+        <span
+          className="neu-anim-pop absolute -right-[4px] -top-[2px] z-10 flex items-center justify-center rounded-full border border-neu-edge bg-neu-sage shadow-neu-sm font-montserrat font-extrabold leading-none select-none"
+          style={{
+            width: "clamp(14px, 1.6cqw, 26px)",
+            height: "clamp(14px, 1.6cqw, 26px)",
+            fontSize: "clamp(9px, 0.9cqw, 15px)",
+            color: "#26301F",
+          }}
+          aria-label="All of today's tickets resolved"
+        >
+          ✓
+        </span>
+      )}
+
+      {/* Crown for rank 1 — floats gently (CSS transform keyframe) */}
       {showCrown && (
-        <div className="absolute -top-[8px] sm:-top-[10px] lg:-top-[12px] left-1/2 -translate-x-1/2 z-10">
-          <Crown className="text-gold-400 w-[12px] h-[12px] sm:w-[15px] sm:h-[15px] lg:w-[18px] lg:h-[18px]" />
+        <div className="absolute -top-[10px] sm:-top-[13px] lg:-top-[16px] left-1/2 -translate-x-1/2 z-10">
+          <div className="neu-anim-crown-float">
+            <Crown className="text-neu-accent-deep w-[12px] h-[12px] sm:w-[15px] sm:h-[15px] lg:w-[18px] lg:h-[18px]" />
+          </div>
         </div>
       )}
     </div>

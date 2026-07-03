@@ -6,6 +6,12 @@
  * A single row in the agent leaderboard.
  * Memoized — only re-renders when its agent prop changes (no parent re-render cascade).
  *
+ * Neumorphic live reorder: the row is absolutely positioned by rank
+ * (`top = index / totalAgents`) inside AgentLeaderboard's relative region and
+ * keeps a stable DOM slot — a rank change only retargets `top`, which glides
+ * over 850ms (--neu-dur-reorder / --neu-ease-glide). Top-3 ranks get warm
+ * accent-wash plinths (8/7/4%); there are no rank medals.
+ *
  * Also exports:
  *   GRID_COLS — the Tailwind responsive grid template shared with the header in
  *               AgentLeaderboard.tsx (single source of truth for column widths).
@@ -14,14 +20,7 @@
 import { memo, useRef, useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import type { AgentStats } from "@/lib/types";
-import {
-  rowVariants,
-  gpuStyle,
-  surgeBgVariants,
-  surgeSweepVariants,
-  surgeSweepBarVariants,
-  winShimmerBarVariants,
-} from "@/lib/motionPresets";
+import { rowVariants, gpuStyle } from "@/lib/motionPresets";
 import { usePrevious } from "@/hooks/usePrevious";
 import { AnimatedValue } from "@/components/AnimatedValue";
 import { AgentIcon } from "./AgentIcon";
@@ -38,9 +37,13 @@ export const GRID_COLS =
 // stay pixel-aligned at every viewport size (tokens in globals.css).
 export const GRID_GAP_X = "gap-x-[var(--gap-row-x)] px-[var(--pad-row-x)]";
 
+// Top-3 accent-wash strengths (percent of --neu-accent mixed into the row bg).
+const RANK_WASH_PCT = [8, 7, 4] as const;
+
 // ── AgentRow ──────────────────────────────────────────────────────────────────
 export interface AgentRowProps {
   agent: AgentStats;
+  /** Rank (0-based) — drives the absolute `top` position, not DOM order. */
   index: number;
   totalAgents: number;
   baseDelay: number;
@@ -50,12 +53,14 @@ export interface AgentRowProps {
 export const AgentRow = memo(function AgentRow({
   agent,
   index,
+  totalAgents,
   baseDelay,
   isWinning,
 }: AgentRowProps) {
   const rowDelay = baseDelay + index * 0.07;
   const ringDelay = rowDelay + 0.25;
   const rank = index + 1;
+  const n = Math.max(totalAgents, 1);
 
   const received = agent.tasksAssignedToday ?? 0;
   const today = agent.tasksCompletedToday ?? 0;
@@ -95,41 +100,40 @@ export const AgentRow = memo(function AgentRow({
       initial="hidden"
       animate="visible"
       exit="exit"
-      style={gpuStyle}
-      className="relative overflow-hidden rounded-xl"
+      style={{
+        ...gpuStyle,
+        top: `${(index * 100) / n}%`,
+        height: `calc(${(100 / n).toFixed(3)}% - 0.2cqh)`,
+        transition: "top var(--neu-dur-reorder) var(--neu-ease-glide)",
+        background:
+          index < 3
+            ? `color-mix(in srgb, var(--neu-accent) ${RANK_WASH_PCT[index]}%, transparent)`
+            : "transparent",
+        boxShadow: index === 0 ? "var(--neu-shadow-raised-sm)" : "none",
+      }}
+      className="absolute inset-x-0 overflow-hidden rounded-neu-chip"
     >
-      {/* ── Surge flash: gold burst on score increase (presets: motionPresets) ── */}
+      {/* ── Surge: honey-gold sweep across the row on score increase ────────
+          Keyed remount replays the CSS neu-sweep run (ends at opacity 0,
+          fill-mode both, so the layer stays invisible after the pass). */}
       {surgeKey > 0 && (
-        <motion.div
-          key={`surge-bg-${surgeKey}`}
-          className="absolute inset-0 pointer-events-none z-[1] rounded-xl"
-          style={{
-            backgroundColor: "rgba(201,168,76,0.3)",
-            ...gpuStyle,
-          }}
-          {...surgeBgVariants}
-        />
-      )}
-      {surgeKey > 0 && (
-        <motion.div
+        <div
           key={`surge-sweep-${surgeKey}`}
-          className="absolute inset-0 pointer-events-none z-[2] overflow-hidden rounded-xl"
-          style={gpuStyle}
-          {...surgeSweepVariants}
+          className="absolute inset-0 pointer-events-none z-[2] overflow-hidden rounded-neu-chip"
         >
-          <motion.div
-            className="absolute inset-y-0 w-[45%]"
+          <div
+            className="absolute inset-y-0 w-[40%]"
             style={{
               background:
-                "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.82) 20%, transparent 100%)",
+                "linear-gradient(90deg, transparent, color-mix(in srgb, var(--neu-accent) 45%, transparent), transparent)",
+              animation: "neu-sweep 0.9s ease-out 1 both",
               ...gpuStyle,
             }}
-            {...surgeSweepBarVariants}
           />
-        </motion.div>
+        </div>
       )}
 
-      {/* ── Win shimmer: continuous sweep while celebration is active ─────── */}
+      {/* ── Win sweep: while celebration is active ────────────────────────── */}
       {isWinning && (
         <motion.div
           className="absolute inset-0 pointer-events-none z-10 overflow-hidden"
@@ -138,20 +142,20 @@ export const AgentRow = memo(function AgentRow({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
         >
-          <motion.div
+          <div
             className="absolute inset-y-0 w-[50%]"
             style={{
               background:
-                "linear-gradient(90deg, transparent, rgba(249,226,126,0.35), rgba(249,226,126,0.6), rgba(249,226,126,0.35), transparent)",
+                "linear-gradient(90deg, transparent, color-mix(in srgb, var(--neu-accent) 35%, transparent), color-mix(in srgb, var(--neu-accent) 55%, transparent), transparent)",
+              animation: "neu-sweep 1.2s ease-out infinite",
             }}
-            {...winShimmerBarVariants}
           />
         </motion.div>
       )}
 
       {/* ── Data grid ─────────────────────────────────────────────────────── */}
       <div
-        className={`grid ${GRID_COLS} items-center ${GRID_GAP_X} py-[0.55cqh] sm:py-[0.7cqh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
+        className={`grid h-full ${GRID_COLS} items-center ${GRID_GAP_X} rounded-neu-chip relative z-[3]`}
       >
         {/* Col 1: Icon — subtle scale pulse on surge, never distorting */}
         <motion.div
@@ -172,9 +176,9 @@ export const AgentRow = memo(function AgentRow({
           />
         </motion.div>
 
-        {/* Col 2: Agent name — opacity dip on surge; row-level gold burst carries the drama */}
+        {/* Col 2: Agent name — opacity dip on surge; row-level sweep carries the drama */}
         <motion.p
-          className="min-w-0 font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
+          className="min-w-0 font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] tracking-wide text-neu-t1 leading-none text-center truncate px-1"
           style={gpuStyle}
           animate={surgeKey > 0 ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
@@ -182,19 +186,24 @@ export const AgentRow = memo(function AgentRow({
           {agent.name}
         </motion.p>
 
-        {/* Col 3: Today — completed / assigned */}
+        {/* Col 3: Today — completed / assigned; numeral squash-pops on surge */}
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
-          <AnimatedValue
-            value={today}
-            className="font-montserrat text-[clamp(2.325rem,3.675cqw,4.65rem)] leading-none text-green-400 tabular-nums font-semibold"
-            highlightOnIncrease
-          />
-          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-white/25 leading-none">
+          <span
+            key={`pop-${surgeKey}`}
+            className={surgeKey > 0 ? "neu-anim-pop inline-flex" : "inline-flex"}
+          >
+            <AnimatedValue
+              value={today}
+              className="font-montserrat text-[clamp(2.325rem,3.675cqw,4.65rem)] leading-none text-neu-sage-deep tabular-nums font-bold"
+              highlightOnIncrease
+            />
+          </span>
+          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-neu-t3 leading-none">
             /
           </span>
           <AnimatedValue
             value={received}
-            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-white/40 leading-none tabular-nums"
+            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-neu-t3 leading-none tabular-nums"
           />
         </div>
 
@@ -202,15 +211,14 @@ export const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={agent.tasksCompletedThisMonth ?? 0}
-            className="font-montserrat tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675cqw,4.65rem)]"
-            style={{ color: "rgba(212,175,55,0.9)" }}
+            className="font-montserrat tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675cqw,4.65rem)] text-neu-t2"
           />
-          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-white/25 leading-none">
+          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-neu-t3 leading-none">
             /
           </span>
           <AnimatedValue
             value={agent.tasksAssignedThisMonth ?? 0}
-            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-white/40 leading-none tabular-nums"
+            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-neu-t3 leading-none tabular-nums"
           />
         </div>
 
@@ -218,31 +226,28 @@ export const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-0.5 sm:gap-1">
           <AnimatedValue
             value={pending}
-            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-red-400"
+            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-neu-t2"
             highlightOnIncrease
           />
-          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-neu-t3">
             /
           </span>
           <AnimatedValue
             value={overdue}
             className={`font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold ${
-              hasOverdue ? "error-overdue-glow" : "text-white/40"
+              hasOverdue ? "text-neu-danger-deep" : "text-neu-t3"
             }`}
           />
-          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-neu-t3">
             /
           </span>
           <AnimatedValue
             value={incomplete}
-            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-slate-200/60"
+            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-neu-butter-deep"
             highlightOnIncrease
           />
         </div>
       </div>
-
-      {/* Row separator */}
-      <div className="mx-3 h-px bg-gradient-to-r from-transparent via-gold-500/[0.08] to-transparent" />
     </motion.div>
   );
 });
