@@ -22,25 +22,19 @@ import { SPECIAL_DATES_COL_WIDTH_CLASS } from "@/components/QueendomPanel";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function QueendomSkeleton({ side }: { side: "left" | "right" }) {
-  const glowClass =
-    side === "left" ? "ambient-glow-left" : "ambient-glow-right";
-
+export default function QueendomSkeleton(_props: { side: "left" | "right" }) {
   return (
     <section
-      className="relative flex h-full w-full flex-col overflow-hidden bg-obsidian"
+      className="relative flex h-full w-full flex-col overflow-hidden bg-neu-canvas neu-raised rounded-neu-panel"
       style={{ padding: "2cqh var(--pad-panel)" }}
     >
-      {/* Ambient radial glow */}
-      <div className={`${glowClass} absolute inset-0 pointer-events-none`} />
-
       {/* ── 1. Header: WingspanHeader + "Queendom" subtitle ── */}
       <div className="relative mb-[1.6cqh] flex flex-shrink-0 flex-col items-center gap-[0.8cqh]">
         {/* Top rule */}
         <SectionDivider
           className="mb-[1.1cqh]"
-          leftRuleClass="bg-gradient-to-r from-transparent via-gold-500/25 to-gold-500/40"
-          rightRuleClass="bg-gradient-to-l from-transparent via-gold-500/25 to-gold-500/40"
+          leftRuleClass="neu-rule-l"
+          rightRuleClass="neu-rule-r"
         />
 
         {/* WingspanHeader — 3-col: pill | name | pill */}
@@ -100,8 +94,8 @@ export default function QueendomSkeleton({ side }: { side: "left" | "right" }) {
 
         {/* Bottom rule */}
         <div className="flex w-full items-center gap-3">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/18 to-gold-500/28" />
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/18 to-gold-500/28" />
+          <div className="h-px flex-1 neu-rule-l" />
+          <div className="h-px flex-1 neu-rule-r" />
         </div>
       </div>
 
@@ -173,7 +167,7 @@ export default function QueendomSkeleton({ side }: { side: "left" | "right" }) {
           {/* Vertical divider */}
           <div
             className="shrink-0 self-stretch w-px"
-            style={{ background: "rgba(212,175,55,0.20)" }}
+            style={{ background: "var(--neu-hairline)" }}
           />
 
           {/* Members list (right) */}
@@ -208,7 +202,7 @@ export default function QueendomSkeleton({ side }: { side: "left" | "right" }) {
       >
         <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-[var(--gap-card)]">
           {/* Leaderboard header row */}
-          <div className="flex items-center gap-3 sm:gap-4 px-2 border-b border-gold-500/20 pb-[0.9cqh]">
+          <div className="flex items-center gap-3 sm:gap-4 px-2 border-b border-neu-hairline pb-[0.9cqh]">
             <Sk
               className="shrink-0 rounded-lg"
               style={{
@@ -259,7 +253,7 @@ export default function QueendomSkeleton({ side }: { side: "left" | "right" }) {
 
             {/* Special Dates column — width shared with the live panel (dry-audit A9) */}
             <div
-              className={`flex w-full min-h-0 flex-shrink-0 flex-col gap-[var(--gap-list)] border-t border-gold-500/20 pt-4 ${SPECIAL_DATES_COL_WIDTH_CLASS} md:border-l md:border-t-0 md:pt-0 md:pl-[var(--gap-section)]`}
+              className={`flex w-full min-h-0 flex-shrink-0 flex-col gap-[var(--gap-list)] border-t border-neu-hairline pt-4 ${SPECIAL_DATES_COL_WIDTH_CLASS} md:border-l md:border-t-0 md:pt-0 md:pl-[var(--gap-section)]`}
             >
               <Sk
                 className="mx-auto rounded-full"
@@ -279,7 +273,7 @@ export default function QueendomSkeleton({ side }: { side: "left" | "right" }) {
           </div>
 
           {/* Joker strip — full-width, border-t */}
-          <div className="w-full border-t border-gold-500/20 pt-[var(--gap-card)]">
+          <div className="w-full border-t border-neu-hairline pt-[var(--gap-card)]">
             <Sk
               className="w-full rounded-xl"
               style={{

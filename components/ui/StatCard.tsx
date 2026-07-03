@@ -81,12 +81,14 @@ export interface StatCardProps {
 // Each key maps to a Tailwind class that consumes the CSS variable token.
 
 const LABEL_CLASS: Record<StatCardAccent, string> = {
-  champagne: "text-champagne",
-  emerald:   "text-status-emerald",
-  red:       "text-status-red",
-  amber:     "text-status-amber",
-  sky:       "text-status-sky",
-  gold:      "text-gold-300 queen-name-glow",
+  /* Neumorphic semantic mapping — the old status hues route to the pastel
+     support family; glows are retired (letterpress instead). */
+  champagne: "text-neu-t2",
+  emerald:   "text-neu-sage-deep",
+  red:       "text-neu-danger-deep",
+  amber:     "text-neu-butter-deep",
+  sky:       "text-neu-powder-deep",
+  gold:      "text-neu-accent-deep neu-letterpress",
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -105,10 +107,9 @@ export function StatCard({
       className={[
         surfaceClass ??
           [
-            // Surface: inset dark background, subtle gold border, tight card radius
+            // Surface: raised neumorphic tile, hairline edge
             "flex flex-1 flex-col items-center justify-center text-center min-w-0",
-            "bg-surface-inset rounded-card border border-gold-500/20",
-            "shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+            "neu-raised-sm rounded-neu-tile",
           ].join(" "),
         className,
       ]

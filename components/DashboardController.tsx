@@ -148,7 +148,7 @@ export default function DashboardController({
         type="button"
         aria-pressed={isFrozen}
         aria-label={isFrozen ? "Resume auto-switching" : "Pause on this screen"}
-        className={`absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border border-neu-edge px-3 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] uppercase transition-[background-color,box-shadow,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-neu-accent-deep/80 ${
+        className={`absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border border-neu-edge px-3 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] uppercase transition-[background-color,box-shadow,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-neu-accent-deep ${
           isFrozen
             ? "bg-neu-well text-neu-sage-deep shadow-neu-pressed"
             : "bg-neu-surface text-neu-t2 shadow-neu"
