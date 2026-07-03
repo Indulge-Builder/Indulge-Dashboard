@@ -27,84 +27,94 @@
 :root,
 [data-neu="light"] {
   /* Surfaces */
-  --neu-canvas:        #ECE8E1;
-  --neu-surface:       #F1EDE6;
-  --neu-surface-high:  #F3EFE8;
-  --neu-well:          #E9E4DB;   /* tracks & rails only */
+  --neu-canvas: #ece8e1;
+  --neu-surface: #f1ede6;
+  --neu-surface-high: #f3efe8;
+  --neu-well: #e9e4db; /* tracks & rails only */
 
   /* Shadow primitives */
-  --neu-dark:   166 156 140;               /* warm putty */
-  --neu-light:  255 255 255;
-  --neu-edge:   rgba(255, 255, 255, 0.55); /* 1px hairline on raised */
+  --neu-dark: 166 156 140; /* warm putty */
+  --neu-light: 255 255 255;
+  --neu-edge: rgba(255, 255, 255, 0.55); /* 1px hairline on raised */
 
   /* Raised (out) — Whisper depth */
   --neu-shadow-raised-sm:
-    2px 2px 6px   rgb(var(--neu-dark) / 0.24),
+    2px 2px 6px rgb(var(--neu-dark) / 0.24),
     -2px -2px 6px rgb(var(--neu-light) / 0.65);
   --neu-shadow-raised:
-    3px 3px 8px   rgb(var(--neu-dark) / 0.26),
-    -3px -3px 8px rgb(var(--neu-light) / 0.70);
+    3px 3px 8px rgb(var(--neu-dark) / 0.26),
+    -3px -3px 8px rgb(var(--neu-light) / 0.7);
   --neu-shadow-raised-lg:
-    6px 6px 16px   rgb(var(--neu-dark) / 0.28),
+    6px 6px 16px rgb(var(--neu-dark) / 0.28),
     -6px -6px 16px rgb(var(--neu-light) / 0.75);
   --neu-shadow-hover:
-    5px 5px 12px   rgb(var(--neu-dark) / 0.30),
-    -5px -5px 12px rgb(var(--neu-light) / 0.80);
+    5px 5px 12px rgb(var(--neu-dark) / 0.3),
+    -5px -5px 12px rgb(var(--neu-light) / 0.8);
 
   /* Inset (state/tracks only) */
   --neu-shadow-inset:
-    inset 2px 2px 5px   rgb(var(--neu-dark) / 0.32),
+    inset 2px 2px 5px rgb(var(--neu-dark) / 0.32),
     inset -2px -2px 5px rgb(var(--neu-light) / 0.75);
   --neu-shadow-pressed:
-    inset 2px 2px 4px   rgb(var(--neu-dark) / 0.35),
-    inset -2px -2px 4px rgb(var(--neu-light) / 0.60);
+    inset 2px 2px 4px rgb(var(--neu-dark) / 0.35),
+    inset -2px -2px 4px rgb(var(--neu-light) / 0.6);
 
-  /* Radii — PEBBLE scale, softened +20% for the TV (2026-07-03 request;
-     handoff originals: 22/20/15/12/9) */
-  --neu-radius-card:  26px;   /* screen panels */
-  --neu-radius-panel: 24px;
-  --neu-radius-field: 18px;
-  --neu-radius-tile:  14px;   /* metric tiles, section cards */
-  --neu-radius-chip:  11px;   /* rows, chips, date tiles */
-  --neu-radius-pill:  999px;
+  /* Radii — rounded well past the handoff PEBBLE scale (22/20/15/12/9) for a
+     smoother marshmallow feel on the TV (2026-07-03 requests, two bumps) */
+  --neu-radius-card: 40px; /* screen panels */
+  --neu-radius-panel: 36px;
+  --neu-radius-field: 27px;
+  --neu-radius-tile: 21px; /* metric tiles, section cards */
+  --neu-radius-chip: 16px; /* rows, chips, date tiles */
+  --neu-radius-pill: 999px;
 
   /* Accent — honey gold (fixed; the dashboard's single theme) */
-  --neu-accent:          #D6BC82;
-  --neu-accent-deep:     #8A7448;  /* text-safe on cream */
-  --neu-accent-fg:       #33290F;  /* ink on accent fills */
-  --neu-accent-gradient: linear-gradient(145deg,
+  --neu-accent: #d6bc82;
+  --neu-accent-deep: #8a7448; /* text-safe on cream */
+  --neu-accent-fg: #33290f; /* ink on accent fills */
+  --neu-accent-gradient: linear-gradient(
+    145deg,
     color-mix(in srgb, var(--neu-accent) 88%, white),
-    color-mix(in srgb, var(--neu-accent) 90%, black));
-  --neu-accent-wash:     color-mix(in srgb, var(--neu-accent) 12%, transparent);
-  --neu-accent-plinth:   linear-gradient(145deg,
+    color-mix(in srgb, var(--neu-accent) 90%, black)
+  );
+  --neu-accent-wash: color-mix(in srgb, var(--neu-accent) 12%, transparent);
+  --neu-accent-plinth: linear-gradient(
+    145deg,
     color-mix(in srgb, var(--neu-accent) 20%, var(--neu-surface)),
-    color-mix(in srgb, var(--neu-accent) 8%,  var(--neu-surface)));
+    color-mix(in srgb, var(--neu-accent) 8%, var(--neu-surface))
+  );
 
   /* Pastel support family (equal lightness; -deep for text/icons) */
-  --neu-sage:   #A9C4A0;  --neu-sage-deep:   #7E9B76;
-  --neu-powder: #A3BFD6;  --neu-powder-deep: #7797B3;
-  --neu-butter: #E3CB96;  --neu-butter-deep: #B39C63;
-  --neu-lilac:  #B3A9D4;  --neu-lilac-deep:  #8A7FB0;
-  --neu-peach:  #E5B896;  --neu-peach-deep:  #BC8E67;
-  --neu-danger: #D98E85;  --neu-danger-deep: #B06A61;
+  --neu-sage: #a9c4a0;
+  --neu-sage-deep: #7e9b76;
+  --neu-powder: #a3bfd6;
+  --neu-powder-deep: #7797b3;
+  --neu-butter: #e3cb96;
+  --neu-butter-deep: #b39c63;
+  --neu-lilac: #b3a9d4;
+  --neu-lilac-deep: #8a7fb0;
+  --neu-peach: #e5b896;
+  --neu-peach-deep: #bc8e67;
+  --neu-danger: #d98e85;
+  --neu-danger-deep: #b06a61;
 
   /* Semantic mapping (dashboard-specific) */
-  --neu-resolved:      var(--neu-sage-deep);   /* resolved / today / closures */
-  --neu-pending:       var(--neu-danger-deep); /* pending / overdue */
-  --neu-incomplete:    var(--neu-butter-deep);
-  --neu-shop:          var(--neu-powder-deep); /* Shop dept (was sky) */
-  --neu-concierge:     var(--neu-accent-deep); /* Onboarding dept (was gold) */
+  --neu-resolved: var(--neu-sage-deep); /* resolved / today / closures */
+  --neu-pending: var(--neu-danger-deep); /* pending / overdue */
+  --neu-incomplete: var(--neu-butter-deep);
+  --neu-shop: var(--neu-powder-deep); /* Shop dept (was sky) */
+  --neu-concierge: var(--neu-accent-deep); /* Onboarding dept (was gold) */
 
   /* Business-vertical series (PerformanceLineGraph, 4 lines) */
   --neu-series-global: var(--neu-accent-deep);
-  --neu-series-shop:   var(--neu-powder-deep);
-  --neu-series-house:  var(--neu-sage-deep);
+  --neu-series-shop: var(--neu-powder-deep);
+  --neu-series-house: var(--neu-sage-deep);
   --neu-series-legacy: var(--neu-lilac-deep);
 
   /* Text on neumorphic surfaces */
-  --neu-text-primary:   #38332B;
-  --neu-text-secondary: #8A8274;
-  --neu-text-tertiary:  #ABA396;
+  --neu-text-primary: #38332b;
+  --neu-text-secondary: #8a8274;
+  --neu-text-tertiary: #aba396;
 
   /* Hairline dividers (replaces gold-500/15..20 borders) */
   --neu-hairline: color-mix(in srgb, var(--neu-accent-deep) 14%, transparent);
@@ -113,115 +123,256 @@
 /* ── Dark variant — warm charcoal (16:00–04:00 IST) ──────────────
    NOT the app's old #050507. Candle-warm highlights.             */
 [data-neu="dark"] {
-  --neu-canvas:        #28241C;
-  --neu-surface:       #2D2920;
-  --neu-surface-high:  #332E24;
-  --neu-well:          #221E17;
+  --neu-canvas: #28241c;
+  --neu-surface: #2d2920;
+  --neu-surface-high: #332e24;
+  --neu-well: #221e17;
 
-  --neu-dark:   0 0 0;
-  --neu-light:  255 240 214;
-  --neu-edge:   rgba(255, 240, 214, 0.06);
+  --neu-dark: 0 0 0;
+  --neu-light: 255 240 214;
+  --neu-edge: rgba(255, 240, 214, 0.06);
 
   --neu-shadow-raised-sm:
-    3px 3px 8px   rgb(var(--neu-dark) / 0.45),
+    3px 3px 8px rgb(var(--neu-dark) / 0.45),
     -3px -3px 8px rgb(var(--neu-light) / 0.045);
   --neu-shadow-raised:
-    6px 6px 14px   rgb(var(--neu-dark) / 0.50),
+    6px 6px 14px rgb(var(--neu-dark) / 0.5),
     -6px -6px 14px rgb(var(--neu-light) / 0.05);
   --neu-shadow-raised-lg:
-    10px 10px 24px   rgb(var(--neu-dark) / 0.55),
+    10px 10px 24px rgb(var(--neu-dark) / 0.55),
     -10px -10px 24px rgb(var(--neu-light) / 0.055);
   --neu-shadow-hover:
-    8px 8px 18px   rgb(var(--neu-dark) / 0.55),
+    8px 8px 18px rgb(var(--neu-dark) / 0.55),
     -8px -8px 18px rgb(var(--neu-light) / 0.06);
   --neu-shadow-inset:
-    inset 3px 3px 7px   rgb(var(--neu-dark) / 0.50),
+    inset 3px 3px 7px rgb(var(--neu-dark) / 0.5),
     inset -3px -3px 7px rgb(var(--neu-light) / 0.05);
   --neu-shadow-pressed:
-    inset 2px 2px 5px   rgb(var(--neu-dark) / 0.55),
+    inset 2px 2px 5px rgb(var(--neu-dark) / 0.55),
     inset -2px -2px 5px rgb(var(--neu-light) / 0.04);
 
   /* Accent lifts lighter so it holds on charcoal */
-  --neu-accent:      #E0CA9B;
-  --neu-accent-deep: #CBB183;
-  --neu-accent-fg:   #33290F;
+  --neu-accent: #e0ca9b;
+  --neu-accent-deep: #cbb183;
+  --neu-accent-fg: #33290f;
 
   /* Deep tones flip lighter than bases on dark */
-  --neu-sage:   #9DB894;  --neu-sage-deep:   #B9D2B0;
-  --neu-powder: #97B3CA;  --neu-powder-deep: #B7CFE2;
-  --neu-butter: #D7BF8A;  --neu-butter-deep: #E9D6AC;
-  --neu-lilac:  #A79DC8;  --neu-lilac-deep:  #C5BCE0;
-  --neu-peach:  #D9AC8A;  --neu-peach-deep:  #EBC5A8;
-  --neu-danger: #CD8279;  --neu-danger-deep: #E0A29A;
+  --neu-sage: #9db894;
+  --neu-sage-deep: #b9d2b0;
+  --neu-powder: #97b3ca;
+  --neu-powder-deep: #b7cfe2;
+  --neu-butter: #d7bf8a;
+  --neu-butter-deep: #e9d6ac;
+  --neu-lilac: #a79dc8;
+  --neu-lilac-deep: #c5bce0;
+  --neu-peach: #d9ac8a;
+  --neu-peach-deep: #ebc5a8;
+  --neu-danger: #cd8279;
+  --neu-danger-deep: #e0a29a;
 
-  --neu-text-primary:   #E8E0D4;
-  --neu-text-secondary: #A39A88;
-  --neu-text-tertiary:  #6E675C;
+  --neu-text-primary: #e8e0d4;
+  --neu-text-secondary: #a39a88;
+  --neu-text-tertiary: #6e675c;
 }
 
 /* ── Component recipes ─────────────────────────────────────────── */
 
-.neu-panel {            /* QueendomPanel / DepartmentColumn shells */
+.neu-panel {
+  /* QueendomPanel / DepartmentColumn shells */
   background: var(--neu-surface);
   border: 1px solid var(--neu-edge);
   border-radius: var(--neu-radius-panel);
   box-shadow: var(--neu-shadow-raised);
 }
-.neu-tile {             /* metric tiles, section cards */
+.neu-tile {
+  /* metric tiles, section cards */
   background: var(--neu-surface);
   border: 1px solid var(--neu-edge);
   border-radius: var(--neu-radius-tile);
   box-shadow: var(--neu-shadow-raised-sm);
 }
-.neu-rail {             /* ticker rail, health-bar track — the ONLY wells */
+.neu-rail {
+  /* ticker rail, health-bar track — the ONLY wells */
   background: var(--neu-well);
   box-shadow: var(--neu-shadow-inset);
   border-radius: var(--neu-radius-pill);
 }
-.neu-plinth-accent {    /* stopwatch, renewals counter, hero anchors */
+.neu-plinth-accent {
+  /* stopwatch, renewals counter, hero anchors */
   background: var(--neu-accent-plinth);
   border: 1px solid var(--neu-edge);
   box-shadow: var(--neu-shadow-raised);
 }
-.neu-plaque {           /* engraved department nameplate */
+.neu-plaque {
+  /* engraved department nameplate */
   background: var(--neu-accent-plinth);
   border: 1px solid var(--neu-edge);
   border-radius: var(--neu-radius-chip);
   box-shadow: var(--neu-shadow-raised);
-  text-shadow: 0 1px 0 rgb(var(--neu-light) / 0.65), 0 -1px 0 rgba(0,0,0,0.14);
+  text-shadow:
+    0 1px 0 rgb(var(--neu-light) / 0.65),
+    0 -1px 0 rgba(0, 0, 0, 0.14);
 }
 
 /* ── Motion layer — "alive but calm", GPU-safe (transform/opacity) ── */
 
-@keyframes neu-bob     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-0.45cqh); } }
-@keyframes neu-bob-sm  { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-0.25cqh); } }
-@keyframes neu-rise    { from { opacity: 0; transform: translateY(22px) scale(0.985); } to { opacity: 1; transform: none; } }
-@keyframes neu-pop     { 0% { transform: scale(1); } 35% { transform: scale(1.16) rotate(-1.5deg); } 65% { transform: scale(0.94); } 100% { transform: scale(1); } }
-@keyframes neu-sweep   { from { transform: translateX(-130%); opacity: 1; } to { transform: translateX(330%); opacity: 0; } }
-@keyframes neu-bloom   { 0% { transform: scale(0.4); opacity: 0.85; } 100% { transform: scale(2.6); opacity: 0; } }
-@keyframes neu-breathe { 0%,100% { opacity: 0.35; } 50% { opacity: 0.9; } }
-@keyframes neu-dot-pulse { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.5); opacity: 0.5; } }
-@keyframes neu-crown-float { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-14%) rotate(6deg); } }
-@keyframes neu-tag-swing { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(1.2deg); } }
-@keyframes neu-drift-a { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(6cqw,4cqh) scale(1.08); } 66% { transform: translate(-4cqw,7cqh) scale(0.95); } }
-@keyframes neu-drift-b { 0%,100% { transform: translate(0,0) scale(1); } 40% { transform: translate(-7cqw,-3cqh) scale(1.1); } 70% { transform: translate(5cqw,-6cqh) scale(0.92); } }
+@keyframes neu-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.45cqh);
+  }
+}
+@keyframes neu-bob-sm {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.25cqh);
+  }
+}
+@keyframes neu-rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes neu-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.16) rotate(-1.5deg);
+  }
+  65% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes neu-sweep {
+  from {
+    transform: translateX(-130%);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(330%);
+    opacity: 0;
+  }
+}
+@keyframes neu-bloom {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+@keyframes neu-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@keyframes neu-dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+}
+@keyframes neu-crown-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-14%) rotate(6deg);
+  }
+}
+@keyframes neu-tag-swing {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(1.2deg);
+  }
+}
+@keyframes neu-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(6cqw, 4cqh) scale(1.08);
+  }
+  66% {
+    transform: translate(-4cqw, 7cqh) scale(0.95);
+  }
+}
+@keyframes neu-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  40% {
+    transform: translate(-7cqw, -3cqh) scale(1.1);
+  }
+  70% {
+    transform: translate(5cqw, -6cqh) scale(0.92);
+  }
+}
 @keyframes neu-confetti-fall {
-  0%   { transform: translateY(-6cqh) translateX(0) rotate(0deg); opacity: 0; }
-  8%   { opacity: 1; }
-  100% { transform: translateY(112cqh) translateX(var(--sway, 3cqw)) rotate(560deg); opacity: 0.9; }
+  0% {
+    transform: translateY(-6cqh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(112cqh) translateX(var(--sway, 3cqw)) rotate(560deg);
+    opacity: 0.9;
+  }
 }
 
 /* Motion timing tokens */
 :root {
-  --neu-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);  /* pops */
-  --neu-ease-glide:  cubic-bezier(0.22, 1, 0.36, 1);      /* rises, reorders, ring draws */
-  --neu-ease-fade:   cubic-bezier(0.4, 0, 0.2, 1);        /* crossfades (matches EASE) */
-  --neu-dur-pop:     550ms;
-  --neu-dur-rise:    700ms;
+  --neu-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* pops */
+  --neu-ease-glide: cubic-bezier(
+    0.22,
+    1,
+    0.36,
+    1
+  ); /* rises, reorders, ring draws */
+  --neu-ease-fade: cubic-bezier(0.4, 0, 0.2, 1); /* crossfades (matches EASE) */
+  --neu-dur-pop: 550ms;
+  --neu-dur-rise: 700ms;
   --neu-dur-reorder: 850ms;
   --neu-dur-crossfade: 1500ms; /* unchanged from production */
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [class*="neu-"], [data-neu] * { animation: none !important; }
+  [class*="neu-"],
+  [data-neu] * {
+    animation: none !important;
+  }
 }

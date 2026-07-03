@@ -226,7 +226,7 @@ export default function QueendomPanel({
                 slideOnChange
                 labelColor="text-neu-sage-deep"
                 valueColor="text-neu-sage-deep"
-                boxClass="neu-plinth-sage rounded-neu-tile neu-anim-bob flex flex-col items-center justify-center text-center flex-1 min-w-0"
+                boxClass="neu-plinth-sage rounded-neu-tile flex flex-col items-center justify-center text-center flex-1 min-w-0"
                 boxStyle={{ padding: "1.2cqh var(--pad-cell)" }}
               />
               {/* Bloom ring — expands and fades once per live increase */}
