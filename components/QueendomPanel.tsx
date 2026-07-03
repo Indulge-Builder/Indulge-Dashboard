@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
+import { usePrevious } from "@/hooks/usePrevious";
 import QueendomWingspanHeader from "./QueendomWingspanHeader";
 import AgentLeaderboard from "./leaderboard/AgentLeaderboard";
 import RenewalsPanel from "./RenewalsPanel";
@@ -11,7 +12,6 @@ import UpcomingRenewals from "./UpcomingRenewals";
 import SpecialDates from "@/components/SpecialDates";
 import { SectionDivider } from "@/components/ui/SectionDivider";
 import { StatCard } from "@/components/ui/StatCard";
-import { GoldGlassCard } from "@/components/ui/GoldGlassCard";
 import type { QueenStats } from "@/lib/types";
 import { safeNum } from "@/lib/format";
 import type { RenewalsPanelData } from "@/types";
@@ -56,7 +56,7 @@ export const SPECIAL_DATES_COL_WIDTH_CLASS = "md:w-[clamp(220px,40%,680px)]";
  *  tracking — "Time Since Last Resolved"), capped at the .title-card max.
  *  Both card titles share the formula so the pair stays visually matched. */
 const BAND_TITLE_CLASS =
-  "!font-cinzel !font-semibold !leading-[1.1] !tracking-[0.24em] !text-[min(calc((100cqi-5rem)/20.5),4rem)] whitespace-nowrap";
+  "!font-cinzel !font-semibold !leading-[1.1] !tracking-[0.24em] !text-[min(calc((100cqi-5rem)/20.5),4rem)] whitespace-nowrap !text-neu-t2 neu-letterpress";
 
 // ── Metric box for the 5-metric hero row (StatCard with verbatim classes) ──
 function MetricBox({
@@ -64,10 +64,10 @@ function MetricBox({
   value,
   delay,
   slideOnChange,
-  labelColor = "text-champagne",
-  valueColor = "text-champagne",
+  labelColor = "text-neu-t2",
+  valueColor = "text-neu-t1",
   valueSizeClass = "text-8xl min-[900px]:text-9xl",
-  boxClass = "flex-1 flex flex-col items-center justify-center text-center min-w-0 bg-black/30 rounded-xl border border-gold-500/20",
+  boxClass = "flex-1 flex flex-col items-center justify-center text-center min-w-0 neu-raised-sm rounded-neu-tile",
   boxStyle = { padding: "1.2cqh var(--pad-cell)" },
 }: {
   label: ReactNode;
@@ -105,8 +105,6 @@ export default function QueendomPanel({
   celebrationAgent = null,
   renewalsData,
 }: QueendomPanelProps) {
-  const radialOrigin = side === "left" ? "25% 45%" : "75% 45%";
-
   // Memoized selector for total count — stable as new rows stream in from WebSocket
   const totalReceived = useMemo(
     () => safeNum(stats.tickets.totalReceived),
@@ -128,6 +126,19 @@ export default function QueendomPanel({
     () => safeNum(stats.joker?.acceptedCount),
     [stats.joker?.acceptedCount],
   );
+
+  // Sage bloom ring when Resolved Today increases live. Same 1.5s
+  // mount-suppression pattern as AgentRow's surge guard so the initial
+  // WebSocket population (0 → N) never fires it.
+  const prevSolvedToday = usePrevious(solvedToday);
+  const [bloomKey, setBloomKey] = useState(0);
+  const bloomMountRef = useRef(Date.now());
+  useEffect(() => {
+    if (Date.now() - bloomMountRef.current < 1500) return;
+    if (prevSolvedToday !== undefined && solvedToday > prevSolvedToday) {
+      setBloomKey((k) => k + 1);
+    }
+  }, [solvedToday, prevSolvedToday]);
 
   const leaderboardMeasureRef = useRef<HTMLDivElement>(null);
   const [leaderboardHeightPx, setLeaderboardHeightPx] = useState<number | null>(
@@ -161,20 +172,12 @@ export default function QueendomPanel({
 
   return (
     <motion.section
-      className="relative flex min-h-[85cqh] flex-1 flex-col overflow-y-auto overflow-x-hidden md:min-h-0"
+      className="relative flex min-h-[85cqh] flex-1 flex-col overflow-y-auto overflow-x-hidden md:min-h-0 neu-raised rounded-neu-panel"
       style={{ padding: "2cqh var(--pad-panel)" }}
       variants={queendomContainerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Ambient radial glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `radial-gradient(ellipse 70% 65% at ${radialOrigin}, rgba(201,168,76,0.065), transparent)`,
-        }}
-      />
-
       {/* ── Wingspan header: metrics | name | metrics (luxury broadcast) ── */}
       <motion.div
         className="relative mb-[1.6cqh] flex w-full min-w-0 flex-shrink-0 flex-col items-center"
@@ -182,8 +185,8 @@ export default function QueendomPanel({
       >
         <SectionDivider
           className="mb-[1.1cqh]"
-          leftRuleClass="bg-gradient-to-r from-transparent via-gold-500/25 to-gold-500/40"
-          rightRuleClass="bg-gradient-to-l from-transparent via-gold-500/25 to-gold-500/40"
+          leftRuleClass="neu-rule-l"
+          rightRuleClass="neu-rule-r"
         />
 
         <QueendomWingspanHeader
@@ -198,48 +201,56 @@ export default function QueendomPanel({
           label="Queendom"
           accent="champagne"
           className="my-[0.35cqh]"
-          labelClass="!font-cinzel !font-semibold text-[clamp(28px,2.5cqw,52px)] tracking-[0.42em] text-gold-300 gold-glow"
+          labelClass="!font-cinzel !font-semibold text-[clamp(28px,2.5cqw,52px)] tracking-[0.42em] !text-neu-accent-deep neu-engraved"
         />
       </motion.div>
 
       {/* ── 5-Metric Hero Row (tickets + Spoiled for this Queendom’s Joker) ──
-          Material upgrade: the card floats (.elevate-hero) with a double-rule
-          engraving frame; "Today" is a lit emerald plinth; the four "This Month"
-          metrics share one recessed surface split by hairline rules (no boxes). */}
+          Neumorphic: "Resolved Today" sits on a raised sage plinth (bobbing,
+          bloom ring on live increase); the four "This Month" metrics share one
+          raised band split by hairline rules. */}
       <motion.div className="flex-shrink-0 mb-[1.6cqh]" variants={queendomItemVariants}>
-        <GoldGlassCard
-          className="elevate-hero engrave-frame"
-          style={{ padding: "1.6cqh var(--pad-card)" }}
-        >
+        <div style={{ padding: "1.6cqh 0" }}>
           <div className="grid grid-cols-1 min-[700px]:grid-cols-[1fr_4fr] gap-[var(--gap-metric)] w-full items-stretch">
-            {/* 1. Total Solved Today — ANCHOR: lit emerald plinth, foil numerals */}
-            <MetricBox
-              label={
-                <>
-                  Resolved <br />
-                  <span className="text-[0.62em] opacity-70">(Today)</span>
-                </>
-              }
-              value={solvedToday}
-              delay={delay + 800}
-              slideOnChange
-              labelColor="text-emerald-300"
-              valueColor="text-foil-emerald emerald-glow-hero"
-              boxClass="surface-luxe-hero rounded-xl flex flex-col items-center justify-center text-center flex-1 min-w-0"
-              boxStyle={{ padding: "1.2cqh var(--pad-cell)" }}
-            />
+            {/* 1. Total Solved Today — ANCHOR: raised sage plinth */}
+            <div className="relative flex min-w-0">
+              <MetricBox
+                label={
+                  <>
+                    Resolved <br />
+                    <span className="text-[0.62em] opacity-70">(Today)</span>
+                  </>
+                }
+                value={solvedToday}
+                delay={delay + 800}
+                slideOnChange
+                labelColor="text-neu-sage-deep"
+                valueColor="text-neu-sage-deep"
+                boxClass="neu-plinth-sage rounded-neu-tile neu-anim-bob flex flex-col items-center justify-center text-center flex-1 min-w-0"
+                boxStyle={{ padding: "1.2cqh var(--pad-cell)" }}
+              />
+              {/* Bloom ring — expands and fades once per live increase */}
+              {bloomKey > 0 && (
+                <div
+                  key={bloomKey}
+                  className="pointer-events-none absolute inset-0 rounded-neu-tile border-2 border-neu-sage-deep"
+                  style={{ animation: "neu-bloom 0.9s ease-out 1 both" }}
+                  aria-hidden
+                />
+              )}
+            </div>
 
-            {/* ── "This Month" — one recessed surface, hairline-split metrics ── */}
-            <div className="surface-luxe rounded-xl flex flex-col min-w-0">
-              {/* Masthead: centered label flanked by gold rules (luxury crest) */}
+            {/* ── "This Month" — one raised band, hairline-split metrics ── */}
+            <div className="neu-raised rounded-neu-tile neu-anim-bob-sm flex flex-col min-w-0" style={{ animationDelay: "0.9s" }}>
+              {/* Masthead: centered label flanked by hairline rules */}
               <div className="flex items-center justify-center gap-[clamp(0.75rem,1.4cqw,2rem)] px-[var(--pad-cell)] pt-[1cqh] pb-[0.6cqh]">
-                <span className="separator-gold-h flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
-                <span className="title-card text-champagne/85 whitespace-nowrap">
+                <span className="neu-rule-l h-px flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
+                <span className="title-card text-neu-t2 whitespace-nowrap">
                   This Month
                 </span>
-                <span className="separator-gold-h flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
+                <span className="neu-rule-r h-px flex-1 max-w-[clamp(2rem,6cqw,9rem)]" />
               </div>
-              <div className="grid grid-cols-2 min-[900px]:grid-cols-4 min-[900px]:divide-x min-[900px]:divide-gold-500/15 flex-1 pb-[0.6cqh]">
+              <div className="grid grid-cols-2 min-[900px]:grid-cols-4 min-[900px]:divide-x min-[900px]:divide-neu-hairline flex-1 pb-[0.6cqh]">
                 {/* Received — from aggregateTicketStats (IST created_at month) */}
                 <MetricBox
                   label="Received"
@@ -256,8 +267,8 @@ export default function QueendomPanel({
                   value={resolvedThisMonth}
                   delay={delay + 1000}
                   slideOnChange
-                  labelColor="text-green-400"
-                  valueColor="text-green-400"
+                  labelColor="text-neu-sage-deep"
+                  valueColor="text-neu-sage-deep"
                   boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
                   boxStyle={{ padding: "0.6cqh var(--pad-cell)" }}
                 />
@@ -268,8 +279,8 @@ export default function QueendomPanel({
                   value={pendingToResolve}
                   delay={delay + 1100}
                   slideOnChange
-                  labelColor="text-red-400"
-                  valueColor="text-red-400"
+                  labelColor="text-neu-danger-deep"
+                  valueColor="text-neu-danger-deep"
                   boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
                   boxStyle={{ padding: "0.6cqh var(--pad-cell)" }}
                 />
@@ -280,7 +291,8 @@ export default function QueendomPanel({
                   value={jokerAccepted}
                   delay={delay + 1200}
                   slideOnChange
-                  valueColor="text-foil-gold"
+                  labelColor="text-neu-accent-deep"
+                  valueColor="text-neu-accent-deep"
                   valueSizeClass="text-9xl min-[900px]:text-[9rem]"
                   boxClass="flex flex-col items-center justify-center text-center flex-1 min-w-0"
                   boxStyle={{ padding: "0.6cqh var(--pad-cell)" }}
@@ -288,7 +300,7 @@ export default function QueendomPanel({
               </div>
             </div>
           </div>
-        </GoldGlassCard>
+        </div>
       </motion.div>
 
       {/* ── RenewalsPanel: Counter | Renewals | Latest members ───────────────── */}
@@ -309,17 +321,16 @@ export default function QueendomPanel({
       {/* Glass trio inlined here (not GoldGlassCard): this wrapper is a motion.div
           participating in the stagger — wrapping would change the animation tree. */}
       <motion.div
-        className="relative flex min-h-0 flex-1 flex-col gap-[var(--gap-card)] overflow-hidden rounded-2xl glass gold-border-glow"
+        className="relative flex min-h-0 flex-1 flex-col gap-[var(--gap-card)] overflow-hidden rounded-neu-tile neu-raised-sm"
         style={{ padding: "1.6cqh var(--pad-card)" }}
         variants={queendomItemVariants}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
         <div className="relative z-10 flex min-h-0 flex-1 flex-col gap-[var(--gap-card)]">
           {/* Row 1: Leaderboard | Special Dates (same width rhythm as before) */}
-          <div className="flex min-h-0 w-full flex-col md:flex-row md:items-start md:gap-[var(--gap-section)]">
+          <div className="flex min-h-0 w-full flex-1 flex-col md:flex-row md:items-stretch md:gap-[var(--gap-section)]">
             <div
               ref={leaderboardMeasureRef}
-              className="min-h-0 min-w-0 w-full flex-shrink-0 md:flex-1"
+              className="min-h-0 min-w-0 w-full flex-shrink-0 md:flex-1 md:self-stretch"
             >
               <AgentLeaderboard
                 agents={stats.agents}
@@ -328,7 +339,7 @@ export default function QueendomPanel({
               />
             </div>
             <div
-              className={`flex w-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-t border-gold-500/20 pt-4 ${SPECIAL_DATES_COL_WIDTH_CLASS} md:border-l md:border-t-0 md:pt-0 md:pl-[var(--gap-section)] md:pr-2 lg:pr-4 md:self-start`}
+              className={`flex w-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-t border-neu-hairline pt-4 ${SPECIAL_DATES_COL_WIDTH_CLASS} md:border-l md:border-t-0 md:pt-0 md:pl-[var(--gap-section)] md:pr-2 lg:pr-4 md:self-start`}
               style={
                 leaderboardHeightPx != null && leaderboardHeightPx > 0
                   ? { height: leaderboardHeightPx }
@@ -339,7 +350,7 @@ export default function QueendomPanel({
                 label="Special Dates"
                 accent="champagne"
                 className="mb-[2cqh] w-full flex-shrink-0 gap-3 px-1 sm:px-2"
-                labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap"
+                labelClass="!font-cinzel !font-semibold !leading-[1.3] !tracking-[0.24em] text-[clamp(1.35rem,1.9cqw,2.3rem)] whitespace-nowrap !text-neu-t1 neu-letterpress"
               />
               <div className="flex min-h-0 flex-1 flex-col">
                 <SpecialDates
@@ -359,12 +370,10 @@ export default function QueendomPanel({
           Fixed short height (cqh) keeps the band shallow while the agent table
           above takes the vertical space. */}
       <motion.div
-        className="relative mt-[1.6cqh] min-h-0 w-full flex-shrink-0 overflow-hidden rounded-2xl glass gold-border-glow"
+        className="relative mt-[1.6cqh] min-h-0 w-full flex-shrink-0 overflow-hidden rounded-neu-tile neu-raised-sm"
         style={{ padding: "1.2cqh var(--pad-card)", height: "13cqh", minHeight: "92px" }}
         variants={queendomItemVariants}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-gold-500/[0.03] to-transparent pointer-events-none rounded-2xl" />
-
         <div className="relative z-10 flex h-full w-full min-h-0 flex-col gap-[var(--gap-card)] md:flex-row">
           {/* Time since the last ticket was resolved */}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -383,8 +392,8 @@ export default function QueendomPanel({
             </div>
           </div>
 
-          {/* vertical gold hairline between the two halves (md+) */}
-          <div className="hidden w-px self-stretch bg-gold-500/15 md:block" />
+          {/* vertical hairline between the two halves (md+) */}
+          <div className="hidden w-px self-stretch bg-neu-hairline md:block" />
 
           {/* Memberships expiring this month — the renewals to land */}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">

@@ -3,14 +3,14 @@
  *
  * components/ui/GoldGlassCard.tsx
  *
- * The gold glass card trio (dry-audit A2): emits the exact class string
- * `glass gold-border-glow rounded-2xl relative overflow-hidden` plus the
- * absolute gold gradient overlay div that was previously hand-rolled in
- * QueendomPanel, RenewalsPanel, JokerMetricsStrip, and both skeletons.
- * Same DOM, same classes ⇒ same pixels.
+ * Serene Neumorphic reskin (2026-07-03): the old gold glass trio
+ * (`glass gold-border-glow` + gradient overlay) is retired. This card now
+ * emits the raised neumorphic tile recipe — soft paired shadows, 1px hairline
+ * edge, PEBBLE tile radius — while keeping the same component name, DOM shape
+ * and prop signature so every call site migrates without structural change.
  *
- * The overlay gradient opacity varies by site (0.03 / 0.04 / 0.06) — pass the
- * exact existing string via `overlayClass`.
+ * `overlayClass` is kept for signature compatibility but the overlay div is
+ * gone: neumorphic surfaces carry no gradient washes.
  */
 
 import type { CSSProperties, ReactNode } from "react";
@@ -18,24 +18,20 @@ import type { CSSProperties, ReactNode } from "react";
 export function GoldGlassCard({
   children,
   className = "",
-  overlayClass = "bg-gradient-to-br from-gold-500/[0.04] to-transparent",
   style,
 }: {
   children?: ReactNode;
-  /** Extra layout classes appended to the standard glass trio. */
+  /** Extra layout classes appended to the raised-tile recipe. */
   className?: string;
-  /** Gradient classes for the overlay div — pass the site's exact string. */
+  /** @deprecated Gradient overlays are retired in the neumorphic skin. */
   overlayClass?: string;
   style?: CSSProperties;
 }) {
   return (
     <div
-      className={`glass gold-border-glow rounded-2xl relative overflow-hidden ${className}`.trim()}
+      className={`neu-raised rounded-neu-tile relative overflow-hidden ${className}`.trim()}
       style={style}
     >
-      <div
-        className={`absolute inset-0 ${overlayClass} pointer-events-none rounded-2xl`}
-      />
       {children}
     </div>
   );

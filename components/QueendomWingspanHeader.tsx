@@ -6,15 +6,15 @@ import AnimatedCounter from "./AnimatedCounter";
 import { EASE_LUXURY } from "@/lib/motionPresets";
 
 // No backdrop-blur: the pill animates x on entrance, and backdrop-filter on a
-// moving element forces a backdrop repaint every frame on TV GPUs. Over the
-// near-black ambient gradient the blur was visually undetectable.
+// moving element forces a backdrop repaint every frame on TV GPUs.
+// Neumorphic: raised pills with a gentle ambient bob (CSS keyframe — GPU-safe).
 const pillBase =
-  "flex min-w-0 max-w-full flex-wrap items-center gap-x-[clamp(1rem,1.2cqw,2.25rem)] gap-y-2 rounded-full border border-gold-500/20 bg-black/40 px-[clamp(1.25rem,1.5cqw,2.75rem)] py-[clamp(0.875rem,1.3cqh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
+  "flex min-w-0 max-w-full flex-wrap items-center gap-x-[clamp(1rem,1.2cqw,2.25rem)] gap-y-2 rounded-full neu-raised-sm neu-anim-bob-sm px-[clamp(1.25rem,1.5cqw,2.75rem)] py-[clamp(0.875rem,1.3cqh,1.75rem)]";
 
 // Stacked variant: a softer rounded card (not a full pill) so the two-line
 // block reads as one intentional unit rather than a squashed pill.
 const stackedPillBase =
-  "flex min-w-0 max-w-full flex-col gap-y-[clamp(0.5rem,0.9cqh,1.1rem)] rounded-[clamp(1.5rem,2cqw,2.75rem)] border border-gold-500/20 bg-black/40 px-[clamp(1.5rem,1.7cqw,3rem)] py-[clamp(0.875rem,1.3cqh,1.75rem)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]";
+  "flex min-w-0 max-w-full flex-col gap-y-[clamp(0.5rem,0.9cqh,1.1rem)] rounded-[clamp(1.5rem,2cqw,2.75rem)] neu-raised-sm neu-anim-bob-sm px-[clamp(1.5rem,1.7cqw,3rem)] py-[clamp(0.875rem,1.3cqh,1.75rem)]";
 
 function MetricPill({
   children,
@@ -30,7 +30,7 @@ function MetricPill({
   const xInit = slideFrom === "left" ? -12 : 12;
   return (
     <motion.div
-      className={stacked ? stackedPillBase : pillBase}
+      className="flex min-w-0 max-w-full"
       initial={{ opacity: 0, x: xInit }}
       animate={{ opacity: 1, x: 0 }}
       transition={{
@@ -42,7 +42,14 @@ function MetricPill({
         x: { duration: 0.55, delay: delaySec, ease: EASE_LUXURY },
       }}
     >
-      {children}
+      {/* Bob lives on an inner div — the CSS transform keyframe must never
+          share an element with Framer's entrance transform. */}
+      <div
+        className={stacked ? stackedPillBase : pillBase}
+        style={{ animationDelay: slideFrom === "right" ? "1.2s" : "0s" }}
+      >
+        {children}
+      </div>
     </motion.div>
   );
 }
@@ -55,8 +62,8 @@ const metricLabelClass = "label-field shrink-0";
 /** Paid / Unpaid numeric readout — +30% vs prior clamp(1.5rem, 2.4vw, 2.35rem) */
 const pillNumberSizeClass = "text-[clamp(2.15rem,3.45cqw,3.45rem)]";
 
-/** White readout with a softer gold aura than `gold-glow` on paid — still “ours,” still cherished */
-const unpaidNumberClass = `font-montserrat ${pillNumberSizeClass} font-bold leading-none tracking-widest text-white tabular-nums [text-shadow:0_0_12px_rgba(212,175,55,0.42),0_0_26px_rgba(212,175,55,0.2),0_1px_0_rgba(253,230,138,0.28)]`;
+/** Neutral readout — primary ink with a letterpress lift (glows retired) */
+const unpaidNumberClass = `font-montserrat ${pillNumberSizeClass} font-bold leading-none tracking-widest text-neu-t1 tabular-nums neu-letterpress`;
 
 interface QueendomWingspanHeaderProps {
   name: string;
@@ -87,18 +94,18 @@ export default function QueendomWingspanHeader({
         {/* Left metric — hug center (end-aligned in column) */}
         <div className="flex min-w-0 justify-end justify-self-stretch pr-1 sm:pr-2">
           <MetricPill delaySec={delayLeftSec} slideFrom="left">
-            <span className={`${metricLabelClass} text-champagne`}>Paid</span>
+            <span className={`${metricLabelClass} text-neu-t2`}>Paid</span>
             <AnimatedCounter
               value={membersTotal}
-              className={`font-montserrat ${pillNumberSizeClass} font-bold leading-none tracking-widest text-gold-300 tabular-nums gold-glow`}
+              className={`font-montserrat ${pillNumberSizeClass} font-bold leading-none tracking-widest text-neu-accent-deep tabular-nums neu-letterpress`}
               delay={leftDelay}
               slideOnChange
             />
           </MetricPill>
         </div>
 
-        {/* Center — Queendom name (original broadcast styling) */}
-        <h2 className="font-cinzel min-w-0 justify-self-center px-2 text-center text-6xl min-[900px]:text-7xl xl:text-8xl tracking-[0.28em] text-gold-400 queen-name-glow uppercase leading-none font-bold">
+        {/* Center — Queendom name (letterpress ink, glow retired) */}
+        <h2 className="font-cinzel min-w-0 justify-self-center px-2 text-center text-6xl min-[900px]:text-7xl xl:text-8xl tracking-[0.28em] text-neu-t1 neu-letterpress uppercase leading-none font-bold">
           {name}
         </h2>
 
@@ -106,7 +113,7 @@ export default function QueendomWingspanHeader({
         <div className="flex min-w-0 justify-start justify-self-stretch pl-1 sm:pl-2">
           <MetricPill delaySec={delayRightSec} slideFrom="right" stacked>
             <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2cqw,2.25rem)]">
-              <span className={`${metricLabelClass} text-champagne`}>Celebrity</span>
+              <span className={`${metricLabelClass} text-neu-t2`}>Celebrity</span>
               <AnimatedCounter
                 value={complimentaryCount}
                 className={unpaidNumberClass}
@@ -114,12 +121,9 @@ export default function QueendomWingspanHeader({
                 slideOnChange
               />
             </div>
-            <div
-              aria-hidden
-              className="h-px w-full bg-gradient-to-r from-transparent via-gold-500/30 to-transparent"
-            />
+            <div aria-hidden className="h-px w-full bg-neu-hairline" />
             <div className="flex min-w-0 items-center justify-center gap-x-[clamp(1rem,1.2cqw,2.25rem)]">
-              <span className={`${metricLabelClass} text-champagne`}>To Be Revived</span>
+              <span className={`${metricLabelClass} text-neu-t2`}>To Be Revived</span>
               <AnimatedCounter
                 value={toBeRevivedCount}
                 className={unpaidNumberClass}
