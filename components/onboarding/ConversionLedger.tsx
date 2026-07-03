@@ -45,58 +45,60 @@ import {
   formatLedgerDate,
 } from "./utils";
 
-// ── Department accent tokens ───────────────────────────────────────────────────
-const DEPT_ACCENT = {
-  concierge: {
-    border: "rgba(212,175,55,0.38)",
-    gradient:
-      "linear-gradient(to right, rgba(212,175,55,0.065) 0%, transparent 42%)",
-  },
-  shop: {
-    border: "rgba(125,211,252,0.42)",
-    gradient:
-      "linear-gradient(to right, rgba(125,211,252,0.065) 0%, transparent 42%)",
-  },
-} as const;
-
 // ── Single row ────────────────────────────────────────────────────────────────
+// Flat on the card: no row container surface — a faint hairline underline, a
+// raised sage ✓ coin, agent in accent-deep caps, time in tertiary ink.
+// The newest row of the primary block rises in (keyed remount on prepend).
 function ConversionLedgerRow({
   row,
   ariaHidden,
+  isNewest,
 }: {
   row: OnboardingLedgerRow;
   ariaHidden?: boolean;
+  isNewest?: boolean;
 }) {
   const cell = { fontSize: ONBOARDING_LEDGER_CELL_FONT } as CSSProperties;
-  const accent = DEPT_ACCENT[row.department ?? "concierge"];
 
   return (
     <div
-      className="relative grid grid-cols-3 items-center gap-x-[clamp(0.25rem,1cqw,2rem)] border-b border-gold-500/[0.07] py-[clamp(10px,min(1.6cqmin,1.8cqh),22px)]"
+      className={`relative grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-x-[clamp(0.25rem,1cqw,2rem)] py-[clamp(10px,min(1.6cqmin,1.8cqh),22px)] ${
+        isNewest ? "neu-anim-rise" : ""
+      }`}
       style={{
-        borderLeft: `2px solid ${accent.border}`,
+        borderBottom: "1px solid var(--neu-hairline)",
         paddingLeft: "clamp(6px,1cqmin,10px)",
       }}
       aria-hidden={ariaHidden}
     >
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: accent.gradient }}
-      />
+      {/* Raised sage ✓ coin */}
       <span
-        className="relative min-w-0 truncate px-1 text-center font-montserrat font-medium leading-none text-champagne"
+        className="flex flex-shrink-0 items-center justify-center rounded-full border border-neu-edge shadow-neu-sm font-montserrat font-extrabold leading-none"
+        style={{
+          width: "clamp(18px, 2cqmin, 34px)",
+          height: "clamp(18px, 2cqmin, 34px)",
+          fontSize: "clamp(10px, 1cqmin, 17px)",
+          background: "color-mix(in srgb, var(--neu-sage) 32%, var(--neu-surface))",
+          color: "var(--neu-sage-deep)",
+        }}
+        aria-hidden
+      >
+        ✓
+      </span>
+      <span
+        className="relative min-w-0 truncate px-1 text-center font-montserrat font-semibold leading-none text-neu-t1"
         style={cell}
       >
         {row.clientName}
       </span>
       <span
-        className="relative min-w-0 truncate px-1 text-center font-montserrat font-medium leading-none text-champagne/90"
+        className="relative min-w-0 truncate px-1 text-center font-montserrat font-medium leading-none text-neu-t3 tabular-nums"
         style={cell}
       >
         {formatLedgerDate(row.recordedAt)}
       </span>
       <span
-        className="relative min-w-0 truncate px-1 text-center font-montserrat font-semibold leading-none text-champagne"
+        className="relative min-w-0 truncate px-1 text-center font-montserrat font-bold uppercase tracking-[0.08em] leading-none text-neu-accent-deep"
         style={cell}
       >
         {row.agentName}
@@ -234,44 +236,42 @@ export function ConversionLedger({
 
   return (
     <div
-      className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl"
+      className="relative flex min-h-0 flex-1 flex-col overflow-hidden neu-raised rounded-neu-tile"
       style={{
-        background: "rgba(10,10,10,0.88)",
-        border: "1px solid rgba(255,255,255,0.14)",
-        boxShadow:
-          "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
         padding:
           "clamp(0.55rem,1.1cqmin,1.5rem) clamp(0.75rem, min(2.5cqmin, 3.2cqw), 2.5rem)",
       }}
     >
-      <div
-        className="pointer-events-none absolute inset-0 rounded-2xl"
-        style={{
-          background:
-            "linear-gradient(135deg, transparent 45%, rgba(255,176,32,0.018) 100%)",
-        }}
-      />
-
-      {/* ── Section heading ── */}
+      {/* ── Section heading — live sage dot + hairline rules ── */}
       <div className="relative mb-[1cqh] flex w-full flex-shrink-0 flex-col items-center gap-y-[0.55cqh] pt-[0.5cqh] text-center">
-        <div className="flex w-full items-center justify-center">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
+        <div className="flex w-full items-center justify-center gap-[clamp(0.3rem,0.45cqw,0.8rem)]">
+          <div className="neu-rule-l h-px flex-1" />
+          <span
+            className="neu-anim-dot-pulse flex-shrink-0 rounded-full"
+            style={{
+              width: "clamp(8px,0.42cqw,15px)",
+              height: "clamp(8px,0.42cqw,15px)",
+              background: "var(--neu-sage-deep)",
+            }}
+            aria-hidden
+          />
           <p
-            className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
+            className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-neu-t1 neu-letterpress"
             style={{ fontSize: ONBOARDING_LEDGER_TITLE_FONT }}
           >
             Conversion Ledger
           </p>
-          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
+          <div className="neu-rule-r h-px flex-1" />
         </div>
       </div>
 
       {/* ── Column headers ── */}
-      <div className="relative border-b border-gold-500/10 pb-3 text-center">
+      <div className="relative border-b border-neu-hairline pb-3 text-center">
         <div
-          className="grid grid-cols-3 gap-x-[clamp(0.25rem,1cqw,2rem)] font-montserrat font-semibold uppercase tracking-[0.2em] text-champagne"
+          className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-[clamp(0.25rem,1cqw,2rem)] font-montserrat font-semibold uppercase tracking-[0.2em] text-neu-t2"
           style={{ fontSize: ONBOARDING_LEDGER_HEADER_FONT }}
         >
+          <span style={{ width: "clamp(18px, 2cqmin, 34px)" }} aria-hidden />
           <span className="min-w-0 truncate px-1 text-center">Client</span>
           <span className="min-w-0 truncate px-1 text-center">Date</span>
           <span className="min-w-0 truncate px-1 text-center">Agent</span>
@@ -282,7 +282,7 @@ export function ConversionLedger({
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden pt-3">
         {rows.length === 0 ? (
           <p
-            className="py-10 text-center font-montserrat text-gold-500/50"
+            className="py-10 text-center font-montserrat text-neu-t3"
             style={{ fontSize: ONBOARDING_LEDGER_CELL_FONT }}
           >
             Awaiting conversions…
@@ -301,8 +301,8 @@ export function ConversionLedger({
             >
               {/* Primary block — its offsetHeight is the loop reset point */}
               <div ref={primaryRef}>
-                {rows.map((row) => (
-                  <ConversionLedgerRow key={row.id} row={row} />
+                {rows.map((row, i) => (
+                  <ConversionLedgerRow key={row.id} row={row} isNewest={i === 0} />
                 ))}
               </div>
 

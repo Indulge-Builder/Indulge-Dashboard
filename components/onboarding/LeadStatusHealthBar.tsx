@@ -7,74 +7,72 @@ import type {
   ZohoLeadStatus,
 } from "@/lib/onboardingTypes";
 
+/**
+ * Neumorphic status palette — the pastel support family from
+ * app/indulge-neumorphic-tokens.css. `flat` fills the bar segments and chip
+ * washes; `deep` carries text/numerals. Order is the pipeline order.
+ */
 export const STATUS_COLORS: Record<
   ZohoLeadStatus,
   {
-    gradient: string;
     flat: string;
-    glow: string;
+    deep: string;
     label: string;
     short: string;
     order: number;
   }
 > = {
-  /* Qualified — teal/cyan, distinct from In Discussion green */
+  /* Qualified — sage (success family) */
   Qualified: {
-    gradient: "linear-gradient(160deg, #67e8f9 0%, #06b6d4 55%, #0e7490 100%)",
-    flat:     "#06b6d4",
-    glow:     "rgba(6,182,212,0.75)",
-    label:    "Qualified",
-    short:    "Qualified",
-    order:    0,
+    flat:  "var(--neu-sage)",
+    deep:  "var(--neu-sage-deep)",
+    label: "Qualified",
+    short: "QUAL",
+    order: 0,
   },
-  /* In Discussion — green */
+  /* In Discussion — powder */
   "In Discussion": {
-    gradient: "linear-gradient(160deg, #4ade80 0%, #22c55e 55%, #15803d 100%)",
-    flat:     "#22c55e",
-    glow:     "rgba(34,197,94,0.75)",
-    label:    "In Discussion",
-    short:    "In Discussion",
-    order:    1,
+    flat:  "var(--neu-powder)",
+    deep:  "var(--neu-powder-deep)",
+    label: "In Discussion",
+    short: "DISC",
+    order: 1,
   },
-  /* Nurturing — purple (unchanged) */
+  /* Nurturing — lilac */
   Nurturing: {
-    gradient: "linear-gradient(160deg, #c084fc 0%, #a855f7 55%, #7e22ce 100%)",
-    flat:     "#a855f7",
-    glow:     "rgba(168,85,247,0.75)",
-    label:    "Nurturing",
-    short:    "Nurturing",
-    order:    2,
+    flat:  "var(--neu-lilac)",
+    deep:  "var(--neu-lilac-deep)",
+    label: "Nurturing",
+    short: "NURT",
+    order: 2,
   },
-  /* Touched — yellow (Zoho stage; legacy "Attempted" maps here in API) */
+  /* Touched — butter (Zoho stage; legacy "Attempted" maps here in API) */
   Touched: {
-    gradient: "linear-gradient(160deg, #fef08a 0%, #eab308 55%, #a16207 100%)",
-    flat:     "#eab308",
-    glow:     "rgba(234,179,8,0.75)",
-    label:    "Touched",
-    short:    "Touched",
-    order:    3,
+    flat:  "var(--neu-butter)",
+    deep:  "var(--neu-butter-deep)",
+    label: "Touched",
+    short: "TOUCH",
+    order: 3,
   },
-  /* New — slate */
+  /* New — peach */
   New: {
-    gradient: "linear-gradient(160deg, #cbd5e1 0%, #94a3b8 55%, #475569 100%)",
-    flat:     "#94a3b8",
-    glow:     "rgba(148,163,184,0.55)",
-    label:    "New",
-    short:    "New",
-    order:    4,
+    flat:  "var(--neu-peach)",
+    deep:  "var(--neu-peach-deep)",
+    label: "New",
+    short: "NEW",
+    order: 4,
   },
-  /* Junk — red */
+  /* Junk — danger */
   Junk: {
-    gradient: "linear-gradient(160deg, #fca5a5 0%, #ef4444 55%, #991b1b 100%)",
-    flat:     "#ef4444",
-    glow:     "rgba(239,68,68,0.75)",
-    label:    "Junk",
-    short:    "Junk",
-    order:    5,
+    flat:  "var(--neu-danger)",
+    deep:  "var(--neu-danger-deep)",
+    label: "Junk",
+    short: "JUNK",
+    order: 5,
   },
 };
 
-/* Keep backward-compatible `bar` key used by sibling components */
+/* Keep backward-compatible key used by sibling components */
 export type StatusColorEntry = (typeof STATUS_COLORS)[ZohoLeadStatus];
 
 interface LeadStatusHealthBarProps {
@@ -90,9 +88,8 @@ const ORDERED_STATUSES: ZohoLeadStatus[] = (
   Object.keys(STATUS_COLORS) as ZohoLeadStatus[]
 ).sort((a, b) => STATUS_COLORS[a].order - STATUS_COLORS[b].order);
 
-const BAR_H   = "clamp(44px, 5.2cqh, 78px)";
-const RADIUS  = "clamp(7px, 0.85cqh, 13px)";
-
+const BAR_H   = "clamp(24px, 3cqh, 44px)";
+const RADIUS  = "999px";
 
 function LeadStatusHealthBar_({
   breakdown,
@@ -111,33 +108,37 @@ function LeadStatusHealthBar_({
     [breakdown],
   );
 
+  const total = breakdown?.total ?? 0;
+
+  /* ── Inset track — the ONLY well in the card (neumorphic rule #4) ────────── */
+  const trackStyle: React.CSSProperties = {
+    height: BAR_H,
+    borderRadius: RADIUS,
+    background: "var(--neu-well)",
+    boxShadow: "var(--neu-shadow-inset)",
+  };
+
   /* ── Empty state ─────────────────────────────────────────────────────────── */
-  if (!breakdown || breakdown.total === 0) {
+  if (!breakdown || total === 0) {
     return (
       <div className={cn("w-full select-none", className)}>
         <PipelineLabel />
-        <div
-          className="relative w-full overflow-hidden"
-          style={{ height: BAR_H, borderRadius: RADIUS }}
-        >
-          <div
-            className="absolute inset-0"
-            style={{ background: "rgba(255,255,255,0.05)" }}
-          />
+        <div className="relative w-full overflow-hidden" style={trackStyle}>
           <div
             className="absolute inset-0 pointer-events-none"
             aria-hidden
             style={{
               background:
-                "linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.10) 45%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.10) 55%, transparent 80%)",
+                "linear-gradient(115deg, transparent 20%, rgb(var(--neu-light) / 0.25) 50%, transparent 80%)",
               backgroundSize: "200% auto",
               animation: reduced
                 ? undefined
                 : "foil-shimmer 2.2s cubic-bezier(0.4,0,0.2,1) infinite",
-              opacity: 0.4,
+              opacity: 0.5,
             }}
           />
         </div>
+        <StatusChipRow breakdown={breakdown} mounted={mounted} reduced={reduced} />
       </div>
     );
   }
@@ -150,201 +151,119 @@ function LeadStatusHealthBar_({
       {/* Pipeline header */}
       <PipelineLabel />
 
-      {/* Segmented bar track */}
+      {/* Segmented inset track */}
       <div
-          className="relative w-full overflow-hidden"
-          style={{
-            height:     BAR_H,
-            borderRadius: RADIUS,
-            background: "rgba(255,255,255,0.05)",
-            zIndex:     1,
-          }}
-          aria-label={`Pipeline: ${breakdown.total} leads`}
-          role="img"
-        >
-          {/* Segments */}
-          {orderedNonZero.map((status, idx) => {
-            const count = breakdown[status] ?? 0;
-            const pct   = (count / Math.max(breakdown.total, 1)) * 100;
-            const left  = cumulativePct;
-            cumulativePct += pct;
-            const showCount = pct >= 5;
-
-            return (
-              <div
-                key={status}
-                style={{
-                  position:   "absolute",
-                  left:       `${left}%`,
-                  width:      `${mounted ? pct : 0}%`,
-                  height:     "100%",
-                  background: STATUS_COLORS[status].gradient,
-                  transition: reduced
-                    ? "none"
-                    : `width 0.9s cubic-bezier(0.16, 1, 0.32, 1) ${idx * 80}ms`,
-                  willChange: reduced ? undefined : "width",
-                  display:    "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow:   "hidden",
-                  boxShadow:  `inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.22)`,
-                  zIndex:     2,
-                }}
-              >
-                {/* Count label inside segment */}
-                {showCount && (
-                  <span
-                    style={{
-                      fontSize:      "clamp(22px, 2.8cqmin, 44px)",
-                      fontFamily:    "'Cinzel', serif",
-                      fontWeight:    700,
-                      color:         "rgba(255,255,255,0.97)",
-                      letterSpacing: "0.05em",
-                      textShadow:    "0 2px 8px rgba(0,0,0,0.85)",
-                      lineHeight:    1,
-                      position:      "relative",
-                      zIndex:        5,
-                    }}
-                  >
-                    {count}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-
-          {/* 1-px black dividers between segments */}
-          <SegmentGaps segments={orderedNonZero} breakdown={breakdown} />
-
-          {/* Top gloss stripe */}
-          <div
-            aria-hidden
-            style={{
-              position:   "absolute",
-              top:        0,
-              left:       0,
-              right:      0,
-              height:     "38%",
-              background: "linear-gradient(to bottom, rgba(255,255,255,0.13) 0%, transparent 100%)",
-              pointerEvents: "none",
-              zIndex:     3,
-            }}
-          />
-
-          {/* Bottom depth shadow */}
-          <div
-            aria-hidden
-            style={{
-              position:   "absolute",
-              bottom:     0,
-              left:       0,
-              right:      0,
-              height:     "28%",
-              background: "linear-gradient(to top, rgba(0,0,0,0.28) 0%, transparent 100%)",
-              pointerEvents: "none",
-              zIndex:     3,
-            }}
-          />
-
-          {/* Outer inset ring */}
-          <div
-            aria-hidden
-            style={{
-              position:   "absolute",
-              inset:      0,
-              borderRadius: RADIUS,
-              boxShadow:  "inset 0 0 0 1px rgba(255,255,255,0.10)",
-              pointerEvents: "none",
-              zIndex:     6,
-            }}
-          />
-        </div>
-
-      {/* Legend — single-line tinted chips: dot · label ·· count */}
-      <div
-        className="flex flex-row items-stretch"
-        style={{
-          marginTop: "clamp(10px, 1.5cqh, 20px)",
-          gap:       "clamp(6px, 0.65cqmin, 10px)",
-        }}
+        className="relative w-full overflow-hidden"
+        style={trackStyle}
+        aria-label={`Pipeline: ${total} leads`}
+        role="img"
       >
+        {/* Segments — flat pastel fills, no gloss */}
         {orderedNonZero.map((status, idx) => {
           const count = breakdown[status] ?? 0;
-          const cfg   = STATUS_COLORS[status];
+          const pct   = (count / Math.max(total, 1)) * 100;
+          const left  = cumulativePct;
+          cumulativePct += pct;
+
           return (
             <div
               key={status}
-              className="flex min-w-0 flex-1 items-center justify-between"
               style={{
-                minHeight:
-                  "clamp(56px, 8.5cqh, 112px)",
-                padding:
-                  "clamp(10px, 1.4cqh, 18px) clamp(10px, 1.1cqmin, 18px)",
-                borderRadius: "clamp(6px, 0.75cqmin, 11px)",
-                background:   "#101722",
-                border:       `1px solid color-mix(in srgb, ${cfg.flat} 30%, transparent)`,
-                boxShadow:    "inset 0 1px 0 rgba(255,255,255,0.04)",
-                gap:          "clamp(6px, 0.6cqmin, 10px)",
-                opacity:      mounted ? 1 : 0,
-                transform:    mounted ? "none" : "translateY(6px)",
+                position:   "absolute",
+                left:       `${left}%`,
+                width:      `${mounted ? pct : 0}%`,
+                height:     "100%",
+                background: STATUS_COLORS[status].flat,
                 transition: reduced
                   ? "none"
-                  : `opacity 0.45s cubic-bezier(0.23,1,0.32,1) ${idx * 50}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${idx * 50}ms`,
+                  : `width 0.9s cubic-bezier(0.16, 1, 0.32, 1) ${idx * 80}ms`,
+                willChange: reduced ? undefined : "width",
+                zIndex:     2,
               }}
-            >
-              {/* Dot + status name — matches the card's Montserrat label tier */}
-              <div
-                className="flex min-w-0 items-center"
-                style={{ gap: "clamp(5px, 0.5cqmin, 9px)" }}
-              >
-                <div
-                  aria-hidden
-                  style={{
-                    width:        "clamp(10px, 1.2cqmin, 16px)",
-                    height:       "clamp(10px, 1.2cqmin, 16px)",
-                    borderRadius: "50%",
-                    background:   cfg.flat,
-                    boxShadow:    `0 0 8px ${cfg.glow}`,
-                    flexShrink:   0,
-                  }}
-                />
-                <span
-                  className="truncate font-montserrat"
-                  style={{
-                    fontSize:
-                      "clamp(19px, min(2.7cqmin, 2.9cqw), 38px)",
-                    fontWeight:    600,
-                    color:         cfg.flat,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase" as const,
-                    lineHeight:    1.1,
-                    opacity:       0.9,
-                  }}
-                >
-                  {cfg.short}
-                </span>
-              </div>
-
-              {/* Count — quiet tier; the hero counts live inside the bar segments */}
-              <span
-                style={{
-                  fontSize:
-                    "clamp(26px, min(3.8cqmin, 4cqw), 54px)",
-                  fontFamily:    "'Cinzel', serif",
-                  fontWeight:    700,
-                  color:         cfg.flat,
-                  lineHeight:    1,
-                  letterSpacing: "0.04em",
-                  textShadow:    `0 0 10px ${cfg.glow}`,
-                  flexShrink:    0,
-                }}
-              >
-                {count}
-              </span>
-            </div>
+            />
           );
         })}
+
+        {/* Hairline dividers between segments */}
+        <SegmentGaps segments={orderedNonZero} breakdown={breakdown} />
       </div>
+
+      {/* Status-count chip row — all 6 statuses, pastel washes, deep numerals */}
+      <StatusChipRow breakdown={breakdown} mounted={mounted} reduced={reduced} />
+    </div>
+  );
+}
+
+/* ── Status-count chip row (QUAL · DISC · NURT · TOUCH · NEW · JUNK) ────────── */
+function StatusChipRow({
+  breakdown,
+  mounted,
+  reduced,
+}: {
+  breakdown: AgentLeadStatusBreakdown;
+  mounted: boolean;
+  reduced: boolean;
+}) {
+  return (
+    <div
+      className="flex flex-row items-stretch"
+      style={{
+        marginTop: "clamp(8px, 1.2cqh, 16px)",
+        gap:       "clamp(4px, 0.5cqmin, 9px)",
+      }}
+    >
+      {ORDERED_STATUSES.map((status, idx) => {
+        const count = breakdown?.[status] ?? 0;
+        const cfg   = STATUS_COLORS[status];
+        return (
+          <div
+            key={status}
+            className="flex min-w-0 flex-1 flex-col items-center justify-center"
+            style={{
+              minHeight:
+                "clamp(44px, 6.5cqh, 96px)",
+              padding:
+                "clamp(6px, 0.9cqh, 12px) clamp(4px, 0.5cqmin, 10px)",
+              borderRadius: "clamp(6px, 0.75cqmin, 11px)",
+              background:   `color-mix(in srgb, ${cfg.flat} 24%, var(--neu-surface))`,
+              border:       "1px solid var(--neu-edge)",
+              boxShadow:    "var(--neu-shadow-raised-sm)",
+              gap:          "clamp(3px, 0.4cqh, 8px)",
+              opacity:      mounted ? 1 : 0,
+              transform:    mounted ? "none" : "translateY(6px)",
+              transition: reduced
+                ? "none"
+                : `opacity 0.45s cubic-bezier(0.23,1,0.32,1) ${idx * 50}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${idx * 50}ms`,
+            }}
+          >
+            <span
+              className="truncate font-montserrat"
+              style={{
+                fontSize:      "clamp(15px, min(1.9cqmin, 2cqw), 28px)",
+                fontWeight:    700,
+                color:         cfg.deep,
+                letterSpacing: "0.14em",
+                lineHeight:    1,
+                opacity:       0.85,
+              }}
+            >
+              {cfg.short}
+            </span>
+            <span
+              className="font-montserrat tabular-nums"
+              style={{
+                fontSize:   "clamp(24px, min(3.4cqmin, 3.6cqw), 50px)",
+                fontWeight: 800,
+                color:      cfg.deep,
+                lineHeight: 1,
+                flexShrink: 0,
+              }}
+            >
+              {count}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -354,21 +273,19 @@ function PipelineLabel() {
   return (
     <div
       className="flex items-center"
-      style={{ marginTop: "clamp(6px, 0.9cqh, 13px)", marginBottom: "clamp(12px, 1.6cqh, 22px)", gap: "clamp(8px, 1cqmin, 14px)" }}
+      style={{ marginTop: "clamp(6px, 0.9cqh, 13px)", marginBottom: "clamp(10px, 1.4cqh, 20px)", gap: "clamp(8px, 1cqmin, 14px)" }}
     >
-      <div
-        aria-hidden
-        style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.09)" }}
-      />
+      <div aria-hidden className="neu-rule-l" style={{ flex: 1, height: "1px" }} />
       {/* Band-title tier — matches QueendomPanel BAND_TITLE_CLASS
           ("Time Since Last Resolved"): Cinzel semibold, 0.24em tracking,
-          width-fit font capped at 4rem, champagne. */}
+          width-fit font capped at 4rem. */}
       <span
+        className="neu-letterpress"
         style={{
           fontSize:      "min(calc((100cqw - 5rem) / 20.5), 4rem)",
-          fontFamily:    "'Cinzel', serif",
+          fontFamily:    "var(--font-cinzel), serif",
           fontWeight:    600,
-          color:         "var(--color-champagne)",
+          color:         "var(--neu-text-secondary)",
           letterSpacing: "0.24em",
           lineHeight:    1.1,
           flexShrink:    0,
@@ -378,15 +295,12 @@ function PipelineLabel() {
       >
         Pipeline
       </span>
-      <div
-        aria-hidden
-        style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.09)" }}
-      />
+      <div aria-hidden className="neu-rule-r" style={{ flex: 1, height: "1px" }} />
     </div>
   );
 }
 
-/* ── 2px black gap dividers between segments ─────────────────────────────── */
+/* ── Hairline gap dividers between segments ─────────────────────────────── */
 function SegmentGaps({
   segments,
   breakdown,
@@ -409,8 +323,8 @@ function SegmentGaps({
               left:      `${acc}%`,
               top:       0,
               bottom:    0,
-              width:     "2px",
-              background: "rgba(0,0,0,0.6)",
+              width:     "1px",
+              background: "rgb(var(--neu-dark) / 0.35)",
               transform: "translateX(-50%)",
               zIndex:    5,
             }}

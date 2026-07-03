@@ -945,16 +945,17 @@ body::before {
   }
 }
 
-/* Onboarding agent card — live metric pulse */
+/* Onboarding agent card — live metric pulse (ends on theme ink, not white,
+   so the flash reads on both cream and charcoal canvases) */
 @keyframes ob-metric-pulse {
   0% {
-    color: var(--ob-pulse-color, #d4af37);
+    color: var(--ob-pulse-color, var(--neu-accent-deep));
   }
   60% {
-    color: var(--ob-pulse-color, #d4af37);
+    color: var(--ob-pulse-color, var(--neu-accent-deep));
   }
   100% {
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--neu-text-primary);
   }
 }
 

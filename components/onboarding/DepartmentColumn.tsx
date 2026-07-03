@@ -3,7 +3,6 @@
 import { memo, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import AnimatedCounter from "@/components/AnimatedCounter";
-import { gpuStyle } from "@/lib/motionPresets";
 import { usePulseOnChange } from "@/hooks/usePulseOnChange";
 import {
   EMPTY_BREAKDOWN,
@@ -16,59 +15,49 @@ import { agentPortraitSrc, DEPT_HEADING_FONT } from "./utils";
 import { LeadStatusHealthBar } from "./LeadStatusHealthBar";
 
 interface DeptAccent {
+  /** Deep dept ink — nameplate text, dot, "Today" numerals. */
   color: string;
-  glowClass: string;
-  cardBorder: string;
-  glassBorder: string;
-  glassBg: string;
+  /** Engraved nameplate plaque fill (dept-tinted gradient). */
+  plaque: string;
+  /** Name-flanking hairline gradients. */
   ruleLeft: CSSProperties;
   ruleRight: CSSProperties;
-  chipBorderToday: string;
-  chipBgToday: string;
 }
 
 // font sizes intentionally omitted — applied via cqh inline styles inside the card
 const METRIC_BOX_BASE =
-  "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-xl border bg-[#101722]";
+  "flex min-w-0 flex-1 basis-0 flex-col items-center justify-center self-center text-center rounded-neu-chip border border-neu-edge bg-neu-surface shadow-neu-sm";
 const METRIC_LABEL_CLASS =
-  "font-montserrat shrink-0 font-semibold uppercase leading-none tracking-[0.25em]";
+  "font-montserrat shrink-0 font-semibold uppercase leading-none tracking-[0.25em] text-neu-t3";
 const METRIC_VALUE_CLASS =
   "font-cinzel font-bold leading-none tracking-[0.06em] tabular-nums";
 
 const ACCENTS: Record<Department, DeptAccent> = {
   concierge: {
-    color: "var(--gold-primary)",
-    glowClass: "queen-name-glow",
-    cardBorder: "rgba(212,175,55,0.45)",
-    glassBorder: "rgba(212,175,55,0.18)",
-    glassBg: "rgba(212,175,55,0.025)",
+    color: "var(--neu-concierge)",
+    plaque:
+      "linear-gradient(145deg, color-mix(in srgb, var(--neu-accent) 30%, var(--neu-surface)), color-mix(in srgb, var(--neu-accent) 12%, var(--neu-surface)))",
     ruleLeft: {
       background:
-        "linear-gradient(to right, transparent, rgba(212,175,55,0.30), rgba(212,175,55,0.50))",
+        "linear-gradient(to right, transparent, color-mix(in srgb, var(--neu-concierge) 55%, transparent))",
     },
     ruleRight: {
       background:
-        "linear-gradient(to left,  transparent, rgba(212,175,55,0.30), rgba(212,175,55,0.50))",
+        "linear-gradient(to left, transparent, color-mix(in srgb, var(--neu-concierge) 55%, transparent))",
     },
-    chipBorderToday: "rgba(212,175,55,0.25)",
-    chipBgToday: "rgba(212,175,55,0.06)",
   },
   shop: {
-    color: "var(--color-sky)",
-    glowClass: "sky-name-glow",
-    cardBorder: "rgba(125,211,252,0.45)",
-    glassBorder: "rgba(125,211,252,0.15)",
-    glassBg: "rgba(125,211,252,0.020)",
+    color: "var(--neu-shop)",
+    plaque:
+      "linear-gradient(145deg, color-mix(in srgb, var(--neu-powder) 30%, var(--neu-surface)), color-mix(in srgb, var(--neu-powder) 12%, var(--neu-surface)))",
     ruleLeft: {
       background:
-        "linear-gradient(to right, transparent, rgba(125,211,252,0.28), rgba(125,211,252,0.45))",
+        "linear-gradient(to right, transparent, color-mix(in srgb, var(--neu-shop) 55%, transparent))",
     },
     ruleRight: {
       background:
-        "linear-gradient(to left,  transparent, rgba(125,211,252,0.28), rgba(125,211,252,0.45))",
+        "linear-gradient(to left, transparent, color-mix(in srgb, var(--neu-shop) 55%, transparent))",
     },
-    chipBorderToday: "rgba(125,211,252,0.25)",
-    chipBgToday: "rgba(125,211,252,0.06)",
   },
 };
 
@@ -76,9 +65,7 @@ const ACCENTS: Record<Department, DeptAccent> = {
 
 interface AgentCardContentProps {
   agent: OnboardingAgentRow;
-  isConcierge: boolean;
   accent: DeptAccent;
-  metricTileBorder: string;
   leadsMonth: number;
   closedCount: number;
   staggerDelay: number;
@@ -91,9 +78,7 @@ interface AgentCardContentProps {
 
 function AgentCardContent({
   agent,
-  isConcierge,
   accent,
-  metricTileBorder,
   leadsMonth,
   closedCount,
   staggerDelay,
@@ -116,62 +101,40 @@ function AgentCardContent({
         alignItems: "stretch",
         padding: "2.5cqh 2cqw",
         gap: "0.6cqh",
-        border: "1px solid rgba(255,255,255,0.14)",
       }}
     >
-      {/* Top zone: name */}
-      <div style={{ flexShrink: 0 }}>
+      {/* Top zone: centered name flanked by dept hairlines */}
+      <div style={{ flexShrink: 0 }} className="flex min-w-0 items-center gap-[clamp(0.4rem,0.55cqw,1rem)]">
+        <div className="h-px flex-1 min-w-[1rem]" style={accent.ruleLeft} />
         <div
-          className={`w-full min-w-0 truncate text-center font-cinzel font-bold uppercase leading-none tracking-[0.28em] ${
-            isConcierge
-              ? "text-gold-400 queen-name-glow"
-              : "text-sky-200 sky-name-glow"
-          }`}
+          className="min-w-0 truncate text-center font-cinzel font-bold uppercase leading-none tracking-[0.28em] neu-engraved"
           style={{
-            fontSize:     "clamp(1.9rem, 3.1cqw, 3.9rem)",
-            background:   "#0f0f0f",
-            border:       "1px solid rgba(255,255,255,0.14)",
-            borderRadius: "clamp(5px, 0.6cqmin, 8px)",
-            padding:      "1cqh 2cqw",
-            boxShadow:    "none",
+            fontSize: "clamp(1.9rem, 3.1cqw, 3.9rem)",
+            color: accent.color,
+            padding: "1cqh 0.5cqw",
           }}
         >
           {agent.name.trim()}
         </div>
-
-        <div
-          style={{
-            height: "1px",
-            marginTop: "0.6cqh",
-            flexShrink: 0,
-            background: `linear-gradient(to right, ${accent.color}70, transparent 75%)`,
-          }}
-        />
+        <div className="h-px flex-1 min-w-[1rem]" style={accent.ruleRight} />
       </div>
 
-      {/* Middle zone: score cards */}
+      {/* Middle zone: three raised metric tiles */}
       <div style={{ flex: "0 0 auto", minHeight: 0, display: "flex", alignItems: "stretch" }}>
         <div
           className="flex w-full min-w-0 flex-row items-stretch"
           style={{ minHeight: 0, gap: "clamp(3px, 1cqw, 14px)" }}
         >
         {/* Leads (This Month) */}
-        <div
-          className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
-          style={{ padding: "2cqh 1cqw" }}
-        >
+        <div className={METRIC_BOX_BASE} style={{ padding: "2cqh 1cqw" }}>
           <span
-            className={`${METRIC_LABEL_CLASS} ${
-              isConcierge ? "text-champagne" : "text-sky-200"
-            }`}
+            className={METRIC_LABEL_CLASS}
             style={{ fontSize: "clamp(1.35rem, 1.9cqw, 2.3rem)", marginBottom: 0 }}
           >
             Leads <br /> (This Month)
           </span>
           <span
-            className={`${METRIC_VALUE_CLASS} ${
-              isConcierge ? "text-champagne" : "text-sky-200"
-            } ${monthPulse ? "ob-metric-flash" : ""}`}
+            className={`${METRIC_VALUE_CLASS} text-neu-t1 ${monthPulse ? "ob-metric-flash" : ""}`}
             style={{
               fontSize: "clamp(1rem, 14cqh, 5.5rem)",
               ["--ob-pulse-color" as string]: accent.color,
@@ -187,22 +150,18 @@ function AgentCardContent({
         </div>
 
         {/* Leads (Today) */}
-        <div
-          className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
-          style={{ padding: "2cqh 1cqw" }}
-        >
+        <div className={METRIC_BOX_BASE} style={{ padding: "2cqh 1cqw" }}>
           <span
-            className={`${METRIC_LABEL_CLASS} tracking-[0.22em] text-emerald-300`}
+            className={`${METRIC_LABEL_CLASS} tracking-[0.22em]`}
             style={{ fontSize: "clamp(1.35rem, 1.9cqw, 2.3rem)", marginBottom: 0 }}
           >
             Leads <br /> (Today)
           </span>
           <span
-            className={`${METRIC_VALUE_CLASS} text-emerald-400 emerald-glow-hero ${
-              todayPulse ? "ob-metric-flash" : ""
-            }`}
+            className={`${METRIC_VALUE_CLASS} ${todayPulse ? "ob-metric-flash" : ""}`}
             style={{
               fontSize: "clamp(1rem, 14cqh, 5.5rem)",
+              color: accent.color,
               ["--ob-pulse-color" as string]: accent.color,
             } as CSSProperties}
           >
@@ -216,24 +175,15 @@ function AgentCardContent({
         </div>
 
         {/* Closures (This Month) */}
-        <div
-          className={`${METRIC_BOX_BASE} ${metricTileBorder}`}
-          style={{ padding: "2cqh 1cqw" }}
-        >
+        <div className={METRIC_BOX_BASE} style={{ padding: "2cqh 1cqw" }}>
           <span
-            className={`${METRIC_LABEL_CLASS} ${
-              isConcierge ? "text-champagne" : "text-sky-200"
-            }`}
+            className={METRIC_LABEL_CLASS}
             style={{ fontSize: "clamp(1.35rem, 1.9cqw, 2.3rem)", marginBottom: 0 }}
           >
             Closures <br /> (This Month)
           </span>
           <span
-            className={`${METRIC_VALUE_CLASS} ${
-              isConcierge
-                ? "text-gold-300 gold-glow"
-                : "text-sky-100 sky-name-glow"
-            } ${closedPulse ? "ob-metric-flash" : ""}`}
+            className={`${METRIC_VALUE_CLASS} text-neu-sage-deep ${closedPulse ? "ob-metric-flash" : ""}`}
             style={{
               fontSize: "clamp(1rem, 14cqh, 5.5rem)",
               ["--ob-pulse-color" as string]: accent.color,
@@ -250,15 +200,8 @@ function AgentCardContent({
       </div>
       </div>
 
-      {/* Bottom zone: pipeline */}
+      {/* Bottom zone: pipeline (inset track + status-count chips) */}
       <div style={{ flexShrink: 0 }}>
-        <div
-          style={{
-            height: "1px",
-            marginBottom: "0.25cqh",
-            background: `linear-gradient(to right, ${accent.color}30, transparent 80%)`,
-          }}
-        />
         <LeadStatusHealthBar breakdown={leadStatus} />
       </div>
     </div>
@@ -286,9 +229,6 @@ const CompactAgentCard = memo(function CompactAgentCard({
 }: CompactAgentCardProps) {
   const slide = !prefersReducedMotion;
   const isConcierge = department === "concierge";
-  const metricTileBorder = isConcierge
-    ? "border-gold-500/20"
-    : "border-sky-400/20";
   const leadsMonth = agent.leadsThisMonth ?? agent.leadsCreatedThisMonth;
   const closedCount = agent.totalConverted;
   const firstNameKey = agent.name.trim().toLowerCase().split(/[\s/,]/)[0];
@@ -311,34 +251,33 @@ const CompactAgentCard = memo(function CompactAgentCard({
           duration: 0.55,
           ease: [0.4, 0, 0.2, 1] as const,
           delay: index * 0.07,
-          layout: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
         },
       };
 
   return (
+    // Raised tile with a slow ambient bob (CSS transform keyframe, staggered
+    // per card). Framer only animates opacity here, so the keyframe owns the
+    // transform channel without conflict.
     <motion.div
       {...motionProps}
-      layout={!prefersReducedMotion}
-      className="relative flex h-full min-h-0 w-full items-stretch overflow-hidden"
+      className="relative flex h-full min-h-0 w-full items-stretch overflow-hidden neu-raised rounded-neu-tile neu-anim-bob-sm"
       style={{
         flexDirection: isConcierge ? "row" : "row-reverse",
-        background: "#0b0b0b",
-        borderTop: "1px solid rgba(255,255,255,0.14)",
-        borderLeft: isConcierge ? undefined : "1px solid rgba(255,255,255,0.14)",
-        borderRight: isConcierge ? "1px solid rgba(255,255,255,0.14)" : undefined,
-        borderBottom: "1px solid rgba(255,255,255,0.14)",
-        borderRadius: "clamp(6px, 0.7cqmin, 10px)",
         containerType: "size",
-        ...gpuStyle,
+        animationDelay: `${index * 1.1}s`,
+        willChange: "opacity",
       }}
     >
-      {/* Portrait (40%) */}
+      {/* Portrait (40%) — raised tile */}
       <div
+        className="border border-neu-edge shadow-neu-sm bg-neu-surface"
         style={{
           position: "relative",
           width: "40%",
           flexShrink: 0,
           overflow: "hidden",
+          borderRadius: "var(--neu-radius-chip)",
+          margin: "1cqh 0.6cqw",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -358,9 +297,7 @@ const CompactAgentCard = memo(function CompactAgentCard({
       {/* Data panel (60%) */}
       <AgentCardContent
         agent={agent}
-        isConcierge={isConcierge}
         accent={accent}
-        metricTileBorder={metricTileBorder}
         leadsMonth={leadsMonth}
         closedCount={closedCount}
         staggerDelay={staggerDelay}
@@ -395,41 +332,44 @@ export function DepartmentColumn({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* Glass card */}
+      {/* Raised panel card */}
       <div
-        className="relative flex min-h-0 flex-1 flex-col rounded-2xl"
+        className="relative flex min-h-0 flex-1 flex-col neu-raised rounded-neu-panel"
         style={{
-          border: "1px solid rgba(255,255,255,0.14)",
-          background: "#0a0a0a",
-          boxShadow: "none",
           padding: "clamp(0.45rem,0.9cqmin,1.5rem)",
           gap: "clamp(0.2rem,0.4cqmin,0.75rem)",
         }}
       >
-        {/* Department header — inside the card */}
+        {/* Department header — engraved nameplate plaque */}
         <div
-          className="relative flex flex-shrink-0 flex-col"
+          className="relative flex flex-shrink-0 justify-center"
           style={{
-            gap:           "clamp(0.35rem, 0.7cqmin, 0.8rem)",
-            paddingTop:    "clamp(0.4rem, 0.9cqmin, 1rem)",
-            marginBottom:  "0.4cqh",
+            paddingTop:   "clamp(0.4rem, 0.9cqmin, 1rem)",
+            marginBottom: "0.4cqh",
           }}
         >
-          {/* Title row: rule — LABEL — rule */}
-          <div className="flex w-full items-center gap-2">
-            <div className="h-px flex-1" style={accent.ruleLeft} />
+          <div
+            className="neu-plaque flex items-center gap-[clamp(0.4rem,0.6cqw,1rem)]"
+            style={{
+              background: accent.plaque,
+              padding: "0.75cqh 1.8cqw",
+            }}
+          >
+            <span
+              className="rounded-full neu-anim-dot-pulse flex-shrink-0"
+              style={{
+                width: "clamp(8px,0.42cqw,15px)",
+                height: "clamp(8px,0.42cqw,15px)",
+                background: accent.color,
+              }}
+              aria-hidden
+            />
             <h3
-              className={`flex-shrink-0 font-cinzel font-bold uppercase leading-none tracking-[0.32em] ${accent.glowClass}`}
+              className="flex-shrink-0 font-cinzel font-bold uppercase leading-none tracking-[0.32em]"
               style={{ fontSize: DEPT_HEADING_FONT, color: accent.color }}
             >
               {label}
             </h3>
-            <div className="h-px flex-1" style={accent.ruleRight} />
-          </div>
-          {/* Bottom separator rule */}
-          <div className="flex w-full items-center">
-            <div className="h-px flex-1" style={accent.ruleLeft} />
-            <div className="h-px flex-1" style={accent.ruleRight} />
           </div>
         </div>
 

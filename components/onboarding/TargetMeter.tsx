@@ -3,20 +3,20 @@
 /**
  * components/onboarding/TargetMeter.tsx
  *
- * "Monthly Target" — Apple-Watch-style activity ring for the revenue team's
- * monthly closure target. Sits in the center column above ConversionLedger;
- * the two cards split the slot the ledger alone filled before 2026-07-03.
+ * "Monthly Target" — activity ring for the revenue team's monthly closure
+ * target. Sits BESIDE ConversionLedger (36% / 64% split of the center
+ * column's bottom slot — OnboardingLayout).
  *
  * The full circle = MONTHLY_CLOSURE_TARGET closures. Each agent's won deals
  * this IST month (OnboardingAgentRow.totalConverted) fill the ring as a
  * colored arc — cumulative arcs drawn back-to-front so the color joints get
- * the same rounded caps as the ring ends. A glowing dot rides the leading
- * edge. Center shows the team total over the target; a legend lists each
- * contributing agent with their count in their arc color.
+ * the same rounded caps as the ring ends. A pulsing halo + dot rides the
+ * leading edge. Center shows the team total over the target; a legend lists
+ * each contributing agent with their count in their arc color.
  *
- * Ring style is deliberately bold (thick stroke, vivid fills, dark amber
- * track on the card's near-black surface) — not the thin translucent line
- * style of the band charts.
+ * Neumorphic: putty track on the raised card, rank palette from the pastel
+ * support family (accent → powder → sage → lilac → peach → danger → butter),
+ * no glow filters.
  */
 
 import { useMemo } from "react";
@@ -32,21 +32,22 @@ import {
 export const MONTHLY_CLOSURE_TARGET = 15;
 
 // Arc palette, assigned to contributing agents by rank (most closures first).
-// First three echo the Performance tiles (amber / blue / emerald).
+// Deep pastel family — matches the specimen's rank order.
 const ARC_COLORS = [
-  "#FFB020",
-  "#6B8FFF",
-  "#34d399",
-  "#a78bfa",
-  "#7dd3fc",
-  "#f87171",
+  "var(--neu-accent-deep)",
+  "var(--neu-powder-deep)",
+  "var(--neu-sage-deep)",
+  "var(--neu-lilac-deep)",
+  "var(--neu-peach-deep)",
+  "var(--neu-danger-deep)",
+  "var(--neu-butter-deep)",
 ] as const;
 
 /** Deals in the month total that no roster agent name matched. */
-const UNATTRIBUTED_COLOR = "rgba(247,231,206,0.45)";
+const UNATTRIBUTED_COLOR = "var(--neu-text-tertiary)";
 
 const R = 41; // ring radius in the 100×100 viewBox
-const STROKE = 11.5; // Apple-Watch-thick
+const STROKE = 11.5;
 
 interface TargetMeterProps {
   /** Full revenue roster (concierge + shop) — contributions read from totalConverted. */
@@ -100,33 +101,19 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
 
   return (
     <div
-      className="relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl"
-      style={{
-        background: "rgba(10,10,10,0.88)",
-        border: "1px solid rgba(255,255,255,0.14)",
-        boxShadow:
-          "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
-        padding: "clamp(0.55rem,1.1cqmin,1.5rem)",
-      }}
+      className="relative flex h-full min-h-0 w-full flex-col overflow-hidden neu-raised rounded-neu-tile"
+      style={{ padding: "clamp(0.55rem,1.1cqmin,1.5rem)" }}
     >
-      <div
-        className="pointer-events-none absolute inset-0 rounded-2xl"
-        style={{
-          background:
-            "linear-gradient(135deg, transparent 45%, rgba(255,176,32,0.018) 100%)",
-        }}
-      />
-
-      {/* ── Section heading — same device as the old ledger heading ── */}
+      {/* ── Section heading ── */}
       <div className="relative flex w-full flex-shrink-0 items-center justify-center gap-0 pt-[0.5cqh]" style={{ marginBottom: "0.8cqh" }}>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
+        <div className="neu-rule-l h-px flex-1" />
         <p
-          className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-gold-400 queen-name-glow"
+          className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-neu-t1 neu-letterpress whitespace-nowrap"
           style={{ fontSize: ONBOARDING_LEDGER_TITLE_FONT }}
         >
           Monthly Target
         </p>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-500/30 to-gold-500/50" />
+        <div className="neu-rule-r h-px flex-1" />
       </div>
 
       {/* ── Ring + legend ── */}
@@ -134,32 +121,14 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
         {/* Ring — square, sized by the card's free height */}
         <div className="relative aspect-square h-full max-h-full min-h-0 max-w-[60%]">
           <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible">
-            <defs>
-              <filter id="tmGlow" x="-40%" y="-40%" width="180%" height="180%">
-                <feGaussianBlur stdDeviation="1.6" result="b" />
-                <feMerge>
-                  <feMergeNode in="b" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            {/* Track — dark amber-tinted full circle (Apple-Watch recessed look) */}
+            {/* Track — recessed putty circle */}
             <circle
               cx="50"
               cy="50"
               r={R}
               fill="none"
-              stroke="rgba(255,176,32,0.10)"
+              stroke="color-mix(in srgb, var(--neu-text-tertiary) 28%, transparent)"
               strokeWidth={STROKE}
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r={R}
-              fill="none"
-              stroke="rgba(0,0,0,0.35)"
-              strokeWidth={STROKE - 2}
             />
 
             {/* Cumulative agent arcs — normalized pathLength, start at 12 o'clock */}
@@ -175,39 +144,44 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
                   strokeWidth={STROKE}
                   strokeLinecap="round"
                   pathLength={1}
-                  filter="url(#tmGlow)"
                   initial={{ strokeDasharray: "0.0001 1" }}
                   animate={{ strokeDasharray: `${Math.max(a.endFrac, 0.0001)} 1` }}
                   transition={{
                     duration: 1.4,
                     delay: 0.3 + (arcs.length - 1 - i) * 0.12,
-                    ease: [0.4, 0, 0.2, 1],
+                    ease: [0.22, 1, 0.36, 1],
                   }}
                 />
               ))}
             </g>
 
-            {/* Leading-edge dot — pulses while the screen is visible */}
+            {/* Leading edge — pulsing halo + dot */}
             {progressFrac > 0 && (
-              <motion.circle
-                cx={tipX}
-                cy={tipY}
-                r={STROKE / 2 - 1.4}
-                fill="#fff"
-                fillOpacity="0.9"
-                filter="url(#tmGlow)"
-                initial={{ opacity: 0 }}
-                animate={
-                  active
-                    ? { opacity: [0.9, 0.45, 0.9] }
-                    : { opacity: 0.9 }
-                }
-                transition={
-                  active
-                    ? { duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: 1.8 }
-                    : { duration: 0.3 }
-                }
-              />
+              <>
+                <motion.circle
+                  cx={tipX}
+                  cy={tipY}
+                  r={STROKE / 2 + 1.5}
+                  fill={tipColor}
+                  initial={{ opacity: 0 }}
+                  animate={
+                    active ? { opacity: [0.25, 0.08, 0.25] } : { opacity: 0.2 }
+                  }
+                  transition={
+                    active
+                      ? { duration: 2.4, repeat: Infinity, ease: "easeInOut", delay: 1.8 }
+                      : { duration: 0.3 }
+                  }
+                />
+                <circle
+                  cx={tipX}
+                  cy={tipY}
+                  r={STROKE / 2 - 2}
+                  fill={tipColor}
+                  stroke="var(--neu-surface)"
+                  strokeWidth="1.4"
+                />
+              </>
             )}
           </svg>
 
@@ -217,20 +191,14 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
               className="font-montserrat font-bold leading-none tabular-nums"
               style={{
                 fontSize: "clamp(2.2rem, min(11cqmin, 13cqh), 7.5rem)",
-                color: targetMet ? "#34d399" : "#FFB020",
-                textShadow: targetMet
-                  ? "0 0 28px rgba(52,211,153,0.5)"
-                  : "0 0 28px rgba(255,176,32,0.45)",
+                color: targetMet ? "var(--neu-sage-deep)" : "var(--neu-text-primary)",
               }}
             >
               {totalClosed}
             </span>
             <span
-              className="mt-[0.5cqh] font-montserrat font-semibold uppercase leading-none tracking-[0.22em]"
-              style={{
-                fontSize: "clamp(0.8rem, min(2.2cqmin, 2.6cqh), 1.6rem)",
-                color: "rgba(255,255,255,0.45)",
-              }}
+              className="mt-[0.5cqh] font-montserrat font-bold uppercase leading-none tracking-[0.22em] text-neu-t3"
+              style={{ fontSize: "clamp(0.8rem, min(2.2cqmin, 2.6cqh), 1.6rem)" }}
             >
               of {MONTHLY_CLOSURE_TARGET}
             </span>
@@ -238,7 +206,7 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
               className="mt-[0.7cqh] font-cinzel font-semibold uppercase leading-none tracking-[0.3em]"
               style={{
                 fontSize: "clamp(0.7rem, min(1.7cqmin, 2cqh), 1.3rem)",
-                color: targetMet ? "rgba(52,211,153,0.8)" : "rgba(255,176,32,0.55)",
+                color: targetMet ? "var(--neu-sage-deep)" : "var(--neu-accent-deep)",
               }}
             >
               {targetMet ? "Target Met" : "Closures"}
@@ -253,7 +221,7 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
         >
           {legend.length === 0 ? (
             <p
-              className="font-montserrat text-gold-500/50"
+              className="font-montserrat text-neu-t3"
               style={{ fontSize: ONBOARDING_LEDGER_CELL_FONT }}
             >
               Awaiting closures…
@@ -262,16 +230,15 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
             legend.map((l) => (
               <div key={`${l.name}-${l.color}`} className="flex min-w-0 items-center gap-[clamp(0.4rem,0.9cqmin,0.9rem)]">
                 <span
-                  className="flex-shrink-0 rounded-full"
+                  className="flex-shrink-0 rounded-full shadow-neu-sm"
                   style={{
                     width: "clamp(10px, 1.4cqmin, 20px)",
                     height: "clamp(10px, 1.4cqmin, 20px)",
                     background: l.color,
-                    boxShadow: `0 0 10px ${l.color}`,
                   }}
                 />
                 <span
-                  className="min-w-0 truncate font-montserrat font-medium text-champagne"
+                  className="min-w-0 truncate font-montserrat font-semibold text-neu-t1"
                   style={{ fontSize: ONBOARDING_LEDGER_CELL_FONT }}
                 >
                   {l.name}
