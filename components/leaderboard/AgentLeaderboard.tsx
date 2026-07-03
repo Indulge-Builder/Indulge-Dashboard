@@ -58,8 +58,14 @@ export default function AgentLeaderboard({
         </div>
       </div>
 
-      {/* ── Agent rows — absolutely positioned by rank inside this region ── */}
-      <div className="relative min-h-0 flex-1 mt-[0.5cqh]">
+      {/* ── Agent rows — absolutely positioned by rank inside this region ──
+          Row pitch = max(region/n, --lb-row-min): rows spread to fill when the
+          region is tall, and never compress below a readable minimum when it
+          is short (overflow clips at the card edge, as the old layout did). */}
+      <div
+        className="relative min-h-0 flex-1 mt-[0.5cqh] overflow-hidden"
+        style={{ ["--lb-row-min" as string]: "clamp(56px, 4.4cqh, 96px)" }}
+      >
         <AnimatePresence>
           {domOrdered.map((agent) => (
             <AgentRow

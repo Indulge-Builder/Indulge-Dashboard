@@ -104,16 +104,20 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
       className="relative flex h-full min-h-0 w-full flex-col overflow-hidden neu-raised rounded-neu-tile"
       style={{ padding: "clamp(0.55rem,1.1cqmin,1.5rem)" }}
     >
-      {/* ── Section heading ── */}
-      <div className="relative flex w-full flex-shrink-0 items-center justify-center gap-0 pt-[0.5cqh]" style={{ marginBottom: "0.8cqh" }}>
-        <div className="neu-rule-l h-px flex-1" />
-        <p
-          className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-neu-t1 neu-letterpress whitespace-nowrap"
-          style={{ fontSize: ONBOARDING_LEDGER_TITLE_FONT }}
-        >
-          Monthly Target
-        </p>
-        <div className="neu-rule-r h-px flex-1" />
+      {/* ── Section heading — inline-size container so the title divides the
+             card's actual width ("Monthly Target" ≈ 12.6em at 0.28em tracking)
+             instead of clipping in the 36% slot ── */}
+      <div className="relative w-full flex-shrink-0 pt-[0.5cqh] [container-type:inline-size]" style={{ marginBottom: "0.8cqh" }}>
+        <div className="flex w-full items-center justify-center gap-0">
+          <div className="neu-rule-l h-px flex-1" />
+          <p
+            className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-neu-t1 neu-letterpress whitespace-nowrap"
+            style={{ fontSize: `min(${ONBOARDING_LEDGER_TITLE_FONT}, calc((100cqi - 3rem) / 12.6))` }}
+          >
+            Monthly Target
+          </p>
+          <div className="neu-rule-r h-px flex-1" />
+        </div>
       </div>
 
       {/* ── Ring + legend ── */}
@@ -221,7 +225,7 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
         >
           {legend.length === 0 ? (
             <p
-              className="font-montserrat text-neu-t3"
+              className="min-w-0 truncate font-montserrat text-neu-t3"
               style={{ fontSize: ONBOARDING_LEDGER_CELL_FONT }}
             >
               Awaiting closures…

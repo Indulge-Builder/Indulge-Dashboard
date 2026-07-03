@@ -102,14 +102,18 @@ export const AgentRow = memo(function AgentRow({
       exit="exit"
       style={{
         ...gpuStyle,
-        top: `${(index * 100) / n}%`,
-        height: `calc(${(100 / n).toFixed(3)}% - 0.2cqh)`,
+        top: `calc(${index} * max(${(100 / n).toFixed(3)}%, var(--lb-row-min, 0px)))`,
+        height: `calc(max(${(100 / n).toFixed(3)}%, var(--lb-row-min, 0px)) - 0.2cqh)`,
         transition: "top var(--neu-dur-reorder) var(--neu-ease-glide)",
         background:
           index < 3
             ? `color-mix(in srgb, var(--neu-accent) ${RANK_WASH_PCT[index]}%, transparent)`
             : "transparent",
         boxShadow: index === 0 ? "var(--neu-shadow-raised-sm)" : "none",
+        // Size container: row content sizes below use min(original, Ncqh)
+        // so numerals/ring shrink to the row instead of clipping when the
+        // leaderboard region is shorter than n full-size rows.
+        containerType: "size",
       }}
       className="absolute inset-x-0 overflow-hidden rounded-neu-chip"
     >
@@ -178,7 +182,7 @@ export const AgentRow = memo(function AgentRow({
 
         {/* Col 2: Agent name — opacity dip on surge; row-level sweep carries the drama */}
         <motion.p
-          className="min-w-0 font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] tracking-wide text-neu-t1 leading-none text-center truncate px-1"
+          className="min-w-0 font-cinzel font-semibold text-[min(3.9rem,52cqh)] tracking-wide text-neu-t1 leading-none text-center truncate px-1"
           style={gpuStyle}
           animate={surgeKey > 0 ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
@@ -194,16 +198,16 @@ export const AgentRow = memo(function AgentRow({
           >
             <AnimatedValue
               value={today}
-              className="font-montserrat text-[clamp(2.325rem,3.675cqw,4.65rem)] leading-none text-neu-sage-deep tabular-nums font-bold"
+              className="font-montserrat text-[min(4.65rem,60cqh)] leading-none text-neu-sage-deep tabular-nums font-bold"
               highlightOnIncrease
             />
           </span>
-          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-neu-t3 leading-none">
+          <span className="font-montserrat text-[min(2.025rem,32cqh)] text-neu-t3 leading-none">
             /
           </span>
           <AnimatedValue
             value={received}
-            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-neu-t3 leading-none tabular-nums"
+            className="font-montserrat text-[min(2.7rem,40cqh)] text-neu-t3 leading-none tabular-nums"
           />
         </div>
 
@@ -211,14 +215,14 @@ export const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-1 sm:gap-2">
           <AnimatedValue
             value={agent.tasksCompletedThisMonth ?? 0}
-            className="font-montserrat tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675cqw,4.65rem)] text-neu-t2"
+            className="font-montserrat tabular-nums font-semibold leading-none text-[min(4.65rem,60cqh)] text-neu-t2"
           />
-          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-neu-t3 leading-none">
+          <span className="font-montserrat text-[min(2.025rem,32cqh)] text-neu-t3 leading-none">
             /
           </span>
           <AnimatedValue
             value={agent.tasksAssignedThisMonth ?? 0}
-            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-neu-t3 leading-none tabular-nums"
+            className="font-montserrat text-[min(2.7rem,40cqh)] text-neu-t3 leading-none tabular-nums"
           />
         </div>
 
@@ -226,24 +230,24 @@ export const AgentRow = memo(function AgentRow({
         <div className="flex items-baseline justify-center gap-0.5 sm:gap-1">
           <AnimatedValue
             value={pending}
-            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-neu-t2"
+            className="font-montserrat text-[min(3.75rem,52cqh)] leading-none tabular-nums font-semibold text-neu-t2"
             highlightOnIncrease
           />
-          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-neu-t3">
+          <span className="font-montserrat text-[min(3.75rem,52cqh)] leading-none tabular-nums font-bold text-neu-t3">
             /
           </span>
           <AnimatedValue
             value={overdue}
-            className={`font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold ${
+            className={`font-montserrat text-[min(3.75rem,52cqh)] leading-none tabular-nums font-bold ${
               hasOverdue ? "text-neu-danger-deep" : "text-neu-t3"
             }`}
           />
-          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-neu-t3">
+          <span className="font-montserrat text-[min(3.75rem,52cqh)] leading-none tabular-nums font-bold text-neu-t3">
             /
           </span>
           <AnimatedValue
             value={incomplete}
-            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-neu-butter-deep"
+            className="font-montserrat text-[min(3.75rem,52cqh)] leading-none tabular-nums font-semibold text-neu-butter-deep"
             highlightOnIncrease
           />
         </div>

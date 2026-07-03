@@ -64,7 +64,12 @@ export const AgentIcon = memo(function AgentIcon({
     : { type: "tween" as const, duration: 1.2, ease: EASE_LUXURY, delay: animDelay };
 
   return (
-    <div className="relative flex-shrink-0 w-[44px] h-[44px] sm:w-[56px] sm:h-[56px] lg:w-[72px] lg:h-[72px]">
+    // Width/height cap at 78% of the row (AgentRow is a size container) so the
+    // ring compresses with short rows instead of clipping to a sliver.
+    <div
+      className="relative flex-shrink-0"
+      style={{ width: "min(72px, 78cqh)", height: "min(72px, 78cqh)" }}
+    >
       <svg
         viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
         className="absolute inset-0 -rotate-90 w-full h-full"
@@ -100,7 +105,7 @@ export const AgentIcon = memo(function AgentIcon({
       {/* Initials badge */}
       {/* min 14px at base breakpoint */}
       <div className="absolute inset-0 flex items-center justify-center rounded-full">
-        <span className="font-cinzel font-bold text-[0.875rem] sm:text-[1rem] lg:text-[1rem] tracking-widest text-neu-t1 select-none">
+        <span className="font-cinzel font-bold text-[min(1rem,26cqh)] tracking-widest text-neu-t1 select-none">
           {getInitials(name)}
         </span>
       </div>
