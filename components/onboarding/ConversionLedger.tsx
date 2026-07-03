@@ -1,13 +1,12 @@
 "use client";
 
 /**
- * components/_unmounted/ConversionLedger.tsx
+ * components/onboarding/ConversionLedger.tsx
  *
- * The "Conversion Ledger" section of the Onboarding screen — UNMOUNTED
- * 2026-07-03, replaced by onboarding/TargetMeter (monthly-target ring). Its
- * data pipeline (ledger + ledgerScrollDuration in useOnboardingPanelData) is
- * still live, so re-mounting only needs the import + props restored in
- * OnboardingLayout.
+ * The "Conversion Ledger" card of the Onboarding screen's center column.
+ * Briefly unmounted 2026-07-03 in favor of TargetMeter, then re-mounted the
+ * same day below it — the two cards now split the column slot the ledger
+ * alone used to fill (see OnboardingLayout).
  *
  * Layout:
  *   ┌─────────────────────────────────┐
@@ -44,7 +43,7 @@ import {
   ONBOARDING_LEDGER_HEADER_FONT,
   ONBOARDING_LEDGER_CELL_FONT,
   formatLedgerDate,
-} from "../onboarding/utils";
+} from "./utils";
 
 // ── Department accent tokens ───────────────────────────────────────────────────
 const DEPT_ACCENT = {
@@ -235,14 +234,26 @@ export function ConversionLedger({
 
   return (
     <div
-      className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+      className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl"
       style={{
+        background: "rgba(10,10,10,0.88)",
+        border: "1px solid rgba(255,255,255,0.14)",
+        boxShadow:
+          "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
         padding:
-          "clamp(0.85rem, min(2.1cqh, 2.4cqmin), 2rem) clamp(0.75rem, min(2.5cqmin, 3.2cqw), 2.5rem)",
+          "clamp(0.55rem,1.1cqmin,1.5rem) clamp(0.75rem, min(2.5cqmin, 3.2cqw), 2.5rem)",
       }}
     >
+      <div
+        className="pointer-events-none absolute inset-0 rounded-2xl"
+        style={{
+          background:
+            "linear-gradient(135deg, transparent 45%, rgba(255,176,32,0.018) 100%)",
+        }}
+      />
+
       {/* ── Section heading ── */}
-      <div className="relative mb-[1.8cqh] flex w-full flex-shrink-0 flex-col items-center gap-y-[0.55cqh] text-center">
+      <div className="relative mb-[1cqh] flex w-full flex-shrink-0 flex-col items-center gap-y-[0.55cqh] pt-[0.5cqh] text-center">
         <div className="flex w-full items-center justify-center">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-500/30 to-gold-500/50" />
           <p

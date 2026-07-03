@@ -3,7 +3,9 @@
 import { useOnboardingPanelData } from "@/hooks/useOnboardingPanelData";
 import { DepartmentColumn } from "./DepartmentColumn";
 import { TargetMeter } from "./TargetMeter";
+import { ConversionLedger } from "./ConversionLedger";
 import { PerformanceLineGraph } from "./PerformanceLineGraph";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { DEPT_HEADING_FONT } from "./utils";
 
 export default function OnboardingLayout() {
@@ -11,9 +13,11 @@ export default function OnboardingLayout() {
   const {
     conciergeAgents,
     shopAgents,
+    ledger,
     pulseEvents,
     leadMonthStats,
     verticalTrendline,
+    ledgerScrollDuration,
     prefersReducedMotion,
     leadStatusByAgent,
     todayDate,
@@ -215,11 +219,25 @@ export default function OnboardingLayout() {
             </div>
           </div>
 
-          <div className="relative flex min-h-0 flex-[3] flex-col">
+          {/* TargetMeter + ConversionLedger split the former flex-[3] slot
+              (1.7 : 1.3) — the ring keeps the larger share so it stays legible,
+              the ledger scrolls so it tolerates the shorter card. Spacing comes
+              from the column's own gap, same as between the cards above. */}
+          <div className="relative flex min-h-0 flex-[1.7] flex-col">
             <TargetMeter
               agents={[...conciergeAgents, ...shopAgents]}
               totalClosed={leadMonthStats.dealsClosedThisMonth}
             />
+          </div>
+
+          <div className="relative flex min-h-0 flex-[1.3] flex-col">
+            <ErrorBoundary label="Conversion Ledger" fillParent>
+              <ConversionLedger
+                rows={ledger}
+                scrollDuration={ledgerScrollDuration}
+                prefersReducedMotion={prefersReducedMotion}
+              />
+            </ErrorBoundary>
           </div>
         </div>
 

@@ -4,8 +4,8 @@
  * components/onboarding/TargetMeter.tsx
  *
  * "Monthly Target" — Apple-Watch-style activity ring for the revenue team's
- * monthly closure target (replaced ConversionLedger in the center column,
- * 2026-07-03; the ledger lives in components/_unmounted/).
+ * monthly closure target. Sits in the center column above ConversionLedger;
+ * the two cards split the slot the ledger alone filled before 2026-07-03.
  *
  * The full circle = MONTHLY_CLOSURE_TARGET closures. Each agent's won deals
  * this IST month (OnboardingAgentRow.totalConverted) fill the ring as a

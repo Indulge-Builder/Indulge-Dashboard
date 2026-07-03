@@ -260,40 +260,48 @@ function LeadStatusHealthBar_({
           />
         </div>
 
-      {/* Legend — tinted pills, stacked label-over-count */}
+      {/* Legend — single-line tinted chips: dot · label ·· count */}
       <div
         className="flex flex-row items-stretch"
         style={{
-          marginTop: "clamp(18px, 2.6cqh, 34px)",
+          marginTop: "clamp(10px, 1.5cqh, 20px)",
           gap:       "clamp(6px, 0.65cqmin, 10px)",
         }}
       >
-        {orderedNonZero.map((status) => {
+        {orderedNonZero.map((status, idx) => {
           const count = breakdown[status] ?? 0;
           const cfg   = STATUS_COLORS[status];
           return (
             <div
               key={status}
-              className="flex flex-1 flex-col items-center justify-center"
+              className="flex min-w-0 flex-1 items-center justify-between"
               style={{
+                minHeight:
+                  "clamp(56px, 8.5cqh, 112px)",
                 padding:
-                  "clamp(8px, 1cqh, 14px) clamp(6px, 0.75cqmin, 12px)",
+                  "clamp(10px, 1.4cqh, 18px) clamp(10px, 1.1cqmin, 18px)",
                 borderRadius: "clamp(6px, 0.75cqmin, 11px)",
                 background:   "#101722",
-                border:       `1px solid color-mix(in srgb, ${cfg.flat} 28%, transparent)`,
-                gap:          "clamp(5px, 0.45cqmin, 8px)",
+                border:       `1px solid color-mix(in srgb, ${cfg.flat} 30%, transparent)`,
+                boxShadow:    "inset 0 1px 0 rgba(255,255,255,0.04)",
+                gap:          "clamp(6px, 0.6cqmin, 10px)",
+                opacity:      mounted ? 1 : 0,
+                transform:    mounted ? "none" : "translateY(6px)",
+                transition: reduced
+                  ? "none"
+                  : `opacity 0.45s cubic-bezier(0.23,1,0.32,1) ${idx * 50}ms, transform 0.45s cubic-bezier(0.23,1,0.32,1) ${idx * 50}ms`,
               }}
             >
-              {/* Label row: glowing dot + status name — Queendom-style label tier */}
+              {/* Dot + status name — matches the card's Montserrat label tier */}
               <div
-                className="flex items-center"
-                style={{ gap: "clamp(5px, 0.5cqmin, 8px)" }}
+                className="flex min-w-0 items-center"
+                style={{ gap: "clamp(5px, 0.5cqmin, 9px)" }}
               >
                 <div
                   aria-hidden
                   style={{
-                    width:        "clamp(8px, 1cqmin, 14px)",
-                    height:       "clamp(8px, 1cqmin, 14px)",
+                    width:        "clamp(10px, 1.2cqmin, 16px)",
+                    height:       "clamp(10px, 1.2cqmin, 16px)",
                     borderRadius: "50%",
                     background:   cfg.flat,
                     boxShadow:    `0 0 8px ${cfg.glow}`,
@@ -301,34 +309,34 @@ function LeadStatusHealthBar_({
                   }}
                 />
                 <span
+                  className="truncate font-montserrat"
                   style={{
                     fontSize:
-                      "clamp(18px, min(2.6cqmin, 2.8cqw), 36px)",
-                    fontFamily:    "'Inter', sans-serif",
+                      "clamp(19px, min(2.7cqmin, 2.9cqw), 38px)",
                     fontWeight:    600,
                     color:         cfg.flat,
                     letterSpacing: "0.12em",
                     textTransform: "uppercase" as const,
-                    lineHeight:    1,
-                    opacity:       0.88,
-                    whiteSpace:    "nowrap" as const,
+                    lineHeight:    1.1,
+                    opacity:       0.9,
                   }}
                 >
                   {cfg.short}
                 </span>
               </div>
 
-              {/* Count — hero number (aligned with compact-card / Queendom metric scale) */}
+              {/* Count — quiet tier; the hero counts live inside the bar segments */}
               <span
                 style={{
                   fontSize:
-                    "clamp(28px, min(4cqmin, 4.5cqw), 56px)",
+                    "clamp(26px, min(3.8cqmin, 4cqw), 54px)",
                   fontFamily:    "'Cinzel', serif",
                   fontWeight:    700,
                   color:         cfg.flat,
                   lineHeight:    1,
                   letterSpacing: "0.04em",
-                  textShadow:    `0 0 12px ${cfg.glow}`,
+                  textShadow:    `0 0 10px ${cfg.glow}`,
+                  flexShrink:    0,
                 }}
               >
                 {count}
@@ -352,16 +360,20 @@ function PipelineLabel() {
         aria-hidden
         style={{ flex: 1, height: "1px", background: "rgba(255,255,255,0.09)" }}
       />
+      {/* Band-title tier — matches QueendomPanel BAND_TITLE_CLASS
+          ("Time Since Last Resolved"): Cinzel semibold, 0.24em tracking,
+          width-fit font capped at 4rem, champagne. */}
       <span
         style={{
-          fontSize:      "clamp(22px, 2.6cqmin, 40px)",
+          fontSize:      "min(calc((100cqw - 5rem) / 20.5), 4rem)",
           fontFamily:    "'Cinzel', serif",
-          fontWeight:    700,
-          color:         "rgba(255,255,255,0.38)",
-          letterSpacing: "0.28em",
-          lineHeight:    1,
+          fontWeight:    600,
+          color:         "var(--color-champagne)",
+          letterSpacing: "0.24em",
+          lineHeight:    1.1,
           flexShrink:    0,
           textTransform: "uppercase" as const,
+          whiteSpace:    "nowrap" as const,
         }}
       >
         Pipeline
