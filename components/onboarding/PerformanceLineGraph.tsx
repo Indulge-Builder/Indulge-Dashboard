@@ -27,8 +27,11 @@ import type { VerticalTrendPoint } from "@/lib/onboardingTypes";
 
 // ── SVG coordinate system ─────────────────────────────────────────────────────
 
+// Viewbox aspect ≈ the card's typical graph slot; the SVG stretches to fill
+// the slot exactly (preserveAspectRatio="none"), so this ratio is the point
+// of zero text distortion, not a hard size.
 const VB_W    = 460;
-const VB_H    = 248;
+const VB_H    = 310;
 const ML      = 36;
 const MT      = 26;
 const MR      = 12;
@@ -247,7 +250,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ width: "100%", position: "relative" }}>
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
       {/* Toggle: today-only ↔ all-points */}
       <button
         onClick={() => setShowAllLabels((v) => !v)}
@@ -332,7 +335,8 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
       <svg
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         width="100%"
-        height="auto"
+        height="100%"
+        preserveAspectRatio="none"
         role="img"
         aria-label="Monthly leads by Indulge vertical — current month"
         style={{ display: "block" }}

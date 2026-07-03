@@ -120,10 +120,10 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
         </div>
       </div>
 
-      {/* ── Ring + legend ── */}
-      <div className="relative flex min-h-0 w-full flex-1 items-center justify-center gap-[clamp(0.75rem,2.5cqmin,3rem)]">
-        {/* Ring — square, sized by the card's free height */}
-        <div className="relative aspect-square h-full max-h-full min-h-0 max-w-[60%]">
+      {/* ── Ring above, legend below — the donut takes all free height ── */}
+      <div className="relative flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-[clamp(0.4rem,1cqh,1.2rem)]">
+        {/* Ring — square, sized by the remaining card height, capped by width */}
+        <div className="relative aspect-square min-h-0 flex-1 max-w-full">
           <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible">
             {/* Track — recessed putty circle */}
             <circle
@@ -218,10 +218,10 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
           </div>
         </div>
 
-        {/* Legend — one row per contributing agent */}
+        {/* Legend — wrapping row of agent entries under the ring */}
         <div
-          className="flex min-w-0 max-w-[38%] flex-shrink flex-col justify-center"
-          style={{ gap: "clamp(0.4rem, 1.2cqmin, 1.2rem)" }}
+          className="flex w-full min-w-0 flex-shrink-0 flex-row flex-wrap items-center justify-center"
+          style={{ columnGap: "clamp(0.8rem,1.4cqw,2rem)", rowGap: "clamp(0.25rem,0.6cqh,0.7rem)" }}
         >
           {legend.length === 0 ? (
             <p
@@ -248,7 +248,7 @@ export function TargetMeter({ agents, totalClosed }: TargetMeterProps) {
                   {l.name}
                 </span>
                 <span
-                  className="ml-auto flex-shrink-0 font-montserrat font-bold tabular-nums"
+                  className="flex-shrink-0 font-montserrat font-bold tabular-nums"
                   style={{ fontSize: ONBOARDING_LEDGER_CELL_FONT, color: l.color }}
                 >
                   {l.count}

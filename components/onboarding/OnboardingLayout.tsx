@@ -9,26 +9,23 @@ import { PerformanceLineGraph } from "./PerformanceLineGraph";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { DEPT_HEADING_FONT } from "./utils";
 
-// ── Center stat tile — label + big numeral, gentle bob, squash-pop on change ──
+// ── Center stat tile — label + big numeral, static tile, squash-pop on change ──
 function StatTile({
   label,
   value,
   color,
-  bobDelayS,
 }: {
   label: string;
   value: number;
   color: string;
-  bobDelayS: number;
 }) {
   const pulse = usePulseOnChange(value);
   return (
     <div
-      className="neu-raised rounded-neu-tile neu-anim-bob flex flex-col items-center"
+      className="neu-raised rounded-neu-tile flex flex-col items-center"
       style={{
         gap: "clamp(2px, 0.4cqmin, 9px)",
         padding: "clamp(6px, 1cqmin, 22px) clamp(4px, 0.6cqmin, 14px)",
-        animationDelay: `${bobDelayS}s`,
       }}
     >
       <span
@@ -140,25 +137,21 @@ export default function OnboardingLayout() {
                 label="Leads"
                 value={leadMonthStats.leads}
                 color="var(--neu-text-primary)"
-                bobDelayS={0}
               />
               <StatTile
                 label="Attended"
                 value={leadMonthStats.attended}
                 color="var(--neu-powder-deep)"
-                bobDelayS={0.9}
               />
               <StatTile
                 label="Converted"
                 value={leadMonthStats.dealsClosedThisMonth}
                 color="var(--neu-sage-deep)"
-                bobDelayS={1.8}
               />
               <StatTile
                 label="Junk"
                 value={leadMonthStats.junk}
                 color="var(--neu-text-secondary)"
-                bobDelayS={2.7}
               />
             </div>
 

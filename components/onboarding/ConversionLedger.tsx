@@ -242,8 +242,11 @@ export function ConversionLedger({
           "clamp(0.55rem,1.1cqmin,1.5rem) clamp(0.75rem, min(2.5cqmin, 3.2cqw), 2.5rem)",
       }}
     >
-      {/* ── Section heading — live sage dot + hairline rules ── */}
-      <div className="relative mb-[1cqh] flex w-full flex-shrink-0 flex-col items-center gap-y-[0.55cqh] pt-[0.5cqh] text-center">
+      {/* ── Section heading — live sage dot + hairline rules. Inline-size
+             container so the title divides the card's actual width
+             ("Conversion Ledger" ≈ 15.3em at 0.28em tracking) instead of
+             clipping when the card runs narrow. ── */}
+      <div className="relative mb-[1cqh] w-full flex-shrink-0 pt-[0.5cqh] text-center [container-type:inline-size]">
         <div className="flex w-full items-center justify-center gap-[clamp(0.3rem,0.45cqw,0.8rem)]">
           <div className="neu-rule-l h-px flex-1" />
           <span
@@ -256,8 +259,8 @@ export function ConversionLedger({
             aria-hidden
           />
           <p
-            className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-neu-t1 neu-letterpress"
-            style={{ fontSize: ONBOARDING_LEDGER_TITLE_FONT }}
+            className="font-cinzel flex-shrink-0 px-[clamp(0.5rem,2cqmin,1.5rem)] font-bold uppercase leading-none tracking-[0.28em] text-neu-t1 neu-letterpress whitespace-nowrap"
+            style={{ fontSize: `min(${ONBOARDING_LEDGER_TITLE_FONT}, calc((100cqi - 5rem) / 15.3))` }}
           >
             Conversion Ledger
           </p>
