@@ -2,7 +2,6 @@
 
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gift, Heart } from "lucide-react";
 import { getSpecialDates } from "@/lib/specialDates";
 import { istToday, getCurrentIstDayUtcBounds } from "@/lib/istDate";
 
@@ -13,6 +12,12 @@ function parseYmd(dateStr: string): Date {
 
 function formatDay(dateStr: string): string {
   return new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(parseYmd(dateStr));
+}
+
+function formatMonthAbbrev(dateStr: string): string {
+  return new Intl.DateTimeFormat("en-GB", { month: "short" })
+    .format(parseYmd(dateStr))
+    .toUpperCase();
 }
 
 // "Today" / "passed" / "this month" are IST calendar comparisons (dry-audit
@@ -71,17 +76,27 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
           const isTodayCard = isToday(item.date);
           const isAnniversary = item.type === "anniversary";
           const isExpired = item.isExpired === true;
-          // Material now lives in globals.css utilities (top-lit, rim-light).
-          // Precedence matches the former inline branches: today (if not expired)
-          // → expired → anniversary → default.
-          const stateClass =
-            isTodayCard && !isExpired
-              ? "special-date-today"
-              : isExpired
-                ? "special-date-expired"
-                : isAnniversary
-                  ? "anniversary-highlight"
-                  : "special-date";
+
+          // Neumorphic row wash: butter = birthday, rose = anniversary; today
+          // gets a stronger wash + accent border + fuller raised shadow.
+          const washColor = isAnniversary ? "var(--neu-danger)" : "var(--neu-butter)";
+          const washPct = isTodayCard ? (isAnniversary ? 24 : 30) : isAnniversary ? 12 : 15;
+          const rowStyle = isExpired
+            ? {
+                background: "color-mix(in srgb, var(--neu-text-tertiary) 12%, transparent)",
+                border: "1px solid var(--neu-edge)",
+                boxShadow: "var(--neu-shadow-raised-sm)",
+              }
+            : {
+                background: `color-mix(in srgb, ${washColor} ${washPct}%, transparent)`,
+                border: isTodayCard
+                  ? "1px solid color-mix(in srgb, var(--neu-accent-deep) 35%, transparent)"
+                  : "1px solid var(--neu-edge)",
+                boxShadow: isTodayCard
+                  ? "var(--neu-shadow-raised)"
+                  : "var(--neu-shadow-raised-sm)",
+              };
+
           return (
             <motion.div
               key={item.id}
@@ -89,57 +104,50 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className={`
-                relative flex-shrink-0 flex w-full min-h-[clamp(70px,10cqh,160px)]
-                flex-row items-center justify-between gap-[clamp(1.25rem,1.5cqw,2.75rem)]
-                rounded-xl overflow-hidden px-[clamp(1.25rem,1.5cqw,2.75rem)] py-[clamp(0.875rem,1.4cqh,1.75rem)]
-                ${stateClass}
-              `}
+              className="relative flex-shrink-0 flex w-full min-h-[clamp(70px,10cqh,160px)] flex-row items-center gap-[clamp(1rem,1.4cqw,2.5rem)] rounded-neu-chip overflow-hidden px-[clamp(1rem,1.4cqw,2.5rem)] py-[clamp(0.875rem,1.4cqh,1.75rem)]"
+              style={rowStyle}
             >
-              <>
-                <div className="flex items-center justify-center flex-shrink-0">
-                  <span
-                    className={`font-montserrat font-bold text-[clamp(2rem,4cqw,3.1rem)] leading-[1.1] tabular-nums ${
-                      isExpired
-                        ? "text-stone-400/80"
-                        : isTodayCard
-                          ? "text-foil-gold"
-                          : "text-champagne/95"
-                    }`}
-                  >
-                    {formatDay(item.date)}
-                  </span>
-                </div>
-                <div
-                  className={`flex flex-1 min-w-0 items-center justify-center ${
-                    (isAnniversary && !isTodayCard && !isExpired) || isTodayCard
-                      ? "gap-4 sm:gap-6"
-                      : "gap-2"
+              {/* Calendar leaf — raised month-over-day tile */}
+              <div
+                className={`flex flex-col items-center justify-center flex-shrink-0 neu-raised-sm rounded-neu-chip px-[clamp(0.6rem,0.8cqw,1.4rem)] py-[clamp(0.35rem,0.6cqh,0.9rem)] ${
+                  isExpired ? "opacity-60" : ""
+                }`}
+              >
+                <span className="font-montserrat font-bold uppercase tracking-[0.26em] leading-none text-[clamp(0.85rem,1.1cqw,1.5rem)] text-neu-t3 ml-[0.26em]">
+                  {formatMonthAbbrev(item.date)}
+                </span>
+                <span
+                  className={`font-montserrat font-extrabold text-[clamp(2rem,4cqw,3.1rem)] leading-[1.1] tabular-nums ${
+                    isExpired ? "text-neu-t3" : "text-neu-t1"
                   }`}
                 >
-                  {isTodayCard && !isExpired && (
-                    <Gift
-                      className="flex-shrink-0 w-[clamp(2rem,3.5cqw,2.75rem)] h-[clamp(2rem,3.5cqw,2.75rem)] text-[#D4AF37]"
-                      strokeWidth={1.75}
-                      aria-hidden
-                    />
-                  )}
-                  {isAnniversary && !isTodayCard && !isExpired && (
-                    <Heart
-                      className="flex-shrink-0 w-[clamp(2rem,3.5cqw,2.75rem)] h-[clamp(2rem,3.5cqw,2.75rem)] text-rose-400/90 fill-rose-400/30"
-                      strokeWidth={1.75}
-                      aria-hidden
-                    />
-                  )}
-                  <span
-                    className={`font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] text-center leading-tight line-clamp-2 break-words ${
-                      isExpired ? "text-stone-400/75" : "text-champagne/90"
-                    }`}
-                  >
-                    {item.clientName}
-                  </span>
-                </div>
-              </>
+                  {formatDay(item.date)}
+                </span>
+              </div>
+
+              {/* Client name */}
+              <span
+                className={`flex-1 min-w-0 font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] text-center leading-tight line-clamp-2 break-words ${
+                  isExpired ? "text-neu-t3" : "text-neu-t1"
+                }`}
+              >
+                {item.clientName}
+              </span>
+
+              {/* Type glyph at row end — ✦ birthday · ♥ anniversary */}
+              <span
+                className="flex-shrink-0 leading-none neu-letterpress text-[clamp(1.8rem,2.6cqw,3rem)]"
+                style={{
+                  color: isExpired
+                    ? "var(--neu-text-tertiary)"
+                    : isAnniversary
+                      ? "var(--neu-danger-deep)"
+                      : "var(--neu-butter-deep)",
+                }}
+                aria-label={isAnniversary ? "Anniversary" : "Birthday"}
+              >
+                {isAnniversary ? "♥" : "✦"}
+              </span>
             </motion.div>
           );
         })}

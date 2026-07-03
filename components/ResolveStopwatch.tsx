@@ -7,11 +7,10 @@
  * Queendom's most recent ticket resolution (QueenStats.lastResolvedAtMs,
  * maintained monotonically by useDashboardData). When a ticket turns terminal
  * the anchor jumps forward, the digits snap back to 00:00 and the card
- * flashes an emerald surge. The composition (digits, hero glow, flanking
- * rules, units caption) shifts hue with age, reusing the dashboard's ticket
- * status colors: emerald → pending red (red-400 foil) at 30 min → overdue
- * neon red (error-overdue-glow, the leaderboard Overdue count) at 1 h
- * (PHASE_STYLES).
+ * flashes a sage surge. The composition (plinth pill, digits, dot, flanking
+ * rules, units caption) shifts hue with age using the neumorphic semantic
+ * colors: accent-deep (healthy) → danger-deep at 30 min → danger-deep on a
+ * danger-washed plinth at 1 h (PHASE_STYLES).
  *
  * TV-grade clock discipline (dry-audit H3/H4): the 1-second tick runs only
  * while this card is actually visible — useScreenActive() is false when the
@@ -30,28 +29,35 @@ interface ResolveStopwatchProps {
 }
 
 // ── Age phases: the longer since the last resolve, the hotter the warning ────
-// < 30 min emerald (healthy) → < 1 h pending red (attention — the red-400 the
-// Pending counts use) → 1 h+ overdue neon red (error-overdue-glow, exactly the
-// leaderboard's Overdue count). Class strings are verbatim literals so
-// Tailwind JIT emits them.
+// < 30 min healthy → < 1 h attention → 1 h+ overdue. Class strings are
+// verbatim literals so Tailwind JIT emits them.
 const PHASE_AGING_MS = 30 * 60_000;
 const PHASE_OVERDUE_MS = 60 * 60_000;
 
+// Neumorphic phases: the digits sit on a raised honey-gold plinth pill with a
+// breathing status dot. Hue escalates with age — accent-deep (healthy) →
+// danger-deep at 30 min → danger-deep + danger-washed plinth at 1 h.
 const PHASE_STYLES = {
   healthy: {
-    digits: "text-foil-emerald emerald-glow-hero",
-    units: "text-emerald-200/75",
-    rule: "via-emerald-300/20 to-emerald-300/45",
+    digits: "text-neu-accent-deep",
+    units: "text-neu-t2",
+    ruleColor: "var(--neu-sage-deep)",
+    dotColor: "var(--neu-sage-deep)",
+    plinthWash: "var(--neu-accent)",
   },
   attention: {
-    digits: "text-foil-red red-glow-hero",
-    units: "text-red-200/75",
-    rule: "via-red-400/25 to-red-400/50",
+    digits: "text-neu-danger-deep",
+    units: "text-neu-danger-deep",
+    ruleColor: "var(--neu-danger-deep)",
+    dotColor: "var(--neu-danger-deep)",
+    plinthWash: "var(--neu-accent)",
   },
   overdue: {
-    digits: "error-overdue-glow",
-    units: "text-red-400/85",
-    rule: "via-red-600/30 to-red-600/60",
+    digits: "text-neu-danger-deep font-extrabold",
+    units: "text-neu-danger-deep",
+    ruleColor: "var(--neu-danger-deep)",
+    dotColor: "var(--neu-danger-deep)",
+    plinthWash: "var(--neu-danger)",
   },
 } as const;
 
@@ -111,48 +117,70 @@ export default function ResolveStopwatch({ lastResolvedAtMs }: ResolveStopwatchP
   // blended under its SectionDivider title.
   const digitsSizeClass =
     elapsed && elapsed.digits.length > 5
-      ? "text-[min(68cqh,19cqw)]"
-      : "text-[min(68cqh,31cqw)]";
+      ? "text-[min(50cqh,16cqw)]"
+      : "text-[min(50cqh,26cqw)]";
 
-  // No overflow-hidden: with the plinth gone there is nothing to clip, and the
-  // 68+16+3cqh stack leaves real headroom — the digits can never be cut
-  // against the title again (the band itself still clips as the outer guard).
   return (
     <div className="relative flex h-full w-full min-h-0 flex-col items-center justify-center [container-type:size]">
       {pulseKey > 0 && (
         <motion.div
           key={pulseKey}
-          className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-emerald-400/25 via-emerald-500/10 to-transparent"
+          className="pointer-events-none absolute inset-0 rounded-neu-tile"
+          style={{
+            background:
+              "linear-gradient(to bottom, color-mix(in srgb, var(--neu-sage) 32%, transparent), transparent)",
+          }}
           initial={surgeBgVariants.initial}
           animate={surgeBgVariants.animate}
           transition={surgeBgVariants.transition}
         />
       )}
 
-      {/* Digits flanked by hairline rules (the design system's divider device):
+      {/* Digits on a raised honey-gold plinth pill, flanked by hairline rules:
           the rules flex-fill whatever width the current format leaves free, so
-          a short MM:SS never floats in an empty plinth — and they recede as
-          HH:MM:SS grows into the space. */}
-      <div className="flex w-full items-center justify-center gap-[3cqw] px-[4cqw]">
+          a short MM:SS never floats — and they recede as HH:MM:SS grows. */}
+      <div className="flex w-full items-center justify-center gap-[2cqw] px-[4cqw]">
         <span
-          className={`h-px min-w-0 flex-1 bg-gradient-to-r from-transparent ${phase.rule}`}
+          className="h-px min-w-0 flex-1"
+          style={{
+            background: `linear-gradient(to right, transparent, color-mix(in srgb, ${phase.ruleColor} 40%, transparent))`,
+          }}
           aria-hidden
         />
         <span
-          className={`font-montserrat font-bold ${digitsSizeClass} leading-none tracking-[0.1em] tabular-nums ${
-            elapsed == null ? "text-champagne/35" : phase.digits
-          }`}
+          className="flex items-center gap-[1.2cqw] rounded-full border border-neu-edge shadow-neu px-[3cqw] py-[3cqh]"
+          style={{
+            background: `linear-gradient(145deg, color-mix(in srgb, ${phase.plinthWash} 20%, var(--neu-surface)), color-mix(in srgb, ${phase.plinthWash} 8%, var(--neu-surface)))`,
+          }}
         >
-          {elapsed?.digits ?? "--:--"}
+          <span
+            className="neu-anim-breathe inline-block flex-shrink-0 rounded-full"
+            style={{
+              width: "min(8cqh,1.4cqw)",
+              height: "min(8cqh,1.4cqw)",
+              background: phase.dotColor,
+            }}
+            aria-hidden
+          />
+          <span
+            className={`font-montserrat font-bold ${digitsSizeClass} leading-none tracking-[0.08em] tabular-nums ${
+              elapsed == null ? "text-neu-t3" : phase.digits
+            }`}
+          >
+            {elapsed?.digits ?? "--:--"}
+          </span>
         </span>
         <span
-          className={`h-px min-w-0 flex-1 bg-gradient-to-l from-transparent ${phase.rule}`}
+          className="h-px min-w-0 flex-1"
+          style={{
+            background: `linear-gradient(to left, transparent, color-mix(in srgb, ${phase.ruleColor} 40%, transparent))`,
+          }}
           aria-hidden
         />
       </div>
       {elapsed != null && (
         <span
-          className={`mt-[3cqh] font-cinzel font-semibold uppercase leading-none tracking-[0.4em] text-[min(16cqh,3rem)] ${phase.units}`}
+          className={`mt-[2cqh] font-cinzel font-semibold uppercase leading-none tracking-[0.4em] text-[min(14cqh,3rem)] ${phase.units}`}
         >
           {elapsed.units}
         </span>
