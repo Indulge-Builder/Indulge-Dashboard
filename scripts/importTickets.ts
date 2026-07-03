@@ -1,11 +1,32 @@
 /**
- * One-time script: import historical Freshdesk tickets from CSV into Supabase tickets table.
+ * Bulk import Freshdesk tickets from CSV into the Supabase `tickets` table
+ * (upsert on ticket_id, batches of 400).
  *
  * Usage:
  *   npx tsx scripts/importTickets.ts <path-to-tickets.csv>
  *   npm run import-tickets -- path/to/tickets.csv
  *
- * Loads .env.local from project root so NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.
+ * This is the ONLY sanctioned bulk-import path. Never import a ticket CSV
+ * through the Supabase table editor: Freshdesk exports carry naive IST
+ * wall-clock timestamps, and the table editor stores them verbatim as UTC,
+ * shifting every instant +5:30 into the future (this froze the
+ * ResolveStopwatch at 00:00 on 2026-07-03). All timestamp conversion goes
+ * through lib/istDate.ts — the same service the Freshdesk webhook and the
+ * dashboard's display math use (naive → Asia/Kolkata, stored as UTC ISO).
+ *
+ * Accepts both header conventions:
+ *   - Freshdesk export:  "Ticket ID", "Status", "Agent", "Group",
+ *                        "Created time", "Resolved time", "Tags"
+ *   - DB-style export:   ticket_id, status, agent_name, queendom_name,
+ *                        created_at, resolved_at, is_escalated, subject
+ *
+ * `tags` is JSONB in the DB and is never written here (the Freshdesk "Tags"
+ * export is a plain comma string, not JSON) — it only feeds the overdue_sync
+ * escalation fallback. `is_incomplete` is webhook-maintained and not part of
+ * any export; a wipe-and-reimport resets it to the column default (false).
+ *
+ * Loads .env.local from project root so NEXT_PUBLIC_SUPABASE_URL and
+ * SUPABASE_SERVICE_ROLE_KEY are set.
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -39,42 +60,66 @@ interface TicketRow {
   queendom_name: string;
   created_at: string;
   resolved_at: string | null;
-  tags: string;
   is_escalated: boolean;
+  subject?: string;
 }
 
-function parseTimestamp(value: string | undefined): string | null {
-  if (value == null || String(value).trim() === "") return null;
-  return timestampStringToIsoUtcForDb(String(value).trim());
+/** First non-empty value among the given header names (DB-style or Freshdesk). */
+function pick(row: CsvRow, ...headers: string[]): string {
+  for (const h of headers) {
+    const v = row[h];
+    if (v != null && String(v).trim() !== "") return String(v).trim();
+  }
+  return "";
+}
+
+function parseTimestamp(value: string): string | null {
+  if (value === "" || value.toUpperCase() === "NULL") return null;
+  return timestampStringToIsoUtcForDb(value);
+}
+
+function parseBool(value: string): boolean {
+  const v = value.trim().toUpperCase();
+  return v === "TRUE" || v === "1";
 }
 
 function transformRow(row: CsvRow): TicketRow | null {
-  const ticketIdRaw = row["Ticket ID"];
-  if (ticketIdRaw == null || String(ticketIdRaw).trim() === "") return null;
+  const ticketIdRaw = pick(row, "ticket_id", "Ticket ID");
+  if (!ticketIdRaw) return null;
+  const ticketId = String(Number(ticketIdRaw) || ticketIdRaw);
 
-  const ticketId = String(Number(ticketIdRaw) || ticketIdRaw.trim());
-  const status = (row["Status"] ?? "").trim() || "open";
-  const agentName = (row["Agent"] ?? "").trim();
-  const queendomName = (row["Group"] ?? "").trim();
+  const status = pick(row, "status", "Status") || "open";
+  const agentName = pick(row, "agent_name", "Agent");
+  const queendomName = pick(row, "queendom_name", "Group");
   if (!queendomName) return null;
 
-  const createdAt = parseTimestamp(row["Created time"]);
+  const createdAt = parseTimestamp(pick(row, "created_at", "Created time"));
   if (!createdAt) return null;
+  const resolvedAt = parseTimestamp(pick(row, "resolved_at", "Resolved time"));
 
-  const resolvedAt = parseTimestamp(row["Resolved time"]);
-  const tags = (row["Tags"] ?? "").trim();
-  const isEscalated = tags.includes("overdue_sync");
+  // Explicit is_escalated column wins; Freshdesk exports without one derive it
+  // from the overdue_sync tag (same signal the escalation webhook path uses).
+  const tags = pick(row, "tags", "Tags");
+  const isEscalated =
+    parseBool(pick(row, "is_escalated", "Is escalated")) ||
+    tags.includes("overdue_sync");
 
-  return {
+  const ticket: TicketRow = {
     ticket_id: ticketId,
     status,
     agent_name: agentName,
     queendom_name: queendomName,
     created_at: createdAt,
     resolved_at: resolvedAt,
-    tags,
     is_escalated: isEscalated,
   };
+
+  // Only send subject when present so an export without the column can't
+  // blank webhook-populated values on upsert (mirrors the webhook rule).
+  const subject = pick(row, "subject", "Subject");
+  if (subject) ticket.subject = subject;
+
+  return ticket;
 }
 
 function readCsv(filePath: string): Promise<TicketRow[]> {
@@ -130,6 +175,23 @@ async function main() {
   if (allRows.length === 0) {
     console.log("No rows to import. Done.");
     process.exit(0);
+  }
+
+  // Sanity gate: a correctly converted export can never produce instants
+  // meaningfully in the future. Catching it here beats debugging a frozen
+  // stopwatch on the TV.
+  const nowMs = Date.now();
+  const future = allRows.filter(
+    (r) =>
+      new Date(r.created_at).getTime() > nowMs + 60_000 ||
+      (r.resolved_at != null &&
+        new Date(r.resolved_at).getTime() > nowMs + 60_000),
+  );
+  if (future.length > 0) {
+    console.error(
+      `Aborting: ${future.length} rows have timestamps in the future after IST→UTC conversion (first: ticket ${future[0].ticket_id}). The CSV timestamps are probably already UTC — check the export source.`,
+    );
+    process.exit(1);
   }
 
   let batchIndex = 0;
