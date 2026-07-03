@@ -399,7 +399,7 @@ VOID_STATUSES            = { spam, deleted }
 
 > Source of truth: `lib/agentRoster.ts` (a name missing there silently zeroes that agent's stats on the TV).
 
-**Queendom Ananyshree (9):** Sanika Ahire, Sakshi Bhutkar, Poorti Gulati, Anshika Eark, Ajith Sajan, Khushi Shah, Palak Kataria, Athul Jose, Ritika Jain.
+**Queendom Ananyshree (9):** Sanika Ahire, Sakshi Bhutkar, Poorti Gulati, Anshika Eark, Ajith Sajan, Khushi Shah, Palak Kataria, Athul Jose, Edwin Fernandes.
 
 **Queendom Anishqa (10):** Sagar Ali, Savio Francis Fernandes, Pranav Gadekar, Dhanush K, Charlotte Dias, Ria Pujhari, Rupali Chodankar, Eeti Srinivsulu, Ekta Nihalani, Rutika Kale.
 
