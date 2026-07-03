@@ -59,12 +59,13 @@
     inset 2px 2px 4px   rgb(var(--neu-dark) / 0.35),
     inset -2px -2px 4px rgb(var(--neu-light) / 0.60);
 
-  /* Radii — PEBBLE scale (final, only scale) */
-  --neu-radius-card:  22px;   /* screen panels */
-  --neu-radius-panel: 20px;
-  --neu-radius-field: 15px;
-  --neu-radius-tile:  12px;   /* metric tiles, section cards */
-  --neu-radius-chip:  9px;    /* rows, chips, date tiles */
+  /* Radii — PEBBLE scale, softened +20% for the TV (2026-07-03 request;
+     handoff originals: 22/20/15/12/9) */
+  --neu-radius-card:  26px;   /* screen panels */
+  --neu-radius-panel: 24px;
+  --neu-radius-field: 18px;
+  --neu-radius-tile:  14px;   /* metric tiles, section cards */
+  --neu-radius-chip:  11px;   /* rows, chips, date tiles */
   --neu-radius-pill:  999px;
 
   /* Accent — honey gold (fixed; the dashboard's single theme) */

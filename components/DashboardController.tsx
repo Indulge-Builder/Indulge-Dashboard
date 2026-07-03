@@ -160,7 +160,9 @@ export default function DashboardController({
 
       {/* Screens stay mounted; only opacity/z-index changes (cinematic crossfade, no translateX tearing). */}
       <ScreenLayer isActive={activeScreen === "concierge"}>
-        <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch">
+        {/* Gutter padding lets the raised panel corners + paired shadows read
+            against the canvas instead of dying at the screen edge. */}
+        <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch px-[0.6cqw] py-[0.9cqh]">
           {/* Anishqa panel — isolated so its crash cannot affect Ananyshree */}
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
             <ErrorBoundary label="Anishqa" fillParent>

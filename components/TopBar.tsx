@@ -49,7 +49,7 @@ function LiveTimeText({
 export default function TopBar() {
   return (
     <motion.header
-      className="relative flex items-center justify-between px-6 sm:px-12 lg:px-[4.5rem] bg-neu-surface border-b border-neu-edge shadow-neu z-10 flex-shrink-0"
+      className="relative flex items-center justify-between px-6 sm:px-12 lg:px-[4.5rem] neu-raised rounded-neu-field z-10 flex-shrink-0 mx-[0.6cqw] mt-[0.8cqh]"
       style={{ height: "18cqh", minHeight: "96px", maxHeight: "165px" }}
       initial={{ opacity: 0, y: -42 }}
       animate={{ opacity: 1, y: 0 }}
