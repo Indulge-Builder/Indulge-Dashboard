@@ -49,38 +49,42 @@ function LiveTimeText({
 export default function TopBar() {
   return (
     <motion.header
-      className="relative flex items-center justify-between px-6 sm:px-12 lg:px-[4.5rem] border-b border-gold-500/15 z-10 flex-shrink-0"
+      className="relative flex items-center justify-between px-6 sm:px-12 lg:px-[4.5rem] bg-neu-surface border-b border-neu-edge shadow-neu z-10 flex-shrink-0"
       style={{ height: "18cqh", minHeight: "96px", maxHeight: "165px" }}
       initial={{ opacity: 0, y: -42 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: EASE_LUXURY }}
     >
-      {/* Ambient horizontal glow */}
-      <div className="absolute inset-0 bg-gradient-to-r from-gold-500/5 via-gold-500/[0.02] to-gold-500/5 pointer-events-none" />
-
       {/* ── Date (left) — hidden on small screens ── */}
       <LiveTimeText
         formatter={DATE_FORMATTER}
-        className="hidden md:block font-montserrat text-[clamp(24px,3.075cqw,45px)] tracking-[0.35em] uppercase text-gold-500 tabular-nums flex-shrink-0"
+        className="hidden md:block font-montserrat text-[clamp(24px,3.075cqw,45px)] tracking-[0.35em] uppercase text-neu-t2 tabular-nums flex-shrink-0"
       />
       {/* Spacer so branding stays centred when date is hidden */}
       <div className="md:hidden flex-1" />
 
-      {/* ── Central Branding ── */}
+      {/* ── Central Branding — title case, letterpress (glows retired) ── */}
       <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center select-none">
-        <h1 className="font-cinzel text-[clamp(2.1rem,4.65cqw,4.425rem)] tracking-[0.3em] sm:tracking-[0.38em] text-gold-400 gold-glow uppercase leading-none whitespace-nowrap">
+        <h1 className="font-cinzel font-extrabold text-[clamp(2.1rem,4.65cqw,4.425rem)] tracking-[0.3em] sm:tracking-[0.38em] text-neu-accent-deep neu-letterpress leading-none whitespace-nowrap">
           Indulge Global
         </h1>
       </div>
 
-      {/* ── Clock + Live (right) ── */}
+      {/* ── Raised clock pill (right): pulsing sage live-dot · time · IST tag ── */}
       <div className="flex h-full items-center justify-end gap-[clamp(1.5rem,2cqw,4rem)] flex-shrink-0">
-        <LiveTimeText
-          formatter={TIME_FORMATTER}
-          className="font-montserrat text-[clamp(27px,3.375cqw,48px)] tracking-[0.25em] sm:tracking-[0.35em] text-gold-400 tabular-nums"
-        />
-        <span className="inline-flex items-center rounded-full border border-gold-500/40 bg-gold-500/5 px-6 py-[0.5625rem] font-montserrat text-[clamp(24px,2.775cqw,42px)] tracking-[0.3em] uppercase text-gold-400 shadow-[0_0_18px_rgba(201,168,76,0.15)]">
-          Live
+        <span className="inline-flex items-center gap-[clamp(0.75rem,0.9cqw,1.75rem)] rounded-full neu-raised-sm px-6 py-[0.5625rem]">
+          <span
+            className="inline-block rounded-full bg-neu-sage-deep neu-anim-dot-pulse flex-shrink-0"
+            style={{ width: "clamp(10px,0.5cqw,18px)", height: "clamp(10px,0.5cqw,18px)" }}
+            aria-hidden
+          />
+          <LiveTimeText
+            formatter={TIME_FORMATTER}
+            className="font-montserrat text-[clamp(27px,3.375cqw,48px)] tracking-[0.25em] sm:tracking-[0.35em] text-neu-t1 tabular-nums"
+          />
+          <span className="font-montserrat font-semibold text-[clamp(16px,1.5cqw,26px)] tracking-[0.3em] uppercase text-neu-t3">
+            IST
+          </span>
         </span>
       </div>
     </motion.header>
