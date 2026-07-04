@@ -25,8 +25,18 @@ export type DaypartTheme = "light" | "dark";
 
 const RECHECK_MS = 60_000;
 
+/**
+ * TEMPORARY (2026-07-04): the cream ("light") theme is pinned as the default
+ * around the clock while the charcoal ("dark") theme is still being refined.
+ * The daypart logic below is preserved but short-circuited — delete the early
+ * return to re-enable the automatic cream/charcoal flip. The `?neu=dark` dev
+ * override still works for previewing/refining the dark theme.
+ */
+const FORCE_LIGHT = true;
+
 /** Cream 04:00–15:59 IST, charcoal 16:00–03:59 IST. */
 export function currentDaypartTheme(): DaypartTheme {
+  if (FORCE_LIGHT) return "light";
   const hour = toISTHour(new Date().toISOString());
   return hour >= 4 && hour < 16 ? "light" : "dark";
 }
