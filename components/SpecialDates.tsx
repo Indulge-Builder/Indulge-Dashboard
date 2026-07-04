@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSpecialDates } from "@/lib/specialDates";
 import { istToday, getCurrentIstDayUtcBounds } from "@/lib/istDate";
@@ -77,25 +77,22 @@ export default function SpecialDates({ queendomId }: SpecialDatesProps) {
           const isAnniversary = item.type === "anniversary";
           const isExpired = item.isExpired === true;
 
-          // Neumorphic row wash: butter = birthday, rose = anniversary; today
-          // gets a stronger wash + accent border + fuller raised shadow.
-          const washColor = isAnniversary ? "var(--neu-danger)" : "var(--neu-butter)";
-          const washPct = isTodayCard ? (isAnniversary ? 24 : 30) : isAnniversary ? 12 : 15;
-          const rowStyle = isExpired
-            ? {
-                background: "color-mix(in srgb, var(--neu-text-tertiary) 12%, transparent)",
-                border: "1px solid var(--neu-edge)",
-                boxShadow: "var(--neu-shadow-raised-sm)",
-              }
-            : {
-                background: `color-mix(in srgb, ${washColor} ${washPct}%, transparent)`,
-                border: isTodayCard
-                  ? "1px solid color-mix(in srgb, var(--neu-accent-deep) 35%, transparent)"
-                  : "1px solid var(--neu-edge)",
-                boxShadow: isTodayCard
-                  ? "var(--neu-shadow-raised)"
-                  : "var(--neu-shadow-raised-sm)",
-              };
+          // Plain rows (washes removed 2026-07-04 request): the raised leaf
+          // tile + type glyph carry the row; only TODAY gets a raised surface
+          // with an accent border so it still pops.
+          const rowStyle: CSSProperties =
+            isTodayCard && !isExpired
+              ? {
+                  background: "var(--neu-surface)",
+                  border:
+                    "1px solid color-mix(in srgb, var(--neu-accent-deep) 35%, transparent)",
+                  boxShadow: "var(--neu-shadow-raised)",
+                }
+              : {
+                  background: "transparent",
+                  border: "1px solid transparent",
+                  boxShadow: "none",
+                };
 
           return (
             <motion.div
