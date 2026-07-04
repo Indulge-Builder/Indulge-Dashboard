@@ -7,12 +7,11 @@
  * new-lead volume for the current IST calendar month (day 1 → last day).
  * Lines only render up to today; future days are blank.
  *
- * Visual hierarchy (highest → lowest expected volume) — neumorphic series
- * tokens (app/indulge-neumorphic-tokens.css):
- *   Indulge Global  — honey gold   var(--neu-series-global)
- *   Indulge Shop    — powder       var(--neu-series-shop)
- *   Indulge House   — sage         var(--neu-series-house)
- *   Indulge Legacy  — lilac        var(--neu-series-legacy)
+ * Visual hierarchy (highest → lowest expected volume):
+ *   Indulge Global  — soft blue    #6B8FFF
+ *   Indulge Shop    — warm gold    #FFB020
+ *   Indulge House   — emerald      #34D399
+ *   Indulge Legacy  — lavender     #C084FC
  *
  * Event burst system — when a new lead fires from any team:
  *   1. Line surge — entire vertical's line briefly ignites
@@ -27,11 +26,8 @@ import type { VerticalTrendPoint } from "@/lib/onboardingTypes";
 
 // ── SVG coordinate system ─────────────────────────────────────────────────────
 
-// Viewbox aspect ≈ the card's typical graph slot; the SVG stretches to fill
-// the slot exactly (preserveAspectRatio="none"), so this ratio is the point
-// of zero text distortion, not a hard size.
 const VB_W    = 460;
-const VB_H    = 310;
+const VB_H    = 248;
 const ML      = 36;
 const MT      = 26;
 const MR      = 12;
@@ -43,10 +39,10 @@ const BOTTOM  = MT + CHART_H;
 // ── Vertical color palette ────────────────────────────────────────────────────
 
 export const VERTICAL_COLORS = {
-  "Indulge Global":  { line: "var(--neu-series-global)", ring: "var(--neu-series-global)", label: "Global"  },
-  "Indulge Shop":    { line: "var(--neu-series-shop)",   ring: "var(--neu-series-shop)",   label: "Shop"    },
-  "Indulge House":   { line: "var(--neu-series-house)",  ring: "var(--neu-series-house)",  label: "House"   },
-  "Indulge Legacy":  { line: "var(--neu-series-legacy)", ring: "var(--neu-series-legacy)", label: "Legacy"  },
+  "Indulge Global":  { line: "#6B8FFF", ring: "#5A7FFF", label: "Global"  },
+  "Indulge Shop":    { line: "#FFB020", ring: "#E09A30", label: "Shop"    },
+  "Indulge House":   { line: "#34D399", ring: "#22C585", label: "House"   },
+  "Indulge Legacy":  { line: "#C084FC", ring: "#A855F7", label: "Legacy"  },
 } as const;
 
 export type VerticalKey = keyof typeof VERTICAL_COLORS;
@@ -195,15 +191,15 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
     if (drawn) {
       return (
         <motion.path key={`${id}-u`} d={d} animate={{ d }} transition={updateTx}
-          fill="none" stroke={color} strokeWidth={2}
+          fill="none" stroke={color} strokeWidth={1.4}
           strokeLinecap="round" strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke" />
+          filter="url(#plg-glow)" vectorEffect="non-scaling-stroke" />
       );
     }
     return (
       <motion.path key={`${id}-i`} d={d} fill="none" stroke={color}
-        strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
+        strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"
+        filter="url(#plg-glow)" vectorEffect="non-scaling-stroke"
         initial={{ pathLength: 0, opacity: 0 }}
         animate={{ pathLength: 1, opacity: 1 }}
         transition={reduced ? { duration: 0 } : {
@@ -224,9 +220,9 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
 
     return (
       <g key={event.id} style={{ pointerEvents: "none" }}>
-        <path d={vGeo.d} fill="none" stroke={color} strokeWidth={2.6}
+        <path d={vGeo.d} fill="none" stroke={color} strokeWidth={2}
           strokeLinecap="round" strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
+          filter="url(#plg-glow)" vectorEffect="non-scaling-stroke"
           style={{ animation: "plg-surge 0.9s ease-out forwards" }} />
 
         <g transform={`translate(${term.x.toFixed(2)}, ${term.y.toFixed(2)})`}>
@@ -250,7 +246,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative" }}>
+    <div style={{ width: "100%", position: "relative" }}>
       {/* Toggle: today-only ↔ all-points */}
       <button
         onClick={() => setShowAllLabels((v) => !v)}
@@ -262,37 +258,33 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
           width:          "24px",
           height:         "24px",
           borderRadius:   "7px",
-          background:     showAllLabels
-            ? "color-mix(in srgb, var(--neu-powder) 30%, var(--neu-surface))"
-            : "var(--neu-surface)",
-          border:         "1px solid var(--neu-edge)",
+          background:     showAllLabels ? "rgba(107,143,255,0.15)" : "rgba(255,255,255,0.05)",
+          border:         showAllLabels ? "1px solid rgba(107,143,255,0.50)" : "1px solid rgba(255,255,255,0.13)",
           cursor:         "pointer",
           display:        "flex",
           alignItems:     "center",
           justifyContent: "center",
           padding:        0,
-          transition:     "background 0.2s, box-shadow 0.2s",
+          transition:     "background 0.2s, border-color 0.2s",
           zIndex:         10,
-          boxShadow:      showAllLabels
-            ? "var(--neu-shadow-pressed)"
-            : "var(--neu-shadow-raised-sm)",
+          boxShadow:      showAllLabels ? "0 0 8px rgba(107,143,255,0.28)" : "none",
         }}
       >
         <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
           {/* Dashed baseline */}
           <line x1="1" y1="5" x2="13" y2="5"
-            stroke={showAllLabels ? "var(--neu-powder-deep)" : "var(--neu-text-tertiary)"}
+            stroke={showAllLabels ? "rgba(107,143,255,0.55)" : "rgba(255,255,255,0.22)"}
             strokeWidth="0.9" strokeDasharray="2 1.5" />
           {showAllLabels ? (
             /* Three dots = all points mode */
             <>
-              <circle cx="1.5"  cy="5" r="1.6" fill="var(--neu-powder-deep)" />
-              <circle cx="7"    cy="5" r="1.6" fill="var(--neu-powder-deep)" />
-              <circle cx="12.5" cy="5" r="1.6" fill="var(--neu-powder-deep)" />
+              <circle cx="1.5"  cy="5" r="1.6" fill="rgba(107,143,255,0.90)" />
+              <circle cx="7"    cy="5" r="1.6" fill="rgba(107,143,255,0.90)" />
+              <circle cx="12.5" cy="5" r="1.6" fill="rgba(107,143,255,0.90)" />
             </>
           ) : (
             /* Single dot at end = today-only mode */
-            <circle cx="12.5" cy="5" r="1.6" fill="var(--neu-text-tertiary)" />
+            <circle cx="12.5" cy="5" r="1.6" fill="rgba(255,255,255,0.55)" />
           )}
         </svg>
       </button>
@@ -335,8 +327,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
       <svg
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         width="100%"
-        height="100%"
-        preserveAspectRatio="none"
+        height="auto"
         role="img"
         aria-label="Monthly leads by Indulge vertical — current month"
         style={{ display: "block" }}
@@ -355,21 +346,25 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
             <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
 
-          {/* Area fill gradients per vertical — 7% wash fading to 0 */}
+          {/* Area fill gradients per vertical */}
           {VERTICALS.map((v) => {
             const vGeo = geo.verticals[v];
             return (
               <linearGradient key={v} id={`plg-fill-${v.replace(/\s+/g, "-")}`}
                 x1="0" y1={vGeo?.topY ?? MT} x2="0" y2={BOTTOM}
                 gradientUnits="userSpaceOnUse">
-                <stop offset="0%"   stopColor={VERTICAL_COLORS[v].line} stopOpacity="0.07" />
+                <stop offset="0%"   stopColor={VERTICAL_COLORS[v].line} stopOpacity="0.10" />
                 <stop offset="100%" stopColor={VERTICAL_COLORS[v].line} stopOpacity="0" />
               </linearGradient>
             );
           })}
         </defs>
 
-        {/* Grid lines + Y-axis labels — putty-toned dashed rules */}
+        {/* Chart area background */}
+        <rect x={ML} y={MT} width={CHART_W} height={CHART_H}
+          fill="rgba(255,255,255,0.015)" rx="2" />
+
+        {/* Grid lines + Y-axis labels */}
         {Y_FRACS.map((f) => {
           const yPos      = MT + f * CHART_H;
           const value     = Math.round(geo.maxVal * (1 - f));
@@ -378,18 +373,14 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
             <g key={f}>
               <line
                 x1={ML} y1={yPos} x2={ML + CHART_W} y2={yPos}
-                stroke={
-                  isBaseline
-                    ? "color-mix(in srgb, var(--neu-text-tertiary) 45%, transparent)"
-                    : "color-mix(in srgb, var(--neu-text-tertiary) 30%, transparent)"
-                }
+                stroke={isBaseline ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.055)"}
                 strokeWidth={isBaseline ? "0.8" : "0.5"}
                 strokeDasharray={isBaseline ? undefined : "3 4"}
               />
               <line x1={ML - 3} y1={yPos} x2={ML} y2={yPos}
-                stroke="color-mix(in srgb, var(--neu-text-tertiary) 50%, transparent)" strokeWidth="0.6" />
+                stroke="rgba(255,255,255,0.16)" strokeWidth="0.6" />
               <text x={ML - 5} y={yPos} textAnchor="end" dominantBaseline="middle"
-                fill="var(--neu-text-tertiary)" fontSize="7"
+                fill="rgba(255,255,255,0.28)" fontSize="7"
                 fontFamily="var(--font-montserrat, system-ui, sans-serif)">
                 {value}
               </text>
@@ -399,12 +390,12 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
 
         {/* Left Y-axis rail */}
         <line x1={ML} y1={MT} x2={ML} y2={BOTTOM}
-          stroke="color-mix(in srgb, var(--neu-text-tertiary) 35%, transparent)" strokeWidth="0.6" />
+          stroke="rgba(255,255,255,0.08)" strokeWidth="0.6" />
 
         {geo.isEmpty ? (
           <text x={VB_W / 2} y={VB_H / 2}
             textAnchor="middle" dominantBaseline="middle"
-            fill="var(--neu-text-tertiary)" fontSize="11"
+            fill="rgba(255,255,255,0.20)" fontSize="11"
             fontFamily="var(--font-montserrat, system-ui, sans-serif)">
             Collecting data…
           </text>
@@ -444,8 +435,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
                       animation: reduced ? undefined : "plg-ring 2.5s ease-out infinite",
                       animationDelay: `${vi * 0.4}s`,
                     }} />
-                  <circle cx={term.x} cy={term.y} r="2.5" fill={color}
-                    stroke="var(--neu-surface)" strokeWidth="0.8" />
+                  <circle cx={term.x} cy={term.y} r="2.5" fill={color} filter="url(#plg-dot)" />
                 </g>
               );
             })}
@@ -497,7 +487,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
                   textAnchor="start"
                   dominantBaseline="middle"
                   fill={color}
-                  stroke="var(--neu-surface)"
+                  stroke="rgba(0,0,0,0.82)"
                   strokeWidth="2.8"
                   strokeLinejoin="round"
                   fontSize="7.5"
@@ -514,7 +504,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
             {geo.xLabels.map(({ x, label }) => (
               <text key={label} x={x} y={BOTTOM + 8}
                 textAnchor="middle" dominantBaseline="hanging"
-                fill="var(--neu-text-tertiary)" fontSize="7.5"
+                fill="rgba(255,255,255,0.22)" fontSize="7.5"
                 fontFamily="var(--font-montserrat, system-ui, sans-serif)">
                 {label}
               </text>
@@ -531,7 +521,7 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
                 <g key={`leg-${v}`}>
                   <circle cx={cx} cy={cy} r="2.5" fill={color} fillOpacity="0.9" />
                   <text x={cx + 5} y={cy} dominantBaseline="middle"
-                    fill="var(--neu-text-secondary)" fontSize="7"
+                    fill="rgba(255,255,255,0.38)" fontSize="7"
                     fontFamily="var(--font-montserrat, system-ui, sans-serif)">
                     {VERTICAL_COLORS[v].label}
                   </text>

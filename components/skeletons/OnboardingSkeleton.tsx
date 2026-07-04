@@ -27,9 +27,8 @@ function SkAgentCard({ delay = 0 }: { delay?: number }) {
     <div
       className="relative flex min-h-0 w-full flex-col overflow-hidden rounded-xl"
       style={{
-        border: "1px solid var(--neu-edge)",
-        background: "var(--neu-surface)",
-        boxShadow: "var(--neu-shadow-raised-sm)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        background: "#0a0f18",
         gap: "clamp(4px,0.6cqmin,8px)",
         padding: "clamp(5px,0.7cqmin,10px)",
       }}
@@ -75,9 +74,8 @@ function SkDeptColumn({
       <div
         className="relative flex min-h-0 flex-1 flex-col rounded-2xl"
         style={{
-          border: "1px solid var(--neu-edge)",
-          background: "var(--neu-surface)",
-          boxShadow: "var(--neu-shadow-raised)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          background: "#0a0f18",
           padding: "clamp(0.45rem,0.9cqmin,1.5rem)",
           gap: "clamp(0.2rem,0.4cqmin,0.5rem)",
         }}
@@ -95,7 +93,7 @@ function SkDeptColumn({
             <div
               className="h-px flex-1"
               style={{
-                background: `linear-gradient(to right, transparent, color-mix(in srgb, ${accentColor} 27%, transparent), color-mix(in srgb, ${accentColor} 53%, transparent))`,
+                background: `linear-gradient(to right, transparent, ${accentColor}44, ${accentColor}88)`,
               }}
             />
             <Sk
@@ -109,7 +107,7 @@ function SkDeptColumn({
             <div
               className="h-px flex-1"
               style={{
-                background: `linear-gradient(to left, transparent, color-mix(in srgb, ${accentColor} 27%, transparent), color-mix(in srgb, ${accentColor} 53%, transparent))`,
+                background: `linear-gradient(to left, transparent, ${accentColor}44, ${accentColor}88)`,
               }}
             />
           </div>
@@ -117,13 +115,13 @@ function SkDeptColumn({
             <div
               className="h-px flex-1"
               style={{
-                background: `linear-gradient(to right, transparent, color-mix(in srgb, ${accentColor} 20%, transparent), color-mix(in srgb, ${accentColor} 33%, transparent))`,
+                background: `linear-gradient(to right, transparent, ${accentColor}33, ${accentColor}55)`,
               }}
             />
             <div
               className="h-px flex-1"
               style={{
-                background: `linear-gradient(to left, transparent, color-mix(in srgb, ${accentColor} 20%, transparent), color-mix(in srgb, ${accentColor} 33%, transparent))`,
+                background: `linear-gradient(to left, transparent, ${accentColor}33, ${accentColor}55)`,
               }}
             />
           </div>
@@ -158,9 +156,9 @@ function SkCenterColumn() {
       <div
         className="relative flex min-h-0 flex-[2] flex-col overflow-hidden rounded-2xl"
         style={{
-          background: "var(--neu-surface)",
-          border: "1px solid var(--neu-edge)",
-          boxShadow: "var(--neu-shadow-raised)",
+          background: "rgba(10,10,10,0.88)",
+          border: "1px solid rgba(107,143,255,0.18)",
+          boxShadow: "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
           padding: "clamp(0.45rem,0.9cqmin,1.5rem)",
           gap: "clamp(0.2rem,0.4cqmin,0.5rem)",
         }}
@@ -178,7 +176,7 @@ function SkCenterColumn() {
             <div
               className="h-px flex-1"
               style={{
-                background: "linear-gradient(to right, transparent, var(--neu-hairline), var(--neu-hairline))",
+                background: "linear-gradient(to right, transparent, rgba(107,143,255,0.30), rgba(107,143,255,0.55))",
               }}
             />
             <Sk
@@ -188,13 +186,13 @@ function SkCenterColumn() {
             <div
               className="h-px flex-1"
               style={{
-                background: "linear-gradient(to left, transparent, var(--neu-hairline), var(--neu-hairline))",
+                background: "linear-gradient(to left, transparent, rgba(255,176,32,0.30), rgba(255,176,32,0.55))",
               }}
             />
           </div>
           <div className="flex w-full items-center">
-            <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, var(--neu-hairline), var(--neu-hairline))" }} />
-            <div className="h-px flex-1" style={{ background: "linear-gradient(to left, transparent, var(--neu-hairline), var(--neu-hairline))" }} />
+            <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(107,143,255,0.28), rgba(107,143,255,0.45))" }} />
+            <div className="h-px flex-1" style={{ background: "linear-gradient(to left, transparent, rgba(255,176,32,0.28), rgba(255,176,32,0.45))" }} />
           </div>
         </div>
 
@@ -210,7 +208,7 @@ function SkCenterColumn() {
               style={{
                 height: "clamp(56px,9cqmin,100px)",
                 animationDelay: `${d}s`,
-                border: "1px solid var(--neu-edge)",
+                border: "1px solid rgba(255,255,255,0.06)",
               }}
             />
           ))}
@@ -227,21 +225,21 @@ function SkCenterColumn() {
       <div
         className="relative flex min-h-0 flex-[3] flex-col overflow-hidden rounded-2xl"
         style={{
-          background: "var(--neu-surface)",
-          border: "1px solid var(--neu-edge)",
-          boxShadow: "var(--neu-shadow-raised)",
+          background: "rgba(10,10,10,0.88)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          boxShadow: "0 0 0 1px rgba(255,255,255,0.03) inset, 0 16px 40px rgba(0,0,0,0.45)",
           padding: "clamp(0.55rem,1.1cqmin,1.5rem)",
           gap: "clamp(0.3rem,0.5cqmin,0.6rem)",
         }}
       >
         {/* Heading */}
         <div className="flex w-full shrink-0 items-center gap-3" style={{ marginBottom: "0.8cqh" }}>
-          <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, var(--neu-hairline))" }} />
+          <div className="h-px flex-1" style={{ background: "linear-gradient(to right, transparent, rgba(212,175,55,0.35))" }} />
           <Sk
             className="shrink-0 rounded-full"
             style={{ width: "clamp(120px,18cqw,220px)", height: "clamp(14px,1.8cqmin,22px)" }}
           />
-          <div className="h-px flex-1" style={{ background: "linear-gradient(to left, transparent, var(--neu-hairline))" }} />
+          <div className="h-px flex-1" style={{ background: "linear-gradient(to left, transparent, rgba(212,175,55,0.35))" }} />
         </div>
 
         {/* Ring + legend */}
@@ -276,12 +274,15 @@ function SkCenterColumn() {
 export default function OnboardingSkeleton() {
   return (
     <section
-      className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-neu-canvas"
+      className="relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-obsidian"
       style={{
         padding:
           "clamp(0.6rem,min(1.6cqh,1.8cqmin),1.75rem) clamp(0.6rem,min(2.4cqmin,3.2cqw),2.5rem)",
       }}
     >
+      {/* Ambient gold radial glow — matches OnboardingPanel */}
+      <div className="ambient-glow-center pointer-events-none absolute inset-0" />
+
       {/* ── 3-column grid — mirrors OnboardingPanel exactly (no page header) ── */}
       <div
         className="relative grid min-h-0 flex-1"
@@ -291,13 +292,13 @@ export default function OnboardingSkeleton() {
         }}
       >
         {/* Column 1: Concierge (gold accent) */}
-        <SkDeptColumn accentColor="var(--neu-concierge)" delay={0} />
+        <SkDeptColumn accentColor="rgba(212,175,55,1)" delay={0} />
 
         {/* Column 2: Performance + Ledger */}
         <SkCenterColumn />
 
         {/* Column 3: Shop (sky/blue accent) */}
-        <SkDeptColumn accentColor="var(--neu-shop)" delay={0.15} />
+        <SkDeptColumn accentColor="rgba(125,211,252,1)" delay={0.15} />
       </div>
     </section>
   );

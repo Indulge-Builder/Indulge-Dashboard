@@ -89,33 +89,43 @@ function OfflineFallback({
   return (
     <div
       className={[
-        // Outer: raised neumorphic surface, hairline edge, card radius
+        // Outer: obsidian background, near-invisible gold border, card radius
         "relative flex flex-col items-center justify-center text-center",
-        "neu-raised-sm rounded-card",
+        "bg-[#050507] border border-gold-500/[0.08] rounded-card",
         "px-[clamp(16px,3cqw,40px)] py-[clamp(24px,4cqh,56px)]",
         fillParent ? "flex-1 h-full w-full" : "w-full",
       ]
         .filter(Boolean)
         .join(" ")}
     >
+      {/* Ultra-subtle ambient radial — same token as ambient-glow-center */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-card"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(201,168,76,0.025), transparent)",
+        }}
+        aria-hidden
+      />
+
       {/* Diamond delimiters + label (U+25C8 WHITE DIAMOND CONTAINING BLACK SMALL DIAMOND) */}
       <p
-        className="relative font-cinzel font-bold uppercase tracking-[0.4em] leading-none text-neu-accent-deep neu-letterpress"
+        className="relative font-cinzel font-bold uppercase tracking-[0.4em] leading-none text-gold-400/50"
         style={{ fontSize: "var(--text-label-lg)" }}
         aria-label={`${label} offline`}
       >
         ◈&nbsp;&nbsp;{label}&nbsp;&nbsp;OFFLINE&nbsp;&nbsp;◈
       </p>
 
-      {/* Separator hairline */}
+      {/* Separator — .separator-gold-h utility from Step 1 */}
       <div
-        className="neu-rule-l w-[clamp(80px,30%,200px)] h-px my-[clamp(12px,2cqh,24px)]"
+        className="separator-gold-h w-[clamp(80px,30%,200px)] my-[clamp(12px,2cqh,24px)]"
         aria-hidden
       />
 
       {/* Body copy */}
       <p
-        className="font-montserrat font-medium leading-relaxed text-neu-t3 max-w-[28ch]"
+        className="font-montserrat font-medium leading-relaxed text-champagne/35 max-w-[28ch]"
         style={{ fontSize: "var(--text-label-md)" }}
       >
         This widget is temporarily unavailable.
@@ -123,18 +133,19 @@ function OfflineFallback({
         The dashboard will retry automatically.
       </p>
 
-      {/* Retry button — quiet raised pill */}
+      {/* Retry button — quiet gold outline, no fill */}
       <button
         type="button"
         onClick={onRetry}
         className={[
           "relative mt-[clamp(16px,2.5cqh,32px)]",
           "font-montserrat font-semibold uppercase tracking-[0.32em]",
-          "text-neu-t2 hover:text-neu-accent-deep",
-          "neu-raised-sm rounded-[var(--radius-pill)] active:shadow-neu-pressed",
+          "text-gold-400/60 hover:text-gold-300/80",
+          "border border-gold-500/[0.15] hover:border-gold-500/[0.28]",
+          "rounded-[var(--radius-pill)]",
           "px-[clamp(16px,2.5cqw,28px)] py-[clamp(8px,1.2cqh,14px)]",
           "transition-colors duration-300",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neu-accent-deep",
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-500/40",
         ].join(" ")}
         style={{ fontSize: "var(--text-label-md)" }}
         aria-label={`Retry ${label}`}

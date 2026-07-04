@@ -41,41 +41,30 @@ function RenewalRow({ item, todayIst }: { item: RenewalDueClient; todayIst: stri
   // Day-of-month anchor: the whole card is scoped to the current month.
   const dayNum = item.endDate.slice(8, 10);
   return (
-    // Raised marquee chip — soft tile per row; today gets an accent wash,
-    // past-due gets a danger wash.
-    <li
-      className="flex w-full min-w-0 items-center gap-[clamp(0.7rem,1cqw,1.6rem)] rounded-neu-chip border border-neu-edge shadow-neu-sm px-[clamp(0.7rem,1cqw,1.6rem)] py-[clamp(0.25rem,0.5cqh,0.7rem)]"
-      style={{
-        background: isDueToday
-          ? "color-mix(in srgb, var(--neu-accent) 18%, var(--neu-surface))"
-          : isPast
-            ? "color-mix(in srgb, var(--neu-danger) 12%, var(--neu-surface))"
-            : "var(--neu-surface)",
-      }}
-    >
+    <li className="flex w-full min-w-0 items-center gap-[clamp(0.7rem,1cqw,1.6rem)]">
       {/* Sizes pair with AgentRow: name matches the agent-name spec exactly;
           the day numeral matches the score-numeral scale (leaderboard rhythm). */}
       <span
         className={`w-[2ch] flex-shrink-0 text-right font-montserrat font-bold tabular-nums leading-none text-[clamp(2.1rem,3.4cqw,4.3rem)] ${
           isDueToday
-            ? "text-neu-accent-deep neu-letterpress"
+            ? "text-foil-gold gold-glow"
             : isPast
-              ? "text-neu-danger-deep"
-              : "text-neu-t1"
+              ? "text-red-400/85"
+              : "text-champagne/95"
         }`}
       >
         {dayNum}
       </span>
-      <span className="h-[clamp(2rem,3.4cqh,3.6rem)] w-px flex-shrink-0 bg-neu-hairline" aria-hidden />
+      <span className="h-[clamp(2rem,3.4cqh,3.6rem)] w-px flex-shrink-0 bg-gold-500/25" aria-hidden />
       <span
         className={`min-w-0 flex-1 truncate font-cinzel font-semibold tracking-wide leading-tight text-[clamp(1.9rem,3.1cqw,3.9rem)] ${
-          isPast ? "text-neu-t3" : "text-neu-t1"
+          isPast ? "text-champagne/55" : "text-champagne"
         }`}
       >
         {item.name}
       </span>
       {item.membershipType && (
-        <span className="hidden min-[900px]:inline flex-shrink-0 font-cinzel font-semibold uppercase tracking-[0.22em] text-[clamp(1.35rem,1.9cqw,2.5rem)] text-neu-accent-deep">
+        <span className="hidden min-[900px]:inline flex-shrink-0 font-cinzel font-semibold uppercase tracking-[0.22em] text-[clamp(1.35rem,1.9cqw,2.5rem)] text-gold-400/75">
           {item.membershipType}
         </span>
       )}
@@ -90,7 +79,7 @@ export default function UpcomingRenewals({ clients }: UpcomingRenewalsProps) {
   if (clients.length === 0) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <span className="label-field text-neu-t3">No renewals due this month</span>
+        <span className="label-field text-champagne/40">No renewals due this month</span>
       </div>
     );
   }

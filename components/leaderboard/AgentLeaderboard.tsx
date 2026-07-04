@@ -3,13 +3,8 @@
 /**
  * components/leaderboard/AgentLeaderboard.tsx
  *
- * Thin container component: column header + live-reorder row list.
- *
- * Live reorder (neumorphic reskin): `agents` arrives rank-ordered from
- * lib/ticketAggregation. Rows are rendered in a STABLE DOM order (sorted by
- * agent id) and absolutely positioned by rank (`top = rank / n`), so a rank
- * change animates `top` (850ms glide in AgentRow) instead of remounting —
- * rows visibly slide past each other on the TV.
+ * Thin container component: sticky column header + AnimatePresence row list.
+ * All animation and data logic lives in AgentRow / AgentIcon.
  *
  * Props mirror the old components/AgentLeaderboard.tsx exactly so QueendomPanel
  * needs only a path change, not a signature change.
@@ -32,46 +27,36 @@ export default function AgentLeaderboard({
   queendomDelay    = 0,
   celebrationAgent = null,
 }: AgentLeaderboardProps) {
-  // agents is rank-ordered; index there IS the rank.
-  const rankById = new Map(agents.map((agent, i) => [agent.id, i]));
-  // Stable DOM order (by id) so reorders only move `top`, never DOM nodes.
-  const domOrdered = [...agents].sort((a, b) => a.id.localeCompare(b.id));
-
   return (
-    <div className="flex h-full w-full flex-col">
-      {/* ── Column header ────────────────────────────────────────────────── */}
-      <div className="z-10 border-b border-neu-hairline flex-shrink-0">
+    <div className="flex w-full flex-col">
+      {/* ── Sticky column header ─────────────────────────────────────────── */}
+      {/* bg is 98% opaque — backdrop blur was invisible but cost a GPU pass on TV */}
+      <div className="z-10 bg-obsidian/98 border-b border-gold-500/20 flex-shrink-0">
         <div className={`grid ${GRID_COLS} ${GRID_GAP_X} pb-[0.9cqh]`}>
           <span />
-          <span className="label-field text-neu-t2 text-center">
+          <span className="label-field text-amber-300/95 text-center">
             Genies
           </span>
-          <span className="label-field text-neu-sage-deep text-center">
+          <span className="label-field text-green-400 text-center">
             Today
           </span>
-          <span className="label-field text-neu-t2 text-center">
+          <span className="label-field text-champagne text-center">
             Monthly
           </span>
-          <span className="label-field text-neu-danger-deep text-center">
+          <span className="label-field text-red-400 text-center">
             Pending
           </span>
         </div>
       </div>
 
-      {/* ── Agent rows — absolutely positioned by rank inside this region ──
-          Row pitch = max(region/n, --lb-row-min): rows spread to fill when the
-          region is tall, and never compress below a readable minimum when it
-          is short (overflow clips at the card edge, as the old layout did). */}
-      <div
-        className="relative min-h-0 flex-1 mt-[0.5cqh] overflow-hidden"
-        style={{ ["--lb-row-min" as string]: "clamp(56px, 4.4cqh, 96px)" }}
-      >
+      {/* ── Agent rows ───────────────────────────────────────────────────── */}
+      <div className="pt-[0.5cqh]">
         <AnimatePresence>
-          {domOrdered.map((agent) => (
+          {agents.map((agent, i) => (
             <AgentRow
               key={agent.id}
               agent={agent}
-              index={rankById.get(agent.id) ?? 0}
+              index={i}
               totalAgents={agents.length}
               baseDelay={queendomDelay}
               isWinning={

@@ -148,10 +148,10 @@ export default function DashboardController({
         type="button"
         aria-pressed={isFrozen}
         aria-label={isFrozen ? "Resume auto-switching" : "Pause on this screen"}
-        className={`absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border border-neu-edge px-3 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] uppercase transition-[background-color,box-shadow,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-neu-accent-deep ${
+        className={`absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border px-3 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] shadow-lg transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/80 ${
           isFrozen
-            ? "bg-neu-well text-neu-sage-deep shadow-neu-pressed"
-            : "bg-neu-surface text-neu-t2 shadow-neu"
+            ? "border-emerald-500/50 bg-emerald-950/75 text-emerald-200"
+            : "border-gold-500/40 bg-black/50 text-gold-200 hover:bg-black/65"
         }`}
         onClick={() => setIsFrozen((v) => !v)}
       >
@@ -160,9 +160,7 @@ export default function DashboardController({
 
       {/* Screens stay mounted; only opacity/z-index changes (cinematic crossfade, no translateX tearing). */}
       <ScreenLayer isActive={activeScreen === "concierge"}>
-        {/* Gutter padding lets the raised panel corners + paired shadows read
-            against the canvas instead of dying at the screen edge. */}
-        <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch px-[0.6cqw] py-[0.9cqh]">
+        <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch">
           {/* Anishqa panel — isolated so its crash cannot affect Ananyshree */}
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
             <ErrorBoundary label="Anishqa" fillParent>
@@ -188,10 +186,19 @@ export default function DashboardController({
             aria-hidden
           >
             <div
-              className="absolute left-1/2 top-[2vh] bottom-[2vh] w-px -translate-x-1/2"
+              className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(to bottom, transparent, color-mix(in srgb, var(--neu-accent-deep) 35%, transparent), transparent)",
+                  "radial-gradient(ellipse 160% 50% at 50% 50%, rgba(201,168,76,0.032), transparent)",
+              }}
+            />
+            <div className="absolute left-1/2 top-[2vh] bottom-[2vh] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-gold-500/35 to-transparent" />
+            <div
+              className="pointer-events-none absolute left-1/2 top-[2vh] bottom-[2vh] w-[4px] -translate-x-1/2"
+              style={{
+                background:
+                  "linear-gradient(to bottom, transparent 8%, rgba(201,168,76,0.08) 30%, rgba(201,168,76,0.12) 50%, rgba(201,168,76,0.08) 70%, transparent 92%)",
+                filter: "blur(2px)",
               }}
             />
           </div>

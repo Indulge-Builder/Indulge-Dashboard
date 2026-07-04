@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useState, useCallback } from "react";
+import { AlertTriangle } from "lucide-react";
 import type { OverdueTicketItem } from "@/types";
 
 const TICKER_DURATION_S = 40; // seconds for one 3×-list half-cycle — slow, calm scroll
@@ -22,77 +23,77 @@ function repeatsPerHalf(count: number): number {
   return Math.max(1, Math.ceil(MIN_ITEMS_PER_HALF / count));
 }
 
+// Overdue red — bright enough for 15ft TV visibility.
+const OVERDUE_COLOR = "#F1948A";
+const OVERDUE_BORDER = "rgba(241, 148, 138, 0.6)";
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Single ticker item — a luggage-tag stub:
-//   [⚠ subject · #id] —tie— [◦ agent tab]  (tab swings ±3°, staggered)
+// Single ticker item — ⚠ [SUBJECT] · #[TICKET ID] · [AGENT]
 // Memoized by ticket identity + display fields.
 // ─────────────────────────────────────────────────────────────────────────────
 function tickerItemPropsAreEqual(
-  prev: { item: OverdueTicketItem; swingDelayS: number },
-  next: { item: OverdueTicketItem; swingDelayS: number },
+  prev: { item: OverdueTicketItem; isLast: boolean },
+  next: { item: OverdueTicketItem; isLast: boolean },
 ) {
   return (
     prev.item.id === next.item.id &&
     prev.item.subject === next.item.subject &&
     prev.item.agentName === next.item.agentName &&
-    prev.swingDelayS === next.swingDelayS
+    prev.isLast === next.isLast
   );
 }
 
 const TickerItem = memo(function TickerItem({
   item,
-  swingDelayS,
+  isLast,
 }: {
   item: OverdueTicketItem;
-  swingDelayS: number;
+  isLast: boolean;
 }) {
   return (
-    <div className="flex items-center flex-shrink-0 pr-[clamp(1rem,1.2cqw,2.2rem)]">
-      {/* Subject card — raised chip */}
-      <div className="flex items-center gap-3 sm:gap-4 min-w-0 neu-raised-sm rounded-neu-chip px-[clamp(0.9rem,1.1cqw,2rem)] py-[clamp(0.3rem,0.55cqh,0.8rem)]">
-        <span
-          className="flex-shrink-0 leading-none text-[clamp(1.5rem,2.4cqw,2.9rem)] text-neu-danger-deep"
-          aria-hidden
+    <>
+      <div className="ticker-item flex items-center gap-4 sm:gap-6 flex-shrink-0">
+        <div
+          className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
+          style={{
+            border: `2px solid ${OVERDUE_BORDER}`,
+            background: "rgba(5, 5, 5, 0.85)",
+          }}
         >
-          ⚠
-        </span>
-        <span className="font-cinzel font-semibold text-[clamp(1.7rem,2.8cqw,3.3rem)] tracking-wide text-neu-t1 truncate max-w-[24ch] sm:max-w-[34ch]">
-          {item.subject}
-        </span>
-        <span className="font-montserrat font-semibold text-[clamp(1.5rem,2.4cqw,2.9rem)] tracking-wide whitespace-nowrap tabular-nums text-neu-t3">
-          #{item.id}
-        </span>
+          <AlertTriangle
+            className="w-8 h-8 sm:w-10 sm:h-10"
+            style={{ color: OVERDUE_COLOR }}
+            strokeWidth={2.5}
+          />
+        </div>
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <span className="font-cinzel font-semibold text-[clamp(1.7rem,2.8cqw,3.3rem)] tracking-wide text-champagne truncate max-w-[24ch] sm:max-w-[34ch]">
+            {item.subject}
+          </span>
+          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1cqw,2.5rem)]">
+            ·
+          </span>
+          <span
+            className="font-cinzel font-semibold text-[clamp(1.5rem,2.4cqw,2.9rem)] tracking-wide whitespace-nowrap"
+            style={{ color: OVERDUE_COLOR }}
+          >
+            #{item.id}
+          </span>
+          <span className="text-gold-400/60 font-cinzel text-[clamp(1.4rem,2.1cqw,2.5rem)]">
+            ·
+          </span>
+          <span className="font-cinzel font-semibold text-[clamp(1.6rem,2.6cqw,3.1rem)] text-white/95 tracking-wide whitespace-nowrap">
+            {item.agentName}
+          </span>
+        </div>
       </div>
-
-      {/* Tie string */}
-      <span
-        className="flex-shrink-0 h-[2px] w-[clamp(0.6rem,0.7cqw,1.3rem)]"
-        style={{
-          background: "color-mix(in srgb, var(--neu-accent-deep) 45%, transparent)",
-        }}
-        aria-hidden
-      />
-
-      {/* Agent tab — accent-washed stub with punched eyelet, swinging from
-          the tie point (transform-only keyframe, staggered per item) */}
-      <div
-        className="neu-anim-tag-swing flex items-center gap-[clamp(0.5rem,0.6cqw,1.1rem)] rounded-neu-chip border border-neu-edge shadow-neu-sm px-[clamp(0.7rem,0.9cqw,1.6rem)] py-[clamp(0.25rem,0.45cqh,0.65rem)]"
-        style={{
-          background: "color-mix(in srgb, var(--neu-accent) 26%, var(--neu-surface))",
-          animationDelay: `${swingDelayS}s`,
-        }}
-      >
-        {/* Punched eyelet */}
-        <span
-          className="flex-shrink-0 rounded-full bg-neu-well shadow-neu-pressed"
-          style={{ width: "clamp(8px,0.5cqw,14px)", height: "clamp(8px,0.5cqw,14px)" }}
+      {!isLast && (
+        <div
+          className="flex-shrink-0 w-px h-10 sm:h-14 bg-white/15"
           aria-hidden
         />
-        <span className="font-montserrat font-bold uppercase tracking-[0.12em] text-[clamp(1.6rem,2.6cqw,3.1rem)] text-neu-accent-deep whitespace-nowrap">
-          {item.agentName}
-        </span>
-      </div>
-    </div>
+      )}
+    </>
   );
 }, tickerItemPropsAreEqual);
 
@@ -117,8 +118,15 @@ function OverdueTickerInner({
 
   if (overdueTickets.length === 0) {
     return (
-      <div className="relative w-full flex-shrink-0 py-4 overflow-hidden rounded-full bg-neu-well shadow-neu-inset mx-[0.6cqw] my-[0.4cqh]">
-        <p className="font-cinzel text-center text-neu-t3 text-[clamp(1.4rem,2cqw,2.2rem)] tracking-widest uppercase">
+      <div
+        className="relative w-full flex-shrink-0 py-4 overflow-hidden"
+        style={{
+          borderTop: "1px solid rgba(212, 175, 55, 0.2)",
+          borderBottom: "1px solid rgba(212, 175, 55, 0.2)",
+          background: "rgba(5, 5, 5, 0.92)",
+        }}
+      >
+        <p className="font-cinzel text-center text-gold-500/60 text-[clamp(1.4rem,2cqw,2.2rem)] tracking-widest uppercase">
           No overdue tickets
         </p>
       </div>
@@ -130,7 +138,14 @@ function OverdueTickerInner({
       role="region"
       aria-label="Overdue tickets"
       aria-live="polite"
-      className="relative flex-shrink-0 overflow-hidden rounded-full bg-neu-well shadow-neu-inset mx-[0.6cqw] my-[0.4cqh] py-[0.6cqh]"
+      className="relative w-full flex-shrink-0 overflow-hidden"
+      style={{
+        borderTop: "1px solid rgba(212, 175, 55, 0.2)",
+        borderBottom: "1px solid rgba(212, 175, 55, 0.2)",
+        // No backdrop-filter: at 92% opaque over an almost-black screen the
+        // blur is invisible, but it forces a full-width GPU pass every frame.
+        background: "rgba(5, 5, 5, 0.92)",
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -155,7 +170,7 @@ function OverdueTickerInner({
             <TickerItem
               key={`${item.id}-${i}`}
               item={item}
-              swingDelayS={Number(((i % 6) * 0.7).toFixed(1))}
+              isLast={i === doubledForScroll.length - 1}
             />
           ))}
         </div>

@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Sora } from "next/font/google";
 import "./globals.css";
-// Serene Neumorphic token layer — must load AFTER the base globals so its
-// :root / [data-neu] variables win. Daypart flip: hooks/useDaypartTheme.ts.
-import "./indulge-neumorphic-tokens.css";
 
 // Two-font system (data face swapped Montserrat → Sora, 2026-06-24):
 //   Cinzel → all titles / labels / headings
@@ -51,7 +48,7 @@ export default function RootLayout({
       className={`${cinzel.variable} ${sora.variable}`}
     >
       <body
-        className="bg-neu-canvas text-neu-t1 overflow-hidden antialiased"
+        className="bg-obsidian text-champagne overflow-hidden antialiased"
         suppressHydrationWarning
       >
         {children}
