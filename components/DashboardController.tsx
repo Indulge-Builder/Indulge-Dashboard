@@ -127,7 +127,9 @@ export default function DashboardController({
   isInitialLoading,
 }: DashboardControllerProps) {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("concierge");
-  const [isFrozen, setIsFrozen] = useState(false);
+  // Auto-switch paused for now — starts frozen on the concierge screen.
+  // Rotation still re-enables via the PAUSE/RESUME button or the P/Space keys.
+  const [isFrozen, setIsFrozen] = useState(true);
 
   useEffect(() => {
     if (isFrozen) return;
