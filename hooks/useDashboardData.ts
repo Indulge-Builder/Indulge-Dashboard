@@ -18,7 +18,7 @@
  * are delegated to lib/ticketAggregation.ts unchanged.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchJson } from "@/lib/clientFetch";
 import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
 import { buildRoster, ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
@@ -26,6 +26,7 @@ import type { QueenStats, MemberStats, TicketStats, JokerStats } from "@/lib/typ
 import type { TicketRowMinimal } from "@/lib/ticketAggregation";
 import {
   aggregateTicketStats,
+  isPrunedWhenTerminal,
   mergeAndRankAgents,
   pruneTicketRowsForDashboardState,
 } from "@/lib/ticketAggregation";
@@ -85,9 +86,10 @@ const INIT_ANISHQA: QueenStats = {
 };
 
 /**
- * Monotonic max for the stopwatch anchor — a refetch over pruned rows (or a
- * month rollover dropping last month's resolved rows) must never move the
- * "time since last resolve" backward or blank it.
+ * Max of two nullable stopwatch-anchor candidates (rows-derived vs pruned
+ * ledger). NOT a monotonic accumulator against previous state — the anchor is
+ * fully re-derived on every change so a resolution that gets reverted stops
+ * counting (see the anti-cheat note on the aggregation effect below).
  */
 function maxResolvedMs(
   a: number | null | undefined,
@@ -157,28 +159,55 @@ export function useDashboardData(): DashboardData {
     assignments: [],
   });
 
+  // ── Stopwatch ledger for resolutions the prune filter drops ─────────────────
+  // A backlog ticket (created in an earlier IST month) that turns terminal is
+  // pruned from ticketRows in the same update, so the rows-derived anchor
+  // below never sees it. Its resolution is remembered here instead — keyed by
+  // ticket id so a later event showing that ticket NON-terminal again revokes
+  // the entry. The version counter re-runs the aggregation effect on ledger
+  // changes that don't touch ticketRows.
+  const prunedResolutionsRef = useRef(
+    new Map<string, NonNullable<ReturnType<typeof resolutionEventMs>>>(),
+  );
+  const [prunedResolutionsVersion, setPrunedResolutionsVersion] = useState(0);
+
   // ── Derive ticket + agent stats whenever ticketRows changes ─────────────────
   // Aggregation is pure and runs only when ticketRows reference changes.
   // All math is delegated to lib/ticketAggregation — NOT modified here.
+  //
+  // Anti-cheat (2026-07-16): lastResolvedAtMs is fully RE-DERIVED here — max
+  // resolved_at over rows that are terminal RIGHT NOW, plus the revocable
+  // pruned-backlog ledger. It is deliberately not a monotonic max against
+  // previous state: agents were resetting the ResolveStopwatch by flipping a
+  // ticket to resolved and straight back. Now the revert removes the ticket
+  // from both sources and the anchor falls back to the last genuine
+  // resolution, so the timer jumps back up.
   useEffect(() => {
     const ticketStats = aggregateTicketStats(ticketRows);
     const { ananyshree: agentsA, anishqa: agentsB } = mergeAndRankAgents(ticketRows);
     const series = buildTicketTimeSeries(ticketRows);
+    const ledgerMax: Record<QueendomId, number | null> = {
+      ananyshree: null,
+      anishqa: null,
+    };
+    for (const entry of prunedResolutionsRef.current.values()) {
+      ledgerMax[entry.queendom] = maxResolvedMs(ledgerMax[entry.queendom], entry.ms);
+    }
     setAnanyshreeStats((prev) => ({
       ...prev,
       tickets: ticketStats.ananyshree,
       agents: agentsA,
       series: series.ananyshree,
-      lastResolvedAtMs: maxResolvedMs(prev.lastResolvedAtMs, series.ananyshree.lastResolvedMs),
+      lastResolvedAtMs: maxResolvedMs(series.ananyshree.lastResolvedMs, ledgerMax.ananyshree),
     }));
     setAnishqaStats((prev) => ({
       ...prev,
       tickets: ticketStats.anishqa,
       agents: agentsB,
       series: series.anishqa,
-      lastResolvedAtMs: maxResolvedMs(prev.lastResolvedAtMs, series.anishqa.lastResolvedMs),
+      lastResolvedAtMs: maxResolvedMs(series.anishqa.lastResolvedMs, ledgerMax.anishqa),
     }));
-  }, [ticketRows]);
+  }, [ticketRows, prunedResolutionsVersion]);
 
   // ── Fetchers (all stable — empty dep arrays) ────────────────────────────────
 
@@ -205,18 +234,26 @@ export function useDashboardData(): DashboardData {
   }, []);
 
   /**
-   * ResolveStopwatch anchor. Called from the Realtime patch path as well as
-   * being derived in the aggregation effect above, because a backlog ticket
-   * (created in an earlier month) that turns terminal is pruned from
-   * ticketRows in the same update — the aggregation pass never sees its
-   * resolution, but the stopwatch must still reset (dry-audit D2).
+   * ResolveStopwatch ledger bookkeeping, called on every ticket INSERT/UPDATE
+   * event. Records the resolution of a ticket the prune filter is about to
+   * drop (backlog ticket from an earlier month turning terminal — dry-audit
+   * D2), and REVOKES the entry when the same ticket is seen non-terminal
+   * again, so a resolve-then-revert never leaves a phantom anchor behind.
+   * Current-month resolutions need no entry — they stay in ticketRows and the
+   * aggregation effect derives them directly.
    */
-  const bumpLastResolved = useCallback((queendom: QueendomId, ms: number) => {
-    const set = queendom === "ananyshree" ? setAnanyshreeStats : setAnishqaStats;
-    set((prev) => {
-      const next = maxResolvedMs(prev.lastResolvedAtMs, ms);
-      return next === prev.lastResolvedAtMs ? prev : { ...prev, lastResolvedAtMs: next };
-    });
+  const noteResolutionEvent = useCallback((row: TicketRowMinimal) => {
+    const ledger = prunedResolutionsRef.current;
+    const resolution = resolutionEventMs(row);
+    let changed: boolean;
+    if (resolution && isPrunedWhenTerminal(row)) {
+      const prev = ledger.get(row.id);
+      changed = prev?.ms !== resolution.ms || prev?.queendom !== resolution.queendom;
+      if (changed) ledger.set(row.id, resolution);
+    } else {
+      changed = ledger.delete(row.id);
+    }
+    if (changed) setPrunedResolutionsVersion((v) => v + 1);
   }, []);
 
   const fetchJokers = useCallback(async () => {
@@ -337,8 +374,7 @@ export function useDashboardData(): DashboardData {
                 }
                 return pruneTicketRowsForDashboardState([...prev, row]);
               });
-              const resolution = resolutionEventMs(row);
-              if (resolution) bumpLastResolved(resolution.queendom, resolution.ms);
+              noteResolutionEvent(row);
             }
           } else if (payload.eventType === "UPDATE" && payload.new) {
             const row = toTicketRow(payload.new as Record<string, unknown>);
@@ -348,13 +384,16 @@ export function useDashboardData(): DashboardData {
                   prev.map((r) => (r.id === row.id ? row : r)),
                 ),
               );
-              const resolution = resolutionEventMs(row);
-              if (resolution) bumpLastResolved(resolution.queendom, resolution.ms);
+              noteResolutionEvent(row);
             }
           } else if (payload.eventType === "DELETE" && payload.old) {
             const oldRow = toTicketRow(payload.old as Record<string, unknown>);
-            if (oldRow)
+            if (oldRow) {
               setTicketRows((prev) => prev.filter((r) => r.id !== oldRow.id));
+              // A hard-deleted ticket's resolution can't anchor the stopwatch.
+              if (prunedResolutionsRef.current.delete(oldRow.id))
+                setPrunedResolutionsVersion((v) => v + 1);
+            }
           }
         },
       },

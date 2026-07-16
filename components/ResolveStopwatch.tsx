@@ -5,9 +5,11 @@
  *
  * "Time Since Last Resolved" — a big digital stopwatch counting up from the
  * Queendom's most recent ticket resolution (QueenStats.lastResolvedAtMs,
- * maintained monotonically by useDashboardData). When a ticket turns terminal
- * the anchor jumps forward, the digits snap back to 00:00 and the card
- * flashes an emerald surge. The composition (digits, hero glow, flanking
+ * re-derived by useDashboardData from tickets that are terminal right now —
+ * NOT monotonic, so a resolve-then-revert un-resets it). When a ticket turns
+ * terminal the anchor jumps forward, the digits snap back to 00:00 and the
+ * card flashes an emerald surge; if that resolution is reverted the anchor
+ * falls back and the digits jump back up. The composition (digits, hero glow, flanking
  * rules, units caption) shifts hue with age, reusing the dashboard's ticket
  * status colors: emerald → pending red (red-400 foil) at 30 min → overdue
  * neon red (error-overdue-glow, the leaderboard Overdue count) at 1 h

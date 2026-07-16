@@ -264,6 +264,16 @@ export function mergeAndRankAgents(rows: TicketRowMinimal[]): {
 export const MAX_TICKET_ROWS_IN_DASHBOARD_STATE = 5000;
 
 /**
+ * True when a row created outside the current IST month would be dropped by
+ * pruneTicketRowsForDashboardState the moment it turns terminal. The stopwatch
+ * ledger in useDashboardData needs this exact predicate: such a resolution
+ * never survives in ticketRows, so it must be remembered (revocably) elsewhere.
+ */
+export function isPrunedWhenTerminal(row: TicketRowMinimal): boolean {
+  return toISTMonth(row.created_at) !== istToday().month;
+}
+
+/**
  * Keep tickets created in the current IST calendar month PLUS the still-open
  * backlog from earlier months (dry-audit D2, revised 2026-07-02 — Overdue /
  * Incomplete carry forward; every other metric, incl. Pending, stays
@@ -275,11 +285,8 @@ export const MAX_TICKET_ROWS_IN_DASHBOARD_STATE = 5000;
 export function pruneTicketRowsForDashboardState(
   rows: TicketRowMinimal[],
 ): TicketRowMinimal[] {
-  const thisMonth = istToday().month;
   const kept = rows.filter(
-    (r) =>
-      !isVoid(r.status) &&
-      (toISTMonth(r.created_at) === thisMonth || !isTerminal(r.status)),
+    (r) => !isVoid(r.status) && (!isPrunedWhenTerminal(r) || !isTerminal(r.status)),
   );
   if (kept.length <= MAX_TICKET_ROWS_IN_DASHBOARD_STATE) return kept;
   return [...kept]
