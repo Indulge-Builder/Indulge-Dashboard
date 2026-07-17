@@ -19,12 +19,12 @@ export const ROSTER_ANANYSHREE: string[] = [
   "Sanika Ahire",
   "Sakshi Bhutkar",
   "Poorti Gulati",
-  "Anshika Eark",
+  "Marlene Fernandes",
   "Ajith Sajan",
   "Khushi Shah",
   "Palak Kataria",
   "Athul Jose",
-  "Edwin Fernandes",
+  "Arun Gangadharan",
 ];
 
 /** Joker names mapped to their Queendom. Used for specialized Joker metrics. */
