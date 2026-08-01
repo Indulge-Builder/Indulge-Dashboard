@@ -24,7 +24,7 @@ export const ROSTER_ANANYSHREE: string[] = [
   "Khushi Shah",
   "Palak Kataria",
   "Athul Jose",
-  "Arun Gangadharan",
+  "Aditya Sonde",
 ];
 
 /** Joker names mapped to their Queendom. Used for specialized Joker metrics. */

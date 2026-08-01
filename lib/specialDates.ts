@@ -1,11 +1,11 @@
 import type { SpecialDate } from "./types";
 
-// ─── Raw special dates data (July 2026) ─────────────────────────────────────
+// ─── Raw special dates data ─────────────────────────────────────────────────
 // Birthdays / (wedding & dating) anniversaries for both Queendoms. Dating
 // anniversaries are mapped to `anniversary` (same Heart styling).
 // The year component is ignored — getSpecialDates() rebuilds every event in the
 // current calendar year, so only month-day matters. 2025 is a placeholder.
-// One June entry (Nesara B S, 30 June) is retained intentionally.
+// Anishqa: refreshed to August 2026. Ananyshree: still July 2026.
 interface SpecialDateRaw {
   fullName: string;
   dateOfBirth?: string; // YYYY-MM-DD
@@ -15,14 +15,6 @@ interface SpecialDateRaw {
 }
 
 const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
-  // ── Retained June entry (today is 30 June) ──
-  {
-    fullName: "Nesara B S",
-    dateOfBirth: "1985-06-30",
-    anniversary: "2013-06-16",
-    queendom: "anishqa",
-  },
-
   // ── Ananyshree — July birthdays ──
   { fullName: "Neha Bhangay", dateOfBirth: "2025-07-01", queendom: "ananyshree" },
   { fullName: "Gulzar", dateOfBirth: "2025-07-01", queendom: "ananyshree" },
@@ -53,33 +45,28 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
   { fullName: "Bhavin", anniversary: "2025-07-13", queendom: "ananyshree" },
   { fullName: "Girish Chitale", anniversary: "2025-07-29", queendom: "ananyshree" },
 
-  // ── Anishqa — July birthdays ──
-  { fullName: "Mr Sandeep", dateOfBirth: "2025-07-04", queendom: "anishqa" },
-  { fullName: "Ayush & Parima", dateOfBirth: "2025-07-12", queendom: "anishqa" },
-  { fullName: "Aniruddha Khopde", dateOfBirth: "2025-07-15", queendom: "anishqa" },
+  // ── Anishqa — August birthdays ──
+  { fullName: "Raj Patel", dateOfBirth: "2025-08-06", queendom: "anishqa" },
+  { fullName: "Paridhi Agarwal", dateOfBirth: "2025-08-11", queendom: "anishqa" },
   {
-    fullName: "Gursimran Singh Kochhar",
-    dateOfBirth: "2025-07-17",
+    fullName: "Rohini Manian's Concierge",
+    dateOfBirth: "2025-08-12",
     queendom: "anishqa",
   },
-  { fullName: "Ayush Atul Mishra", dateOfBirth: "2025-07-19", queendom: "anishqa" },
-  { fullName: "Nakul Dandona", dateOfBirth: "2025-07-26", queendom: "anishqa" },
-  { fullName: "Mehul Mehta", dateOfBirth: "2025-07-26", queendom: "anishqa" },
-  { fullName: "Aarav Gupta", dateOfBirth: "2025-07-29", queendom: "anishqa" },
-  { fullName: "Abhishek Jain", dateOfBirth: "2025-07-29", queendom: "anishqa" },
-  { fullName: "Vrajendra Pande", dateOfBirth: "2025-07-29", queendom: "anishqa" },
-  { fullName: "Raj Shamani", dateOfBirth: "2025-07-30", queendom: "anishqa" },
+  { fullName: "Shweta Kedia", dateOfBirth: "2025-08-12", queendom: "anishqa" },
+  { fullName: "Malay Parekh", dateOfBirth: "2025-08-17", queendom: "anishqa" },
+  { fullName: "Manish Agrawal", dateOfBirth: "2025-08-25", queendom: "anishqa" },
+  { fullName: "Prajodh Rajan", dateOfBirth: "2025-08-27", queendom: "anishqa" },
+  { fullName: "Niraj Sharma", dateOfBirth: "2025-08-28", queendom: "anishqa" },
+
+  // ── Anishqa — August wedding anniversaries ──
+  { fullName: "Sandeep Mehta", anniversary: "2025-08-01", queendom: "anishqa" },
   {
     fullName: "Ramu Rao Jupally's Concierge",
-    dateOfBirth: "2025-07-30",
+    anniversary: "2025-08-06",
     queendom: "anishqa",
   },
-
-  // ── Anishqa — July anniversaries (wedding + dating) ──
-  { fullName: "Shweta Kedia", anniversary: "2025-07-07", queendom: "anishqa" },
-  { fullName: "Sandesh Cadabam", anniversary: "2025-07-10", queendom: "anishqa" },
-  { fullName: "Sathya Murthy", anniversary: "2025-07-22", queendom: "anishqa" },
-  { fullName: "Jitesh Rawal", anniversary: "2025-07-27", queendom: "anishqa" },
+  { fullName: "Abhinaya", anniversary: "2025-08-15", queendom: "anishqa" },
 ];
 
 // ─── Builder ─────────────────────────────────────────────────────────────────
