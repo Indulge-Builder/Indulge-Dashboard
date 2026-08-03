@@ -5,7 +5,7 @@ import type { SpecialDate } from "./types";
 // anniversaries are mapped to `anniversary` (same Heart styling).
 // The year component is ignored — getSpecialDates() rebuilds every event in the
 // current calendar year, so only month-day matters. 2025 is a placeholder.
-// Anishqa: refreshed to August 2026. Ananyshree: still July 2026.
+// Both queendoms refreshed to August 2026.
 interface SpecialDateRaw {
   fullName: string;
   dateOfBirth?: string; // YYYY-MM-DD
@@ -15,35 +15,63 @@ interface SpecialDateRaw {
 }
 
 const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
-  // ── Ananyshree — July birthdays ──
-  { fullName: "Neha Bhangay", dateOfBirth: "2025-07-01", queendom: "ananyshree" },
-  { fullName: "Gulzar", dateOfBirth: "2025-07-01", queendom: "ananyshree" },
-  { fullName: "Vybhav", dateOfBirth: "2025-07-02", queendom: "ananyshree" },
-  { fullName: "Neel Gogia", dateOfBirth: "2025-07-07", queendom: "ananyshree" },
-  { fullName: "Anmol Swarup", dateOfBirth: "2025-07-08", queendom: "ananyshree" },
+  // ── Ananyshree — August birthdays ──
+  // Puneet Kothapa has both a birthday (01.08) and an anniversary (11.08).
   {
-    fullName: "Kamala V (Kamal V's wife)",
-    dateOfBirth: "2025-07-11",
+    fullName: "Puneet Kothapa",
+    dateOfBirth: "2025-08-01",
+    anniversary: "2025-08-11",
     queendom: "ananyshree",
   },
+  { fullName: "Samir Nerurkar", dateOfBirth: "2025-08-02", queendom: "ananyshree" },
   {
-    fullName: "Dhanvi (Anuj Monty's daughter)",
-    dateOfBirth: "2025-07-12",
+    fullName: "Avya (Lakshit's daughter)",
+    dateOfBirth: "2025-08-03",
     queendom: "ananyshree",
   },
-  { fullName: "Shikha", dateOfBirth: "2025-07-13", queendom: "ananyshree" },
-  { fullName: "Shah Akshat", dateOfBirth: "2025-07-14", queendom: "ananyshree" },
-  { fullName: "Vijay Nirani", dateOfBirth: "2025-07-15", queendom: "ananyshree" },
-  { fullName: "Mr. Pintu", dateOfBirth: "2025-07-15", queendom: "ananyshree" },
-  { fullName: "Manugopal", dateOfBirth: "2025-07-21", queendom: "ananyshree" },
-  { fullName: "Jayesh's friend", dateOfBirth: "2025-07-25", queendom: "ananyshree" },
-  { fullName: "Divya Kothamasu", dateOfBirth: "2025-07-28", queendom: "ananyshree" },
-  { fullName: "Ankit Agarwal", dateOfBirth: "2025-07-28", queendom: "ananyshree" },
-  { fullName: "Prince", dateOfBirth: "2025-07-30", queendom: "ananyshree" },
+  { fullName: "Harshil Limbasiya", dateOfBirth: "2025-08-03", queendom: "ananyshree" },
+  {
+    fullName: "Mahendra's wife (turning 35)",
+    dateOfBirth: "2025-08-05",
+    queendom: "ananyshree",
+  },
+  { fullName: "Kamal V.", dateOfBirth: "2025-08-07", queendom: "ananyshree" },
+  { fullName: "Ravi Machani", dateOfBirth: "2025-08-08", queendom: "ananyshree" },
+  {
+    fullName: "Siddharth Reddy (Anuj Jhun.'s friend)",
+    dateOfBirth: "2025-08-09",
+    queendom: "ananyshree",
+  },
+  { fullName: "Ayush Choudhary", dateOfBirth: "2025-08-11", queendom: "ananyshree" },
+  { fullName: "Aahana Swarup", dateOfBirth: "2025-08-14", queendom: "ananyshree" },
+  {
+    fullName: "Shweta (Vishal Agarwal)",
+    dateOfBirth: "2025-08-15",
+    queendom: "ananyshree",
+  },
+  { fullName: "Akanksha", dateOfBirth: "2025-08-19", queendom: "ananyshree" },
+  { fullName: "Jeet's Dad", dateOfBirth: "2025-08-19", queendom: "ananyshree" },
+  { fullName: "Ashutosh", dateOfBirth: "2025-08-22", queendom: "ananyshree" },
+  { fullName: "Ankush Agrawal", dateOfBirth: "2025-08-23", queendom: "ananyshree" },
+  {
+    fullName: "Noor (Ribhav & Simrit's daughter, turning 1)",
+    dateOfBirth: "2025-08-25",
+    queendom: "ananyshree",
+  },
+  { fullName: "Rajesh Nigam", dateOfBirth: "2025-08-25", queendom: "ananyshree" },
+  { fullName: "Advita", dateOfBirth: "2025-08-26", queendom: "ananyshree" },
+  {
+    fullName: "Aarushi (Lakshit's wife)",
+    dateOfBirth: "2025-08-31",
+    queendom: "ananyshree",
+  },
 
-  // ── Ananyshree — July anniversaries ──
-  { fullName: "Bhavin", anniversary: "2025-07-13", queendom: "ananyshree" },
-  { fullName: "Girish Chitale", anniversary: "2025-07-29", queendom: "ananyshree" },
+  // ── Ananyshree — August anniversaries ──
+  {
+    fullName: "Karan Virwani & Mithila",
+    anniversary: "2025-08-06",
+    queendom: "ananyshree",
+  },
 
   // ── Anishqa — August birthdays ──
   { fullName: "Raj Patel", dateOfBirth: "2025-08-06", queendom: "anishqa" },
