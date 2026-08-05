@@ -128,7 +128,8 @@ export default function DashboardController({
 }: DashboardControllerProps) {
   const [activeScreen, setActiveScreen] = useState<ActiveScreen>("concierge");
   // Auto-switch paused for now — starts frozen on the concierge screen.
-  // Rotation still re-enables via the PAUSE/RESUME button or the P/Space keys.
+  // The top-right button now switches panels manually; rotation only
+  // re-enables via the P/Space keys.
   const [isFrozen, setIsFrozen] = useState(true);
 
   useEffect(() => {
@@ -145,19 +146,22 @@ export default function DashboardController({
     <div
       className={`relative h-full w-full min-h-0 min-w-0 overflow-hidden ${className ?? ""}`}
     >
-      {/* Always clickable: TV remotes often fail to deliver Enter to window; use pointer + P key + OK */}
+      {/* Always clickable: TV remotes often fail to deliver Enter to window; use pointer + arrow keys + OK.
+          Auto-rotation stays frozen — this button manually switches between the two panels;
+          the label shows the DESTINATION screen. */}
       <button
         type="button"
-        aria-pressed={isFrozen}
-        aria-label={isFrozen ? "Resume auto-switching" : "Pause on this screen"}
-        className={`absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border px-3 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] shadow-lg transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/80 ${
-          isFrozen
-            ? "border-emerald-500/50 bg-emerald-950/75 text-emerald-200"
-            : "border-gold-500/40 bg-black/50 text-gold-200 hover:bg-black/65"
-        }`}
-        onClick={() => setIsFrozen((v) => !v)}
+        aria-label={
+          activeScreen === "concierge"
+            ? "Switch to onboarding screen"
+            : "Switch to queendom screen"
+        }
+        className="absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border border-gold-500/40 bg-black/50 px-5 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] text-gold-200 shadow-lg transition-[background-color,border-color,color,transform] duration-150 ease-out hover:bg-black/65 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/80"
+        onClick={() =>
+          setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"))
+        }
       >
-        {isFrozen ? "RESUME" : "PAUSE"}
+        {activeScreen === "concierge" ? "ONBOARDING" : "QUEENDOM"}
       </button>
 
       {/* Screens stay mounted; only opacity/z-index changes (cinematic crossfade, no translateX tearing). */}
