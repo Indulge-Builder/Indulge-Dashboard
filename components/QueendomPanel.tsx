@@ -309,7 +309,7 @@ export default function QueendomPanel({
       {/* Glass trio inlined here (not GoldGlassCard): this wrapper is a motion.div
           participating in the stagger — wrapping would change the animation tree. */}
       <motion.div
-        className="relative flex min-h-0 flex-1 flex-col gap-[var(--gap-card)] overflow-hidden rounded-2xl glass gold-border-glow"
+        className="relative flex min-h-[40cqh] flex-1 flex-col gap-[var(--gap-card)] overflow-hidden rounded-2xl glass gold-border-glow"
         style={{ padding: "1.6cqh var(--pad-card)" }}
         variants={queendomItemVariants}
       >
