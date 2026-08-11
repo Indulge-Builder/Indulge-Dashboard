@@ -16,7 +16,11 @@
  * Returns: { ananyshree: JokerStats, anishqa: JokerStats }
  */
 
-import { JOKER_ROSTER } from "@/lib/agentRoster";
+import {
+  FALLBACK_ROSTER,
+  rosterFromAgentRows,
+  type AgentRecord,
+} from "@/lib/agentRoster";
 import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
 import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
 import type { JokerStats } from "@/lib/types";
@@ -119,8 +123,21 @@ export const GET = withApiGuard(async (_req, db) => {
       };
     };
 
+    // Which name is each queendom's Joker comes from the editable `agents`
+    // table (role = 'joker'), falling back to the hardcoded map. This is what
+    // fixes the stale-name failure mode: the constant named "Shruti Sharma"
+    // for anishqa, who has zero rows, so every anishqa Joker metric read 0.
+    const { data: agentRows } = await db
+      .from("agents")
+      .select("id, name, queendom, role, is_active, sort_order");
+    const roster =
+      rosterFromAgentRows(agentRows as AgentRecord[] | null) ?? FALLBACK_ROSTER;
+
     const result: Record<string, JokerStats> = {};
-    for (const [name, queendom] of Object.entries(JOKER_ROSTER)) {
+    for (const { name, queendom } of roster.jokers) {
+      // First joker listed per queendom wins; later ones are ignored rather
+      // than overwriting, so ordering in Settings is predictable.
+      if (result[queendom]) continue;
       result[queendom] = aggregateForJoker(name);
     }
 

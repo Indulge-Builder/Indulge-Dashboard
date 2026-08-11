@@ -19,6 +19,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "./supabaseAdmin";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+/**
+ * True when a Supabase error means "that table doesn't exist" — i.e. a
+ * migration hasn't been applied yet, not a real fault.
+ *
+ * Two codes, because the error can come from either layer: PostgREST answers
+ * from its schema cache (`PGRST205`) and only Postgres itself raises
+ * `42P01`. Checking just one silently misses the common case.
+ */
+export function isMissingTableError(
+  error: { code?: string | null; message?: string | null } | null | undefined,
+): boolean {
+  if (!error) return false;
+  if (error.code === "42P01" || error.code === "PGRST205") return true;
+  return /could not find the table/i.test(error.message ?? "");
+}
+
 /** JSON response with the live-dashboard cache policy — never cache. */
 export function noStoreJson(data: unknown, init?: { status?: number }): NextResponse {
   return NextResponse.json(data, {

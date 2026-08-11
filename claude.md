@@ -64,7 +64,7 @@ components/Dashboard.tsx → DashboardController.tsx (rotation) → QueendomPane
 
 ### Database (Supabase, `supabase/migrations/`)
 
-Core tables: `tickets` (Freshdesk, PK `ticket_id`), `leads` (Zoho, PK `lead_id`), `deals` (Zoho, PK `deal_id`), `onboarding_conversion_ledger` (sales ledger UI), `jokers`, `clients`, `renewals`, `members`, `finance_outlays`. All have Realtime enabled and the same RLS pattern (anon SELECT, authenticated ALL; service role bypasses). Canonical names after renames: `leads` (not `onboarding_lead_touches`), `deals` (not `onboarding_deals`). Full column-level schema is in `docs/master.md` §8.
+Core tables: `tickets` (Freshdesk, PK `ticket_id`), `leads` (Zoho, PK `lead_id`), `deals` (Zoho, PK `deal_id`), `onboarding_conversion_ledger` (sales ledger UI), `jokers`, `clients`, `renewals`, `members`, `agents`, `finance_outlays`. All have Realtime enabled and the same RLS pattern (anon SELECT, authenticated ALL; service role bypasses). Canonical names after renames: `leads` (not `onboarding_lead_touches`), `deals` (not `onboarding_deals`). Full column-level schema is in `docs/master.md` §8.
 
 ## Environment Variables
 
@@ -75,6 +75,16 @@ Core tables: `tickets` (Freshdesk, PK `ticket_id`), `leads` (Zoho, PK `lead_id`)
 | `SUPABASE_SERVICE_ROLE_KEY` | `supabaseAdmin` — all API routes return 503 if missing |
 | `WEBHOOK_SECRET` | webhook auth (`x-webhook-secret` header); **fail-closed in production** if unset, fail-open in dev |
 | `NEXT_PUBLIC_HOME_PANEL_ENABLED` | set `true` to preview the WIP Home screen in rotation |
+| `SETTINGS_PIN` | shared PIN for `/settings`; **fail-closed in production** if unset, fail-open in dev (same policy as `WEBHOOK_SECRET`) |
+
+### Settings page (`/settings`, added 2026-08-11)
+
+A PIN-locked admin surface so non-technical staff can change things that used to require a code edit. Three tabs: **Agents** (the roster), **Renewals** (`renewals` rows), **New Clients** (`members` rows). Notes that matter:
+
+- **The roster now lives in the `agents` table**, not `lib/agentRoster.ts`. `GET /api/roster` serves it; `useDashboardData` threads it into `mergeAndRankAgents(rows, roster)`. The hardcoded arrays remain as `FALLBACK_ROSTER` and are still the default parameter — an empty, missing, or unreachable `agents` table leaves the TV exactly as it was, so **do not delete them**.
+- **Anything this app writes to `renewals` / `members` must use `QUEENDOM_LABEL`** (`lib/queendom.ts`) — `"Ananyshree Queendom"` / `"Anishqa Queendom"`. Those two tables were normalised to that form on 2026-08-11 (from `"ananyshree"` and `"Ananyshree's Queendom"` respectively) and a BEFORE-trigger keeps them there. `tickets` / `jokers` / `clients` were deliberately left on their own spellings — reads still go through `normalizeQueendom()`.
+- **`renewals.created_at` / `members.created_at` are the business date, not the insert time** (renewal date / assignment date). The panel month-gates on them, so the Settings form writes a chosen date through `timestampStringToIsoUtcForDb()` — IST midnight.
+- `/api/settings/*` routes verify the session cookie themselves via `withSettingsGuard`; the UI's PIN gate is convenience only.
 
 ## Known Sharp Edges
 
@@ -82,5 +92,7 @@ Core tables: `tickets` (Freshdesk, PK `ticket_id`), `leads` (Zoho, PK `lead_id`)
 - Both data hooks now share `hooks/useRealtimeChannel.ts` (5-min poll + `CHANNEL_ERROR`/`TIMED_OUT` → refetch + 3s resubscribe; dry-audit **C2**). Channel names (`dashboard-*`, `deals-live`, `leads-touches-live`) are contractual — never rename them, and always clean up via `removeChannel` (the shared hook does both).
 - Hidden screen layers stay mounted but pause their own clocks via `useScreenActive()` (rAF ledger scroll, HomePanel clocks) — resume is seamless because state lives in refs (dry-audit **H3/H4**).
 - **Never bulk-import ticket CSVs through the Supabase table editor** — Freshdesk exports carry naive IST wall-clock timestamps and the table editor stores them verbatim as UTC, shifting every instant +5:30 into the future (froze the ResolveStopwatch at 00:00 on 2026-07-03, and skewed every IST-gated metric). The only sanctioned path is `npm run import-tickets -- <csv>` (`scripts/importTickets.ts`), which routes all timestamps through `lib/istDate.ts` — the same conversion service the Freshdesk webhook uses — and aborts if any converted timestamp lands in the future. It accepts both Freshdesk-style and DB-style CSV headers. Note a wipe-and-reimport resets webhook-maintained columns not present in exports (`is_incomplete`, `tags`).
+- **The Joker roster was stale and silently zeroing a whole panel** (found 2026-08-11): `JOKER_ROSTER` named `"Shruti Sharma"` for anishqa, who has zero rows in `jokers` — the 694 anishqa rows all belong to `"Anil Talluri"`, so every anishqa Joker metric read 0. `/api/jokers` now resolves joker names from the `agents` table (`role = 'joker'`). Separately, `jokers` has had **no row newer than 2026-03-31** and the route is IST-month-gated, so both panels read 0 regardless — that upstream sync looks dead and is worth checking before trusting the Joker panel.
+- **`jokers.queendom_name` is misspelled both ways** — `"ananyashree"` (extra `a`, 770 rows) and `"anisqa"` (missing `h`, 694 rows). Neither resolves through `normalizeQueendom()`. Harmless today only because `/api/jokers` keys off `joker_name`; any new code that trusts that column will silently drop every row. `onboarding_conversion_ledger.queendom_name` is empty string in all 109 rows for the same class of reason.
 - `POST /api/webhooks/zoho-calls` is not implemented (README scaffold only).
 - `onboarding_conversion_ledger` is orphaned in the DB (nothing reads/writes it); drop/archive decision pending (dry-audit **G4**).

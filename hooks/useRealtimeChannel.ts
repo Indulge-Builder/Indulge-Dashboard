@@ -29,10 +29,17 @@ export interface RealtimeTableConfig {
 
 const RECONNECT_DELAY_MS = 3000;
 
+/**
+ * @param enabled set false to skip subscribing entirely. Needed when a table
+ *   may not exist yet (a pending migration): Realtime answers CHANNEL_ERROR,
+ *   which this hook treats as a transient fault and retries every 3s forever —
+ *   an endless refetch loop on a screen that runs 24/7.
+ */
 export function useRealtimeChannel(
   channelName: string,
   configs: RealtimeTableConfig[],
   onError?: () => void,
+  enabled = true,
 ): void {
   const [reconnect, setReconnect] = useState(0);
 
@@ -47,6 +54,7 @@ export function useRealtimeChannel(
   const shape = configs.map((c) => `${c.table}:${c.event ?? "*"}`).join(",");
 
   useEffect(() => {
+    if (!enabled) return;
     const client = supabase;
     if (!client) return;
 
@@ -82,5 +90,5 @@ export function useRealtimeChannel(
       client.removeChannel(ch);
       if (reconnectTimer) clearTimeout(reconnectTimer);
     };
-  }, [channelName, shape, reconnect]);
+  }, [channelName, shape, reconnect, enabled]);
 }

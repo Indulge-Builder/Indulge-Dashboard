@@ -21,7 +21,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchJson } from "@/lib/clientFetch";
 import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
-import { buildRoster, ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "@/lib/agentRoster";
+import {
+  buildRoster,
+  FALLBACK_ROSTER,
+  ROSTER_ANANYSHREE,
+  ROSTER_ANISHQA,
+  type RosterSnapshot,
+} from "@/lib/agentRoster";
 import type { QueenStats, MemberStats, TicketStats, JokerStats } from "@/lib/types";
 import type { TicketRowMinimal } from "@/lib/ticketAggregation";
 import {
@@ -63,7 +69,8 @@ const ZERO_JOKER: JokerStats = {
   totalThisMonth: 0,
 };
 
-// Fixed rosters — stats are filled in from ticket rows after the initial fetch.
+// Initial rosters — the hardcoded fallback, shown for the split second before
+// GET /api/roster resolves. Stats fill in from ticket rows after that fetch.
 const AGENTS_ANANYSHREE = buildRoster(ROSTER_ANANYSHREE, "ananyshree");
 const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
 
@@ -145,6 +152,14 @@ export interface DashboardData {
 export function useDashboardData(): DashboardData {
   const [isInitialLoading,   setIsInitialLoading]   = useState(true);
   const [ticketRows,         setTicketRows]         = useState<TicketRowMinimal[]>([]);
+  // Live roster from the editable `agents` table. Starts as the hardcoded
+  // fallback so the leaderboard renders immediately and never blanks if
+  // /api/roster is slow or down.
+  const [roster,             setRoster]             = useState<RosterSnapshot>(FALLBACK_ROSTER);
+  // Whether the roster actually came from the `agents` table. Gates the
+  // dashboard-agents Realtime channel — subscribing to a table that doesn't
+  // exist yet would CHANNEL_ERROR and retry every 3s forever.
+  const [hasAgentsTable,     setHasAgentsTable]     = useState(false);
   const [ananyshreeStats,    setAnanyshreeStats]    = useState<QueenStats>(INIT_ANANYSHREE);
   const [anishqaStats,       setAnishqaStats]       = useState<QueenStats>(INIT_ANISHQA);
   const [overdueTickets,     setOverdueTickets]     = useState<OverdueTicketItem[]>([]);
@@ -184,7 +199,10 @@ export function useDashboardData(): DashboardData {
   // resolution, so the timer jumps back up.
   useEffect(() => {
     const ticketStats = aggregateTicketStats(ticketRows);
-    const { ananyshree: agentsA, anishqa: agentsB } = mergeAndRankAgents(ticketRows);
+    const { ananyshree: agentsA, anishqa: agentsB } = mergeAndRankAgents(
+      ticketRows,
+      roster,
+    );
     const series = buildTicketTimeSeries(ticketRows);
     const ledgerMax: Record<QueendomId, number | null> = {
       ananyshree: null,
@@ -207,9 +225,25 @@ export function useDashboardData(): DashboardData {
       series: series.anishqa,
       lastResolvedAtMs: maxResolvedMs(series.anishqa.lastResolvedMs, ledgerMax.anishqa),
     }));
-  }, [ticketRows, prunedResolutionsVersion]);
+  }, [ticketRows, prunedResolutionsVersion, roster]);
 
   // ── Fetchers (all stable — empty dep arrays) ────────────────────────────────
+
+  /**
+   * Roster fetch. /api/roster already falls back to the hardcoded arrays
+   * server-side, so a 200 is always usable; a null (network failure) leaves
+   * whatever roster is currently in state untouched.
+   */
+  const fetchRoster = useCallback(async () => {
+    const data = await fetchJson<RosterSnapshot & { source?: string }>("/api/roster");
+    if (data === null || !Array.isArray(data.ananyshree)) return;
+    setRoster({
+      ananyshree: data.ananyshree,
+      anishqa: data.anishqa ?? [],
+      jokers: data.jokers ?? [],
+    });
+    setHasAgentsTable(data.source === "agents-table");
+  }, []);
 
   const fetchTicketRows = useCallback(async () => {
     const rows = await fetchJson<TicketRowMinimal[]>("/api/tickets/rows");
@@ -283,6 +317,7 @@ export function useDashboardData(): DashboardData {
   const fetchAll = useCallback(
     () =>
       Promise.all([
+        fetchRoster(),
         fetchTicketRows(),
         fetchMembers(),
         fetchRenewalsDue(),
@@ -291,7 +326,7 @@ export function useDashboardData(): DashboardData {
         fetchRenewals("ananyshree"),
         fetchRenewals("anishqa"),
       ]),
-    [fetchTicketRows, fetchMembers, fetchRenewalsDue, fetchJokers, fetchOverdueTickets, fetchRenewals],
+    [fetchRoster, fetchTicketRows, fetchMembers, fetchRenewalsDue, fetchJokers, fetchOverdueTickets, fetchRenewals],
   );
 
   // ── Initial load ─────────────────────────────────────────────────────────────
@@ -328,6 +363,25 @@ export function useDashboardData(): DashboardData {
   //   dashboard-jokers   → jokers table   → ticker patch + stats refetch
   //   dashboard-tickets  → tickets table  → optimistic patch ticketRows state
   //   dashboard-renewals → renewals+members tables → refetch /api/renewals-panel
+  //   dashboard-agents   → agents table   → refetch /api/roster + /api/jokers
+
+  // Roster edits made in /settings land on the TV without a reload. The Joker
+  // stats are refetched too because which name each queendom's Joker metrics
+  // aggregate over is itself a roster field.
+  useRealtimeChannel(
+    "dashboard-agents",
+    [
+      { table: "agents", handler: () => { fetchRoster(); } },
+      { table: "agents", handler: () => { fetchJokers(); } },
+    ],
+    () => {
+      fetchRoster();
+      fetchJokers();
+    },
+    // Only once /api/roster confirms the table is really there. Until then the
+    // 5-minute poll still picks up roster changes.
+    hasAgentsTable,
+  );
 
   // Two handlers (dry-audit C5 pattern): member counts and the renewals-due
   // list both live in the clients table but come from different routes.

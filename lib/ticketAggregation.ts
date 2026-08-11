@@ -10,8 +10,8 @@ import {
   utcMillisFromDbTimestamp,
 } from "./istDate";
 import type { TicketStats, AgentStats } from "./types";
-import { ROSTER_ANANYSHREE, ROSTER_ANISHQA } from "./agentRoster";
-import { buildRoster } from "./agentRoster";
+import { FALLBACK_ROSTER, buildRoster } from "./agentRoster";
+import type { RosterSnapshot } from "./agentRoster";
 import { isVoid, isTerminal, isIncompleteScoreStatus } from "./ticketStatus";
 import { normalizeQueendom } from "./queendom";
 
@@ -198,7 +198,15 @@ function calcAgent(
   };
 }
 
-export function aggregateAgentStats(rows: TicketRowMinimal[]): {
+/**
+ * @param roster live roster from GET /api/roster; defaults to the hardcoded
+ *   FALLBACK_ROSTER so every existing caller (and any failed fetch) behaves
+ *   exactly as before this became editable.
+ */
+export function aggregateAgentStats(
+  rows: TicketRowMinimal[],
+  roster: RosterSnapshot = FALLBACK_ROSTER,
+): {
   ananyshree: Record<string, AgentLiveStats>;
   anishqa: Record<string, AgentLiveStats>;
 } {
@@ -215,23 +223,26 @@ export function aggregateAgentStats(rows: TicketRowMinimal[]): {
 
   const ananyshree: Record<string, AgentLiveStats> = {};
   const anishqa: Record<string, AgentLiveStats> = {};
-  for (const name of ROSTER_ANANYSHREE) {
+  for (const name of roster.ananyshree) {
     ananyshree[name] = calcAgent(visibleRows, name, istRef);
   }
-  for (const name of ROSTER_ANISHQA) {
+  for (const name of roster.anishqa) {
     anishqa[name] = calcAgent(visibleRows, name, istRef);
   }
   return { ananyshree, anishqa };
 }
 
 /** Merge live stats into roster and rank by monthly volume (today as tie-breaker). */
-export function mergeAndRankAgents(rows: TicketRowMinimal[]): {
+export function mergeAndRankAgents(
+  rows: TicketRowMinimal[],
+  roster: RosterSnapshot = FALLBACK_ROSTER,
+): {
   ananyshree: AgentStats[];
   anishqa: AgentStats[];
 } {
-  const live = aggregateAgentStats(rows);
-  const rosterA = buildRoster(ROSTER_ANANYSHREE, "ananyshree");
-  const rosterB = buildRoster(ROSTER_ANISHQA, "anishqa");
+  const live = aggregateAgentStats(rows, roster);
+  const rosterA = buildRoster(roster.ananyshree, "ananyshree");
+  const rosterB = buildRoster(roster.anishqa, "anishqa");
   const liveCI = (rec: Record<string, AgentLiveStats>) => {
     const out: Record<string, AgentLiveStats> = {};
     for (const [k, v] of Object.entries(rec)) {
