@@ -35,6 +35,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#050507",
+  // Mobile shell paints into the notch/home-bar areas via env(safe-area-inset-*).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

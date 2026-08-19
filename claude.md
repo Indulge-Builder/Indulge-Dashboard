@@ -38,7 +38,8 @@ Violating any of these causes **silently wrong metrics on the TV**:
 8. **Queendom/group name matching uses `.includes()`, not equality** (Freshdesk sends e.g. `"Team Ananyshree"`) — always via `normalizeQueendom()` in `lib/queendom.ts`.
 9. **Postgres error `23505` (PK violation) on `leads.lead_id` or `deals.deal_id` is expected dedup behavior**, not an error — silently ignore it.
 10. **Soft-delete only.** Tickets are never `DELETE`d; deletion sets `status = "deleted"` and the VOID filter hides the row.
-11. **Both screens stay always-mounted.** Rotation in `DashboardController.tsx` only crossfades opacity/zIndex — never unmount a screen to "optimize".
+11. **Both screens stay always-mounted — ON THE TV TREE ONLY.** Rotation in `DashboardController.tsx` only crossfades opacity/zIndex — never unmount a screen to "optimize". The mobile tree (`components/mobile/`, added 2026-08-20) deliberately does the opposite: only the active tab renders (battery), rotation is replaced by tabs, and the marquee ticker by static alert lines. `components/DashboardRoot.tsx` splits the two by media query — its MOBILE_QUERY must stay identical to the mobile CSS override in `app/globals.css` (which unlocks html/body scrolling and resets the TV's root font-size slope on phones).
+12. **Viewing can be passcode-gated** via `DASHBOARD_PIN` (lib/viewerGate.ts) — OPT-IN: unset → open (the TV deployment needs no config), set → 30-day signed cookie per device. Distinct from SETTINGS_PIN. Planned to be replaced by Supabase Auth shared with the Subscription Manager project.
 
 ## Architecture
 

@@ -25,3 +25,5 @@ Thumbs.db
 # direnv (per-project Supabase account binding)
 .direnv/
 .envrc
+.vercel
+.env*
