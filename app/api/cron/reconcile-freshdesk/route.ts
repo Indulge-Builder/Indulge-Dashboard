@@ -77,6 +77,7 @@ interface ExistingRow {
   subject: string | null;
   created_at: string | null;
   resolved_at: string | null;
+  fd_updated_at: string | null;
 }
 
 /** Two timestamps describe the same instant (2s tolerance for format drift). */
@@ -100,6 +101,12 @@ function needsUpsert(row: ReconcileRow, existing: ExistingRow): boolean {
   if ((row.agent_name ?? null) !== (existing.agent_name ?? null)) return true;
   if (!sameInstant(row.created_at, existing.created_at)) return true;
   if ("resolved_at" in row && !sameInstant(row.resolved_at, existing.resolved_at)) {
+    return true;
+  }
+  // Enrichment drift: fd_updated_at moves on ANY Freshdesk edit (priority,
+  // type, first response, custom fields…), so one timestamp covers all
+  // sixteen enrichment columns without field-by-field diffing.
+  if (row.fd_updated_at && !sameInstant(row.fd_updated_at, existing.fd_updated_at)) {
     return true;
   }
   return false;
@@ -144,7 +151,7 @@ export async function GET(req: NextRequest) {
     const { data, error } = await db
       .from("tickets")
       .select(
-        "ticket_id, status, queendom_name, agent_name, subject, created_at, resolved_at",
+        "ticket_id, status, queendom_name, agent_name, subject, created_at, resolved_at, fd_updated_at",
       )
       .in("ticket_id", ids.slice(i, i + 200));
     if (error) {
@@ -157,17 +164,42 @@ export async function GET(req: NextRequest) {
   }
 
   const changed: ReconcileRow[] = [];
+  const events: Array<Record<string, unknown>> = [];
   let inserted = 0;
   for (const row of rows) {
     const existing = existingById.get(row.ticket_id);
     if (!existing) {
       changed.push(row);
       inserted++;
+      events.push({
+        ticket_id: row.ticket_id,
+        event_type: "created",
+        to_value: row.status,
+        agent_name: row.agent_name ?? null,
+        queendom_name: row.queendom_name,
+        occurred_at: row.created_at,
+        source: "reconcile",
+      });
       continue;
     }
     // Never clobber an existing subject (webhook keeps it fresher than us).
     if (existing.subject) delete row.subject;
-    if (needsUpsert(row, existing)) changed.push(row);
+    if (needsUpsert(row, existing)) {
+      changed.push(row);
+      const oldStatus = (existing.status ?? "").trim();
+      if (oldStatus.toLowerCase() !== row.status.toLowerCase()) {
+        events.push({
+          ticket_id: row.ticket_id,
+          event_type: "status_change",
+          from_value: oldStatus,
+          to_value: row.status,
+          agent_name: row.agent_name ?? null,
+          queendom_name: row.queendom_name,
+          occurred_at: row.fd_updated_at ?? new Date().toISOString(),
+          source: "reconcile",
+        });
+      }
+    }
   }
 
   // PostgREST bulk upserts need uniform keys per request — group by key set.
@@ -188,6 +220,15 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Append state transitions for the founder timeline (best-effort — an
+  // events hiccup must never fail the reconcile itself).
+  if (events.length > 0) {
+    const { error: evErr } = await db.from("ticket_events").insert(events);
+    if (evErr) {
+      console.error("[reconcile-freshdesk] ticket_events insert:", evErr.message);
+    }
+  }
+
   const summary = {
     ok: true,
     window_hours: hours,
@@ -197,6 +238,7 @@ export async function GET(req: NextRequest) {
     truncated,
     upserted: changed.length,
     inserted_missing: inserted,
+    events_recorded: events.length,
     already_in_sync: rows.length - changed.length,
   };
   console.info("[reconcile-freshdesk]", JSON.stringify(summary));

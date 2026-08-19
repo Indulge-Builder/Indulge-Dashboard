@@ -21,6 +21,7 @@ import type {
 } from "@/lib/onboardingTypes";
 import { toISTDay, istToday } from "@/lib/istDate";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import { MembersCard, CsatCard, type InsightsPayload } from "./MobileInsights";
 
 const LEDGER_SHOWN = 6;
 
@@ -29,6 +30,7 @@ interface Props {
   shopAgents: OnboardingAgentRow[];
   ledger: OnboardingLedgerRow[];
   leadMonthStats?: LeadMonthStats;
+  insights: InsightsPayload | null;
 }
 
 function DeptBlock({
@@ -83,6 +85,7 @@ export default function MobileRevenue({
   shopAgents,
   ledger,
   leadMonthStats,
+  insights,
 }: Props) {
   const closuresThisMonth =
     (leadMonthStats?.dealsClosedThisMonth ?? 0) ||
@@ -142,6 +145,10 @@ export default function MobileRevenue({
           </div>
         </section>
       )}
+
+      {/* Founder layer: who consumes the concierge + how happy they are */}
+      <MembersCard insights={insights} />
+      <CsatCard insights={insights} />
 
       {/* 3 ── Departments */}
       <DeptBlock title="Concierge onboarding" agents={conciergeAgents} dept="concierge" />

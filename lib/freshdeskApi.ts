@@ -56,17 +56,49 @@ export function cleanAgentName(
 /** Written to queendom_name when a Freshdesk ticket has no group. */
 export const UNASSIGNED_QUEENDOM = "Unassigned";
 
+/** Freshdesk numeric source ids → labels (channel mix analytics). */
+export const FD_SOURCE_LABELS: Record<number, string> = {
+  1: "Email",
+  2: "Portal",
+  3: "Phone",
+  4: "Forum",
+  6: "Facebook",
+  7: "Chat",
+  8: "MobiHelp",
+  9: "Feedback Widget",
+  10: "Outbound Email",
+  11: "Ecommerce",
+  12: "Bot",
+  13: "WhatsApp",
+};
+
 interface FdTicketApi {
   id: number;
   status: number;
+  priority?: number | null;
+  source?: number | null;
+  type?: string | null;
   group_id: number | null;
   responder_id: number | null;
+  requester_id?: number | null;
+  company_id?: number | null;
   subject: string | null;
   created_at: string;
   updated_at: string;
+  due_by?: string | null;
+  fr_due_by?: string | null;
+  fr_escalated?: boolean;
   spam?: boolean;
   deleted?: boolean;
-  stats?: { resolved_at?: string | null; closed_at?: string | null } | null;
+  custom_fields?: Record<string, unknown> | null;
+  stats?: {
+    resolved_at?: string | null;
+    closed_at?: string | null;
+    first_responded_at?: string | null;
+    agent_responded_at?: string | null;
+    reopened_at?: string | null;
+    pending_since?: string | null;
+  } | null;
 }
 
 /** Row shape upserted into `tickets` (same policy as the webhook upsert path). */
@@ -79,6 +111,29 @@ export interface ReconcileRow {
   subject?: string;
   resolved_at?: string | null;
   is_escalated?: boolean;
+  // Founder-insight enrichment (2026-08-20) — nullable, TV never reads them.
+  priority?: number | null;
+  source?: string | null;
+  ticket_type?: string | null;
+  requester_id?: number | null;
+  company_id?: number | null;
+  first_responded_at?: string | null;
+  agent_responded_at?: string | null;
+  reopened_at?: string | null;
+  pending_since?: string | null;
+  closed_at?: string | null;
+  due_by?: string | null;
+  fr_due_by?: string | null;
+  fr_escalated?: boolean | null;
+  is_billable?: boolean | null;
+  invoice_amount?: number | null;
+  fd_updated_at?: string;
+}
+
+function parseInvoiceAmount(v: unknown): number | null {
+  if (v == null) return null;
+  const n = Number(String(v).replace(/[₹,\s]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 function fdCredentials(): { domain: string; authHeader: string } | null {
@@ -145,6 +200,35 @@ export function mapFreshdeskTicket(
   };
   const subject = (t.subject ?? "").trim();
   if (subject) row.subject = subject;
+
+  // Enrichment columns — everything the founder analytics read.
+  const cf = t.custom_fields ?? {};
+  const billableRaw = cf["cf_is_the_request_billable"];
+  const stats = t.stats ?? {};
+  Object.assign(row, {
+    priority: t.priority ?? null,
+    source:
+      t.source != null
+        ? (FD_SOURCE_LABELS[t.source] ?? String(t.source))
+        : null,
+    ticket_type: t.type ?? null,
+    requester_id: t.requester_id ?? null,
+    company_id: t.company_id ?? null,
+    first_responded_at: stats.first_responded_at ?? null,
+    agent_responded_at: stats.agent_responded_at ?? null,
+    reopened_at: stats.reopened_at ?? null,
+    pending_since: stats.pending_since ?? null,
+    closed_at: stats.closed_at ?? null,
+    due_by: t.due_by ?? null,
+    fr_due_by: t.fr_due_by ?? null,
+    fr_escalated: t.fr_escalated ?? null,
+    is_billable:
+      billableRaw != null
+        ? String(billableRaw).trim().toLowerCase() === "yes"
+        : null,
+    invoice_amount: parseInvoiceAmount(cf["cf_invoice_amount"]),
+    fd_updated_at: t.updated_at,
+  });
 
   // Mirror the webhook's status policy exactly (lib/ticketStatus.ts):
   // terminal → stamp resolved_at + clear escalation; void → clear escalation;

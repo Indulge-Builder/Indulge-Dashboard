@@ -23,6 +23,7 @@ import type { QueenStats, AgentStats } from "@/lib/types";
 import type { OverdueTicketItem } from "@/types";
 import { QUEENDOM_DISPLAY_NAME } from "@/lib/queendom";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import { ServiceMixCard, type InsightsPayload } from "./MobileInsights";
 
 const ALERTS_SHOWN = 3;
 const AGENTS_SHOWN = 6;
@@ -32,6 +33,22 @@ interface Props {
   anishqaStats: QueenStats;
   overdueTickets: OverdueTicketItem[];
   isLoading: boolean;
+  insights: InsightsPayload | null;
+  onOpenPulse: () => void;
+}
+
+/** Per-agent speed metrics from /api/insights, keyed by lowercase name. */
+export interface AgentSpeed {
+  median_frt_min: number | null;
+  median_res_hr: number | null;
+  reopens: number;
+}
+
+function fmtMins(m: number | null): string {
+  if (m == null) return "–";
+  if (m < 60) return `${m}m`;
+  if (m < 60 * 24) return `${Math.round(m / 60)}h`;
+  return `${Math.round(m / (60 * 24))}d`;
 }
 
 /** "3m ago" / "2h ago" — minute-level is plenty for a glance. */
@@ -49,10 +66,12 @@ function AgentRow({
   agent,
   maxScore,
   rank,
+  speed,
 }: {
   agent: AgentStats;
   maxScore: number;
   rank: number;
+  speed?: AgentSpeed;
 }) {
   const [open, setOpen] = useState(false);
   const pct =
@@ -121,6 +140,20 @@ function AgentRow({
               <span className="m-mini-num">{agent.incomplete}</span>
             </div>
             <div className="m-mini">
+              <span className="m-mini-label">1st response</span>
+              <span className="m-mini-num">{fmtMins(speed?.median_frt_min ?? null)}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">Resolution</span>
+              <span className="m-mini-num">
+                {speed?.median_res_hr != null ? `${speed.median_res_hr}h` : "–"}
+              </span>
+            </div>
+            <div className="m-mini" data-warn={(speed?.reopens ?? 0) > 0}>
+              <span className="m-mini-label">Reopens</span>
+              <span className="m-mini-num">{speed?.reopens ?? 0}</span>
+            </div>
+            <div className="m-mini">
               <span className="m-mini-label">Queendom</span>
               <span className="m-mini-num m-mini-text">
                 {QUEENDOM_DISPLAY_NAME[agent.queendom]}
@@ -138,6 +171,8 @@ export default function MobileConcierge({
   anishqaStats,
   overdueTickets,
   isLoading,
+  insights,
+  onOpenPulse,
 }: Props) {
   const [showAllAgents, setShowAllAgents] = useState(false);
   const [renewalsOpen, setRenewalsOpen] = useState(false);
@@ -175,6 +210,14 @@ export default function MobileConcierge({
 
   const openNow = a.pendingToResolve + b.pendingToResolve;
   const solvedToday = a.solvedToday + b.solvedToday;
+
+  const speedByName = useMemo(() => {
+    const map = new Map<string, AgentSpeed>();
+    for (const row of insights?.agents ?? []) {
+      map.set(row.name.toLowerCase(), row);
+    }
+    return map;
+  }, [insights?.agents]);
 
   if (isLoading) {
     return (
@@ -217,9 +260,21 @@ export default function MobileConcierge({
         </section>
       )}
 
-      {/* 2 ── Right now */}
-      <section className="m-card m-card-hero" aria-label="Open tickets now">
-        <h2 className="m-label">Open right now</h2>
+      {/* 2 ── Right now — taps through to the Pulse analytics sheet */}
+      <button
+        className="m-card m-card-hero m-card-tap"
+        aria-label="Open tickets now — tap for pulse analytics"
+        onClick={onOpenPulse}
+      >
+        <span className="m-card-head">
+          <h2 className="m-label">Open right now</h2>
+          <span className="m-tap-hint" aria-hidden>
+            Pulse
+            <svg width="11" height="11" viewBox="0 0 12 12">
+              <path d="M4.5 3 7.5 6 4.5 9" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </span>
         <p className="m-hero-num">
           <AnimatedCounter value={openNow} delay={250} slideOnChange />
         </p>
@@ -243,7 +298,7 @@ export default function MobileConcierge({
             </span>
           </div>
         </div>
-      </section>
+      </button>
 
       {/* 3 ── The month, per Queendom */}
       <section aria-label="This month by Queendom" className="m-queendoms">
@@ -302,6 +357,7 @@ export default function MobileConcierge({
               agent={agent}
               maxScore={maxScore}
               rank={i + 1}
+              speed={speedByName.get(agent.name.toLowerCase())}
             />
           ))}
         </div>
@@ -318,7 +374,10 @@ export default function MobileConcierge({
         )}
       </section>
 
-      {/* 5 ── Renewals, collapsed */}
+      {/* 5 ── Service mix (founder layer) */}
+      <ServiceMixCard insights={insights} />
+
+      {/* 6 ── Renewals, collapsed */}
       <section className="m-card m-card-fold" aria-label="Renewals due">
         <button
           className="m-fold-head"

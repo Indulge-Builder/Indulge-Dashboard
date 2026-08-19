@@ -23,6 +23,7 @@ import { useOnboardingPanelData } from "@/hooks/useOnboardingPanelData";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import MobileConcierge from "./MobileConcierge";
 import MobileRevenue from "./MobileRevenue";
+import { PulseSheet, useInsights } from "./MobileInsights";
 
 type MobileTab = "concierge" | "revenue";
 
@@ -45,7 +46,9 @@ function useIstClock(): string {
 
 export default function MobileDashboard() {
   const [tab, setTab] = useState<MobileTab>("concierge");
+  const [pulseOpen, setPulseOpen] = useState(false);
   const istNow = useIstClock();
+  const { insights, insightsLoading, days, setDays } = useInsights();
 
   const {
     ananyshreeStats,
@@ -108,6 +111,8 @@ export default function MobileDashboard() {
               anishqaStats={anishqaStats}
               overdueTickets={overdueTickets}
               isLoading={isInitialLoading}
+              insights={insights}
+              onOpenPulse={() => setPulseOpen(true)}
             />
           </ErrorBoundary>
         ) : (
@@ -117,10 +122,20 @@ export default function MobileDashboard() {
               shopAgents={shopAgents}
               ledger={ledger}
               leadMonthStats={leadMonthStats}
+              insights={insights}
             />
           </ErrorBoundary>
         )}
       </main>
+
+      <PulseSheet
+        open={pulseOpen}
+        onClose={() => setPulseOpen(false)}
+        insights={insights}
+        loading={insightsLoading}
+        days={days}
+        setDays={setDays}
+      />
     </div>
   );
 }

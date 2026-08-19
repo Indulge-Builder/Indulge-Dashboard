@@ -195,6 +195,12 @@ export async function POST(req: NextRequest) {
     console.info(
       `[freshdesk webhook] ticket ${ticketIdStr} marked deleted (invisible to TV dashboard)`,
     );
+    void db.from("ticket_events").insert({
+      ticket_id: ticketIdStr,
+      event_type: "status_change",
+      to_value: "deleted",
+      source: "webhook",
+    });
 
     return NextResponse.json({ ok: true, voided: ticketIdStr, status: "deleted" });
   }
@@ -236,6 +242,15 @@ export async function POST(req: NextRequest) {
       console.info(
         `[freshdesk webhook] patched is_escalated=${effectiveEscalated} for ticket ${ticketIdStr}`,
       );
+      if (effectiveEscalated === true) {
+        // Founder timeline — best-effort, never fails the webhook.
+        void db.from("ticket_events").insert({
+          ticket_id: ticketIdStr,
+          event_type: "escalated",
+          to_value: "true",
+          source: "webhook",
+        });
+      }
     }
 
     return NextResponse.json({
@@ -302,6 +317,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Prior state for the founder timeline (one indexed PK read per webhook).
+  const { data: prior } = await db
+    .from("tickets")
+    .select("status")
+    .eq("ticket_id", ticketIdStr)
+    .maybeSingle();
+
   const { error } = await db.from("tickets").upsert(row, { onConflict: "ticket_id" });
 
   if (error) {
@@ -312,6 +334,31 @@ export async function POST(req: NextRequest) {
       row,
     );
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Append the transition (best-effort — an events hiccup never fails the
+  // webhook; the reconcile cron records anything missed here).
+  const priorStatus = (prior?.status ?? "").trim();
+  if (!prior) {
+    void db.from("ticket_events").insert({
+      ticket_id: ticketIdStr,
+      event_type: "created",
+      to_value: status,
+      agent_name: (row.agent_name as string | null) ?? null,
+      queendom_name: queendomName,
+      occurred_at: createdIso ?? now,
+      source: "webhook",
+    });
+  } else if (priorStatus.toLowerCase() !== statusLower) {
+    void db.from("ticket_events").insert({
+      ticket_id: ticketIdStr,
+      event_type: "status_change",
+      from_value: priorStatus,
+      to_value: status,
+      agent_name: (row.agent_name as string | null) ?? null,
+      queendom_name: queendomName,
+      source: "webhook",
+    });
   }
 
   console.info(
