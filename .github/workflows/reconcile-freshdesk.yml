@@ -1,0 +1,19 @@
+# Freshdesk↔Supabase reconciliation, every 3 hours.
+# Lives here because Vercel Hobby limits crons to daily; vercel.json keeps a
+# daily 04:00 IST run as a backstop. Both hit the same idempotent endpoint.
+name: reconcile-freshdesk
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reconcile endpoint
+        run: |
+          curl -fsS --max-time 90 \
+            "https://indulge-live-dashboard.vercel.app/api/cron/reconcile-freshdesk?hours=4" \
+            -H "x-webhook-secret: ${{ secrets.RECONCILE_WEBHOOK_SECRET }}"
