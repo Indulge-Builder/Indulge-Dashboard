@@ -4,11 +4,12 @@
  * components/mobile/charts.tsx — dependency-free SVG charts for the founder
  * insight views, built per the dataviz method against the Indulge system:
  *
- * - Series palette (validated 2026-08-20, dark surface #0a0a0a): received =
- *   sky #38bdf8, resolved = brand gold #d4af37 — CVD ΔE 24.5, normal 26.3,
- *   contrast ≥3:1. Both sit brighter than the generic dark-mode lightness
- *   band by design: Indulge's committed world is luminous marks on
- *   near-black (deviation documented; legend + direct labels either way).
+ * - Series palette (validated 2026-08-20, LIGHT surface #f1ede6 — the
+ *   "Indulge Daylight" mobile skin): received = deep powder #54769e,
+ *   resolved = deep honey #a98f4c — lightness in band, CVD ΔE 17.4,
+ *   normal 19.4. The generic chroma floor flags all Serene-family tones
+ *   as muted; that softness is the committed world (per the
+ *   example-serene reference), relieved by legend + tooltip + readout.
  * - Text wears text tokens (champagne inks), never series color; colored
  *   dots beside labels carry identity.
  * - Thin marks: 2px lines, recessive grid hairlines, tabular numerals.
@@ -20,9 +21,16 @@
 import { useMemo, useRef, useState } from "react";
 
 export const SERIES = {
-  received: "#38bdf8",
-  resolved: "#d4af37",
+  received: "#54769e", // deep powder — Serene info family
+  resolved: "#a98f4c", // deep honey — Indulge gold in daylight
 } as const;
+
+/** Cream surface + putty grid (Serene chart conventions). */
+const SURFACE = "#f1ede6";
+const GRID = "rgba(166, 156, 140, 0.28)";
+const BASELINE = "rgba(166, 156, 140, 0.45)";
+const CROSSHAIR = "rgba(56, 51, 43, 0.35)";
+const AREA_FILL = "rgba(208, 172, 90, 0.16)";
 
 export interface PulsePoint {
   d: string; // YYYY-MM-DD (IST day)
@@ -118,8 +126,9 @@ export function PulseChart({ daily }: { daily: PulsePoint[] }) {
             x2={W - PAD_R}
             y1={PAD_T + f * (H - PAD_T - PAD_B)}
             y2={PAD_T + f * (H - PAD_T - PAD_B)}
-            stroke="rgba(245,230,200,0.07)"
+            stroke={GRID}
             strokeWidth="1"
+            strokeDasharray="3 4"
           />
         ))}
         <line
@@ -127,11 +136,11 @@ export function PulseChart({ daily }: { daily: PulsePoint[] }) {
           x2={W - PAD_R}
           y1={H - PAD_B}
           y2={H - PAD_B}
-          stroke="rgba(245,230,200,0.14)"
+          stroke={BASELINE}
           strokeWidth="1"
         />
         {/* resolved area + line (brand gold leads) */}
-        <path d={areaR} fill="rgba(212,175,55,0.09)" />
+        <path d={areaR} fill={AREA_FILL} />
         <polyline
           points={linesR}
           fill="none"
@@ -150,14 +159,14 @@ export function PulseChart({ daily }: { daily: PulsePoint[] }) {
           opacity="0.9"
         />
         {/* endpoint dots with surface ring */}
-        <circle cx={xs[xs.length - 1]} cy={yOf(last.resolved)} r="3.5" fill={SERIES.resolved} stroke="#0a0a0a" strokeWidth="2" />
-        <circle cx={xs[xs.length - 1]} cy={yOf(last.created)} r="3.5" fill={SERIES.received} stroke="#0a0a0a" strokeWidth="2" />
+        <circle cx={xs[xs.length - 1]} cy={yOf(last.resolved)} r="3.5" fill={SERIES.resolved} stroke={SURFACE} strokeWidth="2" />
+        <circle cx={xs[xs.length - 1]} cy={yOf(last.created)} r="3.5" fill={SERIES.received} stroke={SURFACE} strokeWidth="2" />
         {/* crosshair */}
         {p && pick != null && (
           <g>
-            <line x1={xs[pick]} x2={xs[pick]} y1={PAD_T} y2={H - PAD_B} stroke="rgba(245,230,200,0.3)" strokeWidth="1" />
-            <circle cx={xs[pick]} cy={yOf(p.resolved)} r="4" fill={SERIES.resolved} stroke="#0a0a0a" strokeWidth="2" />
-            <circle cx={xs[pick]} cy={yOf(p.created)} r="4" fill={SERIES.received} stroke="#0a0a0a" strokeWidth="2" />
+            <line x1={xs[pick]} x2={xs[pick]} y1={PAD_T} y2={H - PAD_B} stroke={CROSSHAIR} strokeWidth="1" />
+            <circle cx={xs[pick]} cy={yOf(p.resolved)} r="4" fill={SERIES.resolved} stroke={SURFACE} strokeWidth="2" />
+            <circle cx={xs[pick]} cy={yOf(p.created)} r="4" fill={SERIES.received} stroke={SURFACE} strokeWidth="2" />
           </g>
         )}
         {/* x labels: first / last */}

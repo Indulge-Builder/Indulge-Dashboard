@@ -181,7 +181,7 @@ export function PulseSheet({
 
         <div className="m-sheet-body">
           {!pulse || (loading && !insights) ? (
-            <div className="m-card m-skeleton skeleton-block" style={{ height: "12rem" }} />
+            <div className="m-card m-skeleton" style={{ height: "12rem" }} />
           ) : (
             <>
               <section className="m-card" aria-label="Daily volume">

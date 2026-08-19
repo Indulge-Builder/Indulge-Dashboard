@@ -222,9 +222,9 @@ export default function MobileConcierge({
   if (isLoading) {
     return (
       <div className="m-feed" aria-busy>
-        <div className="m-card m-skeleton skeleton-block" style={{ height: "8rem" }} />
-        <div className="m-card m-skeleton skeleton-block" style={{ height: "5.5rem" }} />
-        <div className="m-card m-skeleton skeleton-block" style={{ height: "14rem" }} />
+        <div className="m-card m-skeleton" style={{ height: "8rem" }} />
+        <div className="m-card m-skeleton" style={{ height: "5.5rem" }} />
+        <div className="m-card m-skeleton" style={{ height: "14rem" }} />
       </div>
     );
   }
