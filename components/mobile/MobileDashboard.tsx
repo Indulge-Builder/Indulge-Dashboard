@@ -17,7 +17,7 @@
  * type ramp never touches the TV's clamp() variables.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useOnboardingPanelData } from "@/hooks/useOnboardingPanelData";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -26,8 +26,26 @@ import MobileRevenue from "./MobileRevenue";
 
 type MobileTab = "concierge" | "revenue";
 
+const IST_CLOCK = new Intl.DateTimeFormat("en-IN", {
+  timeZone: "Asia/Kolkata",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+});
+
+/** Minute-ticking IST wall clock — anchors every reading to office time. */
+function useIstClock(): string {
+  const [now, setNow] = useState(() => IST_CLOCK.format(new Date()));
+  useEffect(() => {
+    const id = setInterval(() => setNow(IST_CLOCK.format(new Date())), 15_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
+
 export default function MobileDashboard() {
   const [tab, setTab] = useState<MobileTab>("concierge");
+  const istNow = useIstClock();
 
   const {
     ananyshreeStats,
@@ -44,9 +62,14 @@ export default function MobileDashboard() {
       <header className="m-header">
         <div className="m-header-row">
           <p className="m-wordmark">Indulge</p>
-          <span className="m-live" aria-label="Live data">
-            <span className="m-live-dot" aria-hidden />
-            Live
+          <span className="m-header-meta">
+            <span className="m-clock" aria-label="Current time in India">
+              {istNow} IST
+            </span>
+            <span className="m-live" aria-label="Live data">
+              <span className="m-live-dot" aria-hidden />
+              Live
+            </span>
           </span>
         </div>
 

@@ -5,20 +5,24 @@
  *
  *   1. Needs attention  — top overdue tickets, static lines (never a marquee)
  *   2. Right now        — open / solved today / overdue, one row of three
- *   3. The month        — the two Queendoms side by side
+ *   3. The month        — the two Queendoms side by side, with time since
+ *                          each Queendom's last resolution (the phone's
+ *                          ResolveStopwatch)
  *   4. Who's carrying it — top agents as name + bar; tap a row for the full
  *                          seven-metric breakdown the TV leaderboard shows
  *   5. Renewals due      — collapsed until asked
  *
  * All numbers come from the SAME aggregation the TV renders
  * (lib/ticketAggregation.ts via useDashboardData) — nothing is recomputed
- * here, so the phone can never disagree with the wall.
+ * here, so the phone can never disagree with the wall. Numerals roll in via
+ * AnimatedCounter (the TV's spring odometer, en-IN grouping).
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { QueenStats, AgentStats } from "@/lib/types";
 import type { OverdueTicketItem } from "@/types";
 import { QUEENDOM_DISPLAY_NAME } from "@/lib/queendom";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const ALERTS_SHOWN = 3;
 const AGENTS_SHOWN = 6;
@@ -28,6 +32,17 @@ interface Props {
   anishqaStats: QueenStats;
   overdueTickets: OverdueTicketItem[];
   isLoading: boolean;
+}
+
+/** "3m ago" / "2h ago" — minute-level is plenty for a glance. */
+function timeAgo(ms: number | null | undefined, nowMs: number): string | null {
+  if (!ms) return null;
+  const mins = Math.max(0, Math.floor((nowMs - ms) / 60_000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 function AgentRow({
@@ -46,7 +61,7 @@ function AgentRow({
       : 0;
 
   return (
-    <div className="m-agent" data-open={open}>
+    <div className="m-agent" data-open={open} data-first={rank === 1}>
       <button
         className="m-agent-row"
         onClick={() => setOpen((v) => !v)}
@@ -127,6 +142,13 @@ export default function MobileConcierge({
   const [showAllAgents, setShowAllAgents] = useState(false);
   const [renewalsOpen, setRenewalsOpen] = useState(false);
 
+  // Minute tick for the "last resolve" ages — glance-level freshness.
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
   const a = ananyshreeStats.tickets;
   const b = anishqaStats.tickets;
 
@@ -157,18 +179,23 @@ export default function MobileConcierge({
   if (isLoading) {
     return (
       <div className="m-feed" aria-busy>
-        <div className="m-card m-skeleton" style={{ height: "7.5rem" }} />
-        <div className="m-card m-skeleton" style={{ height: "5rem" }} />
-        <div className="m-card m-skeleton" style={{ height: "14rem" }} />
+        <div className="m-card m-skeleton skeleton-block" style={{ height: "8rem" }} />
+        <div className="m-card m-skeleton skeleton-block" style={{ height: "5.5rem" }} />
+        <div className="m-card m-skeleton skeleton-block" style={{ height: "14rem" }} />
       </div>
     );
   }
+
+  const queendoms = [
+    ["ananyshree", a, ananyshreeStats.lastResolvedAtMs] as const,
+    ["anishqa", b, anishqaStats.lastResolvedAtMs] as const,
+  ];
 
   return (
     <div className="m-feed">
       {/* 1 ── Needs attention */}
       {overdueTickets.length > 0 && (
-        <section className="m-card m-card-alert" aria-label="Overdue tickets">
+        <section className="m-card" aria-label="Overdue tickets">
           <header className="m-card-head">
             <h2 className="m-label m-label-alert">Needs attention</h2>
             <span className="m-count-chip">{overdueTickets.length}</span>
@@ -176,6 +203,7 @@ export default function MobileConcierge({
           <ul className="m-alert-list">
             {overdueTickets.slice(0, ALERTS_SHOWN).map((t) => (
               <li key={t.id} className="m-alert-line">
+                <span className="m-alert-mark" aria-hidden />
                 <span className="m-alert-subject">{t.subject}</span>
                 <span className="m-alert-agent">{t.agentName}</span>
               </li>
@@ -192,22 +220,26 @@ export default function MobileConcierge({
       {/* 2 ── Right now */}
       <section className="m-card m-card-hero" aria-label="Open tickets now">
         <h2 className="m-label">Open right now</h2>
-        <p className="m-hero-num">{openNow}</p>
+        <p className="m-hero-num">
+          <AnimatedCounter value={openNow} delay={250} slideOnChange />
+        </p>
         <div className="m-stat-row" role="list">
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Solved today</span>
             <span className="m-stat-num" data-good={solvedToday > 0}>
-              {solvedToday}
+              <AnimatedCounter value={solvedToday} delay={350} />
             </span>
           </div>
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Received</span>
-            <span className="m-stat-num">{a.totalReceived + b.totalReceived}</span>
+            <span className="m-stat-num">
+              <AnimatedCounter value={a.totalReceived + b.totalReceived} delay={450} />
+            </span>
           </div>
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Overdue</span>
             <span className="m-stat-num" data-bad={overdueTickets.length > 0}>
-              {overdueTickets.length}
+              <AnimatedCounter value={overdueTickets.length} delay={550} />
             </span>
           </div>
         </div>
@@ -215,34 +247,47 @@ export default function MobileConcierge({
 
       {/* 3 ── The month, per Queendom */}
       <section aria-label="This month by Queendom" className="m-queendoms">
-        {(
-          [
-            ["ananyshree", a] as const,
-            ["anishqa", b] as const,
-          ]
-        ).map(([id, t]) => (
-          <div key={id} className="m-card m-queendom-card">
-            <h2 className="m-label">{QUEENDOM_DISPLAY_NAME[id]}</h2>
-            <p className="m-q-num">{t.resolvedThisMonth}</p>
-            <p className="m-q-sub">
-              resolved of <strong>{t.totalReceived}</strong>
-            </p>
-            <div className="m-q-meter" aria-hidden>
-              <i
-                style={{
-                  transform: `scaleX(${
-                    t.totalReceived > 0
-                      ? t.resolvedThisMonth / t.totalReceived
-                      : 0
-                  })`,
-                }}
-              />
+        {queendoms.map(([id, t, lastResolvedAtMs]) => {
+          const last = timeAgo(lastResolvedAtMs, nowMs);
+          const fresh =
+            !!lastResolvedAtMs && nowMs - lastResolvedAtMs < 30 * 60_000;
+          return (
+            <div key={id} className="m-card m-queendom-card">
+              <h2 className="m-q-name">{QUEENDOM_DISPLAY_NAME[id]}</h2>
+              <p className="m-q-num">
+                <AnimatedCounter value={t.resolvedThisMonth} delay={500} />
+              </p>
+              <p className="m-q-sub">
+                resolved of <strong>{t.totalReceived.toLocaleString("en-IN")}</strong>
+              </p>
+              <div className="m-q-meter" aria-hidden>
+                <i
+                  style={{
+                    transform: `scaleX(${
+                      t.totalReceived > 0
+                        ? t.resolvedThisMonth / t.totalReceived
+                        : 0
+                    })`,
+                  }}
+                />
+              </div>
+              <div className="m-q-foot">
+                <p className="m-q-pending" data-none={t.pendingToResolve === 0}>
+                  {t.pendingToResolve} pending
+                </p>
+                {last && (
+                  <p
+                    className="m-q-last"
+                    data-fresh={fresh}
+                    title="Time since last resolution"
+                  >
+                    ✦ {last}
+                  </p>
+                )}
+              </div>
             </div>
-            <p className="m-q-pending" data-none={t.pendingToResolve === 0}>
-              {t.pendingToResolve} pending
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       {/* 4 ── Who's carrying it */}

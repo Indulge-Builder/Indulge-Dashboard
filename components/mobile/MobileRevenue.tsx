@@ -20,6 +20,7 @@ import type {
   LeadMonthStats,
 } from "@/lib/onboardingTypes";
 import { toISTDay, istToday } from "@/lib/istDate";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const LEDGER_SHOWN = 6;
 
@@ -33,9 +34,11 @@ interface Props {
 function DeptBlock({
   title,
   agents,
+  dept,
 }: {
   title: string;
   agents: OnboardingAgentRow[];
+  dept: "concierge" | "shop";
 }) {
   const ranked = useMemo(
     () => [...agents].sort((a, b) => b.totalConverted - a.totalConverted),
@@ -44,7 +47,7 @@ function DeptBlock({
   const max = ranked[0]?.totalConverted ?? 0;
 
   return (
-    <section className="m-card" aria-label={title}>
+    <section className="m-card" data-dept={dept} aria-label={title}>
       <header className="m-card-head">
         <h2 className="m-label">{title}</h2>
       </header>
@@ -100,19 +103,27 @@ export default function MobileRevenue({
       {/* 1 ── The month */}
       <section className="m-card m-card-hero" aria-label="Closures this month">
         <h2 className="m-label">Closed this month</h2>
-        <p className="m-hero-num">{closuresThisMonth}</p>
+        <p className="m-hero-num">
+          <AnimatedCounter value={closuresThisMonth} delay={250} slideOnChange />
+        </p>
         <div className="m-stat-row" role="list">
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Leads</span>
-            <span className="m-stat-num">{leads}</span>
+            <span className="m-stat-num">
+              <AnimatedCounter value={leads} delay={350} />
+            </span>
           </div>
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Attended</span>
-            <span className="m-stat-num">{attended}</span>
+            <span className="m-stat-num" data-good={attended > 0}>
+              <AnimatedCounter value={attended} delay={450} />
+            </span>
           </div>
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Junk</span>
-            <span className="m-stat-num">{junk}</span>
+            <span className="m-stat-num">
+              <AnimatedCounter value={junk} delay={550} />
+            </span>
           </div>
         </div>
       </section>
@@ -133,8 +144,8 @@ export default function MobileRevenue({
       )}
 
       {/* 3 ── Departments */}
-      <DeptBlock title="Concierge onboarding" agents={conciergeAgents} />
-      <DeptBlock title="Shop sales" agents={shopAgents} />
+      <DeptBlock title="Concierge onboarding" agents={conciergeAgents} dept="concierge" />
+      <DeptBlock title="Shop sales" agents={shopAgents} dept="shop" />
 
       {/* 4 ── Live ledger */}
       <section className="m-card" aria-label="Latest closures">
