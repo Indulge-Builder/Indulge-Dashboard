@@ -53,6 +53,7 @@ export const ACTIVE_CLEAR_RESOLVED_AT = new Set([
   "nudge vendor",
   "ongoing delivery",
   "invoice due",
+  "assigned to ai agent",
 ]);
 
 export const isVoid = (s: string | null): boolean => VOID_STATUSES.has(norm(s));

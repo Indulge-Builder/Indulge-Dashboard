@@ -63,6 +63,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
 import { assertWebhookSecret } from "@/lib/webhookAuth";
+import { cleanAgentName, UNASSIGNED_QUEENDOM } from "@/lib/freshdeskApi";
 import {
   SLA_SAFE_STATUSES,
   ACTIVE_CLEAR_RESOLVED_AT,
@@ -247,18 +248,21 @@ export async function POST(req: NextRequest) {
   const { status, queendom_name, agent_name, ticket_created_at, resolved_date_time } =
     payload;
 
-  if (!status || !queendom_name) {
-    console.error("[freshdesk webhook] 400 Missing status or queendom_name", {
+  if (!status) {
+    console.error("[freshdesk webhook] 400 Missing status", {
       ticket_id: ticketIdStr,
-      status: status ?? "(missing)",
-      queendom_name: queendom_name ?? "(missing)",
       fullPayload: payload,
     });
     return NextResponse.json(
-      { error: "Missing required fields: status, queendom_name" },
+      { error: "Missing required field: status" },
       { status: 400 },
     );
   }
+
+  // Unassigned Freshdesk tickets render {{ticket.group.name}} as empty — store
+  // them under a sentinel group instead of bouncing the webhook (a 400 here
+  // means the ticket never reaches the DB at all until reconciliation).
+  const queendomName = queendom_name?.trim() || UNASSIGNED_QUEENDOM;
 
   const statusLower = status.toLowerCase().trim();
   const now = new Date().toISOString();
@@ -266,10 +270,12 @@ export async function POST(req: NextRequest) {
   const row: Record<string, unknown> = {
     ticket_id: ticketIdStr,
     status,
-    queendom_name,
+    queendom_name: queendomName,
   };
   if (payload.agent_name !== undefined) {
-    row.agent_name = agent_name;
+    // Freshdesk suffixes "(Deactivated)" onto deactivated agents' names, which
+    // forks them off the roster — store the clean name (lib/freshdeskApi.ts).
+    row.agent_name = cleanAgentName(agent_name);
   }
   // Only overwrite subject when the payload actually carries one, so an update
   // webhook that omits {{ticket.subject}} can't blank a previously-stored value.
@@ -309,7 +315,7 @@ export async function POST(req: NextRequest) {
   }
 
   console.info(
-    `[freshdesk webhook] upserted ticket ${ticketIdStr} → "${status}" (${queendom_name})`,
+    `[freshdesk webhook] upserted ticket ${ticketIdStr} → "${status}" (${queendomName})`,
     `| agent_name: ${(row.agent_name as string | null) ?? "null"} | resolved_at: ${(row.resolved_at as string | null | undefined) ?? "unchanged"}`,
   );
 

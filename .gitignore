@@ -22,3 +22,6 @@ yarn-error.log*
 # OS metadata
 .DS_Store
 Thumbs.db
+# direnv (per-project Supabase account binding)
+.direnv/
+.envrc

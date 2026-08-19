@@ -33,11 +33,16 @@ export const GET = withApiGuard(async (_req, db) => {
   const { startUtcIso: startOfMonthISTUtcIso } = getCurrentIstMonthUtcBounds();
 
   // Current IST month — feeds every period metric.
+  // Deterministic order is load-bearing: each page is its own query, and
+  // without ORDER BY Postgres may return rows in different physical order per
+  // page — rows silently vanish from the paginated union (2026-08-20: a bulk
+  // repair rewrote tuples and ~500 of 2.8k rows disappeared from this route).
   const monthQuery = paginateAll<TicketRowMinimal>((from, to) =>
     db
       .from("tickets")
       .select(SELECT_COLS)
       .gte("created_at", startOfMonthISTUtcIso)
+      .order("ticket_id", { ascending: true })
       .range(from, to),
   );
 
@@ -51,7 +56,7 @@ export const GET = withApiGuard(async (_req, db) => {
     for (const status of CLOSED_OR_VOID) {
       q = q.not("status", "ilike", status);
     }
-    return q.range(from, to);
+    return q.order("ticket_id", { ascending: true }).range(from, to);
   });
 
   const [monthResult, backlogResult] = await Promise.all([
