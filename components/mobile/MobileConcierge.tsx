@@ -37,18 +37,14 @@ interface Props {
   onOpenPulse: () => void;
 }
 
-/** Per-agent speed metrics from /api/insights, keyed by lowercase name. */
+/** Per-agent insight metrics from /api/insights, keyed by lowercase name.
+ *  No first-response metric: the real work happens on WhatsApp and Freshdesk
+ *  is the tracking ledger, so reply timestamps barely exist (61/24k). What IS
+ *  true in that workflow: resolution time, reopens, billable flags. */
 export interface AgentSpeed {
-  median_frt_min: number | null;
   median_res_hr: number | null;
   reopens: number;
-}
-
-function fmtMins(m: number | null): string {
-  if (m == null) return "–";
-  if (m < 60) return `${m}m`;
-  if (m < 60 * 24) return `${Math.round(m / 60)}h`;
-  return `${Math.round(m / (60 * 24))}d`;
+  billable: number;
 }
 
 /** "3m ago" / "2h ago" — minute-level is plenty for a glance. */
@@ -140,8 +136,8 @@ function AgentRow({
               <span className="m-mini-num">{agent.incomplete}</span>
             </div>
             <div className="m-mini">
-              <span className="m-mini-label">1st response</span>
-              <span className="m-mini-num">{fmtMins(speed?.median_frt_min ?? null)}</span>
+              <span className="m-mini-label">Billable</span>
+              <span className="m-mini-num">{speed?.billable ?? 0}</span>
             </div>
             <div className="m-mini">
               <span className="m-mini-label">Resolution</span>

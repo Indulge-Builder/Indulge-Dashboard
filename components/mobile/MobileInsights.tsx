@@ -38,8 +38,6 @@ export interface InsightsPayload {
     name: string;
     queendom: string | null;
     resolved: number;
-    median_frt_min: number | null;
-    p90_frt_min: number | null;
     median_res_hr: number | null;
     reopens: number;
     open_now: number;
