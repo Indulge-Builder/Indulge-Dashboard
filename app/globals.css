@@ -2088,3 +2088,128 @@ body::before {
 .gate-button:active { transform: scale(0.97); }
 .gate-button:disabled { opacity: 0.4; }
 .gate-error { min-height: 1.2em; font-size: 0.8rem; color: var(--color-red); margin: 0; }
+
+/* ═══ Period filter, queendom selection, target race (2026-08-20) ═══════ */
+
+/* Period filter — the satin track, four seats */
+.m-period {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: linear-gradient(180deg, #e8e3da, #f0ece5);
+  box-shadow: var(--d-track);
+  border-radius: var(--d-r-field);
+  padding: 4px;
+  gap: 2px;
+}
+.m-period-btn {
+  min-height: 40px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--d-ink-3);
+  background: none;
+  border: 0;
+  border-radius: calc(var(--d-r-field) - 5px);
+  transition: color 180ms ease, background 180ms ease, box-shadow 180ms ease,
+    transform 140ms var(--m-ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.m-period-btn:active { transform: scale(0.97); }
+.m-period-btn[data-active="true"] {
+  color: var(--d-accent-deep);
+  background: linear-gradient(180deg, #f9f6f0, #f0ece5);
+  box-shadow: var(--d-tab-active);
+}
+
+/* Queendom card selection — floats higher on an accent wash */
+.m-queendom-card[data-selected="true"] {
+  background: linear-gradient(180deg, #f6f0e2, var(--d-surface));
+  box-shadow: var(--d-raised-lg), inset 0 0 0 1.5px var(--d-accent);
+}
+.m-queendom-card .m-q-foot { margin-top: 0.4rem; display: flex; align-items: baseline; justify-content: space-between; gap: 0.4rem; }
+
+.m-clear-filter {
+  font-size: var(--mt-micro);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--d-accent-deep);
+  background: var(--d-accent-wash);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  min-height: 30px;
+  transition: transform 140ms var(--m-ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.m-clear-filter:active { transform: scale(0.96); }
+.m-target-note {
+  font-size: var(--mt-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--d-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The target race meter — quarter ticks, sage when the target falls */
+.m-target-meter {
+  position: relative;
+  height: 8px;
+  border-radius: 8px;
+  background: var(--d-well);
+  box-shadow: inset 1px 1px 3px rgb(var(--d-dark) / 0.25),
+    inset -1px -1px 2px rgb(var(--d-light) / 0.5);
+  overflow: hidden;
+  margin-top: 0.2rem;
+}
+.m-target-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #dfc084, var(--d-accent));
+  transform-origin: left;
+  transition: transform 900ms var(--m-ease-in-out);
+}
+.m-target-meter i[data-met="true"] {
+  background: linear-gradient(145deg, #b8cfaf, #98b58e);
+}
+.m-target-ticks {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent calc(25% - 1px),
+    rgb(var(--d-dark) / 0.35) calc(25% - 1px),
+    rgb(var(--d-dark) / 0.35) 25%
+  );
+  background-size: 100.5% 100%;
+  pointer-events: none;
+}
+.m-target-star {
+  color: var(--d-sage-deep);
+  font-size: 0.8rem;
+  flex: none;
+  animation: m-star-in 500ms var(--m-ease-out) backwards;
+}
+@keyframes m-star-in {
+  from { opacity: 0; transform: scale(0.4) rotate(-30deg); }
+  to { opacity: 1; transform: none; }
+}
+.m-agent-score em {
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--d-ink-3);
+  font-family: var(--font-montserrat), sans-serif;
+}
+.m-agent-score[data-met="true"] { color: var(--d-sage-deep); }
+.m-agent[data-met="true"] .m-agent-name { font-weight: 600; }
+
+/* soft dim while a period refetch is in flight */
+[data-dim="true"] { opacity: 0.55; transition: opacity 200ms ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .m-target-meter i { transition: none; }
+  .m-target-star { animation: none; }
+}

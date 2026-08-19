@@ -1,25 +1,27 @@
 "use client";
 
 /**
- * Concierge tab — the ranked feed, in the order questions are asked:
+ * Concierge tab — the ranked feed, now driven by a PERIOD FILTER:
  *
- *   1. Needs attention  — top overdue tickets, static lines (never a marquee)
- *   2. Right now        — open / solved today / overdue, one row of three
- *   3. The month        — the two Queendoms side by side, with time since
- *                          each Queendom's last resolution (the phone's
- *                          ResolveStopwatch)
- *   4. Who's carrying it — top agents as name + bar; tap a row for the full
- *                          seven-metric breakdown the TV leaderboard shows
- *   5. Renewals due      — collapsed until asked
+ *   1. Needs attention  — overdue tickets, always "now" (above the filter)
+ *   2. Period filter    — Today / This Week / This Month / Last Month;
+ *                          everything below re-anchors to it
+ *   3. Resolved hero    — the period's headline (tap → Pulse analytics)
+ *   4. The Queendoms    — tap a Queendom to filter the agent list to it
+ *   5. The agents       — every active roster agent, ranked by ON-TIME
+ *                          resolves, each racing a playful target meter
+ *                          (125 on-time per month; paced down for shorter
+ *                          periods), with the full breakdown on tap
+ *   6. Service mix / Renewals — unchanged
  *
- * All numbers come from the SAME aggregation the TV renders
- * (lib/ticketAggregation.ts via useDashboardData) — nothing is recomputed
- * here, so the phone can never disagree with the wall. Numerals roll in via
- * AnimatedCounter (the TV's spring odometer, en-IN grouping).
+ * Data: GET /api/scoreboard?period= (insights_scoreboard — cohort math on
+ * created_at, live Queendoms + active roster only). "On-time" = resolved
+ * without going overdue (beat due_by, or no SLA clock). The realtime
+ * overdue list and last-resolve ages still come from useDashboardData.
  */
 
 import { useEffect, useMemo, useState } from "react";
-import type { QueenStats, AgentStats } from "@/lib/types";
+import type { QueenStats } from "@/lib/types";
 import type { OverdueTicketItem } from "@/types";
 import { QUEENDOM_DISPLAY_NAME } from "@/lib/queendom";
 import AnimatedCounter from "@/components/AnimatedCounter";
@@ -28,19 +30,77 @@ import { ServiceMixCard, type InsightsPayload } from "./MobileInsights";
 const ALERTS_SHOWN = 3;
 const AGENTS_SHOWN = 6;
 
-interface Props {
-  ananyshreeStats: QueenStats;
-  anishqaStats: QueenStats;
-  overdueTickets: OverdueTicketItem[];
-  isLoading: boolean;
-  insights: InsightsPayload | null;
-  onOpenPulse: () => void;
+type Period = "today" | "week" | "month" | "last-month";
+type QueendomId = "ananyshree" | "anishqa";
+
+const PERIODS: Array<{ id: Period; label: string }> = [
+  { id: "today", label: "Today" },
+  { id: "week", label: "Week" },
+  { id: "month", label: "Month" },
+  { id: "last-month", label: "Last Mo" },
+];
+const PERIOD_TITLE: Record<Period, string> = {
+  today: "today",
+  week: "this week",
+  month: "this month",
+  "last-month": "last month",
+};
+/** The game: 125 on-time resolves per agent per month, paced per period. */
+const PERIOD_TARGET: Record<Period, number> = {
+  today: 4, // ≈ 125 / 30, the daily pace
+  week: 29, // ≈ 125 × 7/30
+  month: 125,
+  "last-month": 125,
+};
+
+interface ScoreAgent {
+  name: string;
+  queendom: QueendomId;
+  received: number;
+  resolved: number;
+  ontime: number;
+  pending: number;
+  overdue_open: number;
+}
+interface QueendomScore {
+  received: number;
+  resolved: number;
+  ontime: number;
+  pending: number;
+}
+interface Scoreboard {
+  period: Period;
+  queendoms: Partial<Record<QueendomId, QueendomScore>>;
+  agents: ScoreAgent[];
 }
 
-/** Per-agent insight metrics from /api/insights, keyed by lowercase name.
- *  No first-response metric: the real work happens on WhatsApp and Freshdesk
- *  is the tracking ledger, so reply timestamps barely exist (61/24k). What IS
- *  true in that workflow: resolution time, reopens, billable flags. */
+function useScoreboard(period: Period) {
+  const [board, setBoard] = useState<Scoreboard | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(`/api/scoreboard?period=${period}`);
+        if (res.ok && !cancelled) setBoard((await res.json()) as Scoreboard);
+      } catch (err) {
+        console.error("[useScoreboard]", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    setLoading(true);
+    void load();
+    const id = setInterval(load, 60_000); // keep the game live
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [period]);
+  return { board, loading };
+}
+
+/** Extra per-agent context from /api/insights, keyed by lowercase name. */
 export interface AgentSpeed {
   median_res_hr: number | null;
   reopens: number;
@@ -58,25 +118,32 @@ function timeAgo(ms: number | null | undefined, nowMs: number): string | null {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+interface Props {
+  ananyshreeStats: QueenStats;
+  anishqaStats: QueenStats;
+  overdueTickets: OverdueTicketItem[];
+  isLoading: boolean;
+  insights: InsightsPayload | null;
+  onOpenPulse: () => void;
+}
+
 function AgentRow({
   agent,
-  maxScore,
   rank,
+  target,
   speed,
 }: {
-  agent: AgentStats;
-  maxScore: number;
+  agent: ScoreAgent;
   rank: number;
+  target: number;
   speed?: AgentSpeed;
 }) {
   const [open, setOpen] = useState(false);
-  const pct =
-    maxScore > 0
-      ? Math.max(4, Math.round((agent.tasksCompletedThisMonth / maxScore) * 100))
-      : 0;
+  const progress = Math.min(1, agent.ontime / target);
+  const met = agent.ontime >= target;
 
   return (
-    <div className="m-agent" data-open={open} data-first={rank === 1}>
+    <div className="m-agent" data-open={open} data-first={rank === 1} data-met={met}>
       <button
         className="m-agent-row"
         onClick={() => setOpen((v) => !v)}
@@ -85,55 +152,49 @@ function AgentRow({
         <span className="m-agent-rank">{rank}</span>
         <span className="m-agent-name">{agent.name}</span>
         <span className="m-agent-queendom" data-q={agent.queendom} aria-hidden />
-        <span className="m-agent-score">{agent.tasksCompletedThisMonth}</span>
-        <svg
-          className="m-agent-chevron"
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          aria-hidden
-        >
-          <path
-            d="M3 4.5 6 7.5 9 4.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+        {met && (
+          <span className="m-target-star" title="Target met" aria-label="Target met">
+            ✦
+          </span>
+        )}
+        <span className="m-agent-score" data-met={met}>
+          {agent.ontime}
+          <em>/{target}</em>
+        </span>
+        <svg className="m-agent-chevron" width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+          <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      <div className="m-agent-bar" aria-hidden>
-        <i style={{ transform: `scaleX(${pct / 100})` }} />
+      {/* target meter — quarter ticks, sage once the target is met */}
+      <div
+        className="m-target-meter"
+        role="img"
+        aria-label={`${agent.ontime} of ${target} on-time resolves`}
+      >
+        <i data-met={met} style={{ transform: `scaleX(${progress})` }} />
+        <span className="m-target-ticks" aria-hidden />
       </div>
       <div className="m-agent-detail">
         <div className="m-agent-detail-inner">
           <div className="m-mini-grid">
             <div className="m-mini">
-              <span className="m-mini-label">Today</span>
+              <span className="m-mini-label">On-time</span>
               <span className="m-mini-num">
-                {agent.tasksCompletedToday}
-                <em>/{agent.tasksAssignedToday}</em>
+                {agent.ontime}
+                <em>/{agent.resolved} resolved</em>
               </span>
             </div>
             <div className="m-mini">
-              <span className="m-mini-label">Month</span>
-              <span className="m-mini-num">
-                {agent.tasksCompletedThisMonth}
-                <em>/{agent.tasksAssignedThisMonth}</em>
-              </span>
+              <span className="m-mini-label">Received</span>
+              <span className="m-mini-num">{agent.received}</span>
             </div>
             <div className="m-mini">
               <span className="m-mini-label">Pending</span>
-              <span className="m-mini-num">{agent.pendingScore}</span>
+              <span className="m-mini-num">{agent.pending}</span>
             </div>
-            <div className="m-mini" data-warn={agent.overdueCount > 0}>
-              <span className="m-mini-label">Overdue</span>
-              <span className="m-mini-num">{agent.overdueCount}</span>
-            </div>
-            <div className="m-mini" data-warn={agent.incomplete > 0}>
-              <span className="m-mini-label">Incomplete</span>
-              <span className="m-mini-num">{agent.incomplete}</span>
+            <div className="m-mini" data-warn={agent.overdue_open > 0}>
+              <span className="m-mini-label">Overdue now</span>
+              <span className="m-mini-num">{agent.overdue_open}</span>
             </div>
             <div className="m-mini">
               <span className="m-mini-label">Billable</span>
@@ -170,8 +231,11 @@ export default function MobileConcierge({
   insights,
   onOpenPulse,
 }: Props) {
+  const [period, setPeriod] = useState<Period>("month");
+  const [selectedQ, setSelectedQ] = useState<QueendomId | null>(null);
   const [showAllAgents, setShowAllAgents] = useState(false);
   const [renewalsOpen, setRenewalsOpen] = useState(false);
+  const { board, loading: boardLoading } = useScoreboard(period);
 
   // Minute tick for the "last resolve" ages — glance-level freshness.
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -180,21 +244,23 @@ export default function MobileConcierge({
     return () => clearInterval(id);
   }, []);
 
-  const a = ananyshreeStats.tickets;
-  const b = anishqaStats.tickets;
+  const target = PERIOD_TARGET[period];
+  const qa: QueendomScore =
+    board?.queendoms.ananyshree ?? { received: 0, resolved: 0, ontime: 0, pending: 0 };
+  const qb: QueendomScore =
+    board?.queendoms.anishqa ?? { received: 0, resolved: 0, ontime: 0, pending: 0 };
 
-  const rankedAgents = useMemo(() => {
-    return [...ananyshreeStats.agents, ...anishqaStats.agents].sort(
-      (x, y) =>
-        y.tasksCompletedThisMonth - x.tasksCompletedThisMonth ||
-        y.tasksCompletedToday - x.tasksCompletedToday,
-    );
-  }, [ananyshreeStats.agents, anishqaStats.agents]);
+  const agents = useMemo(() => {
+    const all = board?.agents ?? [];
+    return selectedQ ? all.filter((a) => a.queendom === selectedQ) : all;
+  }, [board?.agents, selectedQ]);
+  const visibleAgents = showAllAgents ? agents : agents.slice(0, AGENTS_SHOWN);
 
-  const visibleAgents = showAllAgents
-    ? rankedAgents
-    : rankedAgents.slice(0, AGENTS_SHOWN);
-  const maxScore = rankedAgents[0]?.tasksCompletedThisMonth ?? 0;
+  const speedByName = useMemo(() => {
+    const map = new Map<string, AgentSpeed>();
+    for (const row of insights?.agents ?? []) map.set(row.name.toLowerCase(), row);
+    return map;
+  }, [insights?.agents]);
 
   const renewalsDue = useMemo(() => {
     const all = [
@@ -204,18 +270,12 @@ export default function MobileConcierge({
     return all.sort((x, y) => x.endDate.localeCompare(y.endDate));
   }, [ananyshreeStats.renewalsDue, anishqaStats.renewalsDue]);
 
-  const openNow = a.pendingToResolve + b.pendingToResolve;
-  const solvedToday = a.solvedToday + b.solvedToday;
+  const lastResolved: Record<QueendomId, number | null | undefined> = {
+    ananyshree: ananyshreeStats.lastResolvedAtMs,
+    anishqa: anishqaStats.lastResolvedAtMs,
+  };
 
-  const speedByName = useMemo(() => {
-    const map = new Map<string, AgentSpeed>();
-    for (const row of insights?.agents ?? []) {
-      map.set(row.name.toLowerCase(), row);
-    }
-    return map;
-  }, [insights?.agents]);
-
-  if (isLoading) {
+  if (isLoading && !board) {
     return (
       <div className="m-feed" aria-busy>
         <div className="m-card m-skeleton" style={{ height: "8rem" }} />
@@ -225,14 +285,14 @@ export default function MobileConcierge({
     );
   }
 
-  const queendoms = [
-    ["ananyshree", a, ananyshreeStats.lastResolvedAtMs] as const,
-    ["anishqa", b, anishqaStats.lastResolvedAtMs] as const,
+  const queendomCards: Array<[QueendomId, QueendomScore]> = [
+    ["ananyshree", qa],
+    ["anishqa", qb],
   ];
 
   return (
     <div className="m-feed">
-      {/* 1 ── Needs attention */}
+      {/* 1 ── Needs attention — always NOW, above the period filter */}
       {overdueTickets.length > 0 && (
         <section className="m-card" aria-label="Overdue tickets">
           <header className="m-card-head">
@@ -256,14 +316,31 @@ export default function MobileConcierge({
         </section>
       )}
 
-      {/* 2 ── Right now — taps through to the Pulse analytics sheet */}
+      {/* 2 ── Period filter — everything below re-anchors to it */}
+      <nav className="m-period" role="tablist" aria-label="Time period">
+        {PERIODS.map((p) => (
+          <button
+            key={p.id}
+            role="tab"
+            aria-selected={period === p.id}
+            className="m-period-btn"
+            data-active={period === p.id}
+            onClick={() => setPeriod(p.id)}
+          >
+            {p.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* 3 ── Resolved hero (tap → Pulse) */}
       <button
         className="m-card m-card-hero m-card-tap"
-        aria-label="Open tickets now — tap for pulse analytics"
+        aria-label={`Resolved ${PERIOD_TITLE[period]} — tap for pulse analytics`}
         onClick={onOpenPulse}
+        data-dim={boardLoading}
       >
         <span className="m-card-head">
-          <h2 className="m-label">Open right now</h2>
+          <h2 className="m-label">Resolved · {PERIOD_TITLE[period]}</h2>
           <span className="m-tap-hint" aria-hidden>
             Pulse
             <svg width="11" height="11" viewBox="0 0 12 12">
@@ -272,108 +349,118 @@ export default function MobileConcierge({
           </span>
         </span>
         <p className="m-hero-num">
-          <AnimatedCounter value={openNow} delay={250} slideOnChange />
+          <AnimatedCounter key={period} value={qa.resolved + qb.resolved} delay={250} slideOnChange />
         </p>
         <div className="m-stat-row" role="list">
           <div className="m-stat" role="listitem">
-            <span className="m-stat-label">Solved today</span>
-            <span className="m-stat-num" data-good={solvedToday > 0}>
-              <AnimatedCounter value={solvedToday} delay={350} />
-            </span>
-          </div>
-          <div className="m-stat" role="listitem">
             <span className="m-stat-label">Received</span>
             <span className="m-stat-num">
-              <AnimatedCounter value={a.totalReceived + b.totalReceived} delay={450} />
+              <AnimatedCounter key={period} value={qa.received + qb.received} delay={350} />
             </span>
           </div>
           <div className="m-stat" role="listitem">
-            <span className="m-stat-label">Overdue</span>
-            <span className="m-stat-num" data-bad={overdueTickets.length > 0}>
-              <AnimatedCounter value={overdueTickets.length} delay={550} />
+            <span className="m-stat-label">On-time</span>
+            <span className="m-stat-num" data-good={qa.ontime + qb.ontime > 0}>
+              <AnimatedCounter key={period} value={qa.ontime + qb.ontime} delay={450} />
+            </span>
+          </div>
+          <div className="m-stat" role="listitem">
+            <span className="m-stat-label">Pending</span>
+            <span className="m-stat-num">
+              <AnimatedCounter key={period} value={qa.pending + qb.pending} delay={550} />
             </span>
           </div>
         </div>
       </button>
 
-      {/* 3 ── The month, per Queendom */}
-      <section aria-label="This month by Queendom" className="m-queendoms">
-        {queendoms.map(([id, t, lastResolvedAtMs]) => {
-          const last = timeAgo(lastResolvedAtMs, nowMs);
-          const fresh =
-            !!lastResolvedAtMs && nowMs - lastResolvedAtMs < 30 * 60_000;
+      {/* 4 ── The Queendoms — tap one to focus its agents */}
+      <section aria-label="Queendoms" className="m-queendoms">
+        {queendomCards.map(([id, q]) => {
+          const last = timeAgo(lastResolved[id], nowMs);
+          const fresh = !!lastResolved[id] && nowMs - lastResolved[id]! < 30 * 60_000;
+          const selected = selectedQ === id;
           return (
-            <div key={id} className="m-card m-queendom-card">
+            <button
+              key={id}
+              className="m-card m-queendom-card m-card-tap"
+              aria-pressed={selected}
+              data-selected={selected}
+              onClick={() => setSelectedQ(selected ? null : id)}
+            >
               <h2 className="m-q-name">{QUEENDOM_DISPLAY_NAME[id]}</h2>
               <p className="m-q-num">
-                <AnimatedCounter value={t.resolvedThisMonth} delay={500} />
+                <AnimatedCounter key={period} value={q.resolved} delay={500} />
               </p>
               <p className="m-q-sub">
-                resolved of <strong>{t.totalReceived.toLocaleString("en-IN")}</strong>
+                resolved of <strong>{q.received.toLocaleString("en-IN")}</strong>
               </p>
               <div className="m-q-meter" aria-hidden>
                 <i
                   style={{
-                    transform: `scaleX(${
-                      t.totalReceived > 0
-                        ? t.resolvedThisMonth / t.totalReceived
-                        : 0
-                    })`,
+                    transform: `scaleX(${q.received > 0 ? q.resolved / q.received : 0})`,
                   }}
                 />
               </div>
-              <div className="m-q-foot">
-                <p className="m-q-pending" data-none={t.pendingToResolve === 0}>
-                  {t.pendingToResolve} pending
-                </p>
+              <span className="m-q-foot">
+                <span className="m-q-pending" data-none={q.pending === 0}>
+                  {q.pending} pending
+                </span>
                 {last && (
-                  <p
-                    className="m-q-last"
-                    data-fresh={fresh}
-                    title="Time since last resolution"
-                  >
+                  <span className="m-q-last" data-fresh={fresh}>
                     ✦ {last}
-                  </p>
+                  </span>
                 )}
-              </div>
-            </div>
+              </span>
+            </button>
           );
         })}
       </section>
 
-      {/* 4 ── Who's carrying it */}
+      {/* 5 ── The agents, racing the target */}
       <section className="m-card" aria-label="Agent leaderboard">
         <header className="m-card-head">
-          <h2 className="m-label">Top agents · this month</h2>
+          <h2 className="m-label">
+            {selectedQ
+              ? `${QUEENDOM_DISPLAY_NAME[selectedQ]}'s agents`
+              : "Agents · on-time race"}
+          </h2>
+          {selectedQ ? (
+            <button className="m-clear-filter" onClick={() => setSelectedQ(null)}>
+              All agents ✕
+            </button>
+          ) : (
+            <span className="m-target-note">target {target}</span>
+          )}
         </header>
-        <div className="m-agent-list">
+        <div className="m-agent-list" data-dim={boardLoading}>
           {visibleAgents.map((agent, i) => (
             <AgentRow
-              key={`${agent.queendom}-${agent.id}`}
+              key={`${agent.queendom}-${agent.name}`}
               agent={agent}
-              maxScore={maxScore}
               rank={i + 1}
+              target={target}
               speed={speedByName.get(agent.name.toLowerCase())}
             />
           ))}
+          {visibleAgents.length === 0 && (
+            <p className="m-empty">No agents yet for this view.</p>
+          )}
         </div>
-        {rankedAgents.length > AGENTS_SHOWN && (
+        {agents.length > AGENTS_SHOWN && (
           <button
             className="m-ghost-button"
             onClick={() => setShowAllAgents((v) => !v)}
             aria-expanded={showAllAgents}
           >
-            {showAllAgents
-              ? "Show fewer"
-              : `All ${rankedAgents.length} agents`}
+            {showAllAgents ? "Show fewer" : `All ${agents.length} agents`}
           </button>
         )}
       </section>
 
-      {/* 5 ── Service mix (founder layer) */}
+      {/* 6 ── Service mix (founder layer) */}
       <ServiceMixCard insights={insights} />
 
-      {/* 6 ── Renewals, collapsed */}
+      {/* 7 ── Renewals, collapsed */}
       <section className="m-card m-card-fold" aria-label="Renewals due">
         <button
           className="m-fold-head"
@@ -385,21 +472,8 @@ export default function MobileConcierge({
             {renewalsDue.length > 0 && (
               <span className="m-count-chip">{renewalsDue.length}</span>
             )}
-            <svg
-              className="m-fold-chevron"
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              aria-hidden
-            >
-              <path
-                d="M3 4.5 6 7.5 9 4.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+            <svg className="m-fold-chevron" width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+              <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
         </button>
@@ -412,9 +486,7 @@ export default function MobileConcierge({
                 {renewalsDue.map((r, i) => (
                   <li key={`${r.name}-${r.endDate}-${i}`} className="m-renewal">
                     <span className="m-renewal-name">{r.name}</span>
-                    <span className="m-renewal-type">
-                      {r.membershipType ?? ""}
-                    </span>
+                    <span className="m-renewal-type">{r.membershipType ?? ""}</span>
                     <span className="m-renewal-date">
                       {r.endDate.slice(8)}·{r.endDate.slice(5, 7)}
                     </span>
