@@ -189,22 +189,43 @@ function AgentRow({
       </div>
       <div className="m-agent-detail">
         <div className="m-agent-detail-inner">
+          {/* colour key only — the numbers live in the grid below */}
           <div className="m-comp-legend" aria-hidden>
-            <span><i className="m-seg-resolved" />{agent.resolved} resolved</span>
-            {agent.overdue_p > 0 && (
-              <span><i className="m-seg-overdue" />{agent.overdue_p} overdue</span>
-            )}
-            {agent.incomplete_p > 0 && (
-              <span><i className="m-seg-incomplete" />{agent.incomplete_p} incomplete</span>
-            )}
-            <span><i className="m-seg-pending" />{pendingRest} pending</span>
+            <span><i className="m-seg-resolved" />Resolved</span>
+            <span><i className="m-seg-overdue" />Overdue</span>
+            <span><i className="m-seg-incomplete" />Incomplete</span>
+            <span><i className="m-seg-pending" />Pending</span>
           </div>
           <div className="m-mini-grid">
+            <div className="m-mini">
+              <span className="m-mini-label">
+                <i className="m-key m-seg-resolved" aria-hidden />Resolved
+              </span>
+              <span className="m-mini-num">{agent.resolved}</span>
+            </div>
+            <div className="m-mini" data-warn={agent.overdue_p > 0}>
+              <span className="m-mini-label">
+                <i className="m-key m-seg-overdue" aria-hidden />Overdue
+              </span>
+              <span className="m-mini-num">{agent.overdue_p}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">
+                <i className="m-key m-seg-incomplete" aria-hidden />Incomplete
+              </span>
+              <span className="m-mini-num">{agent.incomplete_p}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">
+                <i className="m-key m-seg-pending" aria-hidden />Pending
+              </span>
+              <span className="m-mini-num">{pendingRest}</span>
+            </div>
             <div className="m-mini">
               <span className="m-mini-label">On-time</span>
               <span className="m-mini-num">
                 {agent.ontime}
-                <em>/{agent.resolved} resolved</em>
+                <em>/{agent.resolved}</em>
               </span>
             </div>
             <div className="m-mini">
