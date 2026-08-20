@@ -4,12 +4,11 @@
  * components/mobile/charts.tsx — dependency-free SVG charts for the founder
  * insight views, built per the dataviz method against the Indulge system:
  *
- * - Series palette (validated 2026-08-20, LIGHT surface #f1ede6 — the
- *   "Indulge Daylight" mobile skin): received = deep powder #54769e,
- *   resolved = deep honey #a98f4c — lightness in band, CVD ΔE 17.4,
- *   normal 19.4. The generic chroma floor flags all Serene-family tones
- *   as muted; that softness is the committed world (per the
- *   example-serene reference), relieved by legend + tooltip + readout.
+ * - Series palette = the customer app's own tokens (dark-example
+ *   design-system): received = sky #94aecb, resolved = gold #d6ae68 —
+ *   CVD ΔE 14.3, normal 15.4 on the row metal; the muted lightness and
+ *   chroma ARE the app's shipped restraint (committed world), relieved
+ *   by legend + the bone-plate tooltip + the value readout.
  * - Text wears text tokens (champagne inks), never series color; colored
  *   dots beside labels carry identity.
  * - Thin marks: 2px lines, recessive grid hairlines, tabular numerals.
@@ -21,16 +20,16 @@
 import { useMemo, useRef, useState } from "react";
 
 export const SERIES = {
-  received: "#54769e", // deep powder — Serene info family
-  resolved: "#a98f4c", // deep honey — Indulge gold in daylight
+  received: "#94aecb", // the app's sky
+  resolved: "#d6ae68", // the app's bullion gold
 } as const;
 
-/** Cream surface + putty grid (Serene chart conventions). */
-const SURFACE = "#f1ede6";
-const GRID = "rgba(166, 156, 140, 0.28)";
-const BASELINE = "rgba(166, 156, 140, 0.45)";
-const CROSSHAIR = "rgba(56, 51, 43, 0.35)";
-const AREA_FILL = "rgba(208, 172, 90, 0.16)";
+/** rowMetal surface + gold hairline grid (the app's obsidian system). */
+const SURFACE = "#141513";
+const GRID = "rgba(214, 174, 104, 0.14)";
+const BASELINE = "rgba(245, 241, 232, 0.18)";
+const CROSSHAIR = "rgba(245, 241, 232, 0.3)";
+const AREA_FILL = "rgba(214, 174, 104, 0.10)";
 
 export interface PulsePoint {
   d: string; // YYYY-MM-DD (IST day)
