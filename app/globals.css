@@ -1053,6 +1053,7 @@ body::before {
   --a-hair: rgba(214, 174, 104, 0.16);
   --a-sage: #8fb39a;
   --a-sky: #94aecb;
+  --a-blush: #d29b74;
   --a-pos: #7ec79b;
   --a-neg: #e07b6f;
   --a-sheen: rgba(228, 200, 143, 0.05);
@@ -1579,39 +1580,52 @@ body::before {
 .m-agent-chevron { color: var(--a-tt); flex: none; transition: transform 260ms var(--e-slide); }
 .m-agent[data-open="true"] .m-agent-chevron { transform: rotate(180deg); }
 
-/* target race meter — a sunken groove; gold fills it, sage claims it */
-.m-target-meter {
-  position: relative;
+/* composition bar — the period's tickets in a sunken groove: full length =
+   everything received; green claims the resolved, blush the incomplete,
+   red the overdue, and a calm neutral whisper completes the pending rest */
+.m-comp-bar {
+  display: flex;
+  gap: 2px;
   height: 8px;
   border-radius: 8px;
   background: var(--a-inset);
   box-shadow: var(--a-inset-lite), inset 0 0 0 1px var(--a-rim);
   overflow: hidden;
   margin-top: 0.25rem;
+  padding: 0;
 }
-.m-target-meter i {
-  display: block;
-  height: 100%;
-  border-radius: 8px;
-  background: linear-gradient(90deg, var(--a-gold2), var(--a-gold), var(--a-gs));
-  transform-origin: left;
-  transition: transform 900ms var(--e-slide);
+.m-comp-bar i { display: block; height: 100%; min-width: 3px; }
+.m-comp-bar i:first-child { border-radius: 8px 0 0 8px; }
+.m-comp-bar i:last-child { border-radius: 0 8px 8px 0; }
+.m-comp-bar i:only-child { border-radius: 8px; }
+.m-seg-resolved { background: linear-gradient(180deg, #8fd0a8, var(--a-pos)); }
+.m-seg-overdue { background: linear-gradient(180deg, #eb9385, var(--a-neg)); }
+.m-seg-incomplete { background: linear-gradient(180deg, #e0ad88, var(--a-blush)); }
+.m-seg-pending { background: rgba(245, 241, 232, 0.12); }
+
+/* the legend under an opened row — the bar, spelled out */
+.m-comp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  padding: 0.6rem 0 0.1rem 1.8rem;
 }
-.m-target-meter i[data-met="true"] {
-  background: linear-gradient(90deg, #6fa683, var(--a-sage), #a8c9b2);
+.m-comp-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--a-ts);
+  font-variant-numeric: tabular-nums;
 }
-.m-target-ticks {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to right,
-    transparent,
-    transparent calc(25% - 1px),
-    rgba(0, 0, 0, 0.55) calc(25% - 1px),
-    rgba(0, 0, 0, 0.55) 25%
-  );
-  background-size: 100.5% 100%;
-  pointer-events: none;
+.m-comp-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex: none;
 }
 
 .m-agent-bar {
@@ -2175,7 +2189,6 @@ body::before {
   .m-fold-body,
   .m-q-meter i,
   .m-agent-bar i,
-  .m-target-meter i,
   .m-mixbar-track i { transition: none; }
   .m-live-dot { animation: none; }
   .m-sheet-panel { transition: opacity 200ms ease; transform: none; opacity: 0; }

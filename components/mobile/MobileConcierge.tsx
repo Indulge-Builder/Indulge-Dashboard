@@ -60,6 +60,10 @@ interface ScoreAgent {
   resolved: number;
   ontime: number;
   pending: number;
+  overdue_p: number;
+  incomplete_p: number;
+  avg_res_hr: number | null;
+  reopens_p: number;
   overdue_open: number;
 }
 interface QueendomScore {
@@ -100,13 +104,6 @@ function useScoreboard(period: Period) {
   return { board, loading };
 }
 
-/** Extra per-agent context from /api/insights, keyed by lowercase name. */
-export interface AgentSpeed {
-  median_res_hr: number | null;
-  reopens: number;
-  billable: number;
-}
-
 /** "3m ago" / "2h ago" — minute-level is plenty for a glance. */
 function timeAgo(ms: number | null | undefined, nowMs: number): string | null {
   if (!ms) return null;
@@ -131,16 +128,22 @@ function AgentRow({
   agent,
   rank,
   target,
-  speed,
 }: {
   agent: ScoreAgent;
   rank: number;
   target: number;
-  speed?: AgentSpeed;
 }) {
   const [open, setOpen] = useState(false);
-  const progress = Math.min(1, agent.ontime / target);
   const met = agent.ontime >= target;
+  // Stacked composition of the period's tickets — full bar = received.
+  // Escalated wins over incomplete (they partition the open cohort);
+  // the neutral remainder is the calm pending rest.
+  const total = Math.max(1, agent.received);
+  const pendingRest = Math.max(
+    0,
+    agent.pending - agent.overdue_p - agent.incomplete_p,
+  );
+  const seg = (n: number) => `${(n / total) * 100}%`;
 
   return (
     <div className="m-agent" data-open={open} data-first={rank === 1} data-met={met}>
@@ -165,17 +168,37 @@ function AgentRow({
           <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      {/* target meter — quarter ticks, sage once the target is met */}
+      {/* composition bar — the period's tickets, colour-coded */}
       <div
-        className="m-target-meter"
+        className="m-comp-bar"
         role="img"
-        aria-label={`${agent.ontime} of ${target} on-time resolves`}
+        aria-label={`${agent.received} tickets: ${agent.resolved} resolved, ${agent.overdue_p} overdue, ${agent.incomplete_p} incomplete, ${pendingRest} pending`}
       >
-        <i data-met={met} style={{ transform: `scaleX(${progress})` }} />
-        <span className="m-target-ticks" aria-hidden />
+        {agent.resolved > 0 && (
+          <i className="m-seg-resolved" style={{ width: seg(agent.resolved) }} />
+        )}
+        {agent.incomplete_p > 0 && (
+          <i className="m-seg-incomplete" style={{ width: seg(agent.incomplete_p) }} />
+        )}
+        {agent.overdue_p > 0 && (
+          <i className="m-seg-overdue" style={{ width: seg(agent.overdue_p) }} />
+        )}
+        {pendingRest > 0 && (
+          <i className="m-seg-pending" style={{ width: seg(pendingRest) }} />
+        )}
       </div>
       <div className="m-agent-detail">
         <div className="m-agent-detail-inner">
+          <div className="m-comp-legend" aria-hidden>
+            <span><i className="m-seg-resolved" />{agent.resolved} resolved</span>
+            {agent.overdue_p > 0 && (
+              <span><i className="m-seg-overdue" />{agent.overdue_p} overdue</span>
+            )}
+            {agent.incomplete_p > 0 && (
+              <span><i className="m-seg-incomplete" />{agent.incomplete_p} incomplete</span>
+            )}
+            <span><i className="m-seg-pending" />{pendingRest} pending</span>
+          </div>
           <div className="m-mini-grid">
             <div className="m-mini">
               <span className="m-mini-label">On-time</span>
@@ -189,26 +212,14 @@ function AgentRow({
               <span className="m-mini-num">{agent.received}</span>
             </div>
             <div className="m-mini">
-              <span className="m-mini-label">Pending</span>
-              <span className="m-mini-num">{agent.pending}</span>
-            </div>
-            <div className="m-mini" data-warn={agent.overdue_open > 0}>
-              <span className="m-mini-label">Overdue now</span>
-              <span className="m-mini-num">{agent.overdue_open}</span>
-            </div>
-            <div className="m-mini">
-              <span className="m-mini-label">Billable</span>
-              <span className="m-mini-num">{speed?.billable ?? 0}</span>
-            </div>
-            <div className="m-mini">
-              <span className="m-mini-label">Resolution</span>
+              <span className="m-mini-label">Avg resolution</span>
               <span className="m-mini-num">
-                {speed?.median_res_hr != null ? `${speed.median_res_hr}h` : "–"}
+                {agent.avg_res_hr != null ? `${agent.avg_res_hr}h` : "–"}
               </span>
             </div>
-            <div className="m-mini" data-warn={(speed?.reopens ?? 0) > 0}>
+            <div className="m-mini" data-warn={agent.reopens_p > 0}>
               <span className="m-mini-label">Reopens</span>
-              <span className="m-mini-num">{speed?.reopens ?? 0}</span>
+              <span className="m-mini-num">{agent.reopens_p}</span>
             </div>
             <div className="m-mini">
               <span className="m-mini-label">Queendom</span>
@@ -255,12 +266,6 @@ export default function MobileConcierge({
     return selectedQ ? all.filter((a) => a.queendom === selectedQ) : all;
   }, [board?.agents, selectedQ]);
   const visibleAgents = showAllAgents ? agents : agents.slice(0, AGENTS_SHOWN);
-
-  const speedByName = useMemo(() => {
-    const map = new Map<string, AgentSpeed>();
-    for (const row of insights?.agents ?? []) map.set(row.name.toLowerCase(), row);
-    return map;
-  }, [insights?.agents]);
 
   const renewalsDue = useMemo(() => {
     const all = [
@@ -439,7 +444,6 @@ export default function MobileConcierge({
               agent={agent}
               rank={i + 1}
               target={target}
-              speed={speedByName.get(agent.name.toLowerCase())}
             />
           ))}
           {visibleAgents.length === 0 && (
