@@ -221,11 +221,17 @@ export function HourBars({ hourly }: { hourly: number[] }) {
       <div className="m-hourbar-axis" aria-hidden>
         <span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span>
       </div>
-      <p className="m-chart-note">
-        {pick != null
-          ? `${pick}:00 IST — ${hourly[pick]} tickets`
-          : `Peak hour: ${peak}:00 IST`}
-      </p>
+      {pick != null ? (
+        <button
+          className="m-chart-note m-chart-note-clear"
+          onClick={() => setPick(null)}
+          aria-label="Clear hour selection"
+        >
+          {pick}:00 IST — {hourly[pick]} tickets ✕
+        </button>
+      ) : (
+        <p className="m-chart-note">Peak hour: {peak}:00 IST</p>
+      )}
     </div>
   );
 }

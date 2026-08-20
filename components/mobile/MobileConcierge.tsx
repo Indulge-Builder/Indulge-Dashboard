@@ -25,7 +25,7 @@ import type { QueenStats } from "@/lib/types";
 import type { OverdueTicketItem } from "@/types";
 import { QUEENDOM_DISPLAY_NAME } from "@/lib/queendom";
 import AnimatedCounter from "@/components/AnimatedCounter";
-import { ServiceMixCard, type InsightsPayload } from "./MobileInsights";
+import { type InsightsPayload } from "./MobileInsights";
 
 const ALERTS_SHOWN = 3;
 const AGENTS_SHOWN = 6;
@@ -122,6 +122,7 @@ interface Props {
   isLoading: boolean;
   insights: InsightsPayload | null;
   onOpenPulse: () => void;
+  onOpenOverdue: () => void;
 }
 
 function AgentRow({
@@ -255,6 +256,7 @@ export default function MobileConcierge({
   isLoading,
   insights,
   onOpenPulse,
+  onOpenOverdue,
 }: Props) {
   const [period, setPeriod] = useState<Period>("month");
   const [selectedQ, setSelectedQ] = useState<QueendomId | null>(null);
@@ -279,7 +281,15 @@ export default function MobileConcierge({
     const all = board?.agents ?? [];
     return selectedQ ? all.filter((a) => a.queendom === selectedQ) : all;
   }, [board?.agents, selectedQ]);
-  const visibleAgents = showAllAgents ? agents : agents.slice(0, AGENTS_SHOWN);
+  // Default (no Queendom chosen, not expanded): the interesting ends of the
+  // race — top 3 and bottom 3 across both Queendoms, real ranks kept.
+  const topBottom = !selectedQ && !showAllAgents && agents.length > AGENTS_SHOWN;
+  const visibleAgents = topBottom
+    ? agents.slice(0, 3)
+    : showAllAgents || selectedQ
+      ? agents
+      : agents.slice(0, AGENTS_SHOWN);
+  const bottomAgents = topBottom ? agents.slice(-3) : [];
 
   const renewalsDue = useMemo(() => {
     const all = [
@@ -313,11 +323,20 @@ export default function MobileConcierge({
     <div className="m-feed">
       {/* 1 ── Needs attention — always NOW, above the period filter */}
       {overdueTickets.length > 0 && (
-        <section className="m-card" aria-label="Overdue tickets">
-          <header className="m-card-head">
+        <button
+          className="m-card m-card-tap"
+          aria-label={`${overdueTickets.length} overdue tickets — tap for the full list`}
+          onClick={onOpenOverdue}
+        >
+          <span className="m-card-head">
             <h2 className="m-label m-label-alert">Needs attention</h2>
-            <span className="m-count-chip">{overdueTickets.length}</span>
-          </header>
+            <span className="m-fold-meta">
+              <span className="m-count-chip">{overdueTickets.length}</span>
+              <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden>
+                <path d="M4.5 3 7.5 6 4.5 9" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </span>
           <ul className="m-alert-list">
             {overdueTickets.slice(0, ALERTS_SHOWN).map((t) => (
               <li key={t.id} className="m-alert-line">
@@ -329,10 +348,10 @@ export default function MobileConcierge({
           </ul>
           {overdueTickets.length > ALERTS_SHOWN && (
             <p className="m-more-note">
-              +{overdueTickets.length - ALERTS_SHOWN} more overdue
+              +{overdueTickets.length - ALERTS_SHOWN} more — tap to see all
             </p>
           )}
-        </section>
+        </button>
       )}
 
       {/* 2 ── Period filter — everything below re-anchors to it */}
@@ -367,7 +386,7 @@ export default function MobileConcierge({
             </svg>
           </span>
         </span>
-        <p className="m-hero-num">
+        <p className="m-hero-num m-hero-good">
           <AnimatedCounter key={period} value={qa.resolved + qb.resolved} delay={250} slideOnChange />
         </p>
         <div className="m-stat-row" role="list">
@@ -460,25 +479,37 @@ export default function MobileConcierge({
               target={target}
             />
           ))}
+          {topBottom && (
+            <>
+              <div className="m-rank-gap" aria-hidden>
+                <span />···<span />
+              </div>
+              {bottomAgents.map((agent, i) => (
+                <AgentRow
+                  key={`${agent.queendom}-${agent.name}`}
+                  agent={agent}
+                  rank={agents.length - bottomAgents.length + i + 1}
+                  target={target}
+                />
+              ))}
+            </>
+          )}
           {visibleAgents.length === 0 && (
             <p className="m-empty">No agents yet for this view.</p>
           )}
         </div>
-        {agents.length > AGENTS_SHOWN && (
+        {!selectedQ && agents.length > AGENTS_SHOWN && (
           <button
             className="m-ghost-button"
             onClick={() => setShowAllAgents((v) => !v)}
             aria-expanded={showAllAgents}
           >
-            {showAllAgents ? "Show fewer" : `All ${agents.length} agents`}
+            {showAllAgents ? "Top & bottom only" : `All ${agents.length} agents`}
           </button>
         )}
       </section>
 
-      {/* 6 ── Service mix (founder layer) */}
-      <ServiceMixCard insights={insights} />
-
-      {/* 7 ── Renewals, collapsed */}
+      {/* 6 ── Renewals, collapsed */}
       <section className="m-card m-card-fold" aria-label="Renewals due">
         <button
           className="m-fold-head"

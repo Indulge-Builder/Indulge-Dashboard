@@ -2273,3 +2273,40 @@ body::before {
 .gate-button:active { transform: translateY(1px); box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.62); }
 .gate-button:disabled { opacity: 0.4; }
 .gate-error { min-height: 1.2em; font-size: 0.8rem; color: #e07b6f; margin: 0; }
+
+/* ═══ 2026-08-20 late refinements ═══════════════════════════════════════ */
+/* the Resolved hero wears the success green (the TV's resolved voice) */
+.m-hero-good { color: var(--a-pos); }
+
+/* the gap row between the race's top 3 and bottom 3 */
+.m-rank-gap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--a-tt);
+  justify-content: center;
+}
+.m-rank-gap span {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(214, 174, 104, 0.14), transparent);
+}
+
+/* clearable chart note */
+.m-chart-note-clear {
+  background: var(--a-chip);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  color: var(--a-gold);
+  align-self: flex-start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* overdue sheet detail grid hugs the left edge (no rank indent) */
+.m-mini-grid-flush { padding-left: 1.1rem; }

@@ -1,22 +1,21 @@
 "use client";
 
 /**
- * components/mobile/MobileInsights.tsx — the founder layer, woven into the
- * existing tabs (user decision 2026-08-20: no third tab):
+ * components/mobile/MobileInsights.tsx — the founder layer's sheets:
  *
- *   - useInsights(): one fetch of GET /api/insights, 30/90-day switch
- *   - PulseSheet: full-screen slide-up opened from the Concierge hero —
- *     daily received/resolved chart, hourly arrival histogram, open-backlog
- *     aging, SLA breach-risk list
- *   - ServiceMixCard: collapsed card in the Concierge feed — the 17 luxury
- *     categories, channels, priorities
- *   - MembersCard / CsatCard: Revenue feed — top requesters, satisfaction
- *
- * Event math (labeled) — the TV's cohort math is a different definition.
+ *   - useInsights(): GET /api/insights (30/90-day switch) — powers Pulse
+ *   - PulseSheet: slimmed 2026-08-20 to the one chart that earns its keep —
+ *     "When members ask" (hourly arrivals) + the reopened count. The daily
+ *     line chart, backlog aging and breach list were cut (user: low value /
+ *     duplicated the Needs-attention flow).
+ *   - OverdueSheet: the Needs-attention drill-down — every open escalated
+ *     ticket; tap one to unfold the detail the `tickets` table holds
+ *     (status, priority, type, channel, created/due/waiting-since).
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { PulseChart, HourBars, MixBars, type PulsePoint } from "./charts";
+import { HourBars, type PulsePoint } from "./charts";
+import type { OverdueDetailRow } from "@/app/api/tickets/overdue-list/route";
 
 // ── payload types (mirror /api/insights) ────────────────────────────────────
 export interface InsightsPayload {
@@ -123,21 +122,53 @@ function RangeToggle({
   );
 }
 
-function dueLabel(dueBy: string): string {
-  const mins = Math.round((new Date(dueBy).getTime() - Date.now()) / 60_000);
-  if (mins <= 0) return "past due";
-  if (mins < 60) return `${mins}m left`;
-  return `${Math.round(mins / 60)}h left`;
+function SheetFrame({
+  open,
+  onClose,
+  title,
+  sub,
+  controls,
+  children,
+  label,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  sub: string;
+  controls?: React.ReactNode;
+  children: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="m-sheet" data-open={open} aria-hidden={!open}>
+      <button
+        className="m-sheet-backdrop"
+        aria-label="Close"
+        onClick={onClose}
+        tabIndex={open ? 0 : -1}
+      />
+      <div className="m-sheet-panel" role="dialog" aria-modal="true" aria-label={label}>
+        <header className="m-sheet-head">
+          <div>
+            <h2 className="m-sheet-title">{title}</h2>
+            <p className="m-sheet-sub">{sub}</p>
+          </div>
+          <div className="m-sheet-controls">
+            {controls}
+            <button className="m-sheet-close" onClick={onClose} aria-label="Close">
+              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
+                <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        </header>
+        <div className="m-sheet-body">{children}</div>
+      </div>
+    </div>
+  );
 }
 
-// ── Pulse sheet ──────────────────────────────────────────────────────────────
-const AGING_ROWS = [
-  ["h4", "Under 4 hours"],
-  ["h24", "4 – 24 hours"],
-  ["d3", "1 – 3 days"],
-  ["older", "Over 3 days"],
-] as const;
-
+// ── Pulse sheet — when members ask ───────────────────────────────────────────
 export function PulseSheet({
   open,
   onClose,
@@ -154,199 +185,160 @@ export function PulseSheet({
   setDays: (d: 30 | 90) => void;
 }) {
   const pulse = insights?.pulse;
-  const agingMax = pulse
-    ? Math.max(1, pulse.aging.h4, pulse.aging.h24, pulse.aging.d3, pulse.aging.older)
-    : 1;
-
   return (
-    <div className="m-sheet" data-open={open} aria-hidden={!open}>
-      <button className="m-sheet-backdrop" aria-label="Close" onClick={onClose} tabIndex={open ? 0 : -1} />
-      <div className="m-sheet-panel" role="dialog" aria-modal="true" aria-label="Pulse — ticket analytics">
-        <header className="m-sheet-head">
-          <div>
-            <h2 className="m-sheet-title">Pulse</h2>
-            <p className="m-sheet-sub">By event date · IST</p>
-          </div>
-          <div className="m-sheet-controls">
-            <RangeToggle days={days} setDays={setDays} />
-            <button className="m-sheet-close" onClick={onClose} aria-label="Close pulse view">
-              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
-                <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-        </header>
-
-        <div className="m-sheet-body">
-          {!pulse || (loading && !insights) ? (
-            <div className="m-card m-skeleton" style={{ height: "12rem" }} />
-          ) : (
-            <>
-              <section className="m-card" aria-label="Daily volume">
-                <h3 className="m-label">Received vs resolved · {days}d</h3>
-                <PulseChart daily={pulse.daily} />
-              </section>
-
-              <section className="m-card" aria-label="Arrivals by hour">
-                <h3 className="m-label">When members ask</h3>
-                <HourBars hourly={pulse.hourly} />
-              </section>
-
-              <section className="m-card" aria-label="Backlog age">
-                <header className="m-card-head">
-                  <h3 className="m-label">Open backlog age</h3>
-                  <span className="m-count-chip">{pulse.open_now}</span>
-                </header>
-                <div className="m-mixbars">
-                  {AGING_ROWS.map(([key, label]) => {
-                    const n = pulse.aging[key];
-                    const stale = key === "older" && n > 0;
-                    return (
-                      <div key={key} className="m-mixbar">
-                        <span className="m-mixbar-label">{label}</span>
-                        <span className="m-mixbar-n" data-bad={stale}>
-                          {n}
-                        </span>
-                        <div className="m-mixbar-track" aria-hidden>
-                          <i style={{ transform: `scaleX(${n / agingMax})` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                {pulse.reopened > 0 && (
-                  <p className="m-more-note">{pulse.reopened} reopened in {days}d</p>
-                )}
-              </section>
-
-              {pulse.breach_risk.length > 0 && (
-                <section className="m-card" aria-label="SLA breach risk">
-                  <h3 className="m-label m-label-alert">Due within 4 hours</h3>
-                  <ul className="m-alert-list">
-                    {pulse.breach_risk.map((b) => (
-                      <li key={b.ticket_id} className="m-alert-line">
-                        <span className="m-alert-mark" aria-hidden />
-                        <span className="m-alert-subject">{b.subject}</span>
-                        <span className="m-alert-agent">
-                          {b.agent ?? "Unassigned"} · {dueLabel(b.due_by)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-            </>
+    <SheetFrame
+      open={open}
+      onClose={onClose}
+      title="Pulse"
+      sub="Arrivals by hour · IST"
+      label="Pulse — arrival analytics"
+      controls={<RangeToggle days={days} setDays={setDays} />}
+    >
+      {!pulse || (loading && !insights) ? (
+        <div className="m-card m-skeleton" style={{ height: "10rem" }} />
+      ) : (
+        <section className="m-card" aria-label="Arrivals by hour">
+          <h3 className="m-label">When members ask · {days}d</h3>
+          <HourBars hourly={pulse.hourly} />
+          {pulse.reopened > 0 && (
+            <p className="m-more-note">{pulse.reopened} tickets reopened in {days}d</p>
           )}
+        </section>
+      )}
+    </SheetFrame>
+  );
+}
+
+// ── Overdue sheet — the Needs-attention drill-down ──────────────────────────
+const PRIORITY_LABEL: Record<number, string> = {
+  1: "Low",
+  2: "Medium",
+  3: "High",
+  4: "Urgent",
+};
+
+function istStamp(ts: string | null): string {
+  if (!ts) return "–";
+  return new Date(ts).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function ageOf(ts: string | null): string {
+  if (!ts) return "";
+  const h = Math.floor((Date.now() - new Date(ts).getTime()) / 3_600_000);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
+
+function OverdueRow({ t }: { t: OverdueDetailRow }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="m-agent" data-open={open}>
+      <button className="m-agent-row" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+        <span className="m-alert-mark" aria-hidden />
+        <span className="m-agent-name">
+          {t.subject?.trim() || `Ticket #${t.ticket_id}`}
+        </span>
+        <span className="m-alert-agent">{ageOf(t.created_at)}</span>
+        <svg className="m-agent-chevron" width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+          <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      <div className="m-agent-detail">
+        <div className="m-agent-detail-inner">
+          <div className="m-mini-grid m-mini-grid-flush">
+            <div className="m-mini">
+              <span className="m-mini-label">Ticket</span>
+              <span className="m-mini-num m-mini-text">#{t.ticket_id}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">Status</span>
+              <span className="m-mini-num m-mini-text">{t.status ?? "–"}</span>
+            </div>
+            <div className="m-mini" data-warn={t.priority === 4}>
+              <span className="m-mini-label">Priority</span>
+              <span className="m-mini-num m-mini-text">
+                {t.priority != null ? (PRIORITY_LABEL[t.priority] ?? t.priority) : "–"}
+              </span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">Agent</span>
+              <span className="m-mini-num m-mini-text">{t.agent_name ?? "Unassigned"}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">Queendom</span>
+              <span className="m-mini-num m-mini-text">{t.queendom_name ?? "–"}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">Type</span>
+              <span className="m-mini-num m-mini-text">{t.ticket_type ?? "–"}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">Channel</span>
+              <span className="m-mini-num m-mini-text">{t.source ?? "–"}</span>
+            </div>
+            <div className="m-mini">
+              <span className="m-mini-label">Created</span>
+              <span className="m-mini-num m-mini-text">{istStamp(t.created_at)}</span>
+            </div>
+            <div className="m-mini" data-warn>
+              <span className="m-mini-label">Due by</span>
+              <span className="m-mini-num m-mini-text">{istStamp(t.due_by)}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Service mix (Concierge feed card) ───────────────────────────────────────
-const PRIORITY_LABEL: Record<string, string> = {
-  "1": "Low",
-  "2": "Medium",
-  "3": "High",
-  "4": "Urgent",
-  "0": "Unset",
-};
-
-export function ServiceMixCard({
-  insights,
+export function OverdueSheet({
+  open,
+  onClose,
 }: {
-  insights: InsightsPayload | null;
+  open: boolean;
+  onClose: () => void;
 }) {
-  const [openSection, setOpenSection] = useState(false);
-  const mix = insights?.mix;
-  if (!mix || mix.total === 0) return null;
+  const [rows, setRows] = useState<OverdueDetailRow[] | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    fetch("/api/tickets/overdue-list")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => !cancelled && setRows(d as OverdueDetailRow[]))
+      .catch(() => !cancelled && setRows([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   return (
-    <section className="m-card m-card-fold" aria-label="Service mix">
-      <button
-        className="m-fold-head"
-        onClick={() => setOpenSection((v) => !v)}
-        aria-expanded={openSection}
-      >
-        <h2 className="m-label">Service mix · {insights.days}d</h2>
-        <span className="m-fold-meta">
-          <span className="m-count-chip">{mix.total.toLocaleString("en-IN")}</span>
-          <svg className="m-fold-chevron" width="12" height="12" viewBox="0 0 12 12" aria-hidden>
-            <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-      </button>
-      <div className="m-fold-body" data-open={openSection}>
-        <div className="m-fold-inner">
-          <h3 className="m-sublabel">What members asked for</h3>
-          <MixBars items={mix.types} />
-          <h3 className="m-sublabel">How they reached us</h3>
-          <MixBars items={mix.sources} topN={4} />
-          <div className="m-prio-row" aria-label="Priority mix">
-            {mix.priorities.map((p) => (
-              <span key={p.k} className="m-prio-chip" data-urgent={p.k === "4"}>
-                {PRIORITY_LABEL[p.k] ?? p.k} · {p.n.toLocaleString("en-IN")}
-              </span>
+    <SheetFrame
+      open={open}
+      onClose={onClose}
+      title="Needs attention"
+      sub={rows ? `${rows.length} overdue · oldest first` : "Loading…"}
+      label="Overdue tickets"
+    >
+      {rows == null ? (
+        <div className="m-card m-skeleton" style={{ height: "10rem" }} />
+      ) : rows.length === 0 ? (
+        <p className="m-empty">Nothing overdue. ✦</p>
+      ) : (
+        <section className="m-card" aria-label="Overdue tickets, oldest first">
+          <div className="m-agent-list">
+            {rows.map((t) => (
+              <OverdueRow key={t.ticket_id} t={t} />
             ))}
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── Members + CSAT (Revenue feed cards) ─────────────────────────────────────
-export function MembersCard({ insights }: { insights: InsightsPayload | null }) {
-  const members = insights?.members;
-  if (!members || members.length === 0) return null;
-  return (
-    <section className="m-card" aria-label="Top requesters">
-      <header className="m-card-head">
-        <h2 className="m-label">Top members · {insights.days}d</h2>
-      </header>
-      <ul className="m-member-list">
-        {members.slice(0, 8).map((m) => (
-          <li key={m.requester_id} className="m-member">
-            <span className="m-member-name">{m.client}</span>
-            <span className="m-member-meta">
-              {m.urgent > 0 && <em className="m-member-urgent">{m.urgent} urgent</em>}
-              {m.open > 0 && <em>{m.open} open</em>}
-            </span>
-            <span className="m-member-count">{m.tickets}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-export function CsatCard({ insights }: { insights: InsightsPayload | null }) {
-  const csat = insights?.csat;
-  if (!csat || csat.count === 0) return null;
-  return (
-    <section className="m-card" aria-label="Member satisfaction">
-      <header className="m-card-head">
-        <h2 className="m-label">Member satisfaction</h2>
-        <span className="m-pct" data-good={(csat.happy_pct ?? 0) >= 80}>
-          {csat.happy_pct ?? "–"}%
-        </span>
-      </header>
-      <p className="m-q-sub">
-        happy across <strong>{csat.count.toLocaleString("en-IN")}</strong> survey responses
-      </p>
-      {csat.recent_low.length > 0 && (
-        <ul className="m-alert-list">
-          {csat.recent_low.slice(0, 3).map((r) => (
-            <li key={`${r.ticket_id}-${r.at}`} className="m-alert-line">
-              <span className="m-alert-mark" aria-hidden />
-              <span className="m-alert-subject">
-                {r.feedback || r.label}
-              </span>
-              <span className="m-alert-agent">{r.agent ?? ""}</span>
-            </li>
-          ))}
-        </ul>
+        </section>
       )}
-    </section>
+    </SheetFrame>
   );
 }
