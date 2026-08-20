@@ -1603,30 +1603,6 @@ body::before {
 .m-seg-incomplete { background: linear-gradient(180deg, #e0ad88, var(--a-blush)); }
 .m-seg-pending { background: rgba(245, 241, 232, 0.12); }
 
-/* the legend under an opened row — the bar, spelled out */
-.m-comp-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.9rem;
-  padding: 0.6rem 0 0.1rem 1.8rem;
-}
-.m-comp-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-family: var(--f-mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--a-ts);
-  font-variant-numeric: tabular-nums;
-}
-.m-comp-legend i {
-  width: 7px;
-  height: 7px;
-  border-radius: 2px;
-  flex: none;
-}
 /* the tiny colour key riding a grid label */
 .m-mini-label { display: inline-flex; align-items: center; gap: 0.3rem; }
 .m-key {

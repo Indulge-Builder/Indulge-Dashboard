@@ -189,13 +189,6 @@ function AgentRow({
       </div>
       <div className="m-agent-detail">
         <div className="m-agent-detail-inner">
-          {/* colour key only — the numbers live in the grid below */}
-          <div className="m-comp-legend" aria-hidden>
-            <span><i className="m-seg-resolved" />Resolved</span>
-            <span><i className="m-seg-overdue" />Overdue</span>
-            <span><i className="m-seg-incomplete" />Incomplete</span>
-            <span><i className="m-seg-pending" />Pending</span>
-          </div>
           <div className="m-mini-grid">
             <div className="m-mini">
               <span className="m-mini-label">
