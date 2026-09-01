@@ -5,7 +5,8 @@ import type { SpecialDate } from "./types";
 // anniversaries are mapped to `anniversary` (same Heart styling).
 // The year component is ignored — getSpecialDates() rebuilds every event in the
 // current calendar year, so only month-day matters. 2025 is a placeholder.
-// Both queendoms refreshed to August 2026.
+// Both queendoms refreshed to August 2026; Ananyshree extended with
+// September 2026 birthdays.
 interface SpecialDateRaw {
   fullName: string;
   dateOfBirth?: string; // YYYY-MM-DD
@@ -72,6 +73,46 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
     anniversary: "2025-08-06",
     queendom: "ananyshree",
   },
+
+  // ── Ananyshree — September birthdays ──
+  { fullName: "Alok Shah's wife", dateOfBirth: "2025-09-01", queendom: "ananyshree" },
+  { fullName: "Aman Kedia's dad", dateOfBirth: "2025-09-01", queendom: "ananyshree" },
+  { fullName: "Yoginth", dateOfBirth: "2025-09-01", queendom: "ananyshree" },
+  { fullName: "Sakshi", dateOfBirth: "2025-09-03", queendom: "ananyshree" },
+  { fullName: "Shreyans Khemka", dateOfBirth: "2025-09-04", queendom: "ananyshree" },
+  { fullName: "Aditya Srinivas Prasad", dateOfBirth: "2025-09-05", queendom: "ananyshree" },
+  { fullName: "Rohit Reddy", dateOfBirth: "2025-09-05", queendom: "ananyshree" },
+  {
+    fullName: "Piyush Agarwal's GF/Fiancee",
+    dateOfBirth: "2025-09-10",
+    queendom: "ananyshree",
+  },
+  { fullName: "Puneet Khanna", dateOfBirth: "2025-09-10", queendom: "ananyshree" },
+  {
+    fullName: "Nikhil Shankar Dulhani's niece (turning 1)",
+    dateOfBirth: "2025-09-11",
+    queendom: "ananyshree",
+  },
+  { fullName: "Avi Jain", dateOfBirth: "2025-09-12", queendom: "ananyshree" },
+  {
+    fullName: "Nigel (Anuj Jhun.'s friend)",
+    dateOfBirth: "2025-09-12",
+    queendom: "ananyshree",
+  },
+  { fullName: "Veer (Rohan's son)", dateOfBirth: "2025-09-15", queendom: "ananyshree" },
+  {
+    fullName: "Smrithi (Vybhav's daughter) turning 13",
+    dateOfBirth: "2025-09-17",
+    queendom: "ananyshree",
+  },
+  {
+    fullName: "Ram (Ravi Machani's son)",
+    dateOfBirth: "2025-09-19",
+    queendom: "ananyshree",
+  },
+  { fullName: "Samir (& Sonal)", dateOfBirth: "2025-09-21", queendom: "ananyshree" },
+  { fullName: "Aashman", dateOfBirth: "2025-09-28", queendom: "ananyshree" },
+  { fullName: "Kalpesh", dateOfBirth: "2025-09-30", queendom: "ananyshree" },
 
   // ── Anishqa — August birthdays ──
   { fullName: "Raj Patel", dateOfBirth: "2025-08-06", queendom: "anishqa" },
