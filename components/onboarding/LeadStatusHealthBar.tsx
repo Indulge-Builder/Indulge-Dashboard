@@ -129,9 +129,15 @@ function useBalancedChipRows(
   key: string,
 ): string[] | null {
   const [widths, setWidths] = useState<string[] | null>(null);
+  // Width the current layout was computed for. Assigning chip widths changes
+  // the legend's HEIGHT (rows wrap), which also fires the ResizeObserver — a
+  // re-measure on every such fire oscillated between layouts at some zoom
+  // levels ("vibrating boxes", 2026-09-07). Only a WIDTH change re-measures.
+  const measuredWidth = useRef(-1);
 
   useLayoutEffect(() => {
     setWidths(null); // back to natural widths so the next measurement is true
+    measuredWidth.current = -1;
     const el = containerRef.current;
     if (!el || count === 0) return;
 
@@ -141,6 +147,7 @@ function useBalancedChipRows(
       const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
       const W = el.clientWidth;
       if (W <= 0) return;
+      measuredWidth.current = W;
       const natural = chips.map((c) => c.scrollWidth);
 
       // Greedy pack → minimal row count with natural widths.
@@ -181,11 +188,15 @@ function useBalancedChipRows(
       setWidths(out);
     };
 
-    // Measure after the natural-width paint, then keep it fresh on resize.
-    const raf = requestAnimationFrame(measure);
+    // Measure after the natural-width paint, then keep it fresh on WIDTH
+    // changes only (height changes are our own doing).
+    let raf = requestAnimationFrame(measure);
     const ro = new ResizeObserver(() => {
+      if (el.clientWidth === measuredWidth.current) return;
+      measuredWidth.current = -1;
       setWidths(null);
-      requestAnimationFrame(measure);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
     });
     ro.observe(el);
     return () => {
