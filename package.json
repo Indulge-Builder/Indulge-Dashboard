@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "import-tickets": "tsx scripts/importTickets.ts",
-    "audit-freshdesk": "tsx --tsconfig tsconfig.json scripts/auditFreshdesk.ts"
+    "audit-freshdesk": "tsx --tsconfig tsconfig.json scripts/auditFreshdesk.ts",
+    "reconcile-zoho": "tsx --tsconfig tsconfig.json scripts/reconcileZoho.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
