@@ -35,13 +35,20 @@ export const ROSTER_ANANYSHREE: string[] = [
   "Aditya Sonde",
 ];
 
-// Sanika's Queendom (added 2026-09-04) — the names filing under
-// "Sanika's Queendom" in Freshdesk during its first month. Seeded into
-// `agents` by migration 20260904000000; edit the roster from /settings.
+// Sanika's Queendom (added 2026-09-04; full roster from the user 2026-09-07).
+// Spellings follow Freshdesk's agent names ("Kshathriya C C A", not "C A") —
+// ticket attribution is a name match. The live list is the `agents` table,
+// edited from /settings; this is the fallback only.
 export const ROSTER_SANIKA: string[] = [
   "Kshathriya C C A",
   "Shanaya Javeri",
   "Depender Kaur",
+  "Nandini Darbhamulla",
+  "Gunjan Sodha",
+  "Shalak Katkar",
+  "Hrishikesh Badgujar",
+  "Mustafa Kothari",
+  "Mustafa Hussain",
 ];
 
 /** Joker names mapped to their Queendom. Used for specialized Joker metrics. */

@@ -13,8 +13,13 @@
  *   Pipeline per agent:        leads.latest_status → normalizeLeadStatus()
  *                              (lib/leadStatus.ts — current Zoho picklist plus
  *                              the legacy-label map for pre-rename rows).
- *   Closures:                  deals.{deal_name, agent_name, created_at}
- *                              (one row per Zoho deal-creation event).
+ *   Closures:                  deals.{deal_name, agent_name, closing_date, created_at}
+ *                              — one row per Zoho deal; a closure COUNTS on its
+ *                              `closing_date` (Zoho Closing_Date, IST day) and
+ *                              falls back to the `created_at` IST day when that
+ *                              is NULL / not yet migrated. Deals are often
+ *                              entered days after the sale (user decision
+ *                              2026-09-07).
  *
  * Roster seats come from code (ONBOARDING_AGENT_CARDS). Rows whose
  * `agent_name` matches no seat (e.g. "Admin @ Indulge", the automation owner)
@@ -79,31 +84,52 @@ function cardForAgentName(stored: string | null | undefined): OnboardingAgentCar
   );
 }
 
-// ── Ledger row mapper (deals query) ───────────────────────────────────────────
+// ── Deals ─────────────────────────────────────────────────────────────────────
 
-function mapLedgerRows(ledgerQ: {
-  data: unknown;
-  error: { message: string } | null;
-}): OnboardingLedgerRow[] {
-  if (ledgerQ.error) return [];
-  return (
-    (
-      ledgerQ.data as
-        | {
-            deal_id: string;
-            deal_name: string;
-            agent_name: string;
-            created_at: string;
-          }[]
-        | null
-    )?.map((r) => ({
-      id: String(r.deal_id),
-      clientName: r.deal_name,
-      recordedAt: r.created_at,
-      // Store full name in DB, render compact first-name label in UI.
-      agentName: getDisplayAgentName(r.agent_name),
-    })) ?? []
-  );
+type DealRow = {
+  deal_id: string;
+  deal_name: string;
+  agent_name: string;
+  created_at: string;
+  closing_date?: string | null;
+};
+
+/** The IST calendar day a deal counts on. */
+function dealClosedOn(d: DealRow): string {
+  return d.closing_date && /^\d{4}-\d{2}-\d{2}$/.test(d.closing_date)
+    ? d.closing_date
+    : toISTDay(d.created_at);
+}
+
+/**
+ * Every deal, newest entry first. Tries the `closing_date` column and, until
+ * migration 20260907120000 is applied (42703 / PGRST204), falls back to the
+ * pre-2026-09 shape so the TV never loses its closures.
+ */
+async function fetchDeals(
+  db: Parameters<Parameters<typeof withApiGuard>[0]>[1],
+): Promise<DealRow[]> {
+  const select = (cols: string) =>
+    paginateAll<Record<string, unknown>>((from, to) =>
+      db.from("deals").select(cols).order("created_at", { ascending: false }).range(from, to),
+    );
+  let { rows, error } = await select("deal_id, deal_name, agent_name, created_at, closing_date");
+  if (error && ((error as { code?: string }).code === "42703" || (error as { code?: string }).code === "PGRST204")) {
+    console.warn("[/api/onboarding] deals.closing_date missing — counting closures by created_at; apply migration 20260907120000");
+    ({ rows, error } = await select("deal_id, deal_name, agent_name, created_at"));
+  }
+  if (error) throw error;
+  return rows as DealRow[];
+}
+
+function toLedgerRow(d: DealRow): OnboardingLedgerRow {
+  return {
+    id: String(d.deal_id),
+    clientName: d.deal_name,
+    recordedAt: d.closing_date && /^\d{4}-\d{2}-\d{2}$/.test(d.closing_date) ? d.closing_date : d.created_at,
+    // Store full name in DB, render compact first-name label in UI.
+    agentName: getDisplayAgentName(d.agent_name),
+  };
 }
 
 // ── GET handler ───────────────────────────────────────────────────────────────
@@ -134,15 +160,20 @@ export const GET = withApiGuard(
         return ms != null && ms >= todayStartMs && ms < todayEndExMs;
       };
 
-      // ── 1. Display ledger (top 25, newest first from deals) ──────────────
-      const ledger = await (async (): Promise<OnboardingLedgerRow[]> => {
-        const deals = await db
-          .from("deals")
-          .select("deal_id, deal_name, agent_name, created_at")
-          .order("created_at", { ascending: false })
-          .limit(25);
-        return deals.error ? [] : mapLedgerRows(deals);
-      })();
+      // ── 1. Deals: ledger (top 25 by closing day, then entry time) ─────────
+      let deals: DealRow[] = [];
+      try {
+        deals = await fetchDeals(db);
+      } catch (e) {
+        console.warn("[/api/onboarding] deals fetch failed — ledger and closures zeroed", e);
+      }
+      const ledger: OnboardingLedgerRow[] = [...deals]
+        .sort((a, b) => {
+          const byDay = dealClosedOn(b).localeCompare(dealClosedOn(a));
+          return byDay !== 0 ? byDay : b.created_at.localeCompare(a.created_at);
+        })
+        .slice(0, 25)
+        .map(toLedgerRow);
 
       // ── 2. Single paginated leads fetch for the IST month ────────────────
       type LeadRow = {
@@ -224,43 +255,29 @@ export const GET = withApiGuard(
         if (isJunkStatus(s)) junk++;
       }
 
-      // ── 5. Closures this month from deals ────────────────────────────────
-      let dealsThisMonth = 0;
+      // ── 5. Closures this month — by closing day (IST), not entry time ─────
       const closuresById = new Map<string, number>();
       for (const card of ONBOARDING_AGENT_CARDS) closuresById.set(card.id, 0);
+      const dealsThisMonthRows = deals.filter((d) => dealClosedOn(d).slice(0, 7) === thisMonthIST);
+      const dealsThisMonth = dealsThisMonthRows.length;
 
-      try {
-        const { data: dealsData, error: dealsErr } = await db
-          .from("deals")
-          .select("agent_name")
-          .gte("created_at", monthStart)
-          .lt("created_at", monthEndEx)
-          .limit(5000);
-
-        if (dealsErr) throw dealsErr;
-        const rows = (dealsData ?? []) as { agent_name: string }[];
-        dealsThisMonth = rows.length;
-
-        let matchedAny = false;
-        for (const r of rows) {
-          const card = cardForAgentName(r.agent_name);
-          if (!card) continue;
-          matchedAny = true;
-          closuresById.set(card.id, (closuresById.get(card.id) ?? 0) + 1);
-        }
-        if (rows.length > 0 && !matchedAny) {
-          console.warn(
-            "[/api/onboarding] This-month closures: rows found but 0 agent names matched the roster — check lib/onboardingAgents.ts",
-            {
-              roster: ONBOARDING_AGENT_CARDS.map((c) => c.zohoName),
-              distinctAgentNamesInDeals: Array.from(
-                new Set(rows.map((r) => String(r.agent_name ?? "").trim() || "(empty)")),
-              ),
-            },
-          );
-        }
-      } catch (e) {
-        console.warn("[/api/onboarding] deals query failed — closures zeroed", e);
+      let matchedAny = false;
+      for (const d of dealsThisMonthRows) {
+        const card = cardForAgentName(d.agent_name);
+        if (!card) continue;
+        matchedAny = true;
+        closuresById.set(card.id, (closuresById.get(card.id) ?? 0) + 1);
+      }
+      if (dealsThisMonth > 0 && !matchedAny) {
+        console.warn(
+          "[/api/onboarding] This-month closures: rows found but 0 agent names matched the roster — check lib/onboardingAgents.ts",
+          {
+            roster: ONBOARDING_AGENT_CARDS.map((c) => c.zohoName),
+            distinctAgentNamesInDeals: Array.from(
+              new Set(dealsThisMonthRows.map((r) => String(r.agent_name ?? "").trim() || "(empty)")),
+            ),
+          },
+        );
       }
 
       const leadMonthStats: LeadMonthStats = {

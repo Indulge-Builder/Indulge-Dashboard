@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   freshdeskTimestampToIsoUtcForDb,
   normalizeZohoCrmTimestampForIstDigits,
+  toISTDay,
 } from "./istDate";
 
 function safeJsonParse(
@@ -47,6 +48,26 @@ export function zohoTimestampToDb(isoOrEmpty: string | null): string | null {
     freshdeskTimestampToIsoUtcForDb(zohoNormalized) ?? zohoNormalized;
   const t = Date.parse(normalized);
   return Number.isFinite(t) ? normalized : null;
+}
+
+/**
+ * Parse a Zoho DATE merge field (e.g. `Deals.Closing_Date`) to an IST calendar
+ * day "YYYY-MM-DD". Accepts ISO dates, the org's `dd/MM/yyyy` display format
+ * (day first — the Indulge org setting), and full datetimes (→ IST day).
+ * Returns null for empty / unparseable input.
+ */
+export function zohoDateToIstDay(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const t = raw.trim();
+  if (!t || t === "-None-") return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+  const dmy = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (dmy) {
+    const [, d, m, y] = dmy;
+    return `${y}-${m!.padStart(2, "0")}-${d!.padStart(2, "0")}`;
+  }
+  const iso = zohoTimestampToDb(t);
+  return iso ? toISTDay(iso) || null : null;
 }
 
 /** Current instant as strict UTC ISO for `timestamptz` (server receive time). */

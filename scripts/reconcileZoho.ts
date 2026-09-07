@@ -8,7 +8,7 @@
  * Zoho is the source of truth (user decision 2026-09-07). Input files are NDJSON
  * dumps of COQL rows (one Zoho record per line) with at least:
  *   Leads: id, Lead_Status, Owner{id,name}, Full_Name, Business_Vertical, Created_Time, Modified_Time
- *   Deals: id, Deal_Name, Owner{id,name}, Stage, Created_Time
+ *   Deals: id, Deal_Name, Owner{id,name}, Stage, Closing_Date, Created_Time
  * e.g. `select id, Lead_Status, Owner, Full_Name, Business_Vertical, Created_Time,
  * Modified_Time, Converted__s from Leads where ... order by id asc limit 200 offset N`
  * — pass the pages for converted leads too (COQL hides them unless
@@ -197,7 +197,7 @@ async function reconcileLeads() {
 }
 
 // ── deals ────────────────────────────────────────────────────────────────────
-type DbDeal = { deal_id: string; deal_name: string; agent_name: string; created_at: string };
+type DbDeal = { deal_id: string; deal_name: string; agent_name: string; created_at: string; closing_date: string | null };
 
 async function reconcileDeals() {
   const zohoRows = readNdjson(DEAL_FILES);
@@ -207,7 +207,8 @@ async function reconcileDeals() {
   const stages = new Map<string, number>(); for (const r of zoho.values()) inc(stages, String(r.Stage ?? "∅"));
   console.log("Zoho stages:", Object.fromEntries(stages));
 
-  const dbRows = await fetchAll<DbDeal>("deals", "deal_id, deal_name, agent_name, created_at");
+  // Requires migration 20260907120000 (deals.closing_date) — the error names it otherwise.
+  const dbRows = await fetchAll<DbDeal>("deals", "deal_id, deal_name, agent_name, created_at, closing_date");
   const dbById = new Map(dbRows.map((r) => [r.deal_id, r]));
   console.log(`DB rows: ${dbRows.length}`);
 
@@ -220,6 +221,7 @@ async function reconcileDeals() {
       deal_name: typeof z.Deal_Name === "string" ? z.Deal_Name.trim() : "",
       agent_name: ownerName(z.Owner as { id?: string; name?: string | null } | null),
       created_at: toUtcIso(z.Created_Time),
+      closing_date: typeof z.Closing_Date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(z.Closing_Date) ? z.Closing_Date : null,
     };
     if (!expected.created_at || !expected.deal_name) { console.warn(`skip deal ${id}: missing name/time`); continue; }
     const cur = dbById.get(id);
@@ -228,6 +230,7 @@ async function reconcileDeals() {
     if (cur.deal_name !== expected.deal_name) diffs.push("deal_name");
     if (cur.agent_name !== expected.agent_name) diffs.push("agent_name");
     if (!sameInstant(cur.created_at, expected.created_at)) diffs.push("created_at");
+    if ((cur.closing_date ?? null) !== expected.closing_date) diffs.push("closing_date");
     if (diffs.length) { for (const d of diffs) inc(fieldDiffs, d); toUpsert.push(expected); }
   }
   const missingInZoho = dbRows.filter((r) => !zoho.has(r.deal_id));

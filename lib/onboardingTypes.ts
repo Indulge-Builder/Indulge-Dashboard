@@ -46,7 +46,12 @@ export interface OnboardingAgentRow {
 export interface OnboardingLedgerRow {
   id: string;
   clientName: string;
-  /** ISO 8601 UTC string from `deals.created_at`. */
+  /**
+   * The day the closure counts on: `deals.closing_date` ("YYYY-MM-DD", an IST
+   * calendar day — Zoho `Closing_Date`), falling back to the `created_at`
+   * instant when no closing date is stored. Both parse through
+   * `utcMillisFromDbTimestamp` (date-only → IST midnight).
+   */
   recordedAt: string;
   /** Compact display name (getDisplayAgentName). */
   agentName: string;
@@ -128,7 +133,8 @@ export type LeadStatusByAgent = Record<string, AgentLeadStatusBreakdown>;
  *   leads                — total rows where created_at falls in this IST month
  *   attended             — rows whose status shows the agent actioned the lead
  *                          (everything except New and Junk — isAttendedStatus)
- *   dealsClosedThisMonth — count of rows in the deals table this IST month
+ *   dealsClosedThisMonth — deals whose closing_date (fallback: created_at IST day)
+ *                          falls in this IST month
  *   junk                 — rows normalised to Junk (Junk, Not Qualified, legacy Trash)
  */
 export interface LeadMonthStats {

@@ -6,11 +6,18 @@
  *
  * JSON body:
  *   {
- *     "deal_id":    "...",
- *     "deal_name":  "...",
- *     "agent_name": "...",
- *     "created_at": "ISO-8601"   // optional — defaults to webhook receive time
+ *     "deal_id":      "...",
+ *     "deal_name":    "...",
+ *     "agent_name":   "...",
+ *     "closing_date": "YYYY-MM-DD" | "dd/MM/yyyy",  // Zoho Deals.Closing_Date — the day the
+ *                                                    // closure COUNTS on (map it in the Zoho
+ *                                                    // webhook params; added 2026-09-07)
+ *     "created_at":   "ISO-8601"   // optional — defaults to webhook receive time
  *   }
+ *
+ * Fired by the Zoho rule *Update Closures to Dashboard* (Deals · create). Deals
+ * are frequently entered days after the sale, so the dashboard counts closures
+ * by `closing_date` and only falls back to `created_at` when it is missing.
  *
  * `agent_name` is normalised for storage (trim/collapse spaces) via
  * {@link normalizeZohoAgentName} while preserving full Zoho owner name.
@@ -22,6 +29,7 @@ import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { assertWebhookSecret } from "@/lib/webhookAuth";
 import {
   readZohoWebhookBody,
+  zohoDateToIstDay,
   zohoNowUtcForDb,
   zohoTimestampToDb,
 } from "@/lib/zohoWebhook";
@@ -30,6 +38,7 @@ interface ZohoDealsPayload {
   deal_id?: string | number;
   agent_name?: string;
   deal_name?: string;
+  closing_date?: string;
   created_at?: string;
 }
 
@@ -37,6 +46,7 @@ function parsePayload(body: unknown): {
   dealId: string;
   agentName: string;
   dealName: string;
+  closingDate: string | null;
   createdAt: string | null;
 } | null {
   if (body == null || typeof body !== "object") return null;
@@ -51,7 +61,8 @@ function parsePayload(body: unknown): {
   const dealName = typeof o.deal_name === "string" ? o.deal_name.trim() : "";
   if (!dealId || !agentName || !dealName) return null;
   const createdAt = typeof o.created_at === "string" ? zohoTimestampToDb(o.created_at) : null;
-  return { dealId, agentName, dealName, createdAt };
+  const closingDate = zohoDateToIstDay(o.closing_date);
+  return { dealId, agentName, dealName, closingDate, createdAt };
 }
 
 export async function POST(req: NextRequest) {
@@ -93,7 +104,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { dealId, agentName, dealName, createdAt } = parsed;
+  const { dealId, agentName, dealName, closingDate, createdAt } = parsed;
   const createdAtFinal = createdAt ?? zohoNowUtcForDb();
 
   console.log("[zoho-deals webhook] insert deal", {
@@ -101,15 +112,35 @@ export async function POST(req: NextRequest) {
     dealId,
     agentName,
     dealName,
+    closingDate,
+    closing_date_raw: (body as Record<string, unknown>)["closing_date"] ?? null,
   });
 
   try {
-    const { error: insErr } = await db.from("deals").insert({
+    const row: {
+      deal_id: string;
+      deal_name: string;
+      agent_name: string;
+      created_at: string;
+      closing_date?: string;
+    } = {
       deal_id: dealId,
       deal_name: dealName,
       agent_name: agentName,
       created_at: createdAtFinal,
-    });
+    };
+    let { error: insErr } = await db
+      .from("deals")
+      .insert(closingDate ? { ...row, closing_date: closingDate } : row);
+
+    // Column not yet migrated (Postgres 42703 / PostgREST schema-cache PGRST204):
+    // never drop a closure over it — insert without the date.
+    if (insErr && closingDate && (insErr.code === "42703" || insErr.code === "PGRST204")) {
+      console.warn("[zoho-deals webhook] deals.closing_date missing — apply migration 20260907120000", {
+        requestId,
+      });
+      ({ error: insErr } = await db.from("deals").insert(row));
+    }
 
     if (insErr) {
       if (insErr.code === "23505") {

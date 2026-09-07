@@ -110,7 +110,7 @@ export function sortLedgerNewestFirst(
 
 /**
  * Maps a raw Supabase INSERT payload (snake_case) to OnboardingLedgerRow.
- * Supports deals payload (`deal_name`, `created_at`) and legacy
+ * Supports deals payload (`deal_name`, `closing_date`, `created_at`) and legacy
  * conversion payload (`client_name`, `recorded_at`).
  */
 export function ledgerRowFromInsertPayload(
@@ -121,8 +121,11 @@ export function ledgerRowFromInsertPayload(
     raw.deal_id != null ? String(raw.deal_id) : raw.id != null ? String(raw.id) : "";
   if (!rowId) return null;
 
+  // Closures count on closing_date (IST day) when the webhook supplied one.
   const recordedAt =
-    typeof raw.created_at === "string"
+    typeof raw.closing_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.closing_date)
+      ? raw.closing_date
+      : typeof raw.created_at === "string"
       ? raw.created_at
       : raw.created_at != null
         ? String(raw.created_at)
