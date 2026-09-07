@@ -266,7 +266,12 @@ export async function fetchFreshdeskTicketsUpdatedSince(
   const groupNames = new Map(groups.map((g) => [g.id, g.name]));
   const agentNames = new Map(agents.map((a) => [a.id, a.contact.name]));
 
-  const rows: ReconcileRow[] = [];
+  // Keyed by ticket id: the list is paged by updated_at, so a ticket edited
+  // WHILE we page can appear on two pages. Postgres rejects a bulk upsert
+  // that touches the same row twice ("ON CONFLICT DO UPDATE command cannot
+  // affect row a second time" — seen 2026-09-07 on a busy afternoon), so the
+  // later (newer) occurrence replaces the earlier one here.
+  const byId = new Map<string, ReconcileRow>();
   let page = 1;
   let truncated = false;
   for (; page <= maxPages; page++) {
@@ -275,13 +280,14 @@ export async function fetchFreshdeskTicketsUpdatedSince(
         `&order_by=updated_at&order_type=asc&per_page=100&page=${page}&include=stats`,
     );
     for (const t of batch) {
-      rows.push(mapFreshdeskTicket(t, groupNames, agentNames));
+      const row = mapFreshdeskTicket(t, groupNames, agentNames);
+      byId.set(row.ticket_id, row);
     }
-    if (batch.length < 100) return { rows, pages: page, truncated };
+    if (batch.length < 100) return { rows: [...byId.values()], pages: page, truncated };
   }
   truncated = true;
   console.warn(
     `[freshdeskApi] reconcile window truncated at ${maxPages} pages — widen the cron or shrink the window`,
   );
-  return { rows, pages: maxPages, truncated };
+  return { rows: [...byId.values()], pages: maxPages, truncated };
 }
