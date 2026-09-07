@@ -5,8 +5,9 @@
  * /settings). This is the read side — unauthenticated on purpose, because the
  * TV dashboard fetches it on every load and holds no credentials.
  *
- * Degrades to the hardcoded FALLBACK_ROSTER (lib/agentRoster.ts) whenever the
- * table is missing, empty, or errors — the leaderboard must never blank out
+ * Response: RosterSnapshot ({ agents: Record<QueendomId, string[]>, jokers })
+ * plus `source`. Degrades to the hardcoded FALLBACK_ROSTER (lib/agentRoster.ts)
+ * whenever the table is missing, empty, or errors — the leaderboard must never blank out
  * because someone mis-clicked in Settings or the migration hasn't run yet.
  * `source` tells the caller which one it got, for debugging.
  */

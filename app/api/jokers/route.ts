@@ -13,7 +13,7 @@
  *   acceptedToday – "yes" where IST day is today (subset of this month)
  *   totalThisMonth – same as totalSent (all rows in the cohort)
  *
- * Returns: { ananyshree: JokerStats, anishqa: JokerStats }
+ * Returns: Record<QueendomId, JokerStats> — one entry per QUEENDOM_IDS.
  */
 
 import {
@@ -23,7 +23,9 @@ import {
 } from "@/lib/agentRoster";
 import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
 import { istToday, toISTDay, toISTMonth } from "@/lib/istDate";
+import { queendomRecord } from "@/lib/queendom";
 import type { JokerStats } from "@/lib/types";
+import type { QueendomId } from "@/types";
 
 interface JokerRow {
   joker_name: string | null;
@@ -56,8 +58,7 @@ const emptyStats: JokerStats = {
   totalThisMonth: 0,
 };
 
-const emptyResponse = () =>
-  noStoreJson({ ananyshree: emptyStats, anishqa: emptyStats });
+const emptyResponse = () => noStoreJson(queendomRecord(() => emptyStats));
 
 // The TV must never see an error from this panel — every failure path degrades
 // to zeroed stats (200), with the guard's 500 as a last-resort backstop.
@@ -133,7 +134,7 @@ export const GET = withApiGuard(async (_req, db) => {
     const roster =
       rosterFromAgentRows(agentRows as AgentRecord[] | null) ?? FALLBACK_ROSTER;
 
-    const result: Record<string, JokerStats> = {};
+    const result: Partial<Record<QueendomId, JokerStats>> = {};
     for (const { name, queendom } of roster.jokers) {
       // First joker listed per queendom wins; later ones are ignored rather
       // than overwriting, so ordering in Settings is predictable.
@@ -141,10 +142,9 @@ export const GET = withApiGuard(async (_req, db) => {
       result[queendom] = aggregateForJoker(name);
     }
 
-    return noStoreJson({
-      ananyshree: result.ananyshree ?? emptyStats,
-      anishqa: result.anishqa ?? emptyStats,
-    });
+    // A queendom without a Joker (Sanika's, until one is set in Settings)
+    // reads zero — never a missing key.
+    return noStoreJson(queendomRecord((id) => result[id] ?? emptyStats));
   } catch (err) {
     console.error("[/api/jokers] Unexpected error:", err);
     return emptyResponse();

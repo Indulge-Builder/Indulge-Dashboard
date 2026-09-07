@@ -21,11 +21,17 @@
 import { useLayoutEffect, useState } from "react";
 import Dashboard from "./Dashboard";
 import MobileDashboard from "./mobile/MobileDashboard";
+import type { ActiveScreen } from "@/types";
 
 const MOBILE_QUERY =
   "(max-width: 819px), ((pointer: coarse) and (max-width: 1180px))";
 
-export default function DashboardRoot() {
+export default function DashboardRoot({
+  initialScreen = "concierge",
+}: {
+  /** Screen chosen on the landing page — /concierge or /onboarding. */
+  initialScreen?: ActiveScreen;
+}) {
   const [mode, setMode] = useState<"unknown" | "tv" | "mobile">("unknown");
 
   useLayoutEffect(() => {
@@ -41,5 +47,9 @@ export default function DashboardRoot() {
   if (mode === "unknown") {
     return <div className="min-h-screen w-full bg-obsidian" aria-hidden />;
   }
-  return mode === "mobile" ? <MobileDashboard /> : <Dashboard />;
+  return mode === "mobile" ? (
+    <MobileDashboard initialTab={initialScreen === "onboarding" ? "revenue" : "concierge"} />
+  ) : (
+    <Dashboard initialScreen={initialScreen} />
+  );
 }

@@ -6,11 +6,17 @@
  *   lead_id, agent_name, latest_status, lead_name, business_vertical,
  *   created_at, modified_at
  *
+ * Fired by two Zoho workflow rules through the "To Dashboard" webhook (read via
+ * API 2026-09-07): *New Leads Score push to Dashboard* (Leads · create) and
+ * *Update Leads Data to Dashboard* (Leads · field update of Lead_Status OR
+ * Owner). Other field edits do not reach us.
+ *
  * JSON body (map Zoho merge fields):
  *   {
  *     "lead_id":           "...",
- *     "agent_name":        "...",
- *     "status":            "...",        // or "latest_status"
+ *     "agent_name":        "...",        // Lead Owner full name; blank → "Unassigned"
+ *     "status":            "...",        // Lead_Status picklist; blank / -None- → "New"
+ *                                        // (or "latest_status")
  *     "lead_name":         "...",        // optional — first_name / full name
  *     "business_vertical": "Indulge Global", // one of the 4 verticals; default Global
  *     "created_at":        "ISO-8601",   // optional — Zoho create time; else server now on insert
@@ -19,7 +25,16 @@
  *
  * `agent_name` is normalised for storage (trim/collapse spaces) via
  * {@link normalizeZohoAgentName} while preserving full Zoho owner name.
+ *
+ * Only `lead_id` is mandatory. Leads created without an owner or a status used
+ * to be rejected with 400 (Zoho's webhook failure log showed a steady trickle
+ * of `bad_request` on the create rule through Aug 2026); those leads then only
+ * reached the DB on their first status change, with an arrival-time
+ * `created_at` that breaks the month cohort. Defaults keep the row.
  */
+
+const UNASSIGNED_AGENT = "Unassigned";
+const DEFAULT_STATUS = "New";
 
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeZohoAgentName } from "@/lib/onboardingAgents";
@@ -78,13 +93,17 @@ function parsePayload(body: unknown): {
   const leadId =
     rawId != null && String(rawId).trim() !== "" ? String(rawId).trim() : "";
   const agentName =
-    typeof o.agent_name === "string" ? normalizeZohoAgentName(o.agent_name) : "";
-  const statusRaw =
+    (typeof o.agent_name === "string" ? normalizeZohoAgentName(o.agent_name) : "") ||
+    UNASSIGNED_AGENT;
+  const statusIn =
     typeof o.status === "string"
       ? o.status.trim()
       : typeof o.latest_status === "string"
         ? o.latest_status.trim()
         : "";
+  // Zoho renders an empty picklist as "-None-" in merge fields.
+  const statusRaw =
+    !statusIn || statusIn.toLowerCase() === "-none-" ? DEFAULT_STATUS : statusIn;
 
   const leadNameRaw =
     typeof o.lead_name === "string" && o.lead_name.trim()
@@ -93,7 +112,7 @@ function parsePayload(body: unknown): {
         ? o.first_name.trim()
         : "";
 
-  if (!leadId || !agentName || !statusRaw) return null;
+  if (!leadId) return null;
 
   return {
     leadId,
@@ -105,6 +124,29 @@ function parsePayload(body: unknown): {
     modifiedAtClient: typeof o.modified_at === "string" ? zohoTimestampToDb(o.modified_at) : null,
   };
 }
+
+/**
+ * A lead cannot be created or modified in the future. If a parsed instant lands
+ * more than 5 minutes ahead of arrival, the digits were India wall-clock
+ * mislabelled as UTC (the +5:30 drift the 2026-09-07 reconcile repaired):
+ * shift back once; if it is still ahead, fall back to arrival time.
+ */
+function guardAgainstIstDigitsAsUtc(iso: string | null, nowMs: number): string | null {
+  if (!iso) return null;
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return null;
+  const SLACK = 5 * 60 * 1000;
+  if (ms <= nowMs + SLACK) return iso;
+  const shifted = ms - IST_OFFSET_MS;
+  if (shifted <= nowMs + SLACK) {
+    console.warn("[zoho-leads webhook] timestamp ahead of arrival — treated as IST digits", { iso });
+    return new Date(shifted).toISOString();
+  }
+  console.warn("[zoho-leads webhook] timestamp far in the future — using arrival time", { iso });
+  return null;
+}
+
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
 export async function POST(req: NextRequest) {
   const unauthorized = assertWebhookSecret(req);
@@ -139,16 +181,30 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json(
       {
-        error:
-          "Missing or invalid fields: lead_id, agent_name, and status (or latest_status) are required",
+        error: "Missing or invalid fields: lead_id is required",
       },
       { status: 400 },
     );
   }
 
-  const { leadId, agentName, status, leadName, businessVertical, createdAtClient, modifiedAtClient } = parsed;
+  const { leadId, agentName, status, leadName, businessVertical } = parsed;
   const touchedNow = zohoNowUtcForDb();
+  const nowMs = Date.parse(touchedNow);
+  const createdAtClient = guardAgainstIstDigitsAsUtc(parsed.createdAtClient, nowMs);
+  const modifiedAtClient = guardAgainstIstDigitsAsUtc(parsed.modifiedAtClient, nowMs);
   const modifiedAt = modifiedAtClient ?? touchedNow;
+
+  // Surfaces the exact wire format Zoho uses — the 2026-09-07 reconcile found
+  // 5,154 rows whose created_at was Zoho's IST digits stored as UTC (+5:30).
+  const raw = body as Record<string, unknown>;
+  console.info("[zoho-leads webhook] timestamps", {
+    requestId,
+    leadId,
+    created_at_raw: raw["created_at"] ?? null,
+    modified_at_raw: raw["modified_at"] ?? null,
+    createdAtStored: createdAtClient,
+    modifiedAtStored: modifiedAt,
+  });
 
   // Deliberately two-step (select → update/insert) instead of a single upsert:
   // `created_at` is immutable after first insert (cohort anchor), and a blind

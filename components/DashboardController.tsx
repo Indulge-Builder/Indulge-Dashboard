@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import QueendomPanel from "./QueendomPanel";
+import ConciergeScreen from "./concierge/ConciergeScreen";
 import OnboardingLayout from "./onboarding/OnboardingLayout";
 import HomePanel from "./HomePanel";
-import QueendomSkeleton from "./skeletons/QueendomSkeleton";
+import ConciergeSkeleton from "./skeletons/ConciergeSkeleton";
 import OnboardingSkeleton from "./skeletons/OnboardingSkeleton";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
@@ -16,8 +17,7 @@ import {
   SCREEN_DURATIONS_MS,
   nextActiveScreen,
 } from "@/lib/dashboardScreens";
-import type { QueenStats } from "@/lib/types";
-import type { ActiveScreen, RenewalsPanelData } from "@/types";
+import type { ActiveScreen, QueendomView } from "@/types";
 
 export type { ActiveScreen };
 
@@ -101,34 +101,37 @@ function SkeletonOverlay({
   );
 }
 
+/** The two-segment pill's shared button styling (TV-remote sized). */
+const CONTROL_BUTTON_CLASS =
+  "flex min-h-[64px] items-center justify-center font-montserrat text-2xl font-bold tracking-[0.05em] transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400/80";
+
 interface DashboardControllerProps {
   className?: string;
-  ananyshreeStats: QueenStats;
-  anishqaStats: QueenStats;
-  renewalsAnanyshree: RenewalsPanelData;
-  renewalsAnishqa: RenewalsPanelData;
+  /** One entry per queendom in TV order — the concierge screen's columns. */
+  queendoms: QueendomView[];
   celebrationAgent: string | null;
   /**
-   * When true, a skeleton overlay is rendered on top of each panel.
+   * When true, a skeleton overlay is rendered on top of each screen.
    * Fades out (AnimatePresence exit) once the first fetchAll() resolves.
-   * The real panels are always mounted behind the overlay so their counters
+   * The real screens are always mounted behind the overlay so their counters
    * animate from 0 quietly — no jarring re-render when the skeleton lifts.
    */
   isInitialLoading: boolean;
+  /** Screen chosen on the landing page (/concierge or /onboarding). */
+  initialScreen?: ActiveScreen;
 }
 
 export default function DashboardController({
   className,
-  ananyshreeStats,
-  anishqaStats,
-  renewalsAnanyshree,
-  renewalsAnishqa,
+  queendoms,
   celebrationAgent,
   isInitialLoading,
+  initialScreen = "concierge",
 }: DashboardControllerProps) {
-  const [activeScreen, setActiveScreen] = useState<ActiveScreen>("concierge");
-  // Auto-switch paused for now — starts frozen on the concierge screen.
-  // The top-right button now switches panels manually; rotation only
+  const router = useRouter();
+  const [activeScreen, setActiveScreen] = useState<ActiveScreen>(initialScreen);
+  // Auto-switch paused for now — starts frozen on the chosen screen.
+  // The top-right button switches panels manually; rotation only
   // re-enables via the P/Space keys.
   const [isFrozen, setIsFrozen] = useState(true);
 
@@ -140,104 +143,61 @@ export default function DashboardController({
     return () => window.clearTimeout(timeoutId);
   }, [activeScreen, isFrozen]);
 
-  useKeyboardControls(setActiveScreen, setIsFrozen);
+  // Escape / Backspace on the TV remote returns to the landing page.
+  useKeyboardControls(setActiveScreen, setIsFrozen, () => router.push("/"));
+
+  const destination: ActiveScreen = activeScreen === "concierge" ? "onboarding" : "concierge";
 
   return (
     <div
       className={`relative h-full w-full min-h-0 min-w-0 overflow-hidden ${className ?? ""}`}
     >
       {/* Always clickable: TV remotes often fail to deliver Enter to window; use pointer + arrow keys + OK.
-          Auto-rotation stays frozen — this button manually switches between the two panels;
-          the label shows the DESTINATION screen. */}
-      <button
-        type="button"
-        aria-label={
-          activeScreen === "concierge"
-            ? "Switch to onboarding screen"
-            : "Switch to queendom screen"
-        }
-        className="absolute right-3 top-3 z-[100] flex min-h-[64px] min-w-[188px] items-center justify-center rounded-full border border-gold-500/40 bg-black/50 px-5 py-3.5 font-montserrat text-2xl font-bold tracking-[0.05em] text-gold-200 shadow-lg transition-[background-color,border-color,color,transform] duration-150 ease-out hover:bg-black/65 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/80"
-        onClick={() =>
-          setActiveScreen((s) => (s === "concierge" ? "onboarding" : "concierge"))
-        }
+          Two segments: MENU returns to the landing page; the other switches between the two
+          screens — its label shows the DESTINATION screen. Auto-rotation stays frozen. */}
+      <div
+        className="absolute right-3 top-3 z-[100] flex overflow-hidden rounded-full border border-gold-500/40 bg-black/50 shadow-lg"
+        role="group"
+        aria-label="Dashboard controls"
       >
-        {activeScreen === "concierge" ? "ONBOARDING" : "QUEENDOM"}
-      </button>
+        <button
+          type="button"
+          aria-label="Back to the dashboard menu"
+          className={`${CONTROL_BUTTON_CLASS} min-w-[120px] border-r border-gold-500/25 px-5 py-3.5 text-gold-400/80 hover:bg-black/65 hover:text-gold-200`}
+          onClick={() => router.push("/")}
+        >
+          MENU
+        </button>
+        <button
+          type="button"
+          aria-label={`Switch to ${destination} screen`}
+          className={`${CONTROL_BUTTON_CLASS} min-w-[188px] px-5 py-3.5 text-gold-200 hover:bg-black/65`}
+          onClick={() => setActiveScreen(destination)}
+        >
+          {destination === "onboarding" ? "ONBOARDING" : "CONCIERGE"}
+        </button>
+      </div>
 
       {/* Screens stay mounted; only opacity/z-index changes (cinematic crossfade, no translateX tearing). */}
       <ScreenLayer isActive={activeScreen === "concierge"}>
-        <div className="flex min-h-0 h-full w-full min-w-0 flex-col gap-8 md:flex-row md:items-stretch">
-          {/* Anishqa panel — isolated so its crash cannot affect Ananyshree */}
-          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-            <ErrorBoundary label="Anishqa" fillParent>
-              <QueendomPanel
-                name="Anishqa"
-                stats={anishqaStats}
-                side="left"
-                delay={0}
-                celebrationAgent={celebrationAgent}
-                renewalsData={renewalsAnishqa}
-              />
-            </ErrorBoundary>
-            {/* Skeleton overlay — sits above the real panel until data is ready */}
-            <SkeletonOverlay show={isInitialLoading}>
-              <QueendomSkeleton side="left" />
-            </SkeletonOverlay>
-          </div>
-
-          {/* Center column — full-height gold separator between Queendoms (md+) */}
-          <div
-            className="relative hidden shrink-0 self-stretch md:block"
-            style={{ width: "var(--size-center-separator)" }}
-            aria-hidden
-          >
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  "radial-gradient(ellipse 160% 50% at 50% 50%, rgba(201,168,76,0.032), transparent)",
-              }}
-            />
-            <div className="absolute left-1/2 top-[2vh] bottom-[2vh] w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-gold-500/35 to-transparent" />
-            <div
-              className="pointer-events-none absolute left-1/2 top-[2vh] bottom-[2vh] w-[4px] -translate-x-1/2"
-              style={{
-                background:
-                  "linear-gradient(to bottom, transparent 8%, rgba(201,168,76,0.08) 30%, rgba(201,168,76,0.12) 50%, rgba(201,168,76,0.08) 70%, transparent 92%)",
-                filter: "blur(2px)",
-              }}
-            />
-          </div>
-
-          <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-gold-500/25 to-transparent md:hidden" />
-
-          {/* Ananyshree panel — isolated so its crash cannot affect Anishqa */}
-          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col md:basis-0">
-            <ErrorBoundary label="Ananyshree" fillParent>
-              <QueendomPanel
-                name="Ananyshree"
-                stats={ananyshreeStats}
-                side="right"
-                delay={150}
-                celebrationAgent={celebrationAgent}
-                renewalsData={renewalsAnanyshree}
-              />
-            </ErrorBoundary>
-            {/* Skeleton overlay — staggered 0.15s after left panel for a cascade reveal */}
-            <SkeletonOverlay show={isInitialLoading} delay={0.15}>
-              <QueendomSkeleton side="right" />
-            </SkeletonOverlay>
-          </div>
+        <div className="relative flex min-h-0 h-full w-full min-w-0 flex-col">
+          <ErrorBoundary label="Concierge" fillParent>
+            <ConciergeScreen queendoms={queendoms} celebrationAgent={celebrationAgent} />
+          </ErrorBoundary>
+          {/* Skeleton overlay — sits above the real screen until data is ready */}
+          <SkeletonOverlay show={isInitialLoading}>
+            <ConciergeSkeleton />
+          </SkeletonOverlay>
         </div>
       </ScreenLayer>
 
       <ScreenLayer isActive={activeScreen === "onboarding"}>
-        {/* Onboarding screen — isolated from the concierge screens */}
+        {/* Onboarding screen — isolated from the concierge screen */}
         <div className="relative flex min-h-0 h-full w-full min-w-0 flex-col">
           <ErrorBoundary label="Onboarding" fillParent>
             <OnboardingLayout />
           </ErrorBoundary>
-          {/* Skeleton overlay — staggered 0.3s so the left→right→onboarding cascade feels intentional */}
+          {/* Skeleton overlay — staggered 0.3s so the concierge → onboarding cascade feels intentional */}
           <SkeletonOverlay show={isInitialLoading} delay={0.3}>
             <OnboardingSkeleton />
           </SkeletonOverlay>

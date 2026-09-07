@@ -13,7 +13,8 @@ import type { TicketStats, AgentStats } from "./types";
 import { FALLBACK_ROSTER, buildRoster } from "./agentRoster";
 import type { RosterSnapshot } from "./agentRoster";
 import { isVoid, isTerminal, isIncompleteScoreStatus } from "./ticketStatus";
-import { normalizeQueendom } from "./queendom";
+import { normalizeQueendom, queendomRecord } from "./queendom";
+import type { QueendomId } from "@/types";
 
 export interface TicketRowMinimal {
   id: string;
@@ -36,30 +37,17 @@ interface TicketBucket {
   jokerSuggestion: number;
 }
 
-export function aggregateTicketStats(rows: TicketRowMinimal[]): {
-  ananyshree: TicketStats;
-  anishqa: TicketStats;
-} {
+export function aggregateTicketStats(
+  rows: TicketRowMinimal[],
+): Record<QueendomId, TicketStats> {
   const { day: todayIST, month: thisMonthIST } = istToday();
-  const result: {
-    ananyshree: TicketBucket;
-    anishqa: TicketBucket;
-  } = {
-    ananyshree: {
-      totalReceived: 0,
-      resolvedThisMonth: 0,
-      solvedToday: 0,
-      pendingToResolve: 0,
-      jokerSuggestion: 0,
-    },
-    anishqa: {
-      totalReceived: 0,
-      resolvedThisMonth: 0,
-      solvedToday: 0,
-      pendingToResolve: 0,
-      jokerSuggestion: 0,
-    },
-  };
+  const result = queendomRecord<TicketBucket>(() => ({
+    totalReceived: 0,
+    resolvedThisMonth: 0,
+    solvedToday: 0,
+    pendingToResolve: 0,
+    jokerSuggestion: 0,
+  }));
 
   // Deduplicate by ticket id, then strip void (spam / deleted) rows entirely.
   const seen = new Set<string>();
@@ -113,10 +101,7 @@ export function aggregateTicketStats(rows: TicketRowMinimal[]): {
     }
   }
 
-  return {
-    ananyshree: result.ananyshree,
-    anishqa: result.anishqa,
-  };
+  return result;
 }
 
 interface AgentLiveStats {
@@ -206,10 +191,7 @@ function calcAgent(
 export function aggregateAgentStats(
   rows: TicketRowMinimal[],
   roster: RosterSnapshot = FALLBACK_ROSTER,
-): {
-  ananyshree: Record<string, AgentLiveStats>;
-  anishqa: Record<string, AgentLiveStats>;
-} {
+): Record<QueendomId, Record<string, AgentLiveStats>> {
   const istRef = istToday();
 
   // Strip void (spam / deleted) tickets before any per-agent math.
@@ -221,28 +203,21 @@ export function aggregateAgentStats(
     if (!isVoid(row.status)) visibleRows.push(row);
   }
 
-  const ananyshree: Record<string, AgentLiveStats> = {};
-  const anishqa: Record<string, AgentLiveStats> = {};
-  for (const name of roster.ananyshree) {
-    ananyshree[name] = calcAgent(visibleRows, name, istRef);
-  }
-  for (const name of roster.anishqa) {
-    anishqa[name] = calcAgent(visibleRows, name, istRef);
-  }
-  return { ananyshree, anishqa };
+  return queendomRecord((id) => {
+    const live: Record<string, AgentLiveStats> = {};
+    for (const name of roster.agents[id]) {
+      live[name] = calcAgent(visibleRows, name, istRef);
+    }
+    return live;
+  });
 }
 
 /** Merge live stats into roster and rank by monthly volume (today as tie-breaker). */
 export function mergeAndRankAgents(
   rows: TicketRowMinimal[],
   roster: RosterSnapshot = FALLBACK_ROSTER,
-): {
-  ananyshree: AgentStats[];
-  anishqa: AgentStats[];
-} {
+): Record<QueendomId, AgentStats[]> {
   const live = aggregateAgentStats(rows, roster);
-  const rosterA = buildRoster(roster.ananyshree, "ananyshree");
-  const rosterB = buildRoster(roster.anishqa, "anishqa");
   const liveCI = (rec: Record<string, AgentLiveStats>) => {
     const out: Record<string, AgentLiveStats> = {};
     for (const [k, v] of Object.entries(rec)) {
@@ -265,10 +240,7 @@ export function mergeAndRankAgents(
         b.tasksCompletedToday - a.tasksCompletedToday,
     );
   };
-  return {
-    ananyshree: merge(rosterA, live.ananyshree),
-    anishqa: merge(rosterB, live.anishqa),
-  };
+  return queendomRecord((id) => merge(buildRoster(roster.agents[id], id), live[id]));
 }
 
 /** Max rows in Dashboard client state so Realtime + long uptimes cannot grow unbounded. */

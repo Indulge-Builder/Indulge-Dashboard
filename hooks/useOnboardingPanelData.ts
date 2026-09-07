@@ -5,7 +5,6 @@ import { fetchJson } from "@/lib/clientFetch";
 import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { istToday } from "@/lib/istDate";
-import { getAgentDepartment } from "@/lib/onboardingAgents";
 import type {
   LeadStatusByAgent,
   OnboardingAgentRow,
@@ -16,18 +15,20 @@ import type {
 } from "@/lib/onboardingTypes";
 import type { PulseEvent } from "@/components/onboarding/PerformanceLineGraph";
 import {
-  CONCIERGE_FALLBACK_AGENTS,
-  SHOP_FALLBACK_AGENTS,
+  ONBOARDING_FALLBACK_AGENTS,
   LIVE_LEDGER_MAX,
-  orderConciergeAgentsForDisplay,
-  orderShopAgentsForDisplay,
+  orderAgentsForColumn,
   sortLedgerNewestFirst,
   ledgerRowFromInsertPayload,
 } from "@/components/onboarding/utils";
 
 export interface UseOnboardingPanelDataResult {
-  conciergeAgents: OnboardingAgentRow[];
-  shopAgents: OnboardingAgentRow[];
+  /** Every roster seat, roster order. */
+  agents: OnboardingAgentRow[];
+  /** Seats for the left agent column (lib/onboardingAgents.ts `column`). */
+  leftAgents: OnboardingAgentRow[];
+  /** Seats for the right agent column. */
+  rightAgents: OnboardingAgentRow[];
   ledger: OnboardingLedgerRow[];
   pulseEvents: PulseEvent[];
   leadMonthStats: LeadMonthStats;
@@ -45,9 +46,9 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
   const [pulseEvents, setPulseEvents] = useState<PulseEvent[]>([]);
   const pulseTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const firePulse = useCallback((team: "onboarding" | "shop") => {
+  const firePulse = useCallback(() => {
     const id = `pe-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setPulseEvents((prev) => [...prev, { id, team }]);
+    setPulseEvents((prev) => [...prev, { id }]);
     const t = setTimeout(() => {
       setPulseEvents((prev) => prev.filter((e) => e.id !== id));
       pulseTimers.current.delete(id);
@@ -74,10 +75,6 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     junk: 0,
   });
 
-  const [deptStats, setDeptStats] = useState<NonNullable<
-    OnboardingApiPayload["departments"]
-  > | null>(null);
-
   const debouncedLoadRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadAbortRef = useRef<AbortController | null>(null);
 
@@ -100,15 +97,11 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     if (Array.isArray(data.agents) && data.agents.length > 0) {
       setAgents(data.agents);
     } else {
-      setAgents([...CONCIERGE_FALLBACK_AGENTS, ...SHOP_FALLBACK_AGENTS]);
+      setAgents([...ONBOARDING_FALLBACK_AGENTS]);
     }
 
     const raw = Array.isArray(data.ledger) ? data.ledger : [];
     setLedger(sortLedgerNewestFirst(raw).slice(0, LIVE_LEDGER_MAX));
-
-    if (data.departments) {
-      setDeptStats(data.departments);
-    }
 
     if (data.leadStatusByAgent) setLeadStatusByAgent(data.leadStatusByAgent);
     if (Array.isArray(data.verticalTrendline) && data.verticalTrendline.length > 0) {
@@ -145,6 +138,7 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     };
   }, [load]);
 
+  // Channel names are contractual (CLAUDE.md "Known Sharp Edges") — never rename.
   useRealtimeChannel(
     "deals-live",
     [
@@ -156,8 +150,7 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
             if (!raw) return;
             const row = ledgerRowFromInsertPayload(raw);
             if (!row) return;
-            const team = row.department === "shop" ? "shop" : "onboarding";
-            firePulse(team);
+            firePulse();
             setLedger((prev) => {
               const withoutDup = prev.filter((r) => r.id !== row.id);
               return sortLedgerNewestFirst([row, ...withoutDup]).slice(
@@ -179,13 +172,7 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
       {
         table: "leads",
         handler: (payload) => {
-          if (payload.eventType === "INSERT") {
-            const raw = payload.new as Record<string, unknown> | null;
-            const agentName = (raw?.agent_name as string | undefined) ?? "";
-            const dept = getAgentDepartment(agentName);
-            const team = dept === "shop" ? "shop" : "onboarding";
-            firePulse(team);
-          }
+          if (payload.eventType === "INSERT") firePulse();
           scheduleDebouncedLoad();
         },
       },
@@ -193,25 +180,8 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     () => void load(),
   );
 
-  const conciergeAgents = useMemo<OnboardingAgentRow[]>(() => {
-    if (deptStats) return deptStats.concierge.agents;
-    const fromFlat = agents.filter(
-      (a) => (a.department ?? getAgentDepartment(a.name)) === "concierge",
-    );
-    return fromFlat.length > 0
-      ? orderConciergeAgentsForDisplay(fromFlat)
-      : [...CONCIERGE_FALLBACK_AGENTS];
-  }, [agents, deptStats]);
-
-  const shopAgents = useMemo<OnboardingAgentRow[]>(() => {
-    if (deptStats) return deptStats.shop.agents;
-    const fromFlat = agents.filter(
-      (a) => (a.department ?? getAgentDepartment(a.name)) === "shop",
-    );
-    return fromFlat.length > 0
-      ? orderShopAgentsForDisplay(fromFlat)
-      : [...SHOP_FALLBACK_AGENTS];
-  }, [agents, deptStats]);
+  const leftAgents = useMemo(() => orderAgentsForColumn(agents, "left"), [agents]);
+  const rightAgents = useMemo(() => orderAgentsForColumn(agents, "right"), [agents]);
 
   const ledgerScrollDuration = useMemo(() => {
     const n = ledger.length;
@@ -219,8 +189,9 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
   }, [ledger.length]);
 
   return {
-    conciergeAgents,
-    shopAgents,
+    agents,
+    leftAgents,
+    rightAgents,
     ledger,
     pulseEvents,
     leadMonthStats,

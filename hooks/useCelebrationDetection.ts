@@ -6,6 +6,9 @@
  * Detects when any agent's `tasksCompletedToday` increases and triggers a
  * full-screen celebration overlay for that agent. Extracted from Dashboard.tsx.
  *
+ * Takes ONE flattened agent list (every queendom concatenated — the caller
+ * memoises it) so the hook never needs to know how many queendoms exist.
+ *
  * Algorithm (preserved verbatim from original):
  *   1. On the very first call, prevScoresRef is empty → seed the map silently
  *      (no celebration fires on initial load).
@@ -33,10 +36,7 @@ export interface CelebrationState {
   clearCelebration: () => void;
 }
 
-export function useCelebrationDetection(
-  agentsA: AgentStats[],
-  agentsB: AgentStats[],
-): CelebrationState {
+export function useCelebrationDetection(allAgents: AgentStats[]): CelebrationState {
   const [celebrationAgent, setCelebrationAgent] = useState<string | null>(null);
 
   // Persists across renders without causing re-renders — a Map from agent name
@@ -44,15 +44,13 @@ export function useCelebrationDetection(
   const prevScoresRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
-    const allCurrent = [...agentsA, ...agentsB];
-
     const prevMap      = prevScoresRef.current;
     const isInitialSeed = prevMap.size === 0;
     let celebCandidate: string | null = null;
 
     // Only compare if the map has been seeded — first run is always a seed.
     if (!isInitialSeed) {
-      for (const agent of allCurrent) {
+      for (const agent of allAgents) {
         const prev = prevMap.get(agent.name) ?? 0;
         if (agent.tasksCompletedToday > prev) {
           celebCandidate = agent.name;
@@ -62,7 +60,7 @@ export function useCelebrationDetection(
     }
 
     // Always refresh the map so the next render has an accurate baseline.
-    for (const agent of allCurrent) {
+    for (const agent of allAgents) {
       prevMap.set(agent.name, agent.tasksCompletedToday);
     }
 
@@ -77,7 +75,7 @@ export function useCelebrationDetection(
     // celebrationAgent intentionally omitted from deps: reacting to it would
     // cause a feedback loop (overlay shown → effect re-runs → new candidate).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentsA, agentsB]);
+  }, [allAgents]);
 
   const clearCelebration = useCallback(() => setCelebrationAgent(null), []);
 

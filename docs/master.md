@@ -4,6 +4,8 @@
 
 ---
 
+> **Addendum 2026-09-04 — three Queendoms + landing page.** Sections 1, 3, 4.1 and 12 below describe the two-Queendom layout as compiled on 2026-06-11. Since then: (1) a third Queendom, **Sanika**, was added — `QUEENDOM_IDS` in `lib/queendom.ts` is now `["anishqa", "sanika", "ananyshree"]` (TV column order) and every per-Queendom shape is a `Record<QueendomId, T>` built with `queendomRecord()`; (2) the concierge screen was rebuilt as `components/concierge/ConciergeScreen.tsx` per `../design_handoff_three_queendoms/README.md` (option 1c): a full-width **ScoreboardStrip** (name, Paid/Celebrity/To Be Revived pills, the five ticket metrics per Queendom) over three **QueendomColumn**s (RenewalsPanel → AgentLeaderboard + SpecialDates 2×3 grid → Since Last Resolved | Incoming Renewals band), and the OverdueTicker's alarm icon became a colour-tiered **ticket-age badge**; `QueendomPanel` / `QueendomWingspanHeader` / `QueendomSkeleton` were removed; (3) `/` is now a landing page (`components/landing/DashboardPicker.tsx`) that asks which dashboard to view — `/concierge` and `/onboarding` open `DashboardRoot` on that screen (both screens still always-mounted; MENU segment / Escape returns to `/`); (4) `GET /api/renewals-panel` returns every Queendom in one response; `GET /api/tickets/overdue` adds `createdAt`; `GET /api/roster` returns `{ agents: Record<QueendomId, string[]>, jokers }`; (5) migration `20260904000000_sanika_queendom.sql` widens the `agents` CHECK, teaches the renewals/members label trigger "Sanika Queendom", adds Postgres `live_queendom_id()` and re-scopes every `insights_*` function through it, and seeds Sanika's roster. See CLAUDE.md invariant 13.
+
 ## Table of Contents
 
 1. [What This Project Is](#1-what-this-project-is)
@@ -32,7 +34,7 @@
 It tracks three things live:
 
 1. **Concierge operations** — two operational teams called **Queendoms** (*Ananyshree* and *Anishqa*), each with ~9 agents handling client tickets from Freshdesk.
-2. **Revenue / Onboarding** — the sales team's leads and deals from Zoho CRM, split into a **Concierge (Onboarding)** department and a **Shop** department, across four business verticals (Indulge Global, Indulge Shop, Indulge House, Indulge Legacy).
+2. **Revenue / Onboarding** — the sales team's leads and deals from Zoho CRM, one **Onboarding** roster rendered across two agent columns (the Shop department was retired 2026-09-07 — Shop gets its own screen when that team is rebuilt), across four business verticals (Indulge Global, Indulge Shop, Indulge House, Indulge Legacy).
 3. **Engagement extras** — "Joker" lifestyle suggestions sent to clients, membership renewals, new member assignments, client birthdays/anniversaries.
 
 Data is pushed into Supabase by webhooks (Freshdesk, Zoho) and an external Google Sheet sync (jokers); the browser subscribes via Supabase Realtime, so the TV updates within seconds of an event, with a full-screen gold **celebration** when an agent completes a task.
@@ -128,13 +130,13 @@ Layout top → bottom:
 
 | Column | Contents |
 |---|---|
-| Left | `DepartmentColumn` — **Onboarding** (concierge dept): agent cards (Amit, Meghana, Samson, Kaniisha) with portraits, leads this month/today, closures, `LeadStatusHealthBar` pipeline bar per agent |
+| Left | `AgentColumn` — **Onboarding**: agent cards (Samson, Kaniisha) with portraits, leads this month/today, closures, `LeadStatusHealthBar` pipeline bar per agent |
 | Center | Lead month stat tiles (leads / attended / deals closed / junk) + `PerformanceLineGraph` + `ConversionLedger` |
-| Right | `DepartmentColumn` — **Shop** dept (Vikram, Katya, Harsh) — sky-blue themed (`.sky-name-glow`) |
+| Right | `AgentColumn` — **Onboarding** (Nandini, Kabeer, Surbhi — joined 2026-08-17; portraits pending — blank black frame until then). Same gold accent as the left column; the roster/column split lives in `lib/onboardingAgents.ts` |
 
 - **`PerformanceLineGraph`** — native SVG multi-line chart, one Catmull-Rom spline (tension 0.35) per business vertical, draw-in `pathLength` animation with 0.12 s stagger. Colors: Indulge Global `#6B8FFF`, Shop `#FFB020`, House `#34D399`, Legacy `#C084FC`.
 - **`ConversionLedger`** — auto-scrolling sales closure ledger driven by `requestAnimationFrame` (not CSS keyframes); `dt` capped at 100 ms; on optimistic row prepend, scroll position compensates by average row height so visible content doesn't jump. Max 15 visible rows; scroll duration `max(32, rows × 6)` s.
-- **`LeadStatusHealthBar`** — segmented pipeline bar per agent (Qualified / In Discussion / Nurturing / Touched / New / Junk; Zoho's `attempted` is normalized into `Touched`).
+- **`LeadStatusHealthBar`** — segmented pipeline bar per agent over the current Zoho `Lead_Status` picklist, best → worst: Win / Payment Link / Conversing / Nurturing / RNR / New / Cold / Lost / Junk (`ZOHO_LEAD_STATUSES`, `lib/leadStatus.ts`). Legacy labels still in the DB map through `normalizeLeadStatus()` (Touched/Attempted → RNR, In Discussion → Conversing, Qualified → Win, Not Qualified/Trash → Junk). Tiles: Attended = every status except New and Junk. Cards, pipeline and tiles are scoped to `METRIC_BUSINESS_VERTICAL` (Indulge Global); the trendline keeps all four verticals.
 - Agent card metrics flash an `.ob-metric-flash` pulse when their numbers increase. (The old `.card-win-shimmer` gold-foil sweep was never wired up — its plumbing was removed in dry-audit G6.)
 
 ### 4.3 Home screen — `HomePanel` (WIP, env-gated)
@@ -381,7 +383,8 @@ VOID_STATUSES            = { spam, deleted }
 | `lib/ticketAggregation.ts` | All ticket math, void filter, agent stats, ranking, `pruneTicketRowsForDashboardState`, `TicketRowMinimal` |
 | `lib/istDate.ts` | `istToday()`, timestamp parsing rules, IST month/day UTC bounds |
 | `lib/agentRoster.ts` | Concierge rosters + `JOKER_ROSTER` |
-| `lib/onboardingAgents.ts` | `normalizeZohoAgentName`, `getDisplayAgentName`, department lookup, `CONCIERGE_*`/`SHOP_*` card specs + fallback agents |
+| `lib/onboardingAgents.ts` | `ONBOARDING_AGENT_CARDS` roster (id · name · `zohoName` · `column`), `normalizeZohoAgentName`, `getDisplayAgentName`, `onboardingAgentNameMatches`, fallback agents |
+| `lib/leadStatus.ts` | `ZOHO_LEAD_STATUSES`, `normalizeLeadStatus` (current picklist + legacy map), `isAttendedStatus` / `isJunkStatus` |
 | `lib/specialDates.ts` | Static birthday/anniversary data |
 | `lib/motionPresets.ts` | Shared Framer Motion presets (§5.6) |
 | `lib/dashboardScreens.ts` | Screen order, durations, home-panel feature flag |
@@ -405,7 +408,7 @@ VOID_STATUSES            = { spam, deleted }
 
 **Jokers:** Lilian Albrecht → ananyshree · Shruti Sharma → anishqa.
 
-**Onboarding (Concierge dept):** Amit, Meghana, Samson, Kaniisha. **Shop dept:** Vikram, Katya, Harsh. Portraits in `onboarding-agents-images/*.webp`; department lookup keyed on lowercase first name.
+**Onboarding roster (2026-09-07):** left column Samson, Kaniisha; right column Nandini, Kabeer, Surbhi. Gone: Amit, Meghana (Zoho users disabled 2026-08-17), Vikram, Katya, Harsh (Shop, deleted 2026-06-16). Portraits in `onboarding-agents-images/*.webp`; department lookup keyed on lowercase first name.
 
 ---
 

@@ -301,6 +301,14 @@ export async function POST(req: NextRequest) {
   const createdIso = parseWebhookInstant(ticket_created_at);
   if (createdIso) {
     row.created_at = createdIso;
+  } else if (ticket_created_at !== undefined) {
+    // Without a parseable instant the DB default (now()) becomes created_at —
+    // the "arrival-time" fingerprint the 2026-08-20 audit found on 4,429 rows
+    // and the 2026-09-05 audit on 60 more. Log the raw value so the format
+    // that defeats lib/istDate can actually be seen (reconcile repairs the row).
+    console.warn(
+      `[freshdesk webhook] ticket ${ticketIdStr}: unparseable ticket_created_at ${JSON.stringify(ticket_created_at)} — created_at falls back to arrival time until reconcile`,
+    );
   }
 
   if (TERMINAL_STATUSES.has(statusLower)) {

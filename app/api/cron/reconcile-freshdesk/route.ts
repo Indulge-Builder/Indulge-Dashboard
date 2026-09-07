@@ -10,9 +10,12 @@
  * forever (2026-08-20 audit: 162 lost tickets, 4,429 wrong created_at,
  * 1,819 "(Deactivated)" agent names accumulated in ~8 months).
  *
- * Schedule: vercel.json cron, every 3 hours. Lookback defaults to 4 hours
- * (cadence + overlap) — override with ?hours=N (max 168) for manual heals,
- * e.g. `?hours=48` after a long outage.
+ * Schedule: GitHub Actions every 3 hours with `?hours=48`, plus the daily
+ * vercel.json backstop with `?hours=168`. The lookback must be far wider
+ * than the cadence: GitHub schedules drift (5–6.5 h gaps seen 2026-09-04/05)
+ * and the old 4 h window silently skipped everything edited in a gap (audit
+ * 2026-09-05: 20 missing tickets, 29 stale statuses, 60 arrival-time
+ * created_at rows). The 4 h default below is only the no-param fallback.
  *
  * Auth (production): `Authorization: Bearer <CRON_SECRET>` — Vercel sends
  * this automatically when the CRON_SECRET env var is set — or the existing

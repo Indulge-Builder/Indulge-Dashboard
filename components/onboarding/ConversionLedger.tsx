@@ -45,18 +45,11 @@ import {
   formatLedgerDate,
 } from "./utils";
 
-// ── Department accent tokens ───────────────────────────────────────────────────
-const DEPT_ACCENT = {
-  concierge: {
-    border: "rgba(212,175,55,0.38)",
-    gradient:
-      "linear-gradient(to right, rgba(212,175,55,0.065) 0%, transparent 42%)",
-  },
-  shop: {
-    border: "rgba(125,211,252,0.42)",
-    gradient:
-      "linear-gradient(to right, rgba(125,211,252,0.065) 0%, transparent 42%)",
-  },
+// ── Row accent (gold — one Onboarding team since 2026-09) ─────────────────────
+const ROW_ACCENT = {
+  border: "rgba(212,175,55,0.38)",
+  gradient:
+    "linear-gradient(to right, rgba(212,175,55,0.065) 0%, transparent 42%)",
 } as const;
 
 // ── Single row ────────────────────────────────────────────────────────────────
@@ -68,7 +61,7 @@ function ConversionLedgerRow({
   ariaHidden?: boolean;
 }) {
   const cell = { fontSize: ONBOARDING_LEDGER_CELL_FONT } as CSSProperties;
-  const accent = DEPT_ACCENT[row.department ?? "concierge"];
+  const accent = ROW_ACCENT;
 
   return (
     <div

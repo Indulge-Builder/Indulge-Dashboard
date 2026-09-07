@@ -1,3 +1,5 @@
+import type { QueendomId } from "@/types";
+
 export interface MemberStats {
   /** Active clients whose membership is Premium, Genie, Monthly Trial, or Standard (paid pill). */
   total: number;
@@ -36,7 +38,7 @@ export interface JokerStats {
 export interface AgentStats {
   id: string;
   name: string;
-  queendom: "ananyshree" | "anishqa";
+  queendom: QueendomId;
   tasksAssignedToday: number;
   tasksCompletedToday: number;
   tasksCompletedThisMonth: number;
@@ -82,7 +84,7 @@ export interface SpecialDate {
   clientName: string;
   date: string; // YYYY-MM-DD
   type: "birthday" | "anniversary";
-  queendom: "ananyshree" | "anishqa";
+  queendom: QueendomId;
   /** Expired membership — muted styling on the Special Dates card */
   isExpired?: boolean;
 }

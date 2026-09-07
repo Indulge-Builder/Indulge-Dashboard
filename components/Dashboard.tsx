@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * components/Dashboard.tsx — Layout shell.
+ * components/Dashboard.tsx — Layout shell (TV tree).
  *
  * Responsibilities (only these, nothing else):
  *   - Compose useDashboardData + useCelebrationDetection hooks
+ *   - Shape the per-queendom record into the ordered QueendomView list
  *   - Render the three layout regions: TopBar / main content / Ticker
  *   - Pass data down to children via props (no child fetches anything)
  *
@@ -13,30 +14,39 @@
  * intentionally kept as a thin render shell.
  */
 
+import { useMemo } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useCelebrationDetection } from "@/hooks/useCelebrationDetection";
+import { QUEENDOM_DISPLAY_NAME, QUEENDOM_IDS } from "@/lib/queendom";
 import TopBar from "./TopBar";
 import DashboardController from "./DashboardController";
 import CelebrationOverlay from "./CelebrationOverlay";
 import OverdueTicker from "./OverdueTicker";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import type { ActiveScreen, QueendomView } from "@/types";
 
-export default function Dashboard() {
+export default function Dashboard({ initialScreen }: { initialScreen?: ActiveScreen }) {
   // ── Data + realtime state ──────────────────────────────────────────────────
-  const {
-    ananyshreeStats,
-    anishqaStats,
-    overdueTickets,
-    renewalsAnanyshree,
-    renewalsAnishqa,
-    isInitialLoading,
-  } = useDashboardData();
+  const { queendoms, renewals, overdueTickets, isInitialLoading } = useDashboardData();
 
-  // ── Celebration detection ──────────────────────────────────────────────────
-  const { celebrationAgent, clearCelebration } = useCelebrationDetection(
-    ananyshreeStats.agents,
-    anishqaStats.agents,
+  // ── Ordered views for the concierge columns ────────────────────────────────
+  const views = useMemo<QueendomView[]>(
+    () =>
+      QUEENDOM_IDS.map((id) => ({
+        id,
+        name: QUEENDOM_DISPLAY_NAME[id],
+        stats: queendoms[id],
+        renewals: renewals[id],
+      })),
+    [queendoms, renewals],
   );
+
+  // ── Celebration detection — over every queendom's agents ───────────────────
+  const allAgents = useMemo(
+    () => QUEENDOM_IDS.flatMap((id) => queendoms[id].agents),
+    [queendoms],
+  );
+  const { celebrationAgent, clearCelebration } = useCelebrationDetection(allAgents);
 
   // ── Layout ─────────────────────────────────────────────────────────────────
   return (
@@ -57,15 +67,13 @@ export default function Dashboard() {
         />
       </ErrorBoundary>
 
-      {/* Main content: Concierge ↔ Onboarding auto-rotating panel */}
+      {/* Main content: Concierge ↔ Onboarding screens */}
       <DashboardController
         className="min-h-0 min-w-0 flex-1"
-        ananyshreeStats={ananyshreeStats}
-        anishqaStats={anishqaStats}
-        renewalsAnanyshree={renewalsAnanyshree}
-        renewalsAnishqa={renewalsAnishqa}
+        queendoms={views}
         celebrationAgent={celebrationAgent}
         isInitialLoading={isInitialLoading}
+        initialScreen={initialScreen}
       />
 
       {/* Ticker — isolated so a marquee/Framer crash never pulls down the panels */}

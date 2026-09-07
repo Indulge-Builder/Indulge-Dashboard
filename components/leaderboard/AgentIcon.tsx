@@ -15,6 +15,13 @@ import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
 import { getInitials } from "@/lib/format";
 import { EASE_LUXURY } from "@/lib/motionPresets";
+import { fw } from "@/lib/tvScale";
+
+// ── Stage-pinned sizes (handoff §B2: 66px ring, 14.4px initials, 18px crown) ──
+const ICON_STYLE = { width: fw(66), height: fw(66) };
+const INITIALS_STYLE = { fontSize: fw(14.4, 0.6), letterSpacing: "0.1em" };
+const CROWN_STYLE = { width: fw(18, 0.6), height: fw(18, 0.6) };
+const CROWN_TOP = `calc(-1 * ${fw(12, 0.6)})`;
 
 // ── Ring geometry ─────────────────────────────────────────────────────────────
 const RING_SIZE    = 80;
@@ -52,7 +59,7 @@ export const AgentIcon = memo(function AgentIcon({
     : { type: "tween" as const, duration: 1.2, ease: EASE_LUXURY, delay: animDelay };
 
   return (
-    <div className="relative flex-shrink-0 w-[44px] h-[44px] sm:w-[56px] sm:h-[56px] lg:w-[72px] lg:h-[72px]">
+    <div className="relative flex-shrink-0" style={ICON_STYLE}>
       <svg
         viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
         className="absolute inset-0 -rotate-90 w-full h-full"
@@ -84,17 +91,16 @@ export const AgentIcon = memo(function AgentIcon({
       </svg>
 
       {/* Initials badge */}
-      {/* min 14px at base breakpoint */}
       <div className="absolute inset-0 flex items-center justify-center rounded-full border border-gold-500/30">
-        <span className="font-cinzel text-[0.875rem] sm:text-[1rem] lg:text-[1rem] tracking-widest text-gold-400 select-none">
+        <span className="font-cinzel text-gold-400 select-none" style={INITIALS_STYLE}>
           {getInitials(name)}
         </span>
       </div>
 
       {/* Crown for rank 1 */}
       {showCrown && (
-        <div className="absolute -top-[8px] sm:-top-[10px] lg:-top-[12px] left-1/2 -translate-x-1/2 z-10">
-          <Crown className="text-gold-400 w-[12px] h-[12px] sm:w-[15px] sm:h-[15px] lg:w-[18px] lg:h-[18px]" />
+        <div className="absolute left-1/2 -translate-x-1/2 z-10" style={{ top: CROWN_TOP }}>
+          <Crown className="text-gold-400" style={CROWN_STYLE} />
         </div>
       )}
     </div>

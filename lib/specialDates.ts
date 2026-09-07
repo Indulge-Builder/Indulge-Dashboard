@@ -1,4 +1,5 @@
 import type { SpecialDate } from "./types";
+import type { QueendomId } from "@/types";
 
 // ─── Raw special dates data ─────────────────────────────────────────────────
 // Birthdays / (wedding & dating) anniversaries for both Queendoms. Dating
@@ -6,12 +7,13 @@ import type { SpecialDate } from "./types";
 // The year component is ignored — getSpecialDates() rebuilds every event in the
 // current calendar year, so only month-day matters. 2025 is a placeholder.
 // Both queendoms refreshed to August 2026; Ananyshree extended with
-// September 2026 birthdays.
+// September 2026 birthdays. Sanika's Queendom (2026-09-04) has no dates on
+// file yet — add them under the "Sanika" heading below.
 interface SpecialDateRaw {
   fullName: string;
   dateOfBirth?: string; // YYYY-MM-DD
   anniversary?: string; // YYYY-MM-DD
-  queendom: "ananyshree" | "anishqa";
+  queendom: QueendomId;
   isExpired?: boolean;
 }
 
@@ -136,6 +138,8 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
     queendom: "anishqa",
   },
   { fullName: "Abhinaya", anniversary: "2025-08-15", queendom: "anishqa" },
+
+  // ── Sanika — none recorded yet (queendom created 2026-09-01) ──
 ];
 
 // ─── Builder ─────────────────────────────────────────────────────────────────

@@ -24,7 +24,7 @@
 import { withSettingsGuard, settingsJson } from "./settingsAuth";
 import { isMissingTableError } from "./apiGuard";
 import { timestampStringToIsoUtcForDb } from "./istDate";
-import { normalizeQueendom, QUEENDOM_LABEL } from "./queendom";
+import { isQueendomId, normalizeQueendom, QUEENDOM_IDS, QUEENDOM_LABEL } from "./queendom";
 import type { QueendomId } from "@/types";
 
 export type ClientRowTable = "renewals" | "members";
@@ -68,7 +68,7 @@ function parseClientName(raw: unknown): string | null {
 }
 
 function parseQueendom(raw: unknown): QueendomId | null {
-  return raw === "ananyshree" || raw === "anishqa" ? raw : null;
+  return isQueendomId(raw) ? raw : null;
 }
 
 /**
@@ -99,7 +99,7 @@ function missingTableResponse(table: ClientRowTable) {
 }
 
 /**
- * Builds the GET / POST / DELETE handlers for one of the two tables.
+ * Builds the GET / POST / PATCH / DELETE handlers for one of the two tables.
  * Every handler is already wrapped in withSettingsGuard (auth + DB + catch-all).
  */
 export function createClientRowRoutes(table: ClientRowTable) {
@@ -146,7 +146,10 @@ export function createClientRowRoutes(table: ClientRowTable) {
       );
     }
     if (!queendom) {
-      return settingsJson({ error: "Queendom must be ananyshree or anishqa." }, 400);
+      return settingsJson(
+        { error: `Queendom must be one of ${QUEENDOM_IDS.join(", ")}.` },
+        400,
+      );
     }
     if (createdAt === undefined) {
       return settingsJson({ error: "Date must be in YYYY-MM-DD format." }, 400);
@@ -173,6 +176,48 @@ export function createClientRowRoutes(table: ClientRowTable) {
     return settingsJson({ row: decorate([data as RawRow])[0] }, 201);
   });
 
+  /** Edit a row's name and/or business date (the two fields staff own). */
+  const PATCH = withSettingsGuard(async (req, db) => {
+    const body = await readBody(req);
+    if (!body) return settingsJson({ error: "Invalid JSON body" }, 400);
+    const id = typeof body.id === "string" ? body.id : null;
+    if (!id) return settingsJson({ error: "id is required." }, 400);
+
+    const patch: Record<string, unknown> = {};
+    if (body.client_name !== undefined) {
+      const clientName = parseClientName(body.client_name);
+      if (!clientName) {
+        return settingsJson(
+          { error: `Client name is required (max ${MAX_NAME_LENGTH} characters).` },
+          400,
+        );
+      }
+      patch.client_name = clientName;
+    }
+    if (body.date !== undefined) {
+      const createdAt = parseIstDate(body.date);
+      if (createdAt === undefined) {
+        return settingsJson({ error: "Date must be in YYYY-MM-DD format." }, 400);
+      }
+      patch.created_at = createdAt;
+    }
+    if (!Object.keys(patch).length) return settingsJson({ error: "Nothing to update." }, 400);
+
+    const { data, error } = await db
+      .from(table)
+      .update(patch)
+      .eq("id", id)
+      .select(COLUMNS)
+      .single();
+
+    if (error) {
+      if (isMissingTableError(error)) return missingTableResponse(table);
+      console.error(`[settings/${table}] PATCH:`, error.message);
+      return settingsJson({ error: error.message }, 500);
+    }
+    return settingsJson({ row: decorate([data as RawRow])[0] });
+  });
+
   const DELETE = withSettingsGuard(async (req, db) => {
     const body = await readBody(req);
     const id = typeof body?.id === "string" ? body.id : null;
@@ -188,5 +233,5 @@ export function createClientRowRoutes(table: ClientRowTable) {
     return settingsJson({ ok: true });
   });
 
-  return { GET, POST, DELETE };
+  return { GET, POST, PATCH, DELETE };
 }

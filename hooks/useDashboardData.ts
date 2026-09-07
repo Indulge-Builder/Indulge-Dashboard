@@ -6,6 +6,10 @@
  * Single source of truth for all dashboard data state, fetch orchestration,
  * and Supabase Realtime subscriptions. Extracted from Dashboard.tsx.
  *
+ * Every per-queendom value is a `Record<QueendomId, T>` built with
+ * queendomRecord() — adding a queendom is a registry change in
+ * lib/queendom.ts, never a new `useState` pair here.
+ *
  * IMPORTANT — memory-safety guarantees:
  *   1. Each Supabase channel lives in useRealtimeChannel, which removes it via
  *      supabase.removeChannel on cleanup and self-heals on CHANNEL_ERROR /
@@ -21,13 +25,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchJson } from "@/lib/clientFetch";
 import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
-import {
-  buildRoster,
-  FALLBACK_ROSTER,
-  ROSTER_ANANYSHREE,
-  ROSTER_ANISHQA,
-  type RosterSnapshot,
-} from "@/lib/agentRoster";
+import { buildRoster, FALLBACK_ROSTER, type RosterSnapshot } from "@/lib/agentRoster";
+import { QUEENDOM_IDS, queendomRecord } from "@/lib/queendom";
 import type { QueenStats, MemberStats, TicketStats, JokerStats } from "@/lib/types";
 import type { TicketRowMinimal } from "@/lib/ticketAggregation";
 import {
@@ -40,6 +39,7 @@ import { buildTicketTimeSeries, resolutionEventMs } from "@/lib/ticketTimeSeries
 import type {
   OverdueTicketItem,
   RenewalsPanelData,
+  RenewalsPanelResponse,
   MemberApiResponse,
   RenewalsDueResponse,
   QueendomId,
@@ -69,28 +69,26 @@ const ZERO_JOKER: JokerStats = {
   totalThisMonth: 0,
 };
 
-// Initial rosters — the hardcoded fallback, shown for the split second before
-// GET /api/roster resolves. Stats fill in from ticket rows after that fetch.
-const AGENTS_ANANYSHREE = buildRoster(ROSTER_ANANYSHREE, "ananyshree");
-const AGENTS_ANISHQA = buildRoster(ROSTER_ANISHQA, "anishqa");
+const EMPTY_RENEWALS: RenewalsPanelData = {
+  totalRenewalsThisMonth: 0,
+  renewals: [],
+  assignments: [],
+};
 
-const INIT_ANANYSHREE: QueenStats = {
+// Initial state — the hardcoded fallback roster, shown for the split second
+// before GET /api/roster resolves. Stats fill in from ticket rows after that.
+const INIT_QUEENDOMS: Record<QueendomId, QueenStats> = queendomRecord((id) => ({
   members: ZERO_MEMBERS,
   tickets: ZERO_TICKETS,
-  agents: AGENTS_ANANYSHREE,
+  agents: buildRoster(FALLBACK_ROSTER.agents[id], id),
   joker: ZERO_JOKER,
   lastResolvedAtMs: null,
   renewalsDue: [],
-};
+}));
 
-const INIT_ANISHQA: QueenStats = {
-  members: ZERO_MEMBERS,
-  tickets: ZERO_TICKETS,
-  agents: AGENTS_ANISHQA,
-  joker: ZERO_JOKER,
-  lastResolvedAtMs: null,
-  renewalsDue: [],
-};
+const INIT_RENEWALS: Record<QueendomId, RenewalsPanelData> = queendomRecord(
+  () => EMPTY_RENEWALS,
+);
 
 /**
  * Max of two nullable stopwatch-anchor candidates (rows-derived vs pruned
@@ -134,45 +132,49 @@ function toTicketRow(raw: Record<string, unknown> | null): TicketRowMinimal | nu
 
 // ─── Return shape ─────────────────────────────────────────────────────────────
 export interface DashboardData {
-  ananyshreeStats:    QueenStats;
-  anishqaStats:       QueenStats;
-  overdueTickets:     OverdueTicketItem[];
-  renewalsAnanyshree: RenewalsPanelData;
-  renewalsAnishqa:    RenewalsPanelData;
+  /** Live stats per queendom, keyed by id (iterate QUEENDOM_IDS for TV order). */
+  queendoms:        Record<QueendomId, QueenStats>;
+  /** RenewalsPanel data per queendom (GET /api/renewals-panel). */
+  renewals:         Record<QueendomId, RenewalsPanelData>;
+  overdueTickets:   OverdueTicketItem[];
   /**
-   * True from mount until the first fetchAll() resolves (all six API calls
+   * True from mount until the first fetchAll() resolves (all API calls
    * complete or fail individually). Used to render skeleton overlays in
    * DashboardController. An 8-second safety timeout prevents it from staying
    * true permanently on slow or partially-failing networks.
    */
-  isInitialLoading:   boolean;
+  isInitialLoading: boolean;
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 export function useDashboardData(): DashboardData {
-  const [isInitialLoading,   setIsInitialLoading]   = useState(true);
-  const [ticketRows,         setTicketRows]         = useState<TicketRowMinimal[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [ticketRows,       setTicketRows]       = useState<TicketRowMinimal[]>([]);
   // Live roster from the editable `agents` table. Starts as the hardcoded
   // fallback so the leaderboard renders immediately and never blanks if
   // /api/roster is slow or down.
-  const [roster,             setRoster]             = useState<RosterSnapshot>(FALLBACK_ROSTER);
+  const [roster,           setRoster]           = useState<RosterSnapshot>(FALLBACK_ROSTER);
   // Whether the roster actually came from the `agents` table. Gates the
   // dashboard-agents Realtime channel — subscribing to a table that doesn't
   // exist yet would CHANNEL_ERROR and retry every 3s forever.
-  const [hasAgentsTable,     setHasAgentsTable]     = useState(false);
-  const [ananyshreeStats,    setAnanyshreeStats]    = useState<QueenStats>(INIT_ANANYSHREE);
-  const [anishqaStats,       setAnishqaStats]       = useState<QueenStats>(INIT_ANISHQA);
-  const [overdueTickets,     setOverdueTickets]     = useState<OverdueTicketItem[]>([]);
-  const [renewalsAnanyshree, setRenewalsAnanyshree] = useState<RenewalsPanelData>({
-    totalRenewalsThisMonth: 0,
-    renewals: [],
-    assignments: [],
-  });
-  const [renewalsAnishqa, setRenewalsAnishqa] = useState<RenewalsPanelData>({
-    totalRenewalsThisMonth: 0,
-    renewals: [],
-    assignments: [],
-  });
+  const [hasAgentsTable,   setHasAgentsTable]   = useState(false);
+  const [queendoms,        setQueendoms]        = useState(INIT_QUEENDOMS);
+  const [overdueTickets,   setOverdueTickets]   = useState<OverdueTicketItem[]>([]);
+  const [renewals,         setRenewals]         = useState(INIT_RENEWALS);
+
+  /**
+   * Patch every queendom's QueenStats in one state update. The patch factory
+   * receives the id and that queendom's previous stats and returns the
+   * fields to merge — so per-source fetchers stay one line each.
+   */
+  const patchQueendoms = useCallback(
+    (patch: (id: QueendomId, prev: QueenStats) => Partial<QueenStats>) => {
+      setQueendoms((prev) =>
+        queendomRecord((id) => ({ ...prev[id], ...patch(id, prev[id]) })),
+      );
+    },
+    [],
+  );
 
   // ── Stopwatch ledger for resolutions the prune filter drops ─────────────────
   // A backlog ticket (created in an earlier IST month) that turns terminal is
@@ -199,33 +201,19 @@ export function useDashboardData(): DashboardData {
   // resolution, so the timer jumps back up.
   useEffect(() => {
     const ticketStats = aggregateTicketStats(ticketRows);
-    const { ananyshree: agentsA, anishqa: agentsB } = mergeAndRankAgents(
-      ticketRows,
-      roster,
-    );
+    const agents = mergeAndRankAgents(ticketRows, roster);
     const series = buildTicketTimeSeries(ticketRows);
-    const ledgerMax: Record<QueendomId, number | null> = {
-      ananyshree: null,
-      anishqa: null,
-    };
+    const ledgerMax = queendomRecord<number | null>(() => null);
     for (const entry of prunedResolutionsRef.current.values()) {
       ledgerMax[entry.queendom] = maxResolvedMs(ledgerMax[entry.queendom], entry.ms);
     }
-    setAnanyshreeStats((prev) => ({
-      ...prev,
-      tickets: ticketStats.ananyshree,
-      agents: agentsA,
-      series: series.ananyshree,
-      lastResolvedAtMs: maxResolvedMs(series.ananyshree.lastResolvedMs, ledgerMax.ananyshree),
+    patchQueendoms((id) => ({
+      tickets: ticketStats[id],
+      agents: agents[id],
+      series: series[id],
+      lastResolvedAtMs: maxResolvedMs(series[id].lastResolvedMs, ledgerMax[id]),
     }));
-    setAnishqaStats((prev) => ({
-      ...prev,
-      tickets: ticketStats.anishqa,
-      agents: agentsB,
-      series: series.anishqa,
-      lastResolvedAtMs: maxResolvedMs(series.anishqa.lastResolvedMs, ledgerMax.anishqa),
-    }));
-  }, [ticketRows, prunedResolutionsVersion, roster]);
+  }, [ticketRows, prunedResolutionsVersion, roster, patchQueendoms]);
 
   // ── Fetchers (all stable — empty dep arrays) ────────────────────────────────
 
@@ -236,10 +224,9 @@ export function useDashboardData(): DashboardData {
    */
   const fetchRoster = useCallback(async () => {
     const data = await fetchJson<RosterSnapshot & { source?: string }>("/api/roster");
-    if (data === null || !Array.isArray(data.ananyshree)) return;
+    if (data === null || !data.agents) return;
     setRoster({
-      ananyshree: data.ananyshree,
-      anishqa: data.anishqa ?? [],
+      agents: queendomRecord((id) => data.agents[id] ?? []),
       jokers: data.jokers ?? [],
     });
     setHasAgentsTable(data.source === "agents-table");
@@ -256,16 +243,14 @@ export function useDashboardData(): DashboardData {
   const fetchMembers = useCallback(async () => {
     const data = await fetchJson<MemberApiResponse>("/api/clients");
     if (data === null) return;
-    setAnanyshreeStats((prev) => ({ ...prev, members: data.ananyshree }));
-    setAnishqaStats((prev)    => ({ ...prev, members: data.anishqa }));
-  }, []);
+    patchQueendoms((id) => ({ members: data[id] ?? ZERO_MEMBERS }));
+  }, [patchQueendoms]);
 
   const fetchRenewalsDue = useCallback(async () => {
     const data = await fetchJson<RenewalsDueResponse>("/api/clients/expiring");
     if (data === null) return;
-    setAnanyshreeStats((prev) => ({ ...prev, renewalsDue: data.ananyshree ?? [] }));
-    setAnishqaStats((prev)    => ({ ...prev, renewalsDue: data.anishqa ?? [] }));
-  }, []);
+    patchQueendoms((id) => ({ renewalsDue: data[id] ?? [] }));
+  }, [patchQueendoms]);
 
   /**
    * ResolveStopwatch ledger bookkeeping, called on every ticket INSERT/UPDATE
@@ -291,13 +276,10 @@ export function useDashboardData(): DashboardData {
   }, []);
 
   const fetchJokers = useCallback(async () => {
-    const data = await fetchJson<{ ananyshree: JokerStats; anishqa: JokerStats }>(
-      "/api/jokers",
-    );
+    const data = await fetchJson<Record<QueendomId, JokerStats>>("/api/jokers");
     if (data === null) return;
-    setAnanyshreeStats((prev) => ({ ...prev, joker: data.ananyshree }));
-    setAnishqaStats((prev)    => ({ ...prev, joker: data.anishqa }));
-  }, []);
+    patchQueendoms((id) => ({ joker: data[id] ?? ZERO_JOKER }));
+  }, [patchQueendoms]);
 
   const fetchOverdueTickets = useCallback(async () => {
     const data = await fetchJson<OverdueTicketItem[]>("/api/tickets/overdue");
@@ -305,13 +287,12 @@ export function useDashboardData(): DashboardData {
     setOverdueTickets(Array.isArray(data) ? data : []);
   }, []);
 
-  const fetchRenewals = useCallback(async (queendom: "ananyshree" | "anishqa") => {
-    const data = await fetchJson<RenewalsPanelData>(
-      `/api/renewals-panel?queendom=${queendom}`,
-    );
+  // One request for every queendom's RenewalsPanel — the route returns the
+  // full record so the count of queendoms never changes the request count.
+  const fetchRenewals = useCallback(async () => {
+    const data = await fetchJson<RenewalsPanelResponse>("/api/renewals-panel");
     if (data === null) return;
-    if (queendom === "ananyshree") setRenewalsAnanyshree(data);
-    else setRenewalsAnishqa(data);
+    setRenewals(queendomRecord((id) => data[id] ?? EMPTY_RENEWALS));
   }, []);
 
   const fetchAll = useCallback(
@@ -323,14 +304,13 @@ export function useDashboardData(): DashboardData {
         fetchRenewalsDue(),
         fetchJokers(),
         fetchOverdueTickets(),
-        fetchRenewals("ananyshree"),
-        fetchRenewals("anishqa"),
+        fetchRenewals(),
       ]),
     [fetchRoster, fetchTicketRows, fetchMembers, fetchRenewalsDue, fetchJokers, fetchOverdueTickets, fetchRenewals],
   );
 
   // ── Initial load ─────────────────────────────────────────────────────────────
-  // Flips isInitialLoading to false once all six fetches complete.
+  // Flips isInitialLoading to false once all fetches complete.
   // Each individual fetcher has its own try/catch so fetchAll() never rejects.
   // The 8-second safety timeout ensures the skeleton never gets permanently stuck
   // on slow or partially-failing networks.
@@ -355,8 +335,8 @@ export function useDashboardData(): DashboardData {
   }, [fetchAll]);
 
   // ── Supabase Realtime subscriptions ──────────────────────────────────────────
-  // Four channels via useRealtimeChannel (CHANNEL_ERROR/TIMED_OUT → refetch +
-  // 3s resubscribe; cleanup via removeChannel). Channel names are contractual.
+  // Channels via useRealtimeChannel (CHANNEL_ERROR/TIMED_OUT → refetch + 3s
+  // resubscribe; cleanup via removeChannel). Channel names are contractual.
   //
   // Channel map:
   //   dashboard-clients  → clients table  → refetch /api/clients + /api/clients/expiring
@@ -397,7 +377,7 @@ export function useDashboardData(): DashboardData {
     },
   );
 
-  // Jokers feed the JokerMetricsStrip only (the ticker now shows overdue
+  // Jokers feed the Spoiled tile only (the ticker now shows overdue
   // tickets, not joker suggestions). Any jokers row change refetches the
   // aggregated Joker stats from the API.
   useRealtimeChannel(
@@ -466,35 +446,14 @@ export function useDashboardData(): DashboardData {
   useRealtimeChannel(
     "dashboard-renewals",
     [
-      {
-        table: "renewals",
-        event: "INSERT",
-        handler: () => {
-          fetchRenewals("ananyshree");
-          fetchRenewals("anishqa");
-        },
-      },
-      {
-        table: "members",
-        event: "INSERT",
-        handler: () => {
-          fetchRenewals("ananyshree");
-          fetchRenewals("anishqa");
-        },
-      },
+      { table: "renewals", event: "INSERT", handler: () => { fetchRenewals(); } },
+      { table: "members",  event: "INSERT", handler: () => { fetchRenewals(); } },
     ],
-    () => {
-      fetchRenewals("ananyshree");
-      fetchRenewals("anishqa");
-    },
+    fetchRenewals,
   );
 
-  return {
-    ananyshreeStats,
-    anishqaStats,
-    overdueTickets,
-    renewalsAnanyshree,
-    renewalsAnishqa,
-    isInitialLoading,
-  };
+  return { queendoms, renewals, overdueTickets, isInitialLoading };
 }
+
+/** Convenience for consumers that want TV column order without importing the registry. */
+export const DASHBOARD_QUEENDOM_ORDER = QUEENDOM_IDS;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
-import { normalizeQueendom } from "@/lib/queendom";
+import { normalizeQueendom, queendomRecord } from "@/lib/queendom";
+import type { MemberApiResponse } from "@/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ClientRow {
@@ -13,11 +14,6 @@ interface QueenBucket {
   total: number;
   celebrityActive: number;
   toBeRevived: number;
-}
-
-interface AggregatedStats {
-  ananyshree: QueenBucket;
-  anishqa: QueenBucket;
 }
 
 /**
@@ -48,11 +44,12 @@ function isPaidMembership(type: string | null | undefined): boolean {
 // total: Active paid — membership is Premium, Genie, Monthly Trial, or Standard.
 // celebrityActive: Active Celebrity membership (unpaid / complimentary pill).
 // toBeRevived: latest_subscription_status = Expired (any membership tier).
-function aggregate(rows: ClientRow[]): AggregatedStats {
-  const result: AggregatedStats = {
-    ananyshree: { total: 0, celebrityActive: 0, toBeRevived: 0 },
-    anishqa: { total: 0, celebrityActive: 0, toBeRevived: 0 },
-  };
+function aggregate(rows: ClientRow[]): MemberApiResponse {
+  const result = queendomRecord<QueenBucket>(() => ({
+    total: 0,
+    celebrityActive: 0,
+    toBeRevived: 0,
+  }));
 
   for (const row of rows) {
     const queendom = normalizeQueendom(row.group);

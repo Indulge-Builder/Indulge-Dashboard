@@ -16,7 +16,7 @@
 import { withSettingsGuard, settingsJson } from "@/lib/settingsAuth";
 import { isMissingTableError } from "@/lib/apiGuard";
 import { getCurrentIstMonthUtcBounds } from "@/lib/istDate";
-import { normalizeQueendom } from "@/lib/queendom";
+import { isQueendomId, normalizeQueendom, QUEENDOM_IDS } from "@/lib/queendom";
 import type { AgentRecord, AgentRole } from "@/lib/agentRoster";
 import type { QueendomId } from "@/types";
 
@@ -44,8 +44,10 @@ function parseName(raw: unknown): string | null {
 }
 
 function parseQueendom(raw: unknown): QueendomId | null {
-  return raw === "ananyshree" || raw === "anishqa" ? raw : null;
+  return isQueendomId(raw) ? raw : null;
 }
+
+const QUEENDOM_ERROR = `Queendom must be one of ${QUEENDOM_IDS.join(", ")}.`;
 
 function parseRole(raw: unknown): AgentRole | null {
   return raw === "agent" || raw === "joker" ? raw : null;
@@ -55,7 +57,7 @@ function missingTableResponse() {
   return settingsJson(
     {
       error:
-        "The `agents` table does not exist yet. Apply supabase/migrations/20260811000000_agents_table_and_queendom_normalisation.sql in the Supabase SQL Editor.",
+        "The `agents` table does not exist yet. Apply supabase/migrations/20260811000000_agents_table_and_queendom_normalisation.sql (then 20260904000000_sanika_queendom.sql) in the Supabase SQL Editor.",
       code: "AGENTS_TABLE_MISSING",
     },
     503,
@@ -146,7 +148,7 @@ export const POST = withSettingsGuard(async (req, db) => {
   const role = body.role === undefined ? "agent" : parseRole(body.role);
 
   if (!name) return settingsJson({ error: "Name is required (max 80 characters)." }, 400);
-  if (!queendom) return settingsJson({ error: "Queendom must be ananyshree or anishqa." }, 400);
+  if (!queendom) return settingsJson({ error: QUEENDOM_ERROR }, 400);
   if (!role) return settingsJson({ error: "Role must be agent or joker." }, 400);
 
   // Append to the end of that queendom's list.
@@ -198,7 +200,7 @@ export const PATCH = withSettingsGuard(async (req, db) => {
   }
   if (body.queendom !== undefined) {
     const queendom = parseQueendom(body.queendom);
-    if (!queendom) return settingsJson({ error: "Queendom must be ananyshree or anishqa." }, 400);
+    if (!queendom) return settingsJson({ error: QUEENDOM_ERROR }, 400);
     patch.queendom = queendom;
   }
   if (body.role !== undefined) {

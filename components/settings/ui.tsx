@@ -12,11 +12,11 @@
 
 import type { ReactNode } from "react";
 import type { QueendomId } from "@/types";
-import { QUEENDOM_DISPLAY_NAME } from "@/lib/queendom";
+import { QUEENDOM_DISPLAY_NAME, QUEENDOM_IDS } from "@/lib/queendom";
 
 // ─── Buttons ──────────────────────────────────────────────────────────────────
 
-type ButtonVariant = "primary" | "ghost" | "danger";
+type ButtonVariant = "primary" | "ghost" | "danger" | "subtle";
 
 const BUTTON_STYLES: Record<ButtonVariant, string> = {
   primary:
@@ -25,6 +25,9 @@ const BUTTON_STYLES: Record<ButtonVariant, string> = {
     "border border-[var(--border-gold-mid)] text-champagne hover:border-[var(--border-gold-bright)] hover:bg-white/5",
   danger:
     "border border-red-500/40 text-red-300 hover:bg-red-500/10 hover:border-red-500/70",
+  /** Text-only row action — quiet until hovered, so a row of five doesn't shout. */
+  subtle:
+    "text-charcoal-200 hover:bg-white/[0.06] hover:text-champagne",
 };
 
 export function Button({
@@ -34,6 +37,7 @@ export function Button({
   variant = "primary",
   disabled,
   title,
+  size = "md",
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -41,19 +45,81 @@ export function Button({
   variant?: ButtonVariant;
   disabled?: boolean;
   title?: string;
+  size?: "md" | "sm";
 }) {
+  const pad = size === "sm" ? "px-2.5 py-1.5 text-[12px]" : "px-4 py-2 text-sm";
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`rounded-md px-4 py-2 font-montserrat text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${BUTTON_STYLES[variant]}`}
+      className={`rounded-md font-montserrat font-semibold transition-[background-color,border-color,color,transform] duration-150 ease-out active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${pad} ${BUTTON_STYLES[variant]}`}
     >
       {children}
     </button>
   );
 }
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
+/**
+ * Segmented control for switching queendoms / sections. Selection is a static
+ * class swap (no tweened colour); `accent` lets the queendom switcher carry
+ * each queendom's chip colour.
+ */
+export function SegmentedTabs<T extends string>({
+  value,
+  onChange,
+  options,
+  ariaLabel,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: readonly { value: T; label: string; hint?: string; accentClass?: string }[];
+  ariaLabel: string;
+}) {
+  return (
+    <div
+      role="tablist"
+      aria-label={ariaLabel}
+      className="inline-flex max-w-full flex-wrap gap-1 rounded-lg border border-[var(--border-gold-dim)] bg-black/30 p-1"
+    >
+      {options.map((o) => {
+        const active = o.value === value;
+        return (
+          <button
+            key={o.value}
+            role="tab"
+            type="button"
+            aria-selected={active}
+            onClick={() => onChange(o.value)}
+            className={`flex items-baseline gap-2 rounded-md px-3.5 py-2 font-montserrat text-sm font-semibold transition-[background-color,color] duration-150 ${
+              active
+                ? "bg-gold-400/15 text-champagne shadow-[inset_0_0_0_1px_rgba(212,175,55,0.35)]"
+                : "text-charcoal-200 hover:bg-white/[0.05] hover:text-champagne"
+            }`}
+          >
+            {o.accentClass ? (
+              <span className={`inline-block h-2 w-2 rounded-full ${o.accentClass}`} aria-hidden />
+            ) : null}
+            {o.label}
+            {o.hint ? (
+              <span className="font-normal text-[11px] text-charcoal-300">{o.hint}</span>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Solid dot colour per queendom (pairs with QUEENDOM_CHIP_CLASS). */
+export const QUEENDOM_DOT_CLASS: Record<QueendomId, string> = {
+  ananyshree: "bg-gold-400",
+  anishqa: "bg-sky-400",
+  sanika: "bg-emerald-400",
+};
 
 // ─── Form fields ──────────────────────────────────────────────────────────────
 
@@ -148,10 +214,15 @@ export function Select<T extends string>({
   );
 }
 
-export const QUEENDOM_OPTIONS: readonly { value: QueendomId; label: string }[] = [
-  { value: "ananyshree", label: QUEENDOM_DISPLAY_NAME.ananyshree },
-  { value: "anishqa", label: QUEENDOM_DISPLAY_NAME.anishqa },
-];
+export const QUEENDOM_OPTIONS: readonly { value: QueendomId; label: string }[] =
+  QUEENDOM_IDS.map((value) => ({ value, label: QUEENDOM_DISPLAY_NAME[value] }));
+
+/** Chip colour per queendom — one accent each so rows scan at a glance. */
+const QUEENDOM_CHIP_CLASS: Record<QueendomId, string> = {
+  ananyshree: "border-gold-400/40 text-gold-300",
+  anishqa: "border-sky-400/40 text-sky-300",
+  sanika: "border-emerald-400/40 text-emerald-300",
+};
 
 // ─── Layout / feedback ────────────────────────────────────────────────────────
 
@@ -216,14 +287,9 @@ export function QueendomChip({ queendom }: { queendom: QueendomId | null }) {
       </span>
     );
   }
-  const isAnanyshree = queendom === "ananyshree";
   return (
     <span
-      className={`rounded-full border px-2.5 py-0.5 font-montserrat text-[11px] ${
-        isAnanyshree
-          ? "border-gold-400/40 text-gold-300"
-          : "border-sky-400/40 text-sky-300"
-      }`}
+      className={`rounded-full border px-2.5 py-0.5 font-montserrat text-[11px] ${QUEENDOM_CHIP_CLASS[queendom]}`}
     >
       {QUEENDOM_DISPLAY_NAME[queendom]}
     </span>

@@ -21,7 +21,15 @@
 
 import { useScreenActive } from "@/hooks/useScreenActive";
 import { istToday } from "@/lib/istDate";
+import { fh, fw } from "@/lib/tvScale";
 import type { RenewalDueClient } from "@/types";
+
+// ─── Stage-pinned sizes (handoff 1c §B3) ──────────────────────────────────────
+const ROW_GAP = fh(26);
+const DAY_STYLE = { fontSize: fw(52) };
+const RULE_STYLE = { height: fh(44) };
+const NAME_STYLE = { fontSize: fw(46) };
+const TYPE_STYLE = { fontSize: fw(28), letterSpacing: "0.22em" };
 
 interface UpcomingRenewalsProps {
   /** Renewals due this month, ranked by endDate ascending (server-sorted). */
@@ -41,30 +49,33 @@ function RenewalRow({ item, todayIst }: { item: RenewalDueClient; todayIst: stri
   // Day-of-month anchor: the whole card is scoped to the current month.
   const dayNum = item.endDate.slice(8, 10);
   return (
-    <li className="flex w-full min-w-0 items-center gap-[clamp(0.7rem,1cqw,1.6rem)]">
-      {/* Sizes pair with AgentRow: name matches the agent-name spec exactly;
-          the day numeral matches the score-numeral scale (leaderboard rhythm). */}
+    <li className="flex w-full min-w-0 items-center" style={{ gap: fw(18) }}>
       <span
-        className={`w-[2ch] flex-shrink-0 text-right font-montserrat font-bold tabular-nums leading-none text-[clamp(2.1rem,3.4cqw,4.3rem)] ${
+        className={`w-[2ch] flex-shrink-0 text-right font-montserrat font-bold tabular-nums leading-none ${
           isDueToday
             ? "text-foil-gold gold-glow"
             : isPast
               ? "text-red-400/85"
               : "text-champagne/95"
         }`}
+        style={DAY_STYLE}
       >
         {dayNum}
       </span>
-      <span className="h-[clamp(2rem,3.4cqh,3.6rem)] w-px flex-shrink-0 bg-gold-500/25" aria-hidden />
+      <span className="w-px flex-shrink-0 bg-gold-500/25" style={RULE_STYLE} aria-hidden />
       <span
-        className={`min-w-0 flex-1 truncate font-cinzel font-semibold tracking-wide leading-tight text-[clamp(1.9rem,3.1cqw,3.9rem)] ${
+        className={`min-w-0 flex-1 truncate font-cinzel font-semibold tracking-[0.025em] leading-[1.25] ${
           isPast ? "text-champagne/55" : "text-champagne"
         }`}
+        style={NAME_STYLE}
       >
         {item.name}
       </span>
       {item.membershipType && (
-        <span className="hidden min-[900px]:inline flex-shrink-0 font-cinzel font-semibold uppercase tracking-[0.22em] text-[clamp(1.35rem,1.9cqw,2.5rem)] text-gold-400/75">
+        <span
+          className="hidden min-[900px]:inline flex-shrink-0 font-cinzel font-semibold uppercase text-gold-400/75"
+          style={TYPE_STYLE}
+        >
           {item.membershipType}
         </span>
       )}
@@ -79,14 +90,20 @@ export default function UpcomingRenewals({ clients }: UpcomingRenewalsProps) {
   if (clients.length === 0) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <span className="label-field text-champagne/40">No renewals due this month</span>
+        <span
+          className="font-cinzel font-semibold uppercase tracking-[0.22em] text-champagne/40"
+          style={{ fontSize: fw(34) }}
+        >
+          No renewals due this month
+        </span>
       </div>
     );
   }
 
   const rows = (keyPrefix: string) => (
     <ul
-      className="flex w-full flex-col gap-[1.1cqh] pb-[1.1cqh]"
+      className="flex w-full flex-col"
+      style={{ gap: ROW_GAP, paddingBottom: ROW_GAP }}
       aria-hidden={keyPrefix === "b" || undefined}
     >
       {clients.map((item, i) => (
@@ -113,9 +130,9 @@ export default function UpcomingRenewals({ clients }: UpcomingRenewalsProps) {
       aria-label="Renewals due this month"
       style={{
         maskImage:
-          "linear-gradient(to bottom, transparent 0%, black 16%, black 84%, transparent 100%)",
+          "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
         WebkitMaskImage:
-          "linear-gradient(to bottom, transparent 0%, black 16%, black 84%, transparent 100%)",
+          "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
       }}
     >
       {/* Doubled track: two identical halves so translateY(-50%) loops seamlessly. */}

@@ -25,7 +25,7 @@ import MobileConcierge from "./MobileConcierge";
 import MobileRevenue from "./MobileRevenue";
 import { PulseSheet, OverdueSheet, useInsights } from "./MobileInsights";
 
-type MobileTab = "concierge" | "revenue";
+export type MobileTab = "concierge" | "revenue";
 
 const IST_CLOCK = new Intl.DateTimeFormat("en-IN", {
   timeZone: "Asia/Kolkata",
@@ -44,22 +44,16 @@ function useIstClock(): string {
   return now;
 }
 
-export default function MobileDashboard() {
-  const [tab, setTab] = useState<MobileTab>("concierge");
+export default function MobileDashboard({ initialTab = "concierge" }: { initialTab?: MobileTab }) {
+  const [tab, setTab] = useState<MobileTab>(initialTab);
   const [pulseOpen, setPulseOpen] = useState(false);
   const [overdueOpen, setOverdueOpen] = useState(false);
   const istNow = useIstClock();
   const { insights, insightsLoading, days, setDays } = useInsights();
 
-  const {
-    ananyshreeStats,
-    anishqaStats,
-    overdueTickets,
-    isInitialLoading,
-  } = useDashboardData();
+  const { queendoms, overdueTickets, isInitialLoading } = useDashboardData();
 
-  const { conciergeAgents, shopAgents, ledger, leadMonthStats } =
-    useOnboardingPanelData();
+  const { agents, ledger, leadMonthStats } = useOnboardingPanelData();
 
   return (
     <div className="mroot">
@@ -108,8 +102,7 @@ export default function MobileDashboard() {
         {tab === "concierge" ? (
           <ErrorBoundary label="Concierge (mobile)">
             <MobileConcierge
-              ananyshreeStats={ananyshreeStats}
-              anishqaStats={anishqaStats}
+              queendoms={queendoms}
               overdueTickets={overdueTickets}
               isLoading={isInitialLoading}
               insights={insights}
@@ -120,8 +113,7 @@ export default function MobileDashboard() {
         ) : (
           <ErrorBoundary label="Revenue (mobile)">
             <MobileRevenue
-              conciergeAgents={conciergeAgents}
-              shopAgents={shopAgents}
+              agents={agents}
               ledger={ledger}
               leadMonthStats={leadMonthStats}
               insights={insights}

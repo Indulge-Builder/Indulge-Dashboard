@@ -1,5 +1,6 @@
 import type { AgentStats } from "./types";
 import type { QueendomId } from "@/types";
+import { QUEENDOM_IDS, queendomRecord } from "./queendom";
 
 // ─── Canonical rosters ───────────────────────────────────────────────────────
 // Names must match exactly what is stored in the `agent_name` column in Supabase.
@@ -34,15 +35,22 @@ export const ROSTER_ANANYSHREE: string[] = [
   "Aditya Sonde",
 ];
 
+// Sanika's Queendom (added 2026-09-04) — the names filing under
+// "Sanika's Queendom" in Freshdesk during its first month. Seeded into
+// `agents` by migration 20260904000000; edit the roster from /settings.
+export const ROSTER_SANIKA: string[] = [
+  "Kshathriya C C A",
+  "Shanaya Javeri",
+  "Depender Kaur",
+];
+
 /** Joker names mapped to their Queendom. Used for specialized Joker metrics. */
-export const JOKER_ROSTER: Record<string, "ananyshree" | "anishqa"> = {
+export const JOKER_ROSTER: Record<string, QueendomId> = {
   "Lilian Albrecht": "ananyshree",
   "Shruti Sharma": "anishqa",
 };
 
-export function getJokerNameForQueendom(
-  queendom: "ananyshree" | "anishqa",
-): string | null {
+export function getJokerNameForQueendom(queendom: QueendomId): string | null {
   return (
     Object.entries(JOKER_ROSTER).find(([, q]) => q === queendom)?.[0] ?? null
   );
@@ -68,15 +76,20 @@ export type AgentRole = "agent" | "joker";
  * every consumer can treat "live" and "fallback" interchangeably.
  */
 export interface RosterSnapshot {
-  ananyshree: string[];
-  anishqa: string[];
+  /** Leaderboard seats per queendom, in display order. */
+  agents: Record<QueendomId, string[]>;
   jokers: { name: string; queendom: QueendomId }[];
 }
 
-/** The hardcoded roster expressed as a snapshot — used when the table is unusable. */
-export const FALLBACK_ROSTER: RosterSnapshot = {
+const FALLBACK_AGENTS: Record<QueendomId, string[]> = {
   ananyshree: ROSTER_ANANYSHREE,
   anishqa: ROSTER_ANISHQA,
+  sanika: ROSTER_SANIKA,
+};
+
+/** The hardcoded roster expressed as a snapshot — used when the table is unusable. */
+export const FALLBACK_ROSTER: RosterSnapshot = {
+  agents: FALLBACK_AGENTS,
   jokers: Object.entries(JOKER_ROSTER).map(([name, queendom]) => ({
     name,
     queendom,
@@ -88,8 +101,14 @@ export const FALLBACK_ROSTER: RosterSnapshot = {
  * sort_order then name so the leaderboard's pre-stats ordering is stable.
  *
  * Returns null when there is nothing usable (no rows, or no agent-role rows for
- * either queendom) so callers can fall back rather than blank the TV — an
+ * any queendom) so callers can fall back rather than blank the TV — an
  * accidental "delete all" in Settings must not empty the leaderboard.
+ *
+ * Per-queendom safety (2026-09-04): a queendom the table has NEVER heard of
+ * (zero rows of any role/state — e.g. Sanika before migration
+ * 20260904000000 is applied) gets its hardcoded `ROSTER_*` fallback, so a
+ * new column is never blank on the TV. A queendom whose rows all sit
+ * `is_active = false` is a deliberate Settings choice and stays empty.
  */
 export function rosterFromAgentRows(
   rows: AgentRecord[] | null | undefined,
@@ -97,29 +116,28 @@ export function rosterFromAgentRows(
   if (!rows?.length) return null;
 
   const active = rows.filter((r) => r.is_active && r.name?.trim());
-  const byQueendom = (queendom: QueendomId, role: AgentRole) =>
-    active
-      .filter((r) => r.queendom === queendom && r.role === role)
-      .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
+  const ordered = (list: AgentRecord[]) =>
+    [...list].sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
 
-  const ananyshree = byQueendom("ananyshree", "agent").map((r) => r.name.trim());
-  const anishqa = byQueendom("anishqa", "agent").map((r) => r.name.trim());
-  if (!ananyshree.length && !anishqa.length) return null;
+  const agents = queendomRecord((id) => {
+    if (!rows.some((r) => r.queendom === id)) return FALLBACK_AGENTS[id];
+    return ordered(active.filter((r) => r.queendom === id && r.role === "agent")).map((r) =>
+      r.name.trim(),
+    );
+  });
+  if (QUEENDOM_IDS.every((id) => agents[id].length === 0)) return null;
 
-  const jokers = active
-    .filter((r) => r.role === "joker")
-    .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
-    .map((r) => ({ name: r.name.trim(), queendom: r.queendom }));
+  const jokers = ordered(active.filter((r) => r.role === "joker")).map((r) => ({
+    name: r.name.trim(),
+    queendom: r.queendom,
+  }));
 
-  return { ananyshree, anishqa, jokers };
+  return { agents, jokers };
 }
 
 // ─── Builder ─────────────────────────────────────────────────────────────────
 // Creates an AgentStats array with all stats at 0 — the live fetch fills them in.
-export function buildRoster(
-  names: string[],
-  queendom: "ananyshree" | "anishqa",
-): AgentStats[] {
+export function buildRoster(names: string[], queendom: QueendomId): AgentStats[] {
   return names.map((name, i) => ({
     id: `${queendom[0]}${i + 1}`,
     name,

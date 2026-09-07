@@ -1,80 +1,43 @@
 /**
  * lib/onboardingTypes.ts
  *
- * Shared TypeScript shapes for the Revenue Dashboard TV screen and
+ * Shared TypeScript shapes for the Onboarding (Revenue) TV screen and
  * GET /api/onboarding.
  *
- * Versioning note
- * ───────────────
- * Fields marked "Legacy" pre-date the dual-department overhaul and are kept
- * so the existing /api/onboarding route compiles unmodified until Step 3
- * updates it. Once the route is updated, all optional (*?) new fields become
- * de-facto required at runtime.
+ * 2026-09-07 — the two-department model (Concierge vs Shop) was retired: the
+ * Shop team left Zoho in June 2026 and the screen is now Onboarding-only (one
+ * roster, rendered across the same two columns — see lib/onboardingAgents.ts).
+ * Lead statuses follow the current Zoho picklist (lib/leadStatus.ts).
  *
  * Fields marked "This Month Cohort Math" use strict IST-calendar-month bounds
  * (getCurrentIstMonthUtcBounds) — NOT rolling 30-day windows.
  */
 
-// ── Department ────────────────────────────────────────────────────────────────
+import { ZOHO_LEAD_STATUSES, type ZohoLeadStatus } from "./leadStatus";
 
-/**
- * Two revenue departments shown on the TV screen.
- *   concierge — Samson, Amit, Meghana (Concierge Onboarding)
- *   shop      — Vikram, Katya, Harsh  (Shop Sales)
- */
-export type Department = "concierge" | "shop";
-
-// ── Per-department rollup ─────────────────────────────────────────────────────
-// (The old PipelineStatus/PipelineStatusCounts funnel system was collapsed in
-// dry-audit D6 — the UI renders ZohoLeadStatus breakdowns below; the only
-// funnel consumer is the parked _unmounted/AgentVerticalBarChart, which now
-// carries its own local copy.)
-
-/**
- * Aggregated scorecard for one department.
- * All date-bound metrics use This Month Cohort Math.
- */
-export interface DepartmentStats {
-  department: Department;
-  /** Ordered agent cards belonging to this department. */
-  agents: OnboardingAgentRow[];
-}
+export { ZOHO_LEAD_STATUSES };
+export type { ZohoLeadStatus };
 
 // ── Agent row ─────────────────────────────────────────────────────────────────
 
 export interface OnboardingAgentRow {
+  /** Roster id (lib/onboardingAgents.ts) — also the portrait key. */
   id: string;
+  /** Card label (first name). */
   name: string;
-  /** Optional portrait override from onboarding_sales_agents.photo_url */
+  /** Optional portrait override (unused today — reserved for a DB roster). */
   photoUrl?: string | null;
-
-  /**
-   * Which revenue team this agent belongs to.
-   * Optional during migration — populated by updated /api/onboarding (Step 3).
-   * Default assumed: "concierge" for backward compat.
-   */
-  department?: Department;
-
-  // ── Scorecard fields ──────────────────────────────────────────────────────
 
   /** New leads created within the current IST calendar month (all statuses). */
   leadsCreatedThisMonth: number;
   /**
-   * Closure count — won deals this IST month from ledger / Zoho.
+   * Closure count — deals created this IST month owned by this agent.
    * Not a currency field — agent cards show this number only.
-   * Used for win-shimmer detection.
    */
   totalConverted: number;
   /** New leads created today in IST (by created_at, not by activity timestamp). */
   leadsCreatedTodayIst: number;
-
-  // ── This Month Cohort Math fields (populated by updated API route) ────────
-
-  /**
-   * Leads created within the current IST calendar month (Zoho → webhook).
-   * Source: leads.created_at within getCurrentIstMonthUtcBounds().
-   * Alias of leadsCreatedThisMonth — kept for any components that reference it.
-   */
+  /** Alias of leadsCreatedThisMonth — kept for components that reference it. */
   leadsThisMonth?: number;
 }
 
@@ -83,22 +46,19 @@ export interface OnboardingAgentRow {
 export interface OnboardingLedgerRow {
   id: string;
   clientName: string;
-  /** ISO 8601 UTC string from created_at/recorded_at column. */
+  /** ISO 8601 UTC string from `deals.created_at`. */
   recordedAt: string;
+  /** Compact display name (getDisplayAgentName). */
   agentName: string;
-  /**
-   * Revenue department this deal belongs to.
-   * Derived at query time by getAgentDepartment(agentName) — no DB column needed.
-   * Optional during migration; populated by updated /api/onboarding (Step 3).
-   */
-  department?: Department;
 }
 
 // ── Business Vertical ─────────────────────────────────────────────────────────
 
 /**
- * The four Indulge revenue verticals. Visual hierarchy (highest → lowest lead
- * volume): Global > Shop > House > Legacy.
+ * The four Indulge revenue verticals — identical to the Zoho `Business_Vertical`
+ * picklist on Leads and to the CHECK constraint on `leads.business_vertical`.
+ * (The Deals module spells the third one "Indulge Home"; deals carry no
+ * vertical in this app.)
  */
 export type BusinessVertical =
   | "Indulge Global"
@@ -113,10 +73,18 @@ export const BUSINESS_VERTICALS: readonly BusinessVertical[] = [
   "Indulge Legacy",
 ] as const;
 
+/**
+ * The vertical the Onboarding screen's metrics are scoped to (user decision
+ * 2026-09-07): agent cards, pipeline bars and the month tiles count ONLY
+ * leads with this `business_vertical`. The trendline is the one deliberate
+ * exception — it is a by-vertical breakdown, so it still draws all four.
+ */
+export const METRIC_BUSINESS_VERTICAL: BusinessVertical = "Indulge Global";
+
 // ── Lead Trendline ────────────────────────────────────────────────────────────
 
 /**
- * One data point in the 7-day vertical trendline chart.
+ * One data point in the month trendline chart.
  * Each field is the count of new leads for that vertical on this IST day.
  * Ordered oldest → newest so the SVG path draws left-to-right.
  */
@@ -131,92 +99,60 @@ export interface VerticalTrendPoint {
 
 // ── Zoho lead status health ───────────────────────────────────────────────────
 
-/** The 6 Zoho lead statuses relevant to the onboarding pipeline */
-export type ZohoLeadStatus =
-  | "New"
-  | "Touched"
-  | "In Discussion"
-  | "Nurturing"
-  | "Junk"
-  | "Qualified";
-
-/** Per-status count for one agent */
-export interface AgentLeadStatusBreakdown {
-  New: number;
-  Touched: number;
-  "In Discussion": number;
-  Nurturing: number;
-  Junk: number;
-  Qualified: number;
+/** Per-status count for one agent (current IST month cohort). */
+export type AgentLeadStatusBreakdown = Record<ZohoLeadStatus, number> & {
   total: number;
-}
-
-export const EMPTY_BREAKDOWN: AgentLeadStatusBreakdown = {
-  New: 0,
-  Touched: 0,
-  "In Discussion": 0,
-  Nurturing: 0,
-  Junk: 0,
-  Qualified: 0,
-  total: 0,
 };
 
-/** Map from canonical agent name → their status breakdown */
+export function emptyBreakdown(): AgentLeadStatusBreakdown {
+  const bd = { total: 0 } as AgentLeadStatusBreakdown;
+  for (const s of ZOHO_LEAD_STATUSES) bd[s] = 0;
+  return bd;
+}
+
+/** Frozen zero breakdown for default props / fallbacks. */
+export const EMPTY_BREAKDOWN: AgentLeadStatusBreakdown = Object.freeze(
+  emptyBreakdown(),
+) as AgentLeadStatusBreakdown;
+
+/** Map from card display name → that agent's status breakdown */
 export type LeadStatusByAgent = Record<string, AgentLeadStatusBreakdown>;
 
 // ── Monthly lead stats (metric tiles) ────────────────────────────────────────
 
 /**
  * Aggregate lead counts for the current IST calendar month, sourced directly
- * from the leads table (all rows, not filtered by agent name).
+ * from the leads table — every METRIC_BUSINESS_VERTICAL row in the window,
+ * automation owners included.
  *
- *   leads               — total rows where created_at falls in this IST month
- *                         (system agents excluded)
- *   attended            — rows where latest_status IN (New | Touched | In Discussion)
+ *   leads                — total rows where created_at falls in this IST month
+ *   attended             — rows whose status shows the agent actioned the lead
+ *                          (everything except New and Junk — isAttendedStatus)
  *   dealsClosedThisMonth — count of rows in the deals table this IST month
- *   junk                — all remaining rows (Nurturing, Junk, Lost, Trash, unknown…)
+ *   junk                 — rows normalised to Junk (Junk, Not Qualified, legacy Trash)
  */
 export interface LeadMonthStats {
-  leads:                number;
-  attended:             number;
+  leads: number;
+  attended: number;
   dealsClosedThisMonth: number;
-  junk:                 number;
+  junk: number;
 }
 
 // ── API payload ───────────────────────────────────────────────────────────────
 
-/**
- * Shape returned by GET /api/onboarding.
- *
- * `agents` and `ledger` are the legacy flat arrays (backward compat).
- * `departments` is the new dual-department rollup — absent from the current
- * route, populated after Step 3.
- */
+/** Shape returned by GET /api/onboarding. */
 export interface OnboardingApiPayload {
+  /** One row per roster seat, in roster order (lib/onboardingAgents.ts). */
   agents: OnboardingAgentRow[];
+  /** Newest-first closure feed from `deals`. */
   ledger: OnboardingLedgerRow[];
-  /**
-   * Per-department aggregated stats + agent cards.
-   * Strict shape: once present, all inner fields are required and non-null.
-   */
-  departments?: {
-    concierge: DepartmentStats;
-    shop: DepartmentStats;
-  };
-  /** Per-agent Zoho lead status breakdown for current IST month. */
+  /** Per-agent Zoho lead status breakdown for the current IST month. */
   leadStatusByAgent?: LeadStatusByAgent;
-
   /**
-   * Daily new-lead counts split by business_vertical for the current IST calendar
-   * month (day 1 → last day, with future days zero-filled). Powers the 4-line
-   * PerformanceLineGraph. Ordered oldest → newest.
+   * Daily new-lead counts split by business_vertical for the current IST
+   * calendar month (day 1 → last day, future days zero-filled). Oldest → newest.
    */
   verticalTrendline?: VerticalTrendPoint[];
-
-  /**
-   * Direct aggregate from the leads table for the current IST calendar month.
-   * Powers the 4 metric tiles above the PerformanceLineGraph.
-   * Not filtered by known agent names — includes every row in the table.
-   */
+  /** Direct aggregate from the leads table for the current IST calendar month. */
   leadMonthStats?: LeadMonthStats;
 }

@@ -9,12 +9,13 @@
  * Supports:
  *   P / Space / Enter / NumpadEnter / MediaPlayPause → toggle freeze
  *   ArrowLeft / ArrowRight → manual screen switch
+ *   Escape / Backspace / BrowserBack → `onHome` (back to the landing page)
  *
  * Uses capture-phase listener so events arrive before fullscreen UI or other
  * handlers intercept them — important for TV remote / embedded browser engines.
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { stepActiveScreen } from "@/lib/dashboardScreens";
 import type { ActiveScreen } from "@/types";
 
@@ -30,12 +31,26 @@ function isFreezeToggleKey(e: KeyboardEvent): boolean {
   return false;
 }
 
+function isHomeKey(e: KeyboardEvent): boolean {
+  return e.key === "Escape" || e.key === "Backspace" || e.key === "BrowserBack";
+}
+
 export function useKeyboardControls(
   setActiveScreen: ScreenDispatch,
   setIsFrozen: FreezeDispatch,
+  onHome?: () => void,
 ): void {
+  // Latest-ref so a new arrow function per render never re-binds the listener.
+  const onHomeRef = useRef(onHome);
+  onHomeRef.current = onHome;
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (isHomeKey(e) && onHomeRef.current) {
+        e.preventDefault();
+        onHomeRef.current();
+        return;
+      }
       if (isFreezeToggleKey(e)) {
         e.preventDefault();
         e.stopPropagation();

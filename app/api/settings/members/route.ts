@@ -1,5 +1,5 @@
 /**
- * /api/settings/members — add / list / remove rows in the `members` table.
+ * /api/settings/members — add / list / edit / remove rows in the `members` table.
  *
  * This is the "new client" path: a row here is what the Queendom panel's
  * "Latest Assignments" list reads via /api/renewals-panel. It deliberately does
@@ -10,4 +10,4 @@
 
 import { createClientRowRoutes } from "@/lib/settingsClientRows";
 
-export const { GET, POST, DELETE } = createClientRowRoutes("members");
+export const { GET, POST, PATCH, DELETE } = createClientRowRoutes("members");

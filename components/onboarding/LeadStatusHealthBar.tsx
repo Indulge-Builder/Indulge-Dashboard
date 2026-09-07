@@ -1,12 +1,17 @@
 "use client";
 
-import React, { memo, useEffect, useMemo, useState } from "react";
+import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import type {
-  AgentLeadStatusBreakdown,
-  ZohoLeadStatus,
+import {
+  ZOHO_LEAD_STATUSES,
+  type AgentLeadStatusBreakdown,
+  type ZohoLeadStatus,
 } from "@/lib/onboardingTypes";
 
+/**
+ * One swatch per canonical Zoho lead status (lib/leadStatus.ts). Segment and
+ * legend order follow ZOHO_LEAD_STATUSES (pipeline best → worst).
+ */
 export const STATUS_COLORS: Record<
   ZohoLeadStatus,
   {
@@ -15,62 +20,79 @@ export const STATUS_COLORS: Record<
     glow: string;
     label: string;
     short: string;
-    order: number;
   }
 > = {
-  /* Qualified — teal/cyan, distinct from In Discussion green */
-  Qualified: {
-    gradient: "linear-gradient(160deg, #67e8f9 0%, #06b6d4 55%, #0e7490 100%)",
-    flat:     "#06b6d4",
-    glow:     "rgba(6,182,212,0.75)",
-    label:    "Qualified",
-    short:    "Qualified",
-    order:    0,
+  /* Win — gold: the lead is won (the same gold as the Converted tile) */
+  Win: {
+    gradient: "linear-gradient(160deg, #fde68a 0%, #f59e0b 55%, #b45309 100%)",
+    flat:     "#f59e0b",
+    glow:     "rgba(245,158,11,0.75)",
+    label:    "Win",
+    short:    "Win",
   },
-  /* In Discussion — green */
-  "In Discussion": {
+  /* Payment Link — rose: payment link sent, closing */
+  "Payment Link": {
+    gradient: "linear-gradient(160deg, #f9a8d4 0%, #ec4899 55%, #9d174d 100%)",
+    flat:     "#ec4899",
+    glow:     "rgba(236,72,153,0.75)",
+    label:    "Payment Link",
+    short:    "Pay Link",
+  },
+  /* Conversing — green: live conversation */
+  Conversing: {
     gradient: "linear-gradient(160deg, #4ade80 0%, #22c55e 55%, #15803d 100%)",
     flat:     "#22c55e",
     glow:     "rgba(34,197,94,0.75)",
-    label:    "In Discussion",
-    short:    "In Discussion",
-    order:    1,
+    label:    "Conversing",
+    short:    "Conversing",
   },
-  /* Nurturing — purple (unchanged) */
+  /* Nurturing — purple */
   Nurturing: {
     gradient: "linear-gradient(160deg, #c084fc 0%, #a855f7 55%, #7e22ce 100%)",
     flat:     "#a855f7",
     glow:     "rgba(168,85,247,0.75)",
     label:    "Nurturing",
     short:    "Nurturing",
-    order:    2,
   },
-  /* Touched — yellow (Zoho stage; legacy "Attempted" maps here in API) */
-  Touched: {
+  /* RNR — yellow: rang, no response (legacy "Touched" / "Attempted" map here) */
+  RNR: {
     gradient: "linear-gradient(160deg, #fef08a 0%, #eab308 55%, #a16207 100%)",
     flat:     "#eab308",
     glow:     "rgba(234,179,8,0.75)",
-    label:    "Touched",
-    short:    "Touched",
-    order:    3,
+    label:    "RNR",
+    short:    "RNR",
   },
-  /* New — slate */
+  /* New — slate: untouched */
   New: {
     gradient: "linear-gradient(160deg, #cbd5e1 0%, #94a3b8 55%, #475569 100%)",
     flat:     "#94a3b8",
     glow:     "rgba(148,163,184,0.55)",
     label:    "New",
     short:    "New",
-    order:    4,
   },
-  /* Junk — red */
+  /* Cold — ice blue: went cold */
+  Cold: {
+    gradient: "linear-gradient(160deg, #bfdbfe 0%, #60a5fa 55%, #1d4ed8 100%)",
+    flat:     "#60a5fa",
+    glow:     "rgba(96,165,250,0.70)",
+    label:    "Cold",
+    short:    "Cold",
+  },
+  /* Lost — orange: engaged, then lost (distinct from Junk) */
+  Lost: {
+    gradient: "linear-gradient(160deg, #fdba74 0%, #f97316 55%, #c2410c 100%)",
+    flat:     "#f97316",
+    glow:     "rgba(249,115,22,0.75)",
+    label:    "Lost",
+    short:    "Lost",
+  },
+  /* Junk — red (Junk, Not Qualified, legacy Trash) */
   Junk: {
     gradient: "linear-gradient(160deg, #fca5a5 0%, #ef4444 55%, #991b1b 100%)",
     flat:     "#ef4444",
     glow:     "rgba(239,68,68,0.75)",
     label:    "Junk",
     short:    "Junk",
-    order:    5,
   },
 };
 
@@ -86,12 +108,94 @@ function cn(...parts: Array<string | undefined | null | false>) {
   return parts.filter(Boolean).join(" ");
 }
 
-const ORDERED_STATUSES: ZohoLeadStatus[] = (
-  Object.keys(STATUS_COLORS) as ZohoLeadStatus[]
-).sort((a, b) => STATUS_COLORS[a].order - STATUS_COLORS[b].order);
+const ORDERED_STATUSES: readonly ZohoLeadStatus[] = ZOHO_LEAD_STATUSES;
 
 const BAR_H   = "clamp(44px, 5.2cqh, 78px)";
 const RADIUS  = "clamp(7px, 0.85cqh, 13px)";
+const LEGEND_GAP = "clamp(6px, 0.65cqmin, 10px)";
+
+/**
+ * Balanced legend rows. Chips are first laid out at their natural width (so
+ * "Conversing" is never truncated); this hook measures them, finds the fewest
+ * rows they fit in, then splits the chips EVENLY across those rows (pipeline
+ * order kept) and returns one flex-basis per chip — natural width plus an
+ * equal share of the row's leftover — so every row is filled edge to edge and
+ * no lone chip is stretched across a whole row. Re-runs on resize and
+ * whenever the set of statuses changes. Returns null while measuring.
+ */
+function useBalancedChipRows(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  count: number,
+  key: string,
+): string[] | null {
+  const [widths, setWidths] = useState<string[] | null>(null);
+
+  useLayoutEffect(() => {
+    setWidths(null); // back to natural widths so the next measurement is true
+    const el = containerRef.current;
+    if (!el || count === 0) return;
+
+    const measure = () => {
+      const chips = Array.from(el.children) as HTMLElement[];
+      if (chips.length !== count) return;
+      const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+      const W = el.clientWidth;
+      if (W <= 0) return;
+      const natural = chips.map((c) => c.scrollWidth);
+
+      // Greedy pack → minimal row count with natural widths.
+      const greedy: number[][] = [];
+      let row: number[] = [];
+      let used = 0;
+      natural.forEach((w, i) => {
+        const need = (row.length ? gap : 0) + w;
+        if (row.length && used + need > W) {
+          greedy.push(row);
+          row = [];
+          used = 0;
+        }
+        row.push(i);
+        used += (row.length > 1 ? gap : 0) + w;
+      });
+      if (row.length) greedy.push(row);
+
+      // Even split into the same number of rows, if every row still fits.
+      const r = greedy.length;
+      const k = Math.ceil(count / r);
+      const even: number[][] = [];
+      for (let i = 0; i < count; i += k) even.push(natural.map((_, j) => j).slice(i, i + k));
+      const fits = even.every(
+        (ids) => ids.reduce((sum, i) => sum + natural[i], 0) + gap * (ids.length - 1) <= W,
+      );
+      const rows = fits ? even : greedy;
+
+      // Each chip keeps its natural width; only the row's leftover is shared
+      // equally — an equal split would squeeze "Conversing" under "RNR".
+      const out = new Array<string>(count);
+      for (const ids of rows) {
+        const m = ids.length;
+        const used = ids.reduce((sum, i) => sum + natural[i], 0) + gap * (m - 1);
+        const extra = Math.max(0, W - used) / m;
+        for (const i of ids) out[i] = `${Math.floor(natural[i] + extra)}px`;
+      }
+      setWidths(out);
+    };
+
+    // Measure after the natural-width paint, then keep it fresh on resize.
+    const raf = requestAnimationFrame(measure);
+    const ro = new ResizeObserver(() => {
+      setWidths(null);
+      requestAnimationFrame(measure);
+    });
+    ro.observe(el);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [containerRef, count, key]);
+
+  return widths;
+}
 
 
 function LeadStatusHealthBar_({
@@ -110,6 +214,8 @@ function LeadStatusHealthBar_({
     () => ORDERED_STATUSES.filter((s) => (breakdown?.[s] ?? 0) > 0),
     [breakdown],
   );
+  const legendRef = useRef<HTMLDivElement | null>(null);
+  const chipWidths = useBalancedChipRows(legendRef, orderedNonZero.length, orderedNonZero.join("|"));
 
   /* ── Empty state ─────────────────────────────────────────────────────────── */
   if (!breakdown || breakdown.total === 0) {
@@ -260,24 +366,31 @@ function LeadStatusHealthBar_({
           />
         </div>
 
-      {/* Legend — single-line tinted chips: dot · label ·· count */}
+      {/* Legend — tinted chips: dot · label ·· count.
+          Labels are never truncated: chips start at their natural width, the
+          row WRAPS, and useBalancedChipRows then hands every chip a basis so
+          the rows come out even (3+3, 3+2 …) and each fills its row. */}
       <div
-        className="flex flex-row items-stretch"
+        ref={legendRef}
+        className="flex flex-row flex-wrap items-stretch"
         style={{
           marginTop: "clamp(10px, 1.5cqh, 20px)",
-          gap:       "clamp(6px, 0.65cqmin, 10px)",
+          gap:       LEGEND_GAP,
         }}
       >
         {orderedNonZero.map((status, idx) => {
           const count = breakdown[status] ?? 0;
           const cfg   = STATUS_COLORS[status];
+          const basis = chipWidths?.[idx];
           return (
             <div
               key={status}
-              className="flex min-w-0 flex-1 items-center justify-between"
+              className="flex items-center justify-between"
               style={{
+                flex:      basis ? `0 0 ${basis}` : "0 0 auto",
+                minWidth:  basis ? 0 : "max-content",
                 minHeight:
-                  "clamp(56px, 8.5cqh, 112px)",
+                  "clamp(48px, 7cqh, 104px)",
                 padding:
                   "clamp(10px, 1.4cqh, 18px) clamp(10px, 1.1cqmin, 18px)",
                 borderRadius: "clamp(6px, 0.75cqmin, 11px)",
@@ -309,7 +422,7 @@ function LeadStatusHealthBar_({
                   }}
                 />
                 <span
-                  className="truncate font-montserrat"
+                  className="whitespace-nowrap font-montserrat"
                   style={{
                     fontSize:
                       "clamp(19px, min(2.7cqmin, 2.9cqw), 38px)",

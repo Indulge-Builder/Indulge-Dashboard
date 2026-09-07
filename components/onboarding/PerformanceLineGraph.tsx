@@ -60,8 +60,7 @@ const DUST: [number, number][] = [
 // ── Pulse event type ──────────────────────────────────────────────────────────
 
 export interface PulseEvent {
-  id:   string;
-  team: "onboarding" | "shop";
+  id: string;
 }
 
 // ── Geometry helpers ──────────────────────────────────────────────────────────
@@ -211,8 +210,8 @@ export function PerformanceLineGraph({ data, pulseEvents = [], todayDate }: Perf
 
   // ── Event burst renderer ───────────────────────────────────────────────────
   const Burst = (event: PulseEvent) => {
-    // Map pulse team → vertical key (onboarding = Global, shop = Shop for burst targeting)
-    const vertKey: VerticalKey = event.team === "onboarding" ? "Indulge Global" : "Indulge Shop";
+    // Bursts ride the Indulge Global line — the Onboarding team's vertical.
+    const vertKey: VerticalKey = "Indulge Global";
     const vGeo  = geo.verticals[vertKey];
     const color = VERTICAL_COLORS[vertKey].line;
     if (!vGeo?.term || !vGeo.d) return null;

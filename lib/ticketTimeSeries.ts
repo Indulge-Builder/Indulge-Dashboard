@@ -24,10 +24,12 @@ import {
   utcMillisFromDbTimestamp,
 } from "./istDate";
 import { isVoid, isTerminal } from "./ticketStatus";
-import { normalizeQueendom } from "./queendom";
+import { normalizeQueendom, queendomRecord } from "./queendom";
 import type { TicketRowMinimal } from "./ticketAggregation";
+import type { QueendomId } from "@/types";
 
-export type Queendom = "ananyshree" | "anishqa";
+/** @deprecated alias kept for older imports — use QueendomId. */
+export type Queendom = QueendomId;
 
 export interface DailyPoint {
   /** 1-based IST day-of-month. */
@@ -53,10 +55,7 @@ export interface TicketTimeSeries {
   lastResolvedMs: number | null;
 }
 
-const EMPTY_BOTH: Record<Queendom, TicketTimeSeries> = {
-  ananyshree: emptySeries(),
-  anishqa: emptySeries(),
-};
+const EMPTY_ALL: Record<QueendomId, TicketTimeSeries> = queendomRecord(emptySeries);
 
 function emptySeries(): TicketTimeSeries {
   return {
@@ -82,7 +81,7 @@ function resolutionTs(row: TicketRowMinimal): string | null {
  */
 export function resolutionEventMs(
   row: TicketRowMinimal,
-): { queendom: Queendom; ms: number } | null {
+): { queendom: QueendomId; ms: number } | null {
   if (isVoid(row.status) || !isTerminal(row.status)) return null;
   const queendom = normalizeQueendom(row.queendom_name);
   if (!queendom) return null;
@@ -91,25 +90,24 @@ export function resolutionEventMs(
 }
 
 /**
- * Build both Queendoms' time series in one pass. Returns fresh empty series
- * (never the shared EMPTY_BOTH) so callers can mutate safely if they wish.
+ * Build every Queendom's time series in one pass. Returns fresh empty series
+ * (never the shared EMPTY_ALL) so callers can mutate safely if they wish.
  */
-export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom, TicketTimeSeries> {
-  if (!rows.length) {
-    return { ananyshree: emptySeries(), anishqa: emptySeries() };
-  }
+export function buildTicketTimeSeries(
+  rows: TicketRowMinimal[],
+): Record<QueendomId, TicketTimeSeries> {
+  if (!rows.length) return queendomRecord(emptySeries);
 
   const { day: todayIST, month: thisMonthIST } = istToday();
   const todayDom = Number(todayIST.slice(8, 10)); // 1..31
 
   // received[q][dom] and resolved[q][dom]; hourly[q][hour]; lastResolvedMs max
-  const acc: Record<
-    Queendom,
-    { received: number[]; resolved: number[]; hourly: number[]; lastResolvedMs: number | null }
-  > = {
-    ananyshree: { received: new Array(32).fill(0), resolved: new Array(32).fill(0), hourly: new Array(24).fill(0), lastResolvedMs: null },
-    anishqa: { received: new Array(32).fill(0), resolved: new Array(32).fill(0), hourly: new Array(24).fill(0), lastResolvedMs: null },
-  };
+  const acc = queendomRecord(() => ({
+    received: new Array<number>(32).fill(0),
+    resolved: new Array<number>(32).fill(0),
+    hourly: new Array<number>(24).fill(0),
+    lastResolvedMs: null as number | null,
+  }));
 
   const seen = new Set<string>();
   for (const row of rows) {
@@ -119,7 +117,7 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
 
     const queendom = normalizeQueendom(row.queendom_name);
     if (!queendom) continue;
-    const bucket = acc[queendom as Queendom];
+    const bucket = acc[queendom];
 
     // Received — by created_at day, current IST month only. The Heartbeat's
     // hourly buckets are ARRIVAL-based (created_at hour) so the chart answers
@@ -146,7 +144,7 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
     }
   }
 
-  const finalize = (q: Queendom): TicketTimeSeries => {
+  const finalize = (q: QueendomId): TicketTimeSeries => {
     const b = acc[q];
     const daily: DailyPoint[] = [];
     let peakDaily = 0;
@@ -167,7 +165,7 @@ export function buildTicketTimeSeries(rows: TicketRowMinimal[]): Record<Queendom
     };
   };
 
-  return { ananyshree: finalize("ananyshree"), anishqa: finalize("anishqa") };
+  return queendomRecord(finalize);
 }
 
-export { EMPTY_BOTH as EMPTY_TICKET_TIME_SERIES };
+export { EMPTY_ALL as EMPTY_TICKET_TIME_SERIES };

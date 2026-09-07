@@ -1,205 +1,107 @@
 "use client";
 
 /**
- * /settings — the non-technical admin surface for the dashboard.
- *
- * Three tabs:
- *   Agents       → the concierge roster per queendom (was lib/agentRoster.ts)
- *   Renewals     → rows in `renewals`, feeding "Renewals This Month"
- *   New Clients  → rows in `members`, feeding "Latest Assignments"
- *
- * Locked behind a shared PIN (SETTINGS_PIN). The gate is a convenience for the
- * UI only — every /api/settings/* route independently verifies the session
- * cookie, so hiding the tabs is never the thing keeping anyone out.
+ * /settings — the dashboard's settings home. After the PIN, staff pick which
+ * DOMAIN they are administering. Concierge is live (queendoms → agents,
+ * renewals, new members); Onboarding is reserved for the revenue screen's
+ * future settings and shown disabled so the shape of the panel is clear.
  */
 
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AgentsTab } from "@/components/settings/AgentsTab";
-import { ClientRowsTab, type ClientRowsTabConfig } from "@/components/settings/ClientRowsTab";
-import { settingsRequest } from "@/components/settings/api";
-import { Button, Field, Notice } from "@/components/settings/ui";
+import { QUEENDOM_DISPLAY_NAME, QUEENDOM_IDS } from "@/lib/queendom";
+import { SettingsShell } from "@/components/settings/SettingsShell";
 
-type TabId = "agents" | "renewals" | "clients";
+const DOMAINS = [
+  {
+    id: "concierge",
+    href: "/settings/concierge",
+    numeral: "I",
+    title: "Concierge",
+    kicker: "Queendoms · Agents · Renewals · New Members",
+    description:
+      "The roster shown on each Queendom's leaderboard, plus the renewals and new-member names the TV celebrates this month.",
+    contents: QUEENDOM_IDS.map((id) => QUEENDOM_DISPLAY_NAME[id]).join("  ·  "),
+    enabled: true,
+  },
+  {
+    id: "onboarding",
+    href: "/settings/onboarding",
+    numeral: "II",
+    title: "Onboarding",
+    kicker: "Leads · Deals · Targets",
+    description:
+      "Sales-floor settings for the revenue screen. Not yet editable here — the Onboarding dashboard still reads its configuration from Zoho and code.",
+    contents: "Coming soon",
+    enabled: false,
+  },
+] as const;
 
-const TABS: readonly { id: TabId; label: string }[] = [
-  { id: "agents", label: "Agents" },
-  { id: "renewals", label: "Renewals" },
-  { id: "clients", label: "New Clients" },
-];
-
-const RENEWALS_CONFIG: ClientRowsTabConfig = {
-  endpoint: "renewals",
-  addTitle: "Record a renewal",
-  addDescription:
-    "Adds to the Renewals This Month count and the latest-renewals list on that queendom's panel.",
-  listTitle: "Recent renewals",
-  listDescription: "Newest first. The TV counts only entries dated in the current month.",
-  dateLabel: "Renewal date",
-  nameLabel: "Client name",
-  namePlaceholder: "e.g. Ravi Kailas",
-  entityLabel: "Renewal",
-};
-
-const CLIENTS_CONFIG: ClientRowsTabConfig = {
-  endpoint: "members",
-  addTitle: "Add a new client",
-  addDescription:
-    "Adds to the Latest Assignments list on that queendom's panel. Membership records themselves (plan, amount, expiry) still come from the main client system — this is the assignment only.",
-  listTitle: "Recent assignments",
-  listDescription: "Newest first. The TV shows only entries dated in the current month.",
-  dateLabel: "Assigned on",
-  nameLabel: "Client name",
-  namePlaceholder: "e.g. Richa Raj",
-  entityLabel: "Assignment",
-};
-
-export default function SettingsPage() {
-  const [unlocked, setUnlocked] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<TabId>("agents");
-
-  const checkSession = useCallback(async () => {
-    const res = await settingsRequest<{ unlocked: boolean }>("/api/settings/session");
-    setUnlocked(res.ok ? Boolean(res.data?.unlocked) : false);
-  }, []);
-
-  useEffect(() => {
-    void checkSession();
-  }, [checkSession]);
-
-  const lock = useCallback(() => setUnlocked(false), []);
-
-  const signOut = useCallback(async () => {
-    await settingsRequest("/api/settings/session", { method: "DELETE" });
-    setUnlocked(false);
-  }, []);
-
-  if (unlocked === null) {
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="font-montserrat text-sm text-charcoal-300">Loading…</p>
-      </main>
-    );
-  }
-
-  if (!unlocked) {
-    return <PinGate onUnlocked={() => setUnlocked(true)} />;
-  }
-
+export default function SettingsHome() {
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-10">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-cinzel text-3xl text-champagne">Settings</h1>
+    <SettingsShell>
+      {() => (
+        <section aria-labelledby="domain-title">
+          <h2 id="domain-title" className="font-cinzel text-lg text-champagne">
+            Which dashboard do you want to manage?
+          </h2>
           <p className="mt-1 font-montserrat text-[13px] text-charcoal-300">
-            Changes appear on the TV within a few seconds — no redeploy needed.
+            Each dashboard has its own settings. Pick one to continue.
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="font-montserrat text-[13px] text-gold-300 underline-offset-4 hover:underline"
-          >
-            View dashboard
-          </Link>
-          <Button variant="ghost" onClick={() => void signOut()}>
-            Sign out
-          </Button>
-        </div>
-      </header>
 
-      <nav className="mb-6 flex flex-wrap gap-2" aria-label="Settings sections">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            aria-current={tab === t.id ? "page" : undefined}
-            className={`rounded-md px-4 py-2 font-montserrat text-sm font-semibold transition-colors ${
-              tab === t.id
-                ? "bg-gold-400 text-obsidian"
-                : "border border-[var(--border-gold-dim)] text-charcoal-200 hover:border-[var(--border-gold-mid)] hover:text-champagne"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
-
-      {tab === "agents" ? <AgentsTab onUnauthorized={lock} /> : null}
-      {tab === "renewals" ? (
-        <ClientRowsTab config={RENEWALS_CONFIG} onUnauthorized={lock} />
-      ) : null}
-      {tab === "clients" ? (
-        <ClientRowsTab config={CLIENTS_CONFIG} onUnauthorized={lock} />
-      ) : null}
-    </main>
-  );
-}
-
-// ─── PIN gate ─────────────────────────────────────────────────────────────────
-
-function PinGate({ onUnlocked }: { onUnlocked: () => void }) {
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [checking, setChecking] = useState(false);
-
-  const submit = useCallback(async () => {
-    if (!pin.trim()) return;
-    setChecking(true);
-    const res = await settingsRequest<{ unlocked: boolean }>("/api/settings/session", {
-      method: "POST",
-      body: { pin },
-    });
-    setChecking(false);
-    if (res.ok && res.data?.unlocked) {
-      setPin("");
-      onUnlocked();
-      return;
-    }
-    setError(res.error ?? "Incorrect PIN");
-  }, [pin, onUnlocked]);
-
-  return (
-    <main className="flex min-h-screen items-center justify-center px-6">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void submit();
-        }}
-        className="w-full max-w-sm rounded-xl border border-[var(--border-gold-dim)] bg-surface-card p-7"
-      >
-        <h1 className="font-cinzel text-2xl text-champagne">Settings</h1>
-        <p className="mb-6 mt-1 font-montserrat text-[13px] text-charcoal-300">
-          Enter the team PIN to manage agents, renewals, and new clients.
-        </p>
-
-        <Field label="PIN">
-          <input
-            type="password"
-            value={pin}
-            autoFocus
-            autoComplete="current-password"
-            onChange={(e) => {
-              setPin(e.target.value);
-              setError(null);
-            }}
-            className="w-full rounded-md border border-[var(--border-gold-subtle)] bg-black/40 px-3 py-2 font-montserrat text-sm tracking-[0.3em] text-champagne focus:border-[var(--border-gold-bright)] focus:outline-none"
-          />
-        </Field>
-
-        {error ? (
-          <div className="mt-4">
-            <Notice tone="error">{error}</Notice>
+          <div className="mt-6 grid gap-5 md:grid-cols-2">
+            {DOMAINS.map((d) => {
+              const inner = (
+                <>
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-gold-500/[0.05] to-transparent" />
+                  <div className="relative flex h-full flex-col">
+                    <span className="font-cinzel text-[12px] tracking-[0.3em] text-gold-400/60 uppercase">
+                      {d.numeral}
+                    </span>
+                    <h3 className="mt-3 font-cinzel text-3xl font-bold uppercase leading-none tracking-[0.08em] text-gold-400 queen-name-glow">
+                      {d.title}
+                    </h3>
+                    <p className="mt-3 font-cinzel text-[12px] tracking-[0.24em] text-champagne/80 uppercase">
+                      {d.kicker}
+                    </p>
+                    <span className="separator-gold-h my-5 h-px w-full" aria-hidden />
+                    <p className="font-montserrat text-[13px] leading-relaxed text-champagne/70">
+                      {d.description}
+                    </p>
+                    <p className="mt-3 font-cinzel text-[11px] tracking-[0.2em] text-gold-400/70 uppercase">
+                      {d.contents}
+                    </p>
+                    <div className="mt-auto flex items-center justify-between pt-6">
+                      <span className="font-cinzel text-[12px] tracking-[0.28em] text-gold-300 uppercase gold-glow">
+                        {d.enabled ? "Open" : "Locked"}
+                      </span>
+                      {!d.enabled ? (
+                        <span className="rounded-full border border-gold-500/25 px-2.5 py-1 font-montserrat text-[11px] uppercase tracking-[0.18em] text-charcoal-300">
+                          Coming soon
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </>
+              );
+              const cls =
+                "group relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl glass engrave-frame p-7 text-left outline-none";
+              return d.enabled ? (
+                <Link
+                  key={d.id}
+                  href={d.href}
+                  className={`${cls} elevate-mid transition-transform duration-150 ease-out hover:border-gold-400/45 focus-visible:elevate-hero focus-visible:border-gold-400/45 active:scale-[0.99]`}
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <div key={d.id} className={`${cls} opacity-60`} aria-disabled>
+                  {inner}
+                </div>
+              );
+            })}
           </div>
-        ) : null}
-
-        <div className="mt-6">
-          <Button type="submit" disabled={checking || !pin.trim()}>
-            {checking ? "Checking…" : "Unlock"}
-          </Button>
-        </div>
-      </form>
-    </main>
+        </section>
+      )}
+    </SettingsShell>
   );
 }

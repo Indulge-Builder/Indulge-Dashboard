@@ -5,7 +5,7 @@
  *
  *   1. The month     — closures + leads, one hero pair
  *   2. Lead health   — attended / closed / junk of this month's leads
- *   3. Departments   — Concierge Onboarding and Shop Sales agent rows
+ *   3. Onboarding    — every roster agent, ranked by closures
  *   4. Live ledger   — latest closures, newest first
  *
  * Data comes straight from useOnboardingPanelData — the same payload the TV
@@ -26,21 +26,18 @@ import { type InsightsPayload } from "./MobileInsights";
 const LEDGER_SHOWN = 6;
 
 interface Props {
-  conciergeAgents: OnboardingAgentRow[];
-  shopAgents: OnboardingAgentRow[];
+  agents: OnboardingAgentRow[];
   ledger: OnboardingLedgerRow[];
   leadMonthStats?: LeadMonthStats;
   insights: InsightsPayload | null;
 }
 
-function DeptBlock({
+function AgentBlock({
   title,
   agents,
-  dept,
 }: {
   title: string;
   agents: OnboardingAgentRow[];
-  dept: "concierge" | "shop";
 }) {
   const ranked = useMemo(
     () => [...agents].sort((a, b) => b.totalConverted - a.totalConverted),
@@ -49,7 +46,7 @@ function DeptBlock({
   const max = ranked[0]?.totalConverted ?? 0;
 
   return (
-    <section className="m-card" data-dept={dept} aria-label={title}>
+    <section className="m-card" aria-label={title}>
       <header className="m-card-head">
         <h2 className="m-label">{title}</h2>
       </header>
@@ -81,18 +78,14 @@ function DeptBlock({
 }
 
 export default function MobileRevenue({
-  conciergeAgents,
-  shopAgents,
+  agents,
   ledger,
   leadMonthStats,
   insights,
 }: Props) {
   const closuresThisMonth =
     (leadMonthStats?.dealsClosedThisMonth ?? 0) ||
-    [...conciergeAgents, ...shopAgents].reduce(
-      (sum, a) => sum + a.totalConverted,
-      0,
-    );
+    agents.reduce((sum, a) => sum + a.totalConverted, 0);
   const leads = leadMonthStats?.leads ?? 0;
   const attended = leadMonthStats?.attended ?? 0;
   const junk = leadMonthStats?.junk ?? 0;
@@ -146,9 +139,8 @@ export default function MobileRevenue({
         </section>
       )}
 
-      {/* 3 ── Departments */}
-      <DeptBlock title="Concierge onboarding" agents={conciergeAgents} dept="concierge" />
-      <DeptBlock title="Shop sales" agents={shopAgents} dept="shop" />
+      {/* 3 ── Onboarding roster */}
+      <AgentBlock title="Onboarding" agents={agents} />
 
       {/* 4 ── Live ledger */}
       <section className="m-card" aria-label="Latest closures">

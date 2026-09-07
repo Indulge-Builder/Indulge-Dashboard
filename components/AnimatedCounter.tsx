@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type CSSProperties } from "react"
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, type Variants } from "framer-motion"
 import { EASE_LUXURY } from "@/lib/motionPresets"
 
@@ -27,6 +27,8 @@ interface AnimatedCounterProps {
   delay?:    number
   /** Use vertical slide animation on value change (rolling digit effect) */
   slideOnChange?: boolean
+  /** Inline style on the value span — for stage-pinned sizes (lib/tvScale). */
+  style?: CSSProperties
 }
 
 export default function AnimatedCounter({
@@ -34,6 +36,7 @@ export default function AnimatedCounter({
   className,
   delay = 600,
   slideOnChange = false,
+  style,
 }: AnimatedCounterProps) {
   const value = typeof rawValue === "number" && !Number.isNaN(rawValue) ? rawValue : 0
   const motionValue  = useMotionValue(0)
@@ -76,6 +79,7 @@ export default function AnimatedCounter({
           <motion.span
             key={value}
             className={`inline-block ${className ?? ""}`}
+            style={style}
             custom={dir}
             variants={rollVariants}
             initial="enter"
@@ -90,5 +94,5 @@ export default function AnimatedCounter({
     );
   }
 
-  return <motion.span className={className}>{displayValue}</motion.span>
+  return <motion.span className={className} style={style}>{displayValue}</motion.span>
 }

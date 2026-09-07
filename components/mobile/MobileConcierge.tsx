@@ -22,8 +22,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { QueenStats } from "@/lib/types";
-import type { OverdueTicketItem } from "@/types";
-import { QUEENDOM_DISPLAY_NAME } from "@/lib/queendom";
+import type { OverdueTicketItem, QueendomId } from "@/types";
+import { QUEENDOM_DISPLAY_NAME, QUEENDOM_IDS, queendomRecord } from "@/lib/queendom";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { type InsightsPayload } from "./MobileInsights";
 
@@ -31,7 +31,6 @@ const ALERTS_SHOWN = 3;
 const AGENTS_SHOWN = 6;
 
 type Period = "today" | "week" | "month" | "last-month";
-type QueendomId = "ananyshree" | "anishqa";
 
 const PERIODS: Array<{ id: Period; label: string }> = [
   { id: "today", label: "Today" },
@@ -116,8 +115,8 @@ function timeAgo(ms: number | null | undefined, nowMs: number): string | null {
 }
 
 interface Props {
-  ananyshreeStats: QueenStats;
-  anishqaStats: QueenStats;
+  /** Live stats per queendom (useDashboardData) — renewals due + last-resolve ages. */
+  queendoms: Record<QueendomId, QueenStats>;
   overdueTickets: OverdueTicketItem[];
   isLoading: boolean;
   insights: InsightsPayload | null;
@@ -249,9 +248,10 @@ function AgentRow({
   );
 }
 
+const ZERO_SCORE: QueendomScore = { received: 0, resolved: 0, ontime: 0, pending: 0 };
+
 export default function MobileConcierge({
-  ananyshreeStats,
-  anishqaStats,
+  queendoms,
   overdueTickets,
   isLoading,
   insights,
@@ -272,17 +272,31 @@ export default function MobileConcierge({
   }, []);
 
   const target = PERIOD_TARGET[period];
-  const qa: QueendomScore =
-    board?.queendoms.ananyshree ?? { received: 0, resolved: 0, ontime: 0, pending: 0 };
-  const qb: QueendomScore =
-    board?.queendoms.anishqa ?? { received: 0, resolved: 0, ontime: 0, pending: 0 };
+  // Per-queendom period scores (insights_scoreboard) + the sum across all.
+  const scores = useMemo(
+    () => queendomRecord((id) => board?.queendoms[id] ?? ZERO_SCORE),
+    [board?.queendoms],
+  );
+  const total = useMemo(
+    () =>
+      QUEENDOM_IDS.reduce<QueendomScore>(
+        (acc, id) => ({
+          received: acc.received + scores[id].received,
+          resolved: acc.resolved + scores[id].resolved,
+          ontime: acc.ontime + scores[id].ontime,
+          pending: acc.pending + scores[id].pending,
+        }),
+        ZERO_SCORE,
+      ),
+    [scores],
+  );
 
   const agents = useMemo(() => {
     const all = board?.agents ?? [];
     return selectedQ ? all.filter((a) => a.queendom === selectedQ) : all;
   }, [board?.agents, selectedQ]);
   // Default (no Queendom chosen, not expanded): the interesting ends of the
-  // race — top 3 and bottom 3 across both Queendoms, real ranks kept.
+  // race — top 3 and bottom 3 across all Queendoms, real ranks kept.
   const topBottom = !selectedQ && !showAllAgents && agents.length > AGENTS_SHOWN;
   const visibleAgents = topBottom
     ? agents.slice(0, 3)
@@ -291,18 +305,15 @@ export default function MobileConcierge({
       : agents.slice(0, AGENTS_SHOWN);
   const bottomAgents = topBottom ? agents.slice(-3) : [];
 
-  const renewalsDue = useMemo(() => {
-    const all = [
-      ...(ananyshreeStats.renewalsDue ?? []),
-      ...(anishqaStats.renewalsDue ?? []),
-    ];
-    return all.sort((x, y) => x.endDate.localeCompare(y.endDate));
-  }, [ananyshreeStats.renewalsDue, anishqaStats.renewalsDue]);
+  const renewalsDue = useMemo(
+    () =>
+      QUEENDOM_IDS.flatMap((id) => queendoms[id].renewalsDue ?? []).sort((x, y) =>
+        x.endDate.localeCompare(y.endDate),
+      ),
+    [queendoms],
+  );
 
-  const lastResolved: Record<QueendomId, number | null | undefined> = {
-    ananyshree: ananyshreeStats.lastResolvedAtMs,
-    anishqa: anishqaStats.lastResolvedAtMs,
-  };
+  const lastResolved = queendomRecord((id) => queendoms[id].lastResolvedAtMs);
 
   if (isLoading && !board) {
     return (
@@ -314,10 +325,10 @@ export default function MobileConcierge({
     );
   }
 
-  const queendomCards: Array<[QueendomId, QueendomScore]> = [
-    ["ananyshree", qa],
-    ["anishqa", qb],
-  ];
+  const queendomCards: Array<[QueendomId, QueendomScore]> = QUEENDOM_IDS.map((id) => [
+    id,
+    scores[id],
+  ]);
 
   return (
     <div className="m-feed">
@@ -387,25 +398,25 @@ export default function MobileConcierge({
           </span>
         </span>
         <p className="m-hero-num m-hero-good">
-          <AnimatedCounter key={period} value={qa.resolved + qb.resolved} delay={250} slideOnChange />
+          <AnimatedCounter key={period} value={total.resolved} delay={250} slideOnChange />
         </p>
         <div className="m-stat-row" role="list">
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Received</span>
             <span className="m-stat-num">
-              <AnimatedCounter key={period} value={qa.received + qb.received} delay={350} />
+              <AnimatedCounter key={period} value={total.received} delay={350} />
             </span>
           </div>
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">On-time</span>
-            <span className="m-stat-num" data-good={qa.ontime + qb.ontime > 0}>
-              <AnimatedCounter key={period} value={qa.ontime + qb.ontime} delay={450} />
+            <span className="m-stat-num" data-good={total.ontime > 0}>
+              <AnimatedCounter key={period} value={total.ontime} delay={450} />
             </span>
           </div>
           <div className="m-stat" role="listitem">
             <span className="m-stat-label">Pending</span>
             <span className="m-stat-num">
-              <AnimatedCounter key={period} value={qa.pending + qb.pending} delay={550} />
+              <AnimatedCounter key={period} value={total.pending} delay={550} />
             </span>
           </div>
         </div>

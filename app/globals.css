@@ -1430,6 +1430,13 @@ body::before {
 
 /* ── Queendom cards: the member's onyx metal ───────────────────────────── */
 .m-queendoms { display: grid; grid-template-columns: 1fr 1fr; gap: 0.95rem; }
+/* Three Queendoms (2026-09-04): an odd last card spans the row on narrow
+   phones; from 480px all three sit side by side. */
+.m-queendom-card:nth-child(odd):last-child { grid-column: 1 / -1; }
+@media (min-width: 480px) {
+  .m-queendoms { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .m-queendom-card:nth-child(odd):last-child { grid-column: auto; }
+}
 .m-queendom-card {
   gap: 0.3rem;
   padding: 1rem 1.05rem;
@@ -1551,6 +1558,7 @@ body::before {
 .m-agent-queendom { width: 5px; height: 5px; border-radius: 50%; flex: none; }
 .m-agent-queendom[data-q="ananyshree"] { background: var(--a-gold); }
 .m-agent-queendom[data-q="anishqa"] { background: var(--a-gs); }
+.m-agent-queendom[data-q="sanika"] { background: var(--a-sage); }
 .m-target-star {
   color: var(--a-pos);
   font-size: 0.78rem;
@@ -1776,12 +1784,6 @@ body::before {
 }
 .m-empty { font-size: 0.85rem; color: var(--a-tt); margin: 0; padding: 0.2rem 0; }
 
-/* ── Revenue: Shop wears the app's sky ─────────────────────────────────── */
-.m-card[data-dept="shop"] .m-label { color: var(--a-sky); }
-.m-card[data-dept="shop"] .m-agent-score { color: var(--a-sky); }
-.m-card[data-dept="shop"] .m-agent-bar i {
-  background: linear-gradient(90deg, #6c88a8, var(--a-sky));
-}
 .m-rev-leads {
   font-family: var(--f-mono);
   font-size: 0.56rem;

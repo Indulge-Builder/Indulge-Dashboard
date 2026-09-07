@@ -1,129 +1,61 @@
 /**
  * lib/onboardingAgents.ts
  *
- * Canonical agent roster, department mapping, and name-normalisation helpers
- * for the Revenue Dashboard TV screen.
+ * The Onboarding roster (Zoho CRM lead owners shown on the Revenue TV screen)
+ * and the name-normalisation helpers that match Zoho owner names to cards.
  *
- * Two departments:
- *   Concierge — Amit, Samson, Meghana
- *   Shop      — Vikram, Katya, Harsh
+ * ── Roster as of 2026-09-07 (read from Zoho users API) ───────────────────────
+ *   Active "Onboarding Manager" / "Onboarding Agents" roles:
+ *     Samson Fernandes · Kaniisha Chamarria · Nandini Pandey · Kabeer Dhawan ·
+ *     Surbhi Dewan   (the last three joined 2026-08-17)
+ *   Gone: Amit Agarwal, Meghana Singh (disabled 2026-08-17);
+ *         Vikram, Katya, Harsh Gupta — the Shop / Retail team (deleted 2026-06-16).
+ *   Not on the TV: "Admin @ Indulge" (automation owner of every WhatsApp /
+ *   web-form lead until reassignment) and the founders.
  *
- * Department is derived entirely at runtime from the agent's display name via
- * getAgentDepartment(). No database column is required.
+ * The screen keeps its two agent columns; `column` says which one a seat
+ * renders in. Both columns are Onboarding — there is no department any more.
+ * Shop will get its own screen when that team is rebuilt.
  *
- * Zoho CRM now stores owner names as full names in DB/webhooks.
- * UI mapping to card labels is done at read time via getDisplayAgentName().
+ * UPDATE THIS FILE when agents join / leave; portraits live in
+ * `onboarding-agents-images/<id>.webp` (see components/onboarding/utils.ts).
  */
 
-import type { Department } from "./onboardingTypes";
+export type AgentColumn = "left" | "right";
 
-// ── Concierge agents ──────────────────────────────────────────────────────────
+export const AGENT_COLUMNS: readonly AgentColumn[] = ["left", "right"] as const;
 
-export const CONCIERGE_AGENT_DISPLAY_NAMES = [
-  "Amit",
-  "Meghana",
-  "Samson",
-  "Kaniisha",
-] as const;
+/** Heading shown above each column. */
+export const AGENT_COLUMN_LABEL: Readonly<Record<AgentColumn, string>> = {
+  left: "Onboarding",
+  right: "Onboarding",
+};
 
-export type ConciergeAgentDisplayName =
-  (typeof CONCIERGE_AGENT_DISPLAY_NAMES)[number];
-
-/** Fixed display order for Concierge column (left → right). */
-export const CONCIERGE_AGENT_CARDS: readonly {
+export interface OnboardingAgentCard {
+  /** Stable id — also the portrait preset key. */
   id: string;
-  name: ConciergeAgentDisplayName;
-}[] = [
-  { id: "amit",     name: "Amit"     },
-  { id: "meghana",  name: "Meghana"  },
-  { id: "samson",   name: "Samson"   },
-  { id: "kaniisha", name: "Kaniisha" },
+  /** Card label (first name). */
+  name: string;
+  /** Full owner name as Zoho sends it in `agent_name`. */
+  zohoName: string;
+  column: AgentColumn;
+}
+
+/** Fixed display order (top → bottom within each column). */
+export const ONBOARDING_AGENT_CARDS: readonly OnboardingAgentCard[] = [
+  { id: "samson",   name: "Samson",   zohoName: "Samson Fernandes",   column: "left"  },
+  { id: "kaniisha", name: "Kaniisha", zohoName: "Kaniisha Chamarria", column: "left"  },
+  { id: "nandini",  name: "Nandini",  zohoName: "Nandini Pandey",     column: "right" },
+  { id: "kabeer",   name: "Kabeer",   zohoName: "Kabeer Dhawan",      column: "right" },
+  { id: "surbhi",   name: "Surbhi",   zohoName: "Surbhi Dewan",       column: "right" },
 ] as const;
 
-// ── Shop agents ───────────────────────────────────────────────────────────────
+export const ALL_AGENT_DISPLAY_NAMES: readonly string[] = ONBOARDING_AGENT_CARDS.map(
+  (c) => c.name,
+);
 
-export const SHOP_AGENT_DISPLAY_NAMES = [
-  "Vikram",
-  "Katya",
-  "Harsh",
-] as const;
-
-export type ShopAgentDisplayName =
-  (typeof SHOP_AGENT_DISPLAY_NAMES)[number];
-
-/** Fixed display order for Shop column (left → right). */
-export const SHOP_AGENT_CARDS: readonly {
-  id: string;
-  name: ShopAgentDisplayName;
-}[] = [
-  { id: "vikram", name: "Vikram" },
-  { id: "katya",  name: "Katya"  },
-  { id: "harsh",  name: "Harsh"  },
-] as const;
-
-// ── Combined roster ───────────────────────────────────────────────────────────
-
-export type AnyAgentDisplayName =
-  | ConciergeAgentDisplayName
-  | ShopAgentDisplayName;
-
-/**
- * All known agent display names across both departments.
- * Used for IN-list queries and first-word fallback matching.
- */
-export const ALL_AGENT_DISPLAY_NAMES: readonly AnyAgentDisplayName[] = [
-  ...CONCIERGE_AGENT_DISPLAY_NAMES,
-  ...SHOP_AGENT_DISPLAY_NAMES,
-] as const;
-
-
-// ── Department map ────────────────────────────────────────────────────────────
-
-/**
- * Maps every canonical display name (lowercased) to its department.
- *
- * HOW IT WORKS — no DB migration needed:
- *   getAgentDepartment(agentName) normalises the stored agent_name to its
- *   first word, lowercases it, and looks it up here. Any Zoho variation such
- *   as "Amit Agarwal", "amit", or "Amit/Backup" all resolve to "concierge"
- *   because the first-word extraction always yields "amit".
- *
- * UPDATE THIS MAP when agents are added / moved between teams.
- */
-export const DEPARTMENT_BY_AGENT_KEY: Readonly<Record<string, Department>> = {
-  // Concierge
-  amit:    "concierge",
-  samson:  "concierge",
-  meghana: "concierge",
-  aniisha: "concierge",
-  kaniisha: "concierge",
-  // Shop
-  vikram:  "shop",
-  katya:   "shop",
-  harsh:   "shop",
-} as const;
-
-/**
- * Resolves a raw agent_name string (from Supabase, Zoho webhook, or API
- * response) to its Department without a database column.
- *
- * Matching priority:
- *   1. First token (split by whitespace, "/" or ",") mapped via DEPARTMENT_BY_AGENT_KEY
- *   2. Falls back to "concierge" so unknown agents never disappear from UI
- *
- * @example
- *   getAgentDepartment("Samson Fernandes") // → "concierge"
- *   getAgentDepartment("vikram")           // → "shop"
- *   getAgentDepartment("Harsh/Backup")     // → "shop"
- *   getAgentDepartment("Unknown Agent")    // → "concierge"  (safe fallback)
- */
-export function getAgentDepartment(agentName: string): Department {
-  const trimmed = agentName.trim().replace(/\s+/g, " ");
-  if (!trimmed) return "concierge";
-
-  // First-token extraction handles "Amit Agarwal", "Harsh/Backup", "samson".
-  const firstToken = trimmed.split(/[\s/,]/)[0]?.toLowerCase() ?? "";
-  return DEPARTMENT_BY_AGENT_KEY[firstToken] ?? "concierge";
+export function cardsForColumn(column: AgentColumn): readonly OnboardingAgentCard[] {
+  return ONBOARDING_AGENT_CARDS.filter((c) => c.column === column);
 }
 
 // ── Display-name mapping and Zoho storage normalisation ───────────────────────
@@ -133,9 +65,8 @@ export function getAgentDepartment(agentName: string): Department {
  * Converts full Zoho owner names to the card's first-name display style.
  *
  * @example
- *   getDisplayAgentName("Amit Agarwal")   // "Amit"
- *   getDisplayAgentName("Katya")          // "Katya"
- *   getDisplayAgentName("Admin @ Indulge")// "Admin"
+ *   getDisplayAgentName("Samson Fernandes")  // "Samson"
+ *   getDisplayAgentName("Admin @ Indulge")   // "Admin"
  */
 export function getDisplayAgentName(raw: string): string {
   const trimmed = raw.trim().replace(/\s+/g, " ");
@@ -157,7 +88,7 @@ export function getDisplayAgentName(raw: string): string {
  * and only map to short display labels in the UI.
  *
  * @example
- *   normalizeZohoAgentName("  Amit   Agarwal ") // "Amit Agarwal"
+ *   normalizeZohoAgentName("  Samson   Fernandes ") // "Samson Fernandes"
  */
 export function normalizeZohoAgentName(raw: string): string {
   return raw.trim().replace(/\s+/g, " ");
@@ -169,8 +100,7 @@ export function normalizeZohoAgentName(raw: string): string {
  * Match a card's display name to a stored `agent_name` value (exact,
  * case-insensitive, or compound e.g. "Samson/Neha" → Samson).
  *
- * Used by /api/onboarding to aggregate lead-touch and ledger counts per agent.
- * Works for both Concierge and Shop agents without modification.
+ * Used by /api/onboarding to aggregate lead and deal counts per agent.
  */
 export function onboardingAgentNameMatches(
   cardDisplayName: string,
@@ -201,30 +131,14 @@ export function onboardingAgentNameMatches(
 // ── Fallback agent cards ──────────────────────────────────────────────────────
 
 /**
- * Returns a zeroed OnboardingAgentRow for a given card spec.
- * Used when /api/onboarding fails so the TV always shows all six seats.
+ * Zeroed rows for every roster seat. Used when /api/onboarding fails so the
+ * TV always shows all seats.
  */
-function zeroedAgent(
-  id: string,
-  name: AnyAgentDisplayName,
-  department: Department,
-) {
-  return {
-    id,
-    name,
-    department,
-    leadsCreatedThisMonth: 0,
-    totalConverted:        0,
-    leadsCreatedTodayIst:  0,
-    leadsThisMonth:        0,
-  } as const;
-}
-
-export const CONCIERGE_FALLBACK_AGENTS = CONCIERGE_AGENT_CARDS.map((c) =>
-  zeroedAgent(c.id, c.name, "concierge"),
-);
-
-export const SHOP_FALLBACK_AGENTS = SHOP_AGENT_CARDS.map((c) =>
-  zeroedAgent(c.id, c.name, "shop"),
-);
-
+export const ONBOARDING_FALLBACK_AGENTS = ONBOARDING_AGENT_CARDS.map((c) => ({
+  id: c.id,
+  name: c.name,
+  leadsCreatedThisMonth: 0,
+  totalConverted:        0,
+  leadsCreatedTodayIst:  0,
+  leadsThisMonth:        0,
+}));

@@ -27,3 +27,9 @@ Thumbs.db
 .envrc
 .vercel
 .env*
+
+# Local MCP binding (per-project Supabase account; token comes from direnv)
+.mcp.json
+
+# Ad-hoc reconciliation scratch scripts
+.q.tmp.js

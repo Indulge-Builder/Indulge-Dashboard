@@ -12,7 +12,12 @@
 
 import { AnimatePresence } from "framer-motion";
 import type { AgentStats } from "@/lib/types";
-import { AgentRow, GRID_COLS, GRID_GAP_X } from "./AgentRow";
+import { AgentRow, GRID_STYLE } from "./AgentRow";
+import { fh, fw } from "@/lib/tvScale";
+
+/** Column caption (handoff §B2: 44px, .22em) — colour varies per column. */
+const HEADER_CLASS = "font-cinzel font-semibold uppercase leading-[1.15] text-center";
+const HEADER_STYLE = { fontSize: fw(44), letterSpacing: "0.22em" };
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface AgentLeaderboardProps {
@@ -32,25 +37,25 @@ export default function AgentLeaderboard({
       {/* ── Sticky column header ─────────────────────────────────────────── */}
       {/* bg is 98% opaque — backdrop blur was invisible but cost a GPU pass on TV */}
       <div className="z-10 bg-obsidian/98 border-b border-gold-500/20 flex-shrink-0">
-        <div className={`grid ${GRID_COLS} ${GRID_GAP_X} pb-[0.9cqh]`}>
+        <div className="grid" style={{ ...GRID_STYLE, paddingBottom: fh(24) }}>
           <span />
-          <span className="label-field text-amber-300/95 text-center">
+          <span className={`${HEADER_CLASS} text-amber-300/95`} style={HEADER_STYLE}>
             Genies
           </span>
-          <span className="label-field text-green-400 text-center">
+          <span className={`${HEADER_CLASS} text-green-400`} style={HEADER_STYLE}>
             Today
           </span>
-          <span className="label-field text-champagne text-center">
+          <span className={`${HEADER_CLASS} text-champagne`} style={HEADER_STYLE}>
             Monthly
           </span>
-          <span className="label-field text-red-400 text-center">
+          <span className={`${HEADER_CLASS} text-red-400`} style={HEADER_STYLE}>
             Pending
           </span>
         </div>
       </div>
 
       {/* ── Agent rows ───────────────────────────────────────────────────── */}
-      <div className="pt-[0.5cqh]">
+      <div style={{ paddingTop: fh(14) }}>
         <AnimatePresence>
           {agents.map((agent, i) => (
             <AgentRow

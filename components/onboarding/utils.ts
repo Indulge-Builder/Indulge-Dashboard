@@ -1,37 +1,30 @@
 /**
  * components/onboarding/utils.ts
  *
- * Pure helpers and constants for the Revenue Dashboard (Onboarding screen).
+ * Pure helpers and constants for the Onboarding (Revenue) screen.
  * No React imports — safe in Server Components.
  *
  * Sections:
  *   1. Typography scale constants
  *   2. Data constants + fallback agents (re-exported from lib/onboardingAgents)
- *   3. Agent ordering helpers (per-department)
- *   4. Amount / date / lakh formatters
+ *   3. Agent ordering helpers (per-column)
+ *   4. Date formatters
  *   5. Ledger helpers
  *   6. Portrait helpers
  */
 
 import {
-  CONCIERGE_AGENT_CARDS,
-  SHOP_AGENT_CARDS,
-  CONCIERGE_FALLBACK_AGENTS,
-  SHOP_FALLBACK_AGENTS,
-  getAgentDepartment,
+  ONBOARDING_FALLBACK_AGENTS,
+  cardsForColumn,
+  type AgentColumn,
 } from "@/lib/onboardingAgents";
 import { utcMillisFromDbTimestamp } from "@/lib/istDate";
 import type {
   OnboardingAgentRow,
   OnboardingLedgerRow,
 } from "@/lib/onboardingTypes";
-import amitPortrait from "../../onboarding-agents-images/amit-sir.webp";
-import harshPortrait from "../../onboarding-agents-images/harsh.webp";
 import kaniishaPortrait from "../../onboarding-agents-images/kaniisha.webp";
-import katyaPortrait from "../../onboarding-agents-images/katya.webp";
-import meghanaPortrait from "../../onboarding-agents-images/meghana.webp";
 import samsonPortrait from "../../onboarding-agents-images/samson.webp";
-import vikramPortrait from "../../onboarding-agents-images/vikram.webp";
 
 // ── IST display formatters (module-level singletons — never re-created per call) ──
 
@@ -47,7 +40,6 @@ const IST_LEDGER_DATE_FORMATTER = new Intl.DateTimeFormat("en-GB", {
 
 // ── 1. Typography scale ───────────────────────────────────────────────────────
 // CSS variables defined in app/globals.css — single source of truth.
-// Reference: var(--text-heading-xl), var(--text-heading-lg), etc.
 
 /** Section headings (Monthly Target / Conversion Ledger) → CSS var(--text-heading-lg) */
 export const ONBOARDING_LEDGER_TITLE_FONT = "var(--text-heading-lg)";
@@ -58,7 +50,7 @@ export const ONBOARDING_LEDGER_HEADER_FONT = "var(--text-ledger-header)";
 /** Cell text in each ledger data row → CSS var(--text-ledger-cell) */
 export const ONBOARDING_LEDGER_CELL_FONT = "var(--text-ledger-cell)";
 
-/** Department name heading above each column → CSS var(--text-dept-heading) */
+/** Column heading ("Onboarding") above each agent column → CSS var(--text-dept-heading) */
 export const DEPT_HEADING_FONT = "var(--text-dept-heading)";
 
 // ── 2. Data constants & fallback agents ──────────────────────────────────────
@@ -67,67 +59,35 @@ export const DEPT_HEADING_FONT = "var(--text-dept-heading)";
 export const LIVE_LEDGER_MAX = 15;
 
 // Re-export from lib/onboardingAgents — single source of truth
-export { CONCIERGE_FALLBACK_AGENTS, SHOP_FALLBACK_AGENTS, getAgentDepartment };
+export { ONBOARDING_FALLBACK_AGENTS };
 
 // ── 3. Agent ordering ─────────────────────────────────────────────────────────
 
 /**
- * Generic reorder: matches fromApi agents to the card spec order, filling
- * missing seats with zeroed fallback rows.
+ * Picks the seats of one column from the API's flat agent list, in roster
+ * order, filling any missing seat with its zeroed fallback row.
  */
-function orderAgentsForDepartment(
+export function orderAgentsForColumn(
   fromApi: OnboardingAgentRow[],
-  cards: readonly { id: string; name: string }[],
-  fallbacks: readonly (typeof CONCIERGE_FALLBACK_AGENTS)[number][],
+  column: AgentColumn,
 ): OnboardingAgentRow[] {
-  const pool = [...fromApi];
-  return cards.map((spec) => {
-    const idxId = pool.findIndex((a) => a.id === spec.id);
-    if (idxId >= 0) {
-      const [a] = pool.splice(idxId, 1);
-      return a!;
-    }
-    const idxName = pool.findIndex(
+  return cardsForColumn(column).map((spec) => {
+    const byId = fromApi.find((a) => a.id === spec.id);
+    if (byId) return byId;
+    const byName = fromApi.find(
       (a) => a.name.trim().toLowerCase() === spec.name.toLowerCase(),
     );
-    if (idxName >= 0) {
-      const [a] = pool.splice(idxName, 1);
-      return a!;
-    }
-    return (fallbacks.find((f) => f.id === spec.id) ??
-      fallbacks[0]!) as OnboardingAgentRow;
+    if (byName) return byName;
+    return (ONBOARDING_FALLBACK_AGENTS.find((f) => f.id === spec.id) ??
+      ONBOARDING_FALLBACK_AGENTS[0]!) as OnboardingAgentRow;
   });
-}
-
-/** Reorders Concierge agents to match the fixed CONCIERGE_AGENT_CARDS display order. */
-export function orderConciergeAgentsForDisplay(
-  fromApi: OnboardingAgentRow[],
-): OnboardingAgentRow[] {
-  return orderAgentsForDepartment(
-    fromApi,
-    CONCIERGE_AGENT_CARDS,
-    CONCIERGE_FALLBACK_AGENTS,
-  );
-}
-
-/** Reorders Shop agents to match the fixed SHOP_AGENT_CARDS display order. */
-export function orderShopAgentsForDisplay(
-  fromApi: OnboardingAgentRow[],
-): OnboardingAgentRow[] {
-  return orderAgentsForDepartment(
-    fromApi,
-    SHOP_AGENT_CARDS,
-    SHOP_FALLBACK_AGENTS,
-  );
 }
 
 // ── 4. Formatters ─────────────────────────────────────────────────────────────
 
 /**
  * Returns "22 March" (day + long month, no time, no year) from any timestamp string.
- * Always displays in IST (Asia/Kolkata) — matches the UTC→IST conversion used
- * throughout the project (lib/istDate, /api/tickets, /api/onboarding).
- * Returns "—" on parse failure.
+ * Always displays in IST (Asia/Kolkata). Returns "—" on parse failure.
  */
 export function formatLedgerDate(iso: string): string {
   const ms = utcMillisFromDbTimestamp(iso);
@@ -191,14 +151,7 @@ export function ledgerRowFromInsertPayload(
       : String(raw.agent_name ?? "");
   if (!agentName.trim()) return null;
 
-  return {
-    id: rowId,
-    clientName,
-    recordedAt,
-    agentName,
-    // Derive department from agent name — no DB column needed
-    department: getAgentDepartment(agentName),
-  };
+  return { id: rowId, clientName, recordedAt, agentName };
 }
 
 // ── 6. Portrait helpers ───────────────────────────────────────────────────────
@@ -207,58 +160,27 @@ function bundledImageSrc(img: string | { src: string }): string {
   return typeof img === "string" ? img : img.src;
 }
 
-const LOCAL_ONBOARDING_PORTRAITS: Record<
-  "amit" | "samson" | "meghana" | "kaniisha" | "vikram" | "katya" | "harsh",
-  string
-> = {
-  amit: bundledImageSrc(amitPortrait),
+/**
+ * Bundled portraits keyed by roster id. To add one: drop
+ * `onboarding-agents-images/<id>.webp` in the repo, import it above and add
+ * the key here. Seats without a file show a blank black frame (Nandini,
+ * Kabeer and Surbhi as of 2026-09-07 — photos still to be supplied).
+ */
+const LOCAL_ONBOARDING_PORTRAITS: Readonly<Record<string, string>> = {
   samson: bundledImageSrc(samsonPortrait),
-  meghana: bundledImageSrc(meghanaPortrait),
   kaniisha: bundledImageSrc(kaniishaPortrait),
-  vikram: bundledImageSrc(vikramPortrait),
-  katya: bundledImageSrc(katyaPortrait),
-  harsh: bundledImageSrc(harshPortrait),
 };
 
-function agentPortraitPresetKey(
-  agent: OnboardingAgentRow,
-): "amit" | "samson" | "meghana" | "kaniisha" | "vikram" | "katya" | "harsh" | null {
-  const id = agent.id.trim().toLowerCase();
-  if (
-    id === "amit" ||
-    id === "samson" ||
-    id === "meghana" ||
-    id === "kaniisha" ||
-    id === "vikram" ||
-    id === "katya" ||
-    id === "harsh"
-  ) {
-    return id;
-  }
-  const n = agent.name.trim().toLowerCase();
-  if (n === "amit") return "amit";
-  if (n === "samson") return "samson";
-  if (n === "meghana") return "meghana";
-  if (n === "kaniisha") return "kaniisha";
-  if (n === "vikram") return "vikram";
-  if (n === "katya") return "katya";
-  if (n === "harsh") return "harsh";
-  return null;
-}
-
 /**
- * Resolves the best available portrait src for an agent:
- *   1. photoUrl from database (takes priority)
- *   2. Bundled static image for known concierge agents
- *   3. Dicebear avatar fallback (seeded by name / id)
+ * Resolves the portrait src for an agent, or null when there is none:
+ *   1. photoUrl from the API (takes priority)
+ *   2. Bundled static image for the roster id / first name
+ *   3. null — the card renders a blank black frame (user decision 2026-09-07:
+ *      no placeholder avatars while the new agents' photos are pending).
  */
-export function agentPortraitSrc(agent: OnboardingAgentRow): string {
+export function agentPortraitSrc(agent: OnboardingAgentRow): string | null {
   if (agent.photoUrl) return agent.photoUrl;
-  const presetKey = agentPortraitPresetKey(agent);
-  if (presetKey) return LOCAL_ONBOARDING_PORTRAITS[presetKey];
-  const q = new URLSearchParams({
-    seed: agent.name || agent.id,
-    backgroundColor: "transparent",
-  });
-  return `https://api.dicebear.com/7.x/avataaars/svg?${q.toString()}`;
+  const id = agent.id.trim().toLowerCase();
+  const first = agent.name.trim().toLowerCase().split(/[\s/,]/)[0] ?? "";
+  return LOCAL_ONBOARDING_PORTRAITS[id] ?? LOCAL_ONBOARDING_PORTRAITS[first] ?? null;
 }

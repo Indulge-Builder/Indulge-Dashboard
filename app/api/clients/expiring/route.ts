@@ -14,7 +14,7 @@
 import { NextResponse } from "next/server";
 import { withApiGuard, noStoreJson } from "@/lib/apiGuard";
 import { getCurrentIstMonthDateBounds } from "@/lib/istDate";
-import { normalizeQueendom } from "@/lib/queendom";
+import { normalizeQueendom, queendomRecord } from "@/lib/queendom";
 import type { RenewalDueClient, RenewalsDueResponse } from "@/types";
 
 interface ExpiringClientRow {
@@ -42,7 +42,7 @@ export const GET = withApiGuard(async (_req, db) => {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const result: RenewalsDueResponse = { ananyshree: [], anishqa: [] };
+  const result: RenewalsDueResponse = queendomRecord(() => []);
   for (const row of (data ?? []) as ExpiringClientRow[]) {
     const queendom = normalizeQueendom(row.group);
     if (!queendom || !row.name || !row.latest_subscription_end) continue;

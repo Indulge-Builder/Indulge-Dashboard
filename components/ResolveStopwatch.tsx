@@ -25,10 +25,17 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useScreenActive } from "@/hooks/useScreenActive";
 import { surgeBgVariants } from "@/lib/motionPresets";
+import { fw } from "@/lib/tvScale";
 
 interface ResolveStopwatchProps {
   /** UTC ms of the most recent resolution; null until one is seen. */
   lastResolvedAtMs?: number | null;
+  /**
+   * Three-column band (handoff 1c §B3): digits pinned to 150px on the TV
+   * stage, units 30px, and the flanking hairlines dropped — there is no
+   * spare width for them at a third of the screen.
+   */
+  compact?: boolean;
 }
 
 // ── Age phases: the longer since the last resolve, the hotter the warning ────
@@ -74,7 +81,10 @@ function formatElapsed(ms: number): { digits: string; units: string } {
     : { digits: `${pad(m)}:${pad(s)}`, units: "min · sec" };
 }
 
-export default function ResolveStopwatch({ lastResolvedAtMs }: ResolveStopwatchProps) {
+const COMPACT_DIGITS_STYLE = { fontSize: fw(150), letterSpacing: "0.08em" };
+const COMPACT_UNITS_STYLE = { fontSize: fw(30), marginTop: fw(10) };
+
+export default function ResolveStopwatch({ lastResolvedAtMs, compact = false }: ResolveStopwatchProps) {
   const active = useScreenActive();
   const [nowMs, setNowMs] = useState(() => Date.now());
 
@@ -120,7 +130,13 @@ export default function ResolveStopwatch({ lastResolvedAtMs }: ResolveStopwatchP
   // 68+16+3cqh stack leaves real headroom — the digits can never be cut
   // against the title again (the band itself still clips as the outer guard).
   return (
-    <div className="relative flex h-full w-full min-h-0 flex-col items-center justify-center [container-type:size]">
+    <div
+      className={`relative flex h-full w-full min-h-0 flex-col items-center justify-center ${
+        // Compact sizes come from lib/tvScale (viewport-relative); a size
+        // container here would re-base those cqw units to this wrapper.
+        compact ? "" : "[container-type:size]"
+      }`}
+    >
       {pulseKey > 0 && (
         <motion.div
           key={pulseKey}
@@ -136,25 +152,33 @@ export default function ResolveStopwatch({ lastResolvedAtMs }: ResolveStopwatchP
           a short MM:SS never floats in an empty plinth — and they recede as
           HH:MM:SS grows into the space. */}
       <div className="flex w-full items-center justify-center gap-[3cqw] px-[4cqw]">
+        {!compact && (
+          <span
+            className={`h-px min-w-0 flex-1 bg-gradient-to-r from-transparent ${phase.rule}`}
+            aria-hidden
+          />
+        )}
         <span
-          className={`h-px min-w-0 flex-1 bg-gradient-to-r from-transparent ${phase.rule}`}
-          aria-hidden
-        />
-        <span
-          className={`font-montserrat font-bold ${digitsSizeClass} leading-none tracking-[0.1em] tabular-nums ${
+          className={`font-montserrat font-bold ${compact ? "" : digitsSizeClass} leading-none tracking-[0.1em] tabular-nums ${
             elapsed == null ? "text-champagne/35" : phase.digits
           }`}
+          style={compact ? COMPACT_DIGITS_STYLE : undefined}
         >
           {elapsed?.digits ?? "--:--"}
         </span>
-        <span
-          className={`h-px min-w-0 flex-1 bg-gradient-to-l from-transparent ${phase.rule}`}
-          aria-hidden
-        />
+        {!compact && (
+          <span
+            className={`h-px min-w-0 flex-1 bg-gradient-to-l from-transparent ${phase.rule}`}
+            aria-hidden
+          />
+        )}
       </div>
       {elapsed != null && (
         <span
-          className={`mt-[3cqh] font-cinzel font-semibold uppercase leading-none tracking-[0.4em] text-[min(16cqh,3rem)] ${phase.units}`}
+          className={`font-cinzel font-semibold uppercase leading-none tracking-[0.4em] ${
+            compact ? "" : "mt-[3cqh] text-[min(16cqh,3rem)]"
+          } ${phase.units}`}
+          style={compact ? COMPACT_UNITS_STYLE : undefined}
         >
           {elapsed.units}
         </span>

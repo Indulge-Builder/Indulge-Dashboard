@@ -6,7 +6,7 @@
  *   1. Add its WidgetId to the union below
  *   2. Add its config entry to WIDGETS (mark mounted: false until ready to mount)
  *   3. Create its component file
- *   4. Mount it in the appropriate screen component (QueendomPanel or OnboardingLayout)
+ *   4. Mount it in the appropriate screen component (concierge/QueendomColumn, ScoreboardStrip, or OnboardingLayout)
  */
 
 import type { DataSourceId } from "./dataSources";
@@ -40,7 +40,7 @@ export const WIDGETS: Record<WidgetId, WidgetConfig> = {
     dataSources: ["freshdesk"],
     mounted: true,
     description:
-      "Full concierge panel per Queendom (tickets + agents + jokers + renewals)",
+      "One concierge column per Queendom (scoreboard strip + renewals + leaderboard + special dates + band)",
   },
   "agent-leaderboard": {
     id: "agent-leaderboard",

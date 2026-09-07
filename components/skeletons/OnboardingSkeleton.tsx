@@ -61,7 +61,7 @@ function SkAgentCard({ delay = 0 }: { delay?: number }) {
   );
 }
 
-/** Department column skeleton (left or right): heading + 3 stacked agent cards */
+/** Agent column skeleton (left or right): heading + stacked agent cards */
 function SkDeptColumn({
   accentColor,
   delay = 0,
@@ -80,7 +80,7 @@ function SkDeptColumn({
           gap: "clamp(0.2rem,0.4cqmin,0.5rem)",
         }}
       >
-        {/* Department heading */}
+        {/* Column heading */}
         <div
           className="flex shrink-0 flex-col"
           style={{
@@ -291,14 +291,14 @@ export default function OnboardingSkeleton() {
           gap: "clamp(0.6rem,1.4cqw,3.4rem)",
         }}
       >
-        {/* Column 1: Concierge (gold accent) */}
+        {/* Column 1: Onboarding agents (gold) */}
         <SkDeptColumn accentColor="rgba(212,175,55,1)" delay={0} />
 
         {/* Column 2: Performance + Ledger */}
         <SkCenterColumn />
 
-        {/* Column 3: Shop (sky/blue accent) */}
-        <SkDeptColumn accentColor="rgba(125,211,252,1)" delay={0.15} />
+        {/* Column 3: Onboarding agents (gold) */}
+        <SkDeptColumn accentColor="rgba(212,175,55,1)" delay={0.15} />
       </div>
     </section>
   );

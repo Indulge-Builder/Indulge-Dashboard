@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/reconcile-freshdesk",
+      "path": "/api/cron/reconcile-freshdesk?hours=168",
       "schedule": "30 22 * * *"
     }
   ]

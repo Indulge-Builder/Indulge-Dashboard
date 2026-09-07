@@ -7,11 +7,11 @@
  * Memoized — only re-renders when its agent prop changes (no parent re-render cascade).
  *
  * Also exports:
- *   GRID_COLS — the Tailwind responsive grid template shared with the header in
+ *   GRID_STYLE — the grid template shared with the header in
  *               AgentLeaderboard.tsx (single source of truth for column widths).
  */
 
-import { memo, useRef, useEffect, useState, useMemo } from "react";
+import { memo, useRef, useEffect, useState, useMemo, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import type { AgentStats } from "@/lib/types";
 import {
@@ -23,20 +23,34 @@ import {
   winShimmerBarVariants,
 } from "@/lib/motionPresets";
 import { usePrevious } from "@/hooks/usePrevious";
+import { fh, fw } from "@/lib/tvScale";
 import { AnimatedValue } from "@/components/AnimatedValue";
 import { AgentIcon } from "./AgentIcon";
 
 // ── Shared grid template (header + every row must match exactly) ──────────────
-// Exported so AgentLeaderboard.tsx uses the same string without duplication.
-export const GRID_COLS =
-  "grid-cols-[3.5rem_minmax(0,2fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_minmax(6.75rem,1.1fr)] " +
-  "sm:grid-cols-[4.5rem_minmax(0,2fr)_minmax(7rem,1fr)_minmax(7rem,1fr)_minmax(8rem,1.1fr)] " +
-  "lg:grid-cols-[5.5rem_minmax(0,2fr)_minmax(8.5rem,1fr)_minmax(8.5rem,1fr)_minmax(9rem,1.1fr)] " +
-  "xl:grid-cols-[5.5rem_minmax(0,2fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1fr)_minmax(9.5rem,1.1fr)]";
+// Handoff 1c §B2: `72px minmax(0,2fr) minmax(150px,1fr) minmax(150px,1fr)
+// minmax(210px,1.1fr)`, column-gap 30px, horizontal padding 14px — expressed
+// through lib/tvScale so the TV stage renders those exact pixels and smaller
+// viewports scale proportionally. Exported so AgentLeaderboard.tsx uses the
+// same object without duplication.
+export const GRID_STYLE: CSSProperties = {
+  gridTemplateColumns: `${fw(72)} minmax(0,2fr) minmax(${fw(150)},1fr) minmax(${fw(150)},1fr) minmax(${fw(210)},1.1fr)`,
+  columnGap: fw(30),
+  paddingLeft: fw(14),
+  paddingRight: fw(14),
+};
 
-// Fluid column gap + horizontal padding — shared by header and rows so they
-// stay pixel-aligned at every viewport size (tokens in globals.css).
-export const GRID_GAP_X = "gap-x-[var(--gap-row-x)] px-[var(--pad-row-x)]";
+/** Row vertical padding (handoff: 20px; drop to 12 first if a roster exceeds 10). */
+const ROW_PAD_Y = fh(20);
+
+// ── Cell type sizes (handoff §B2, stage px) ───────────────────────────────────
+const NAME_STYLE: CSSProperties = { fontSize: fw(54), letterSpacing: "0.025em" };
+const BIG_STYLE: CSSProperties = { fontSize: fw(66) };
+const SLASH_STYLE: CSSProperties = { fontSize: fw(29) };
+const DENOM_STYLE: CSSProperties = { fontSize: fw(38) };
+const PENDING_STYLE: CSSProperties = { fontSize: fw(54) };
+const PAIR_GAP: CSSProperties = { gap: fw(7) };
+const TRIPLE_GAP: CSSProperties = { gap: fw(3.6) };
 
 // ── AgentRow ──────────────────────────────────────────────────────────────────
 export interface AgentRowProps {
@@ -151,12 +165,12 @@ export const AgentRow = memo(function AgentRow({
 
       {/* ── Data grid ─────────────────────────────────────────────────────── */}
       <div
-        className={`grid ${GRID_COLS} items-center ${GRID_GAP_X} py-[0.55cqh] sm:py-[0.7cqh] rounded-xl transition-colors duration-300 group relative z-[3] hover:bg-white/[0.025]`}
+        className="grid items-center rounded-xl group relative z-[3]"
+        style={{ ...GRID_STYLE, paddingTop: ROW_PAD_Y, paddingBottom: ROW_PAD_Y }}
       >
         {/* Col 1: Icon — subtle scale pulse on surge, never distorting */}
         <motion.div
-          className="ml-2 sm:ml-3 lg:ml-4"
-          style={gpuStyle}
+          style={{ ...gpuStyle, marginLeft: fw(6) }}
           animate={
             surgeKey > 0
               ? { scale: [1, 1.14, 1], opacity: [1, 0.88, 1] }
@@ -174,8 +188,8 @@ export const AgentRow = memo(function AgentRow({
 
         {/* Col 2: Agent name — opacity dip on surge; row-level gold burst carries the drama */}
         <motion.p
-          className="min-w-0 font-cinzel font-semibold text-[clamp(1.9rem,3.1cqw,3.9rem)] tracking-wide text-champagne leading-none text-center truncate px-1"
-          style={gpuStyle}
+          className="min-w-0 font-cinzel font-semibold text-champagne leading-none text-center truncate px-1"
+          style={{ ...gpuStyle, ...NAME_STYLE }}
           animate={surgeKey > 0 ? { opacity: [1, 0.6, 1] } : { opacity: 1 }}
           transition={{ duration: 0.55, ease: "easeOut" }}
         >
@@ -183,59 +197,65 @@ export const AgentRow = memo(function AgentRow({
         </motion.p>
 
         {/* Col 3: Today — completed / assigned */}
-        <div className="flex items-baseline justify-center gap-1 sm:gap-2">
+        <div className="flex items-baseline justify-center" style={PAIR_GAP}>
           <AnimatedValue
             value={today}
-            className="font-montserrat text-[clamp(2.325rem,3.675cqw,4.65rem)] leading-none text-green-400 tabular-nums font-semibold"
+            className="font-montserrat leading-none text-green-400 tabular-nums font-semibold"
+            style={BIG_STYLE}
             highlightOnIncrease
           />
-          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-white/25 leading-none">
+          <span className="font-montserrat text-white/25 leading-none" style={SLASH_STYLE}>
             /
           </span>
           <AnimatedValue
             value={received}
-            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-white/40 leading-none tabular-nums"
+            className="font-montserrat text-white/40 leading-none tabular-nums"
+            style={DENOM_STYLE}
           />
         </div>
 
         {/* Col 4: Monthly — completed / assigned */}
-        <div className="flex items-baseline justify-center gap-1 sm:gap-2">
+        <div className="flex items-baseline justify-center" style={PAIR_GAP}>
           <AnimatedValue
             value={agent.tasksCompletedThisMonth ?? 0}
-            className="font-montserrat tabular-nums font-semibold leading-none text-[clamp(2.325rem,3.675cqw,4.65rem)]"
-            style={{ color: "rgba(212,175,55,0.9)" }}
+            className="font-montserrat tabular-nums font-semibold leading-none"
+            style={{ ...BIG_STYLE, color: "rgba(212,175,55,0.9)" }}
           />
-          <span className="font-montserrat text-[clamp(1.275rem,1.575cqw,2.025rem)] text-white/25 leading-none">
+          <span className="font-montserrat text-white/25 leading-none" style={SLASH_STYLE}>
             /
           </span>
           <AnimatedValue
             value={agent.tasksAssignedThisMonth ?? 0}
-            className="font-montserrat text-[clamp(1.65rem,2.175cqw,2.7rem)] text-white/40 leading-none tabular-nums"
+            className="font-montserrat text-white/40 leading-none tabular-nums"
+            style={DENOM_STYLE}
           />
         </div>
 
         {/* Col 5: Pending / Overdue / Incomplete */}
-        <div className="flex items-baseline justify-center gap-0.5 sm:gap-1">
+        <div className="flex items-baseline justify-center" style={TRIPLE_GAP}>
           <AnimatedValue
             value={pending}
-            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-red-400"
+            className="font-montserrat leading-none tabular-nums font-semibold text-red-400"
+            style={PENDING_STYLE}
             highlightOnIncrease
           />
-          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-montserrat leading-none tabular-nums font-bold text-white/30" style={PENDING_STYLE}>
             /
           </span>
           <AnimatedValue
             value={overdue}
-            className={`font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold ${
+            className={`font-montserrat leading-none tabular-nums font-bold ${
               hasOverdue ? "error-overdue-glow" : "text-white/40"
             }`}
+            style={PENDING_STYLE}
           />
-          <span className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-bold text-white/30">
+          <span className="font-montserrat leading-none tabular-nums font-bold text-white/30" style={PENDING_STYLE}>
             /
           </span>
           <AnimatedValue
             value={incomplete}
-            className="font-montserrat text-[clamp(1.875rem,2.85cqw,3.75rem)] leading-none tabular-nums font-semibold text-slate-200/60"
+            className="font-montserrat leading-none tabular-nums font-semibold text-slate-200/60"
+            style={PENDING_STYLE}
             highlightOnIncrease
           />
         </div>

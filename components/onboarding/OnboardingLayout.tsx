@@ -1,7 +1,8 @@
 "use client";
 
 import { useOnboardingPanelData } from "@/hooks/useOnboardingPanelData";
-import { DepartmentColumn } from "./DepartmentColumn";
+import { AgentColumn } from "./AgentColumn";
+import { AGENT_COLUMN_LABEL } from "@/lib/onboardingAgents";
 import { TargetMeter } from "./TargetMeter";
 import { ConversionLedger } from "./ConversionLedger";
 import { PerformanceLineGraph } from "./PerformanceLineGraph";
@@ -11,8 +12,9 @@ import { DEPT_HEADING_FONT } from "./utils";
 export default function OnboardingLayout() {
   const props = useOnboardingPanelData();
   const {
-    conciergeAgents,
-    shopAgents,
+    agents,
+    leftAgents,
+    rightAgents,
     ledger,
     pulseEvents,
     leadMonthStats,
@@ -41,10 +43,10 @@ export default function OnboardingLayout() {
         className="relative grid min-h-0 flex-1 grid-cols-1 gap-[clamp(0.6rem,1.4cqw,3.4rem)] lg:grid-cols-[1fr_1fr_1.05fr]"
       >
         <div className="flex min-h-[clamp(220px,28cqh,380px)] flex-col lg:min-h-0">
-          <DepartmentColumn
-            department="concierge"
-            label="Onboarding"
-            agents={conciergeAgents}
+          <AgentColumn
+            column="left"
+            label={AGENT_COLUMN_LABEL.left}
+            agents={leftAgents}
             prefersReducedMotion={prefersReducedMotion}
             leadStatusByAgent={leadStatusByAgent}
           />
@@ -225,7 +227,7 @@ export default function OnboardingLayout() {
               from the column's own gap, same as between the cards above. */}
           <div className="relative flex min-h-0 flex-[1.7] flex-col">
             <TargetMeter
-              agents={[...conciergeAgents, ...shopAgents]}
+              agents={agents}
               totalClosed={leadMonthStats.dealsClosedThisMonth}
             />
           </div>
@@ -242,10 +244,10 @@ export default function OnboardingLayout() {
         </div>
 
         <div className="flex min-h-[clamp(220px,28cqh,380px)] flex-col lg:min-h-0">
-          <DepartmentColumn
-            department="shop"
-            label="Shop"
-            agents={shopAgents}
+          <AgentColumn
+            column="right"
+            label={AGENT_COLUMN_LABEL.right}
+            agents={rightAgents}
             prefersReducedMotion={prefersReducedMotion}
             leadStatusByAgent={leadStatusByAgent}
           />
