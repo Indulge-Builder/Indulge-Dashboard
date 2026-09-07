@@ -1,6 +1,12 @@
 # Freshdesk↔Supabase reconciliation, every 3 hours.
 # Lives here because Vercel Hobby limits crons to daily; vercel.json keeps a
 # daily 04:00 IST run as a backstop. Both hit the same idempotent endpoint.
+#
+# Lookback is 48 h, NOT the cron cadence: GitHub schedules drift (observed
+# gaps of 5–6.5 h between runs on 2026-09-04/05) and a 4 h window left every
+# ticket created or edited in the gap unreconciled — 20 tickets created in
+# Sept 2026 were missing from the DB and 29 statuses were stale. 48 h of
+# tickets is ~3 pages (6 Freshdesk credits), so the wide window is free.
 name: reconcile-freshdesk
 
 on:
@@ -15,5 +21,5 @@ jobs:
       - name: Call reconcile endpoint
         run: |
           curl -fsS --max-time 90 \
-            "https://indulge-live-dashboard.vercel.app/api/cron/reconcile-freshdesk?hours=4" \
+            "https://indulge-live-dashboard.vercel.app/api/cron/reconcile-freshdesk?hours=48" \
             -H "x-webhook-secret: ${{ secrets.RECONCILE_WEBHOOK_SECRET }}"
