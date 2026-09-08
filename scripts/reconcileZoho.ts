@@ -5,6 +5,10 @@
  *   npm run reconcile-zoho -- --leads ... --deals ... --apply                            # upsert changed + missing rows
  *   npm run reconcile-zoho -- --leads ... --deals ... --apply --delete-missing           # also delete DB rows Zoho no longer has
  *
+ * --delete-missing is race-safe: a DB row created AFTER the newest Created_Time in the
+ * dump is a live webhook arrival the dump could not contain, so it is never deleted
+ * (2026-09-08: a lead created 2 h after the dump was wrongly removed before this guard).
+ *
  * Zoho is the source of truth (user decision 2026-09-07). Input files are NDJSON
  * dumps of COQL rows (one Zoho record per line) with at least:
  *   Leads: id, Lead_Status, Owner{id,name}, Full_Name, Business_Vertical, Created_Time, Modified_Time
@@ -44,6 +48,19 @@ const db = createClient(URL, KEY, { auth: { persistSession: false } });
 const argv = process.argv.slice(2);
 const APPLY = argv.includes("--apply");
 const DELETE_MISSING = argv.includes("--delete-missing");
+
+/** Newest Created_Time in the dump (ms). DB rows created after it post-date the dump. */
+function dumpHorizonMs(rows: Record<string, unknown>[]): number {
+  let max = 0;
+  for (const r of rows) { const ms = Date.parse(toUtcIso(r.Created_Time) ?? ""); if (ms > max) max = ms; }
+  return max;
+}
+/** Split DB-only rows into deletable (older than the dump) and post-dump arrivals to keep. */
+function splitByHorizon<T extends { created_at: string }>(rows: T[], horizonMs: number) {
+  const stale: T[] = [], fresh: T[] = [];
+  for (const r of rows) (Date.parse(r.created_at) > horizonMs ? fresh : stale).push(r);
+  return { stale, fresh };
+}
 function filesAfter(flag: string): string[] {
   const i = argv.indexOf(flag); if (i < 0) return [];
   const out: string[] = [];
@@ -120,7 +137,9 @@ async function upsertBatches(table: string, key: string, rows: Record<string, un
   for (let i = 0; i < rows.length; i += 200) {
     const { error } = await db.from(table).upsert(rows.slice(i, i + 200), { onConflict: key });
     if (error) throw new Error(`${table} upsert: ${error.message}`);
+    if (rows.length > 200) process.stdout.write(`  ${Math.min(i + 200, rows.length)}/${rows.length}\r`);
   }
+  if (rows.length > 200) process.stdout.write("\n");
 }
 async function deleteBatches(table: string, key: string, ids: string[]) {
   for (let i = 0; i < ids.length; i += 200) {
@@ -139,6 +158,7 @@ async function reconcileLeads() {
   for (const r of zohoRows) zoho.set(String(r.id), r); // last page wins on duplicates
   console.log(`\n== LEADS ==  Zoho rows: ${zohoRows.length} (${zoho.size} unique ids)`);
 
+  console.log("fetching DB leads…");
   const dbRows = await fetchAll<DbLead>("leads", "lead_id, agent_name, latest_status, lead_name, business_vertical, created_at, modified_at");
   const dbById = new Map(dbRows.map((r) => [r.lead_id, r]));
   console.log(`DB rows: ${dbRows.length}`);
@@ -175,16 +195,19 @@ async function reconcileLeads() {
     if (diffs.length) { for (const d of diffs) inc(fieldDiffs, d); toUpsert.push(expected); }
   }
 
-  const missingInZoho = dbRows.filter((r) => !zoho.has(r.lead_id));
+  const horizon = dumpHorizonMs(zohoRows);
+  const { stale: missingInZoho, fresh: newerThanDump } = splitByHorizon(dbRows.filter((r) => !zoho.has(r.lead_id)), horizon);
   console.log(`inserts (in Zoho, not in DB): ${inserts}`);
   console.log(`updates (field diffs): ${toUpsert.length - inserts}`, Object.fromEntries(fieldDiffs));
   console.log("status transitions:", Object.fromEntries([...statusPairs].sort((a, b) => b[1] - a[1])));
   const missByStatus = new Map<string, number>(); for (const r of missingInZoho) inc(missByStatus, r.latest_status ?? "∅");
   console.log(`in DB, not in Zoho (deleted / trashed / not dumped): ${missingInZoho.length}`, Object.fromEntries(missByStatus));
   if (missingInZoho.length) console.log("  sample:", missingInZoho.slice(0, 8).map((r) => `${r.lead_id} ${r.lead_name} [${r.latest_status}] ${r.created_at.slice(0, 10)}`));
+  if (newerThanDump.length) console.log(`in DB, newer than the dump (webhook arrivals after ${new Date(horizon).toISOString()} — kept, never deleted): ${newerThanDump.length}`, newerThanDump.map((r) => `${r.lead_id} ${r.lead_name}`));
   if (unknownOwners.size) console.warn("UNKNOWN owner ids (fell back to Owner.name) — extend OWNER_NAMES:", Object.fromEntries(unknownOwners));
 
   if (APPLY) {
+    console.log(`applying ${toUpsert.length} lead upserts in batches of 200…`);
     await upsertBatches("leads", "lead_id", toUpsert);
     console.log(`APPLIED: upserted ${toUpsert.length} lead rows`);
     if (DELETE_MISSING && missingInZoho.length) {
@@ -233,9 +256,11 @@ async function reconcileDeals() {
     if ((cur.closing_date ?? null) !== expected.closing_date) diffs.push("closing_date");
     if (diffs.length) { for (const d of diffs) inc(fieldDiffs, d); toUpsert.push(expected); }
   }
-  const missingInZoho = dbRows.filter((r) => !zoho.has(r.deal_id));
+  const horizon = dumpHorizonMs(zohoRows);
+  const { stale: missingInZoho, fresh: newerThanDump } = splitByHorizon(dbRows.filter((r) => !zoho.has(r.deal_id)), horizon);
   console.log(`inserts: ${inserts}; updates: ${toUpsert.length - inserts}`, Object.fromEntries(fieldDiffs));
   console.log(`in DB, not in Zoho: ${missingInZoho.length}`, missingInZoho.map((r) => `${r.deal_id} ${r.deal_name} (${r.agent_name}) ${r.created_at.slice(0, 10)}`));
+  if (newerThanDump.length) console.log(`in DB, newer than the dump (kept, never deleted): ${newerThanDump.length}`, newerThanDump.map((r) => `${r.deal_id} ${r.deal_name}`));
 
   if (APPLY) {
     await upsertBatches("deals", "deal_id", toUpsert);
@@ -250,4 +275,5 @@ async function reconcileDeals() {
 (async () => {
   if (LEAD_FILES.length) await reconcileLeads();
   if (DEAL_FILES.length) await reconcileDeals();
+  process.exit(0); // don't let a lingering client socket keep the process alive
 })().catch((e) => { console.error(e); process.exit(1); });

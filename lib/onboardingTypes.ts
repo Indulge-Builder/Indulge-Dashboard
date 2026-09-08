@@ -131,18 +131,38 @@ export type LeadStatusByAgent = Record<string, AgentLeadStatusBreakdown>;
  * automation owners included.
  *
  *   leads                — total rows where created_at falls in this IST month
- *   attended             — rows whose status shows the agent actioned the lead
- *                          (everything except New and Junk — isAttendedStatus)
- *   dealsClosedThisMonth — deals whose closing_date (fallback: created_at IST day)
- *                          falls in this IST month
+ *   pipeline             — live opportunities: Conversing + Nurturing +
+ *                          Payment Link + Win (isLivePipelineStatus)
+ *   rnr                  — rang, no response: reached out, never answered —
+ *                          the lead-quality / reachability signal (62 % of
+ *                          September 2026 when this tile was introduced)
+ *   untouched            — still "New": nobody has actioned the lead yet
  *   junk                 — rows normalised to Junk (Junk, Not Qualified, legacy Trash)
+ *   dealsClosedThisMonth — deals whose closing_date (fallback: created_at IST day)
+ *                          falls in this IST month (drives the target ring)
+ *
+ * The Performance tiles show leads · pipeline · rnr · junk (user decision
+ * 2026-09-07 — "Attended" = leads − New − Junk was mostly RNR and overstated
+ * engagement; Converted already lives on the ring). Swap a tile by editing the
+ * TILES array in components/onboarding/OnboardingLayout.tsx.
  */
 export interface LeadMonthStats {
   leads: number;
-  attended: number;
-  dealsClosedThisMonth: number;
+  pipeline: number;
+  rnr: number;
+  untouched: number;
   junk: number;
+  dealsClosedThisMonth: number;
 }
+
+export const EMPTY_LEAD_MONTH_STATS: LeadMonthStats = {
+  leads: 0,
+  pipeline: 0,
+  rnr: 0,
+  untouched: 0,
+  junk: 0,
+  dealsClosedThisMonth: 0,
+};
 
 // ── API payload ───────────────────────────────────────────────────────────────
 

@@ -139,6 +139,10 @@ export default function OnboardingLayout() {
               className="grid w-full flex-shrink-0"
               style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "clamp(6px, 1cqw, 28px)" }}
             >
+              {/* Month tiles (Indulge Global leads created this IST month).
+                  Converted is deliberately absent — it lives on the target
+                  ring below. Colours echo the pipeline bar: Pipeline = the
+                  Conversing green, RNR = the RNR yellow, Junk = red. */}
               {(
                 [
                   {
@@ -148,16 +152,16 @@ export default function OnboardingLayout() {
                     accent: "rgba(192,200,220,0.35)",
                   },
                   {
-                    label: "Attended",
-                    value: leadMonthStats.attended,
-                    color: "#6B8FFF",
-                    accent: "rgba(107,143,255,0.45)",
+                    label: "Pipeline",
+                    value: leadMonthStats.pipeline,
+                    color: "#22c55e",
+                    accent: "rgba(34,197,94,0.45)",
                   },
                   {
-                    label: "Converted",
-                    value: leadMonthStats.dealsClosedThisMonth,
-                    color: "#FFB020",
-                    accent: "rgba(255,176,32,0.50)",
+                    label: "RNR",
+                    value: leadMonthStats.rnr,
+                    color: "#eab308",
+                    accent: "rgba(234,179,8,0.45)",
                   },
                   {
                     label: "Junk",

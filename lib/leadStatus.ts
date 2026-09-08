@@ -52,9 +52,13 @@ const LEGACY_BY_KEY: Readonly<Record<string, ZohoLeadStatus>> = {
   trash: "Junk",
 };
 
-/** Statuses that count as "the agent has actioned this lead". */
-export function isAttendedStatus(s: ZohoLeadStatus): boolean {
-  return s !== "New" && s !== "Junk";
+/**
+ * Live pipeline — leads a human is actually working towards a sale:
+ * Conversing, Nurturing, Payment Link, Win. Excludes RNR (rang, no response),
+ * Cold, Lost, Junk and untouched New.
+ */
+export function isLivePipelineStatus(s: ZohoLeadStatus): boolean {
+  return s === "Conversing" || s === "Nurturing" || s === "Payment Link" || s === "Win";
 }
 
 export function isJunkStatus(s: ZohoLeadStatus): boolean {

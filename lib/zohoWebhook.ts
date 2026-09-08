@@ -52,8 +52,9 @@ export function zohoTimestampToDb(isoOrEmpty: string | null): string | null {
 
 /**
  * Parse a Zoho DATE merge field (e.g. `Deals.Closing_Date`) to an IST calendar
- * day "YYYY-MM-DD". Accepts ISO dates, the org's `dd/MM/yyyy` display format
- * (day first — the Indulge org setting), and full datetimes (→ IST day).
+ * day "YYYY-MM-DD". Accepts ISO dates, the webhook's `mm-dd-yyyy` Date Parameter
+ * Format (month first — the Zoho webhook setting, NOT the org display format),
+ * and full datetimes (→ IST day).
  * Returns null for empty / unparseable input.
  */
 export function zohoDateToIstDay(raw: unknown): string | null {
@@ -61,9 +62,12 @@ export function zohoDateToIstDay(raw: unknown): string | null {
   const t = raw.trim();
   if (!t || t === "-None-") return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
-  const dmy = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
-  if (dmy) {
-    const [, d, m, y] = dmy;
+  // Zoho webhook "Date Parameter Format" is set to mm-dd-yyyy (Setup → Webhooks →
+  // send_update_to_dashboard, confirmed 2026-09-08). Month FIRST. Do not flip this
+  // without changing the Zoho setting too — "09-08-2026" is 8 Sept, not 9 Aug.
+  const mdy = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (mdy) {
+    const [, m, d, y] = mdy;
     return `${y}-${m!.padStart(2, "0")}-${d!.padStart(2, "0")}`;
   }
   const iso = zohoTimestampToDb(t);

@@ -43,8 +43,8 @@ import {
   utcMillisFromDbTimestamp,
 } from "@/lib/istDate";
 import {
-  isAttendedStatus,
   isJunkStatus,
+  isLivePipelineStatus,
   isKnownLeadStatus,
   normalizeLeadStatus,
 } from "@/lib/leadStatus";
@@ -247,12 +247,16 @@ export const GET = withApiGuard(
       }
 
       // ── 4. leadMonthStats (metric tiles — every scoped row, roster or not) ─
-      let attended = 0;
+      let pipeline = 0;
+      let rnr = 0;
+      let untouched = 0;
       let junk = 0;
       for (const row of metricRows) {
         const s = normalizeLeadStatus(row.latest_status);
-        if (isAttendedStatus(s)) attended++;
-        if (isJunkStatus(s)) junk++;
+        if (isLivePipelineStatus(s)) pipeline++;
+        else if (s === "RNR") rnr++;
+        else if (s === "New") untouched++;
+        else if (isJunkStatus(s)) junk++;
       }
 
       // ── 5. Closures this month — by closing day (IST), not entry time ─────
@@ -282,9 +286,11 @@ export const GET = withApiGuard(
 
       const leadMonthStats: LeadMonthStats = {
         leads: metricRows.length,
-        attended,
-        dealsClosedThisMonth: dealsThisMonth,
+        pipeline,
+        rnr,
+        untouched,
         junk,
+        dealsClosedThisMonth: dealsThisMonth,
       };
 
       // ── 6. Build OnboardingAgentRow[] in roster order ────────────────────

@@ -131,12 +131,12 @@ Layout top → bottom:
 | Column | Contents |
 |---|---|
 | Left | `AgentColumn` — **Onboarding**: agent cards (Samson, Kaniisha) with portraits, leads this month/today, closures, `LeadStatusHealthBar` pipeline bar per agent |
-| Center | Lead month stat tiles (leads / attended / deals closed / junk) + `PerformanceLineGraph` + `ConversionLedger` |
+| Center | Lead month stat tiles (leads / pipeline / RNR / junk — Indulge Global only) + `PerformanceLineGraph` + `TargetMeter` (closures vs target) + `ConversionLedger` |
 | Right | `AgentColumn` — **Onboarding** (Nandini, Kabeer, Surbhi — joined 2026-08-17; portraits pending — blank black frame until then). Same gold accent as the left column; the roster/column split lives in `lib/onboardingAgents.ts` |
 
 - **`PerformanceLineGraph`** — native SVG multi-line chart, one Catmull-Rom spline (tension 0.35) per business vertical, draw-in `pathLength` animation with 0.12 s stagger. Colors: Indulge Global `#6B8FFF`, Shop `#FFB020`, House `#34D399`, Legacy `#C084FC`.
 - **`ConversionLedger`** — auto-scrolling sales closure ledger driven by `requestAnimationFrame` (not CSS keyframes); `dt` capped at 100 ms; on optimistic row prepend, scroll position compensates by average row height so visible content doesn't jump. Max 15 visible rows; scroll duration `max(32, rows × 6)` s.
-- **`LeadStatusHealthBar`** — segmented pipeline bar per agent over the current Zoho `Lead_Status` picklist, best → worst: Win / Payment Link / Conversing / Nurturing / RNR / New / Cold / Lost / Junk (`ZOHO_LEAD_STATUSES`, `lib/leadStatus.ts`). Legacy labels still in the DB map through `normalizeLeadStatus()` (Touched/Attempted → RNR, In Discussion → Conversing, Qualified → Win, Not Qualified/Trash → Junk). Tiles: Attended = every status except New and Junk. Cards, pipeline and tiles are scoped to `METRIC_BUSINESS_VERTICAL` (Indulge Global); the trendline keeps all four verticals.
+- **`LeadStatusHealthBar`** — segmented pipeline bar per agent over the current Zoho `Lead_Status` picklist, best → worst: Win / Payment Link / Conversing / Nurturing / RNR / New / Cold / Lost / Junk (`ZOHO_LEAD_STATUSES`, `lib/leadStatus.ts`). Legacy labels still in the DB map through `normalizeLeadStatus()` (Touched/Attempted → RNR, In Discussion → Conversing, Qualified → Win, Not Qualified/Trash → Junk). Tiles: Pipeline = Conversing + Nurturing + Payment Link + Win; RNR = rang-no-response; Junk = Junk/Not Qualified. Cards, pipeline and tiles are scoped to `METRIC_BUSINESS_VERTICAL` (Indulge Global); the trendline keeps all four verticals.
 - Agent card metrics flash an `.ob-metric-flash` pulse when their numbers increase. (The old `.card-win-shimmer` gold-foil sweep was never wired up — its plumbing was removed in dry-audit G6.)
 
 ### 4.3 Home screen — `HomePanel` (WIP, env-gated)

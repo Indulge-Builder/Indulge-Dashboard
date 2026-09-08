@@ -13,6 +13,7 @@ import type {
   VerticalTrendPoint,
   LeadMonthStats,
 } from "@/lib/onboardingTypes";
+import { EMPTY_LEAD_MONTH_STATS } from "@/lib/onboardingTypes";
 import type { PulseEvent } from "@/components/onboarding/PerformanceLineGraph";
 import {
   ONBOARDING_FALLBACK_AGENTS,
@@ -68,12 +69,7 @@ export function useOnboardingPanelData(): UseOnboardingPanelDataResult {
     {},
   );
   const [verticalTrendline, setVerticalTrendline] = useState<VerticalTrendPoint[]>([]);
-  const [leadMonthStats, setLeadMonthStats] = useState<LeadMonthStats>({
-    leads: 0,
-    attended: 0,
-    dealsClosedThisMonth: 0,
-    junk: 0,
-  });
+  const [leadMonthStats, setLeadMonthStats] = useState<LeadMonthStats>(EMPTY_LEAD_MONTH_STATS);
 
   const debouncedLoadRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadAbortRef = useRef<AbortController | null>(null);

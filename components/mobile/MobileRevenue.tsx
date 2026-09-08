@@ -4,7 +4,7 @@
  * Revenue tab — the Zoho side, same ranked-feed grammar as Concierge:
  *
  *   1. The month     — closures + leads, one hero pair
- *   2. Lead health   — attended / closed / junk of this month's leads
+ *   2. Lead health   — live pipeline share of this month's leads
  *   3. Onboarding    — every roster agent, ranked by closures
  *   4. Live ledger   — latest closures, newest first
  *
@@ -87,9 +87,10 @@ export default function MobileRevenue({
     (leadMonthStats?.dealsClosedThisMonth ?? 0) ||
     agents.reduce((sum, a) => sum + a.totalConverted, 0);
   const leads = leadMonthStats?.leads ?? 0;
-  const attended = leadMonthStats?.attended ?? 0;
+  const pipeline = leadMonthStats?.pipeline ?? 0;
+  const rnr = leadMonthStats?.rnr ?? 0;
   const junk = leadMonthStats?.junk ?? 0;
-  const attendedPct = leads > 0 ? attended / leads : 0;
+  const pipelinePct = leads > 0 ? pipeline / leads : 0;
 
   const todayIst = istToday().day;
   const recentLedger = ledger.slice(0, LEDGER_SHOWN);
@@ -110,9 +111,15 @@ export default function MobileRevenue({
             </span>
           </div>
           <div className="m-stat" role="listitem">
-            <span className="m-stat-label">Attended</span>
-            <span className="m-stat-num" data-good={attended > 0}>
-              <AnimatedCounter value={attended} delay={450} />
+            <span className="m-stat-label">Pipeline</span>
+            <span className="m-stat-num" data-good={pipeline > 0}>
+              <AnimatedCounter value={pipeline} delay={450} />
+            </span>
+          </div>
+          <div className="m-stat" role="listitem">
+            <span className="m-stat-label">RNR</span>
+            <span className="m-stat-num">
+              <AnimatedCounter value={rnr} delay={500} />
             </span>
           </div>
           <div className="m-stat" role="listitem">
@@ -126,15 +133,15 @@ export default function MobileRevenue({
 
       {/* 2 ── Lead health */}
       {leads > 0 && (
-        <section className="m-card" aria-label="Lead attention rate">
+        <section className="m-card" aria-label="Live pipeline share">
           <header className="m-card-head">
-            <h2 className="m-label">Leads attended</h2>
+            <h2 className="m-label">In pipeline</h2>
             <span className="m-fold-meta m-pct">
-              {Math.round(attendedPct * 100)}%
+              {Math.round(pipelinePct * 100)}%
             </span>
           </header>
           <div className="m-q-meter m-meter-tall" aria-hidden>
-            <i style={{ transform: `scaleX(${attendedPct})` }} />
+            <i style={{ transform: `scaleX(${pipelinePct})` }} />
           </div>
         </section>
       )}
