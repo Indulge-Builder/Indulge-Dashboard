@@ -29,7 +29,7 @@ import {
 } from "./utils";
 
 /** The revenue team's shared monthly closure goal (full ring = this many). */
-export const MONTHLY_CLOSURE_TARGET = 15;
+export const MONTHLY_CLOSURE_TARGET = 50;
 
 // Arc palette, assigned to contributing agents by rank (most closures first).
 // First three echo the Performance tiles (amber / blue / emerald).
