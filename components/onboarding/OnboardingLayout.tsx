@@ -233,6 +233,8 @@ export default function OnboardingLayout() {
             <TargetMeter
               agents={agents}
               totalClosed={leadMonthStats.dealsClosedThisMonth}
+              todayDate={todayDate}
+              prefersReducedMotion={prefersReducedMotion}
             />
           </div>
 
