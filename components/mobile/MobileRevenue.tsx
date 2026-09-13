@@ -21,6 +21,7 @@ import type {
 } from "@/lib/onboardingTypes";
 import { toISTDay, istToday } from "@/lib/istDate";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import { agentPortraitSrc } from "@/components/onboarding/utils";
 import { type InsightsPayload } from "./MobileInsights";
 
 const LEDGER_SHOWN = 6;
@@ -51,26 +52,37 @@ function AgentBlock({
         <h2 className="m-label">{title}</h2>
       </header>
       <div className="m-agent-list">
-        {ranked.map((agent) => (
-          <div key={agent.id} className="m-agent">
-            <div className="m-agent-row m-agent-row-static">
-              <span className="m-agent-name">{agent.name}</span>
-              <span className="m-rev-leads">
-                {agent.leadsCreatedThisMonth} leads
-              </span>
-              <span className="m-agent-score">{agent.totalConverted}</span>
+        {ranked.map((agent) => {
+          // Same bundled cutouts as the TV cards; a seat with no file keeps
+          // an empty obsidian well (no placeholder avatars — see utils.ts).
+          const portrait = agentPortraitSrc(agent);
+          return (
+            <div key={agent.id} className="m-agent">
+              <div className="m-agent-row m-agent-row-static">
+                <span className="m-agent-portrait" aria-hidden>
+                  {portrait && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={portrait} alt="" loading="lazy" decoding="async" />
+                  )}
+                </span>
+                <span className="m-agent-name">{agent.name}</span>
+                <span className="m-rev-leads">
+                  {agent.leadsCreatedThisMonth} leads
+                </span>
+                <span className="m-agent-score">{agent.totalConverted}</span>
+              </div>
+              <div className="m-agent-bar" aria-hidden>
+                <i
+                  style={{
+                    transform: `scaleX(${
+                      max > 0 ? Math.max(0.04, agent.totalConverted / max) : 0
+                    })`,
+                  }}
+                />
+              </div>
             </div>
-            <div className="m-agent-bar" aria-hidden>
-              <i
-                style={{
-                  transform: `scaleX(${
-                    max > 0 ? Math.max(0.04, agent.totalConverted / max) : 0
-                  })`,
-                }}
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
         {ranked.length === 0 && <p className="m-empty">No agents yet.</p>}
       </div>
     </section>

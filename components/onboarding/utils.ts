@@ -23,8 +23,11 @@ import type {
   OnboardingAgentRow,
   OnboardingLedgerRow,
 } from "@/lib/onboardingTypes";
+import kabeerPortrait from "../../onboarding-agents-images/kabeer.webp";
 import kaniishaPortrait from "../../onboarding-agents-images/kaniisha.webp";
+import nandiniPortrait from "../../onboarding-agents-images/nandini.webp";
 import samsonPortrait from "../../onboarding-agents-images/samson.webp";
+import surbhiPortrait from "../../onboarding-agents-images/surbhi.webp";
 
 // ── IST display formatters (module-level singletons — never re-created per call) ──
 
@@ -166,12 +169,23 @@ function bundledImageSrc(img: string | { src: string }): string {
 /**
  * Bundled portraits keyed by roster id. To add one: drop
  * `onboarding-agents-images/<id>.webp` in the repo, import it above and add
- * the key here. Seats without a file show a blank black frame (Nandini,
- * Kabeer and Surbhi as of 2026-09-07 — photos still to be supplied).
+ * the key here. Every seat has a file as of 2026-09-12; a seat without one
+ * shows a blank black frame.
+ *
+ * File prep (Nandini / Kabeer / Surbhi, 2026-09-12): transparent cutout,
+ * margins trimmed to the figure, then ~6 % headroom above the hair and ~4 %
+ * at the sides. The cards crop with `object-fit: cover; object-position: top
+ * center`, so equal headroom is what keeps every hairline at the same height
+ * across frames — a file with a baked-in backdrop (Nandini's arrived as a
+ * screenshot with the checkerboard in the pixels) or a huge empty canvas
+ * will look wrong. Samson / Kaniisha still carry their original canvases.
  */
 const LOCAL_ONBOARDING_PORTRAITS: Readonly<Record<string, string>> = {
   samson: bundledImageSrc(samsonPortrait),
   kaniisha: bundledImageSrc(kaniishaPortrait),
+  nandini: bundledImageSrc(nandiniPortrait),
+  kabeer: bundledImageSrc(kabeerPortrait),
+  surbhi: bundledImageSrc(surbhiPortrait),
 };
 
 /**
@@ -179,7 +193,7 @@ const LOCAL_ONBOARDING_PORTRAITS: Readonly<Record<string, string>> = {
  *   1. photoUrl from the API (takes priority)
  *   2. Bundled static image for the roster id / first name
  *   3. null — the card renders a blank black frame (user decision 2026-09-07:
- *      no placeholder avatars while the new agents' photos are pending).
+ *      no placeholder avatars, ever — a new seat stays black until its file lands).
  */
 export function agentPortraitSrc(agent: OnboardingAgentRow): string | null {
   if (agent.photoUrl) return agent.photoUrl;
