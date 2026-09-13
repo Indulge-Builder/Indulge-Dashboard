@@ -10,10 +10,9 @@
  * The full circle = MONTHLY_CLOSURE_TARGET closures. Each agent's won deals
  * this IST month (OnboardingAgentRow.totalConverted) fill the ring as a
  * colored arc — cumulative arcs drawn back-to-front so the color joints get
- * the same rounded caps as the ring ends. A notch on the track marks today's
- * position through the month, so "7 of 50" can be read as ahead or behind at
- * a glance. Center shows the team total over the target and the days left; a
- * legend lists each contributing agent with their count in their arc color.
+ * the same rounded caps as the ring ends. Center shows the team total over
+ * the target and the days left in the month; a legend lists each contributing
+ * agent with their count in their arc color.
  *
  * ── Depth is structural, never emissive (redesign 2026-09-13) ───────────────
  * The ring used to render every arc through an SVG Gaussian blur (`tmGlow`),
@@ -161,28 +160,27 @@ export function TargetMeter({
 
   const targetMet = totalClosed >= MONTHLY_CLOSURE_TARGET;
 
-  // ── Pace: where we are in the IST month ───────────────────────────────────
-  // The ring answers "how many"; the notch answers "is that good for today".
+  // Days remaining in the IST month — the caption under the numeral, so
+  // "7 of 50" carries how much of the month is left to earn the rest.
   // The day comes from IST (invariant 1) — never from a UTC-derived date.
-  const { paceFrac, daysLeft } = useMemo(() => {
+  //
+  // A matching notch on the track (marking today's position round the ring, so
+  // the arc could be read as ahead or behind pace) was built and removed on
+  // 2026-09-14: nobody could tell what the mark meant without being told, and
+  // drawing it across the band made the ring look divided rather than
+  // annotated. Don't re-add it without a label outside the ring.
+  const daysLeft = useMemo(() => {
     const day = todayDate ?? istToday().day;
     const [y, m, d] = day.split("-").map(Number);
-    if (!y || !m || !d) return { paceFrac: 0, daysLeft: 0 };
+    if (!y || !m || !d) return 0;
     const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-    return {
-      paceFrac: Math.min(d / daysInMonth, 1),
-      daysLeft: Math.max(daysInMonth - d, 0),
-    };
+    return Math.max(daysInMonth - d, 0);
   }, [todayDate]);
 
-  // Ring geometry: 12 o'clock start, clockwise.
-  const polar = (frac: number, radius: number) => {
-    const a = frac * 2 * Math.PI - Math.PI / 2;
-    return { x: 50 + radius * Math.cos(a), y: 50 + radius * Math.sin(a) };
-  };
-  const tip = polar(progressFrac, R);
-  const paceInner = polar(paceFrac, R - STROKE / 2);
-  const paceOuter = polar(paceFrac, R + STROKE / 2);
+  // Leading-edge position (ring starts at 12 o'clock, clockwise).
+  const tipAngle = progressFrac * 2 * Math.PI - Math.PI / 2;
+  const tipX = 50 + R * Math.cos(tipAngle);
+  const tipY = 50 + R * Math.sin(tipAngle);
 
   const uniqueArcColors = Array.from(new Set(arcs.map((a) => a.color)));
   const drawDuration = prefersReducedMotion ? 0 : 1.4;
@@ -289,34 +287,12 @@ export function TargetMeter({
               ))}
             </g>
 
-            {/* Today's pace notch — drawn over the arcs so it stays readable on
-                filled and empty track alike. The dark backing line is what
-                gives it contrast against a bright band. */}
-            <g opacity={targetMet ? 0.35 : 1}>
-              <line
-                x1={paceInner.x}
-                y1={paceInner.y}
-                x2={paceOuter.x}
-                y2={paceOuter.y}
-                stroke="rgba(0,0,0,0.55)"
-                strokeWidth={2.4}
-              />
-              <line
-                x1={paceInner.x}
-                y1={paceInner.y}
-                x2={paceOuter.x}
-                y2={paceOuter.y}
-                stroke="rgba(245,230,200,0.75)"
-                strokeWidth={1}
-              />
-            </g>
-
             {/* Leading edge — a small solid marker, no bloom. It says "you are
                 here"; the center number is the focal point, not this. */}
             {progressFrac > 0 && (
               <motion.circle
-                cx={tip.x}
-                cy={tip.y}
+                cx={tipX}
+                cy={tipY}
                 r={STROKE / 2 - 3.4}
                 fill="#F7F2E6"
                 initial={{ opacity: 0 }}
