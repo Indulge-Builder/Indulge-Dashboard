@@ -24,7 +24,7 @@
  * ring does — from contrast and thickness, not emission:
  *   · a genuinely recessed track (warm lip catching light over a black well)
  *   · a top-lit gradient across each band, so it reads as a physical ribbon
- *   · rounded caps and a restrained leading marker, no bloom
+ *   · rounded caps ending the band, with nothing riding on top of them
  * Do NOT reintroduce feGaussianBlur / box-shadow glow here. Beyond the look,
  * the old filter re-rasterized every frame under an infinite pulse — a 24/7
  * cost on the TV, the same class the 2026-06 perf pass removed elsewhere.
@@ -126,7 +126,7 @@ export function TargetMeter({
   // decorate. (The old build pulsed the dot forever: burn-in on a 24/7 panel.)
   const closedPulse = usePulseOnChange(totalClosed);
 
-  const { arcs, progressFrac, legend } = useMemo(() => {
+  const { arcs, legend } = useMemo(() => {
     const contributors = agents
       .filter((a) => (a.totalConverted ?? 0) > 0)
       .sort((a, b) => (b.totalConverted ?? 0) - (a.totalConverted ?? 0))
@@ -153,7 +153,6 @@ export function TargetMeter({
       // Drawn back-to-front: longest cumulative arc first, so each shorter
       // arc paints over it and every color joint gets a rounded cap.
       arcs: [...arcList].reverse(),
-      progressFrac: Math.min(cum / MONTHLY_CLOSURE_TARGET, 1),
       legend: slices,
     };
   }, [agents, totalClosed]);
@@ -176,11 +175,6 @@ export function TargetMeter({
     const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
     return Math.max(daysInMonth - d, 0);
   }, [todayDate]);
-
-  // Leading-edge position (ring starts at 12 o'clock, clockwise).
-  const tipAngle = progressFrac * 2 * Math.PI - Math.PI / 2;
-  const tipX = 50 + R * Math.cos(tipAngle);
-  const tipY = 50 + R * Math.sin(tipAngle);
 
   const uniqueArcColors = Array.from(new Set(arcs.map((a) => a.color)));
   const drawDuration = prefersReducedMotion ? 0 : 1.4;
@@ -287,19 +281,13 @@ export function TargetMeter({
               ))}
             </g>
 
-            {/* Leading edge — a small solid marker, no bloom. It says "you are
-                here"; the center number is the focal point, not this. */}
-            {progressFrac > 0 && (
-              <motion.circle
-                cx={tipX}
-                cy={tipY}
-                r={STROKE / 2 - 3.4}
-                fill="#F7F2E6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: closedPulse && active && !prefersReducedMotion ? 0.95 : 0.5 }}
-                transition={{ duration: prefersReducedMotion ? 0 : 0.32, ease: "easeOut" }}
-              />
-            )}
+            {/* No marker rides the leading edge. The arc's own rounded cap
+                already ends exactly there, so a dot on top of it marked a
+                position that was never in doubt while adding a second bright
+                focal point against the numeral (removed 2026-09-14 — it kept
+                being read as an unexplained object sitting on the ring). The
+                "a closure just landed" signal it carried lives on the centre
+                numeral's pop, so nothing was lost with it. */}
           </svg>
 
           {/* Center readout. The 18 % side padding keeps the stack inside the
