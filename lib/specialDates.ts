@@ -6,9 +6,10 @@ import type { QueendomId } from "@/types";
 // anniversaries are mapped to `anniversary` (same Heart styling).
 // The year component is ignored — getSpecialDates() rebuilds every event in the
 // current calendar year, so only month-day matters. 2025 is a placeholder.
-// Both queendoms refreshed to August 2026; Ananyshree extended with
-// September 2026 birthdays. Sanika's Queendom (2026-09-04) has no dates on
-// file yet — add them under the "Sanika" heading below.
+// Both queendoms refreshed to September 2026 (Ananyshree birthdays; Anishqa
+// birthdays + wedding + dating anniversaries, added 2026-09-16). Sanika's
+// Queendom (2026-09-04) has no dates on file yet — add them under the
+// "Sanika" heading below.
 interface SpecialDateRaw {
   fullName: string;
   dateOfBirth?: string; // YYYY-MM-DD
@@ -138,6 +139,37 @@ const SPECIAL_DATES_RAW: SpecialDateRaw[] = [
     queendom: "anishqa",
   },
   { fullName: "Abhinaya", anniversary: "2025-08-15", queendom: "anishqa" },
+
+  // ── Anishqa — September birthdays ──
+  { fullName: "Mr Mahendra", dateOfBirth: "2025-09-02", queendom: "anishqa" },
+  { fullName: "Gautam Desai", dateOfBirth: "2025-09-03", queendom: "anishqa" },
+  { fullName: "Bhavadeep Reddy", dateOfBirth: "2025-09-09", queendom: "anishqa" },
+  { fullName: "Abhinaya", dateOfBirth: "2025-09-14", queendom: "anishqa" },
+  {
+    fullName: "Gaurav & Saruchi Singal",
+    dateOfBirth: "2025-09-21",
+    queendom: "anishqa",
+  },
+  { fullName: "Nandan Reddy", dateOfBirth: "2025-09-21", queendom: "anishqa" },
+  { fullName: "Gautham Pai", dateOfBirth: "2025-09-26", queendom: "anishqa" },
+  { fullName: "Gurava Reddy", dateOfBirth: "2025-09-29", queendom: "anishqa" },
+  { fullName: "Ritesh Karnani", dateOfBirth: "2025-09-29", queendom: "anishqa" },
+
+  // ── Anishqa — September wedding anniversaries ──
+  { fullName: "Sunita Mankani", anniversary: "2025-09-09", queendom: "anishqa" },
+  { fullName: "Devita Saraf", anniversary: "2025-09-13", queendom: "anishqa" },
+  { fullName: "Dr. Rohit Suri", anniversary: "2025-09-13", queendom: "anishqa" },
+
+  // ── Anishqa — September dating anniversaries (same Heart styling) ──
+  { fullName: "Ankit Maheshwari", anniversary: "2025-09-03", queendom: "anishqa" },
+  { fullName: "Preethi & K", anniversary: "2025-09-03", queendom: "anishqa" },
+  { fullName: "Raj Patel", anniversary: "2025-09-03", queendom: "anishqa" },
+  { fullName: "Daljit Singh", anniversary: "2025-09-05", queendom: "anishqa" },
+  { fullName: "Arshad Ali", anniversary: "2025-09-13", queendom: "anishqa" },
+  { fullName: "Arjun & Pushparaj", anniversary: "2025-09-20", queendom: "anishqa" },
+  { fullName: "Brijesh Thakkar", anniversary: "2025-09-28", queendom: "anishqa" },
+  { fullName: "Nakul Dandona", anniversary: "2025-09-28", queendom: "anishqa" },
+  { fullName: "Vinayak Mittal", anniversary: "2025-09-28", queendom: "anishqa" },
 
   // ── Sanika — none recorded yet (queendom created 2026-09-01) ──
 ];
