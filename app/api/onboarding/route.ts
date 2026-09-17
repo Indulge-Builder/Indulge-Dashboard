@@ -15,11 +15,15 @@
  *                              the legacy-label map for pre-rename rows).
  *   Closures:                  deals.{deal_name, agent_name, closing_date, created_at}
  *                              — one row per Zoho deal; a closure COUNTS on its
- *                              `closing_date` (Zoho Closing_Date, IST day) and
- *                              falls back to the `created_at` IST day when that
- *                              is NULL / not yet migrated. Deals are often
- *                              entered days after the sale (user decision
- *                              2026-09-07).
+ *                              `closing_date` (Zoho Closing_Date, IST day) ONLY.
+ *                              A deal with no closing date is in no month, just
+ *                              like Zoho's own Closing_Date filter — it stays in
+ *                              the ledger (by entry time) but never in a tile or
+ *                              card (2026-09-17: two "Membership" placeholders
+ *                              with a blank Closing_Date made Sept read 14 vs
+ *                              Zoho's 12). Deals are often entered days after
+ *                              the sale (user decision 2026-09-07), so entry
+ *                              time is never a proxy for the closing month.
  *
  * Roster seats come from code (ONBOARDING_AGENT_CARDS). Rows whose
  * `agent_name` matches no seat (e.g. "Admin @ Indulge", the automation owner)
@@ -94,11 +98,14 @@ type DealRow = {
   closing_date?: string | null;
 };
 
-/** The IST calendar day a deal counts on. */
-function dealClosedOn(d: DealRow): string {
+/**
+ * The IST calendar day a deal counts on, or null when Zoho has no Closing_Date
+ * for it (then it counts in no month — same as Zoho's own date filter).
+ */
+function dealClosedOn(d: DealRow): string | null {
   return d.closing_date && /^\d{4}-\d{2}-\d{2}$/.test(d.closing_date)
     ? d.closing_date
-    : toISTDay(d.created_at);
+    : null;
 }
 
 /**
@@ -167,9 +174,11 @@ export const GET = withApiGuard(
       } catch (e) {
         console.warn("[/api/onboarding] deals fetch failed — ledger and closures zeroed", e);
       }
+      // Ledger order is display-only: closing day when known, else entry day.
+      const ledgerDay = (d: DealRow) => dealClosedOn(d) ?? toISTDay(d.created_at);
       const ledger: OnboardingLedgerRow[] = [...deals]
         .sort((a, b) => {
-          const byDay = dealClosedOn(b).localeCompare(dealClosedOn(a));
+          const byDay = ledgerDay(b).localeCompare(ledgerDay(a));
           return byDay !== 0 ? byDay : b.created_at.localeCompare(a.created_at);
         })
         .slice(0, 25)
@@ -259,11 +268,23 @@ export const GET = withApiGuard(
         else if (isJunkStatus(s)) junk++;
       }
 
-      // ── 5. Closures this month — by closing day (IST), not entry time ─────
+      // ── 5. Closures this month — by closing day (IST), never entry time ───
       const closuresById = new Map<string, number>();
       for (const card of ONBOARDING_AGENT_CARDS) closuresById.set(card.id, 0);
-      const dealsThisMonthRows = deals.filter((d) => dealClosedOn(d).slice(0, 7) === thisMonthIST);
+      const dealsThisMonthRows = deals.filter((d) => dealClosedOn(d)?.slice(0, 7) === thisMonthIST);
       const dealsThisMonth = dealsThisMonthRows.length;
+
+      // Deals entered this month with no Closing_Date in Zoho are invisible to
+      // the tiles/cards until someone fills the date in — say so in the logs.
+      const undatedThisMonth = deals.filter(
+        (d) => !dealClosedOn(d) && toISTDay(d.created_at).slice(0, 7) === thisMonthIST,
+      );
+      if (undatedThisMonth.length) {
+        console.warn(
+          "[/api/onboarding] deals entered this month with no closing_date — not counted; set Closing_Date in Zoho and re-sync",
+          undatedThisMonth.map((d) => `${d.deal_id} ${d.deal_name} (${d.agent_name})`),
+        );
+      }
 
       let matchedAny = false;
       for (const d of dealsThisMonthRows) {
