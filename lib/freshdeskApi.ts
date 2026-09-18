@@ -25,6 +25,7 @@ import {
   TERMINAL_STATUSES,
   VOID_STATUSES,
   ACTIVE_CLEAR_RESOLVED_AT,
+  SLA_SAFE_STATUSES,
 } from "./ticketStatus";
 
 /** Agent-facing labels for Freshdesk's numeric ticket status ids. */
@@ -243,7 +244,55 @@ export function mapFreshdeskTicket(
   } else if (ACTIVE_CLEAR_RESOLVED_AT.has(statusLower)) {
     row.resolved_at = null;
   }
+  // Clear-only overdue truth (2026-09-18): a ticket parked in an SLA-safe
+  // status, or whose Freshdesk deadline is still ahead, is NOT overdue in
+  // Freshdesk — so a stale `true` must not survive here. Freshdesk fires the
+  // "resolution due" event at the ORIGINAL SLA target even after an agent has
+  // extended due_by (55486 / 55366), and nothing ever cleared those flags:
+  // Anishqa showed 6 overdue on the TV against 2 in Freshdesk.
+  if (
+    !TERMINAL_STATUSES.has(statusLower) &&
+    !VOID_STATUSES.has(statusLower) &&
+    (SLA_SAFE_STATUSES.has(statusLower) || isFutureInstant(t.due_by))
+  ) {
+    row.is_escalated = false;
+  }
   return row;
+}
+
+/** True when `iso` parses to an instant later than now. */
+export function isFutureInstant(iso: string | null | undefined): boolean {
+  if (!iso) return false;
+  const ms = Date.parse(iso);
+  return Number.isFinite(ms) && ms > Date.now();
+}
+
+/**
+ * Live `due_by` of one ticket, for the SLA-breach webhook to verify a breach
+ * against. Single attempt with a short timeout — a webhook must never sit in
+ * fdGet's 429 back-off. `undefined` = could not be read (caller falls back to
+ * trusting the payload); `null` = Freshdesk has no deadline on the ticket.
+ */
+export async function fetchFreshdeskDueBy(
+  ticketId: string,
+): Promise<string | null | undefined> {
+  const creds = fdCredentials();
+  if (!creds) return undefined;
+  try {
+    const res = await fetch(
+      `https://${creds.domain}/api/v2/tickets/${encodeURIComponent(ticketId)}`,
+      {
+        headers: { Authorization: creds.authHeader },
+        cache: "no-store",
+        signal: AbortSignal.timeout(4000),
+      },
+    );
+    if (!res.ok) return undefined;
+    const t = (await res.json()) as { due_by?: string | null };
+    return t.due_by ?? null;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

@@ -63,7 +63,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSupabaseAdminOr503 } from "@/lib/supabaseAdmin";
 import { freshdeskTimestampToIsoUtcForDb } from "@/lib/istDate";
 import { assertWebhookSecret } from "@/lib/webhookAuth";
-import { cleanAgentName, UNASSIGNED_QUEENDOM } from "@/lib/freshdeskApi";
+import {
+  cleanAgentName,
+  fetchFreshdeskDueBy,
+  isFutureInstant,
+  UNASSIGNED_QUEENDOM,
+} from "@/lib/freshdeskApi";
 import {
   SLA_SAFE_STATUSES,
   ACTIVE_CLEAR_RESOLVED_AT,
@@ -219,11 +224,27 @@ export async function POST(req: NextRequest) {
 
     const statusLower = (existing?.status ?? "").toLowerCase().trim();
     const inSafe = SLA_SAFE_STATUSES.has(statusLower);
-    const effectiveEscalated = inSafe ? false : payload.is_escalated;
+
+    // Freshdesk fires "resolution due" at the ORIGINAL SLA target even when an
+    // agent has already extended due_by — the ticket is not overdue in
+    // Freshdesk, and nothing would ever clear the flag again (2026-09-18:
+    // Anishqa 6 on the TV vs 2 in Freshdesk). Verify a breach against the live
+    // deadline; if Freshdesk can't be read, trust the payload as before.
+    const liveDueBy =
+      payload.is_escalated && !inSafe
+        ? await fetchFreshdeskDueBy(ticketIdStr)
+        : undefined;
+    const deadlineAhead = isFutureInstant(liveDueBy);
+    const effectiveEscalated =
+      inSafe || deadlineAhead ? false : payload.is_escalated;
+
+    const patch: Record<string, unknown> = { is_escalated: effectiveEscalated };
+    // Keep the ticker's "overdue since" anchor current (cron-only otherwise).
+    if (typeof liveDueBy === "string") patch.due_by = liveDueBy;
 
     const { error } = await db
       .from("tickets")
-      .update({ is_escalated: effectiveEscalated })
+      .update(patch)
       .eq("ticket_id", ticketIdStr);
 
     if (error) {
@@ -237,6 +258,10 @@ export async function POST(req: NextRequest) {
     if (inSafe && payload.is_escalated) {
       console.info(
         `[freshdesk webhook] ticket ${ticketIdStr} has SLA-safe status — forced is_escalated=false (ignored payload true)`,
+      );
+    } else if (deadlineAhead) {
+      console.info(
+        `[freshdesk webhook] ticket ${ticketIdStr} due_by ${liveDueBy} is still ahead — forced is_escalated=false (ignored payload true)`,
       );
     } else {
       console.info(

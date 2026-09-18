@@ -24,7 +24,9 @@
  * Policy notes:
  * - Upserts mirror the webhook's status policy via mapFreshdeskTicket().
  * - is_escalated is never set true here (CLAUDE.md invariant #5); it is
- *   only cleared for terminal/void statuses, same as the webhook.
+ *   only CLEARED — for terminal/void/SLA-safe statuses (same as the webhook)
+ *   and when Freshdesk's due_by is still ahead (deadline extended → not
+ *   overdue in Freshdesk). A stale `true` alone forces an upsert.
  * - is_incomplete and tags are never touched (webhook-maintained).
  * - subject is only written when the DB row has none, so a manually
  *   curated subject is never clobbered.
@@ -81,6 +83,7 @@ interface ExistingRow {
   created_at: string | null;
   resolved_at: string | null;
   fd_updated_at: string | null;
+  is_escalated: boolean | null;
 }
 
 /** Two timestamps describe the same instant (2s tolerance for format drift). */
@@ -106,6 +109,9 @@ function needsUpsert(row: ReconcileRow, existing: ExistingRow): boolean {
   if ("resolved_at" in row && !sameInstant(row.resolved_at, existing.resolved_at)) {
     return true;
   }
+  // Stale overdue flag: Freshdesk says not overdue (safe status / deadline
+  // ahead) but the DB still says escalated. Nothing else may have changed.
+  if (row.is_escalated === false && existing.is_escalated === true) return true;
   // Enrichment drift: fd_updated_at moves on ANY Freshdesk edit (priority,
   // type, first response, custom fields…), so one timestamp covers all
   // sixteen enrichment columns without field-by-field diffing.
@@ -154,7 +160,7 @@ export async function GET(req: NextRequest) {
     const { data, error } = await db
       .from("tickets")
       .select(
-        "ticket_id, status, queendom_name, agent_name, subject, created_at, resolved_at, fd_updated_at",
+        "ticket_id, status, queendom_name, agent_name, subject, created_at, resolved_at, fd_updated_at, is_escalated",
       )
       .in("ticket_id", ids.slice(i, i + 200));
     if (error) {
